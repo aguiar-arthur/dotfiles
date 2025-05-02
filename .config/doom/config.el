@@ -1,11 +1,13 @@
 ;; -*- lexical-binding: t; -*-
 
-;; Style
+;; ---------------------------
+;; Core
+;; ---------------------------
+
 (setq doom-theme 'doom-dracula)
 (setq which-key-idle-delay 0.5)
 (setq display-line-numbers-type 'relative)
 
-;; General editor preferences
 (setq confirm-kill-emacs nil
       delete-by-moving-to-trash t
       window-combination-resize t
@@ -15,7 +17,7 @@
       require-final-newline t)
 
 ;; ---------------------------
-;; Clojure settings
+;; Clojure
 ;; ---------------------------
 
 (after! clojure-mode
@@ -49,35 +51,13 @@
   (setq flycheck-check-syntax-automatically '(save mode-enabled)
         flycheck-display-errors-delay 0.3))
 
-;; useful packages
-(use-package! clj-refactor
-  :hook (clojure-mode . clj-refactor-mode)
-  :config
-  (cljr-add-keybindings-with-prefix "C-c C-m"))
-
-(use-package! paredit
-  :hook ((clojure-mode . paredit-mode)
-         (emacs-lisp-mode . paredit-mode)))
-
-;; Simplified Hooks
 (add-hook 'clojure-mode-hook #'rainbow-delimiters-mode)
 (add-hook 'cider-repl-mode-hook #'rainbow-delimiters-mode)
 (add-hook 'clojure-mode-hook #'paredit-mode)
 (add-hook 'cider-repl-mode-hook #'paredit-mode)
 
-;; Remaps
-(map! :after clojure-mode
-      :map clojure-mode-map
-      :localleader
-      "'" nil ;; This is a remap to avoid the smart keys in some systems
-      :desc "Cider jack in CLJ"
-      "s" #'cider-jack-in-clj)
+;; ---------------------------
+;; Additional
+;; ---------------------------
 
-(after! paredit
-  (map! :map paredit-mode-map
-        "C-c l" #'paredit-forward
-        "C-c h" #'paredit-backward
-        "C-c s l" #'paredit-forward-slurp-sexp
-        "C-c s h" #'paredit-backward-slurp-sexp
-        "C-c b l" #'paredit-forward-barf-sexp
-        "C-c b h" #'paredit-backward-barf-sexp))
+(load! "+bindings")
