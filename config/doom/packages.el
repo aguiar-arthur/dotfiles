@@ -1,0 +1,7 @@
+(package! clojure-mode)
+(package! cider)
+(package! clj-refactor)
+(package! lsp-mode)
+(package! lsp-ui)
+(package! company-lsp)
+(package! flycheck-clj-kondo)
