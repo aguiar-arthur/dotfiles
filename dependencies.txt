@@ -1,5 +1,0 @@
-ripgrep
-clojure
-leiningen
-clojure-lsp
-gnu coreutils
