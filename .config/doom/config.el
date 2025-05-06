@@ -21,6 +21,17 @@
 
 (add-hook 'after-init-hook #'global-flycheck-mode)
 
+(after! ace-window
+  (setq aw-keys '(?1 ?2 ?3 ?4 ?5 ?6 ?7 ?8 ?9 ?0))
+  (setq aw-scope 'global)
+  (setq aw-background nil)
+  (setq aw-minibuffer-flag t))
+
+(after! ace-window
+  (custom-set-faces!
+    '(aw-leading-char-face
+       :foreground "white" :background "red" :weight bold :height 2.0)))
+       
 ;; ---------------------------
 ;; Clojure
 ;; ---------------------------
