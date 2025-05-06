@@ -3,7 +3,6 @@
 ;; ---------------------------
 ;; Core
 ;; ---------------------------
-
 (setq doom-theme 'doom-dracula)
 (setq which-key-idle-delay 0.5)
 (setq display-line-numbers-type 'relative)
@@ -16,9 +15,18 @@
       truncate-string-ellipsis "…"
       require-final-newline t)
 
+(after! flycheck
+  (setq flycheck-check-syntax-automatically '(save mode-enabled)
+        flycheck-display-errors-delay 0.5))
+
+(add-hook 'after-init-hook #'global-flycheck-mode)
+
 ;; ---------------------------
 ;; Clojure
 ;; ---------------------------
+(use-package! paredit
+  :hook ((clojure-mode . paredit-mode)
+         (emacs-lisp-mode . paredit-mode)))
 
 (after! clojure-mode
   (setq clojure-indent-style 'align-arguments
@@ -37,7 +45,6 @@
         lsp-enable-snippet t
         lsp-enable-file-watchers t))
 
-;; (auto-completion)
 (after! company
   (setq company-idle-delay 0.3
         company-minimum-prefix-length 2
@@ -46,18 +53,12 @@
         company-global-modes '(not eshell-mode shell-mode term-mode vterm-mode)
         company-dabbrev-downcase nil))
 
-;; syntax checking
-(after! flycheck
-  (setq flycheck-check-syntax-automatically '(save mode-enabled)
-        flycheck-display-errors-delay 0.3))
-
 (add-hook 'clojure-mode-hook #'rainbow-delimiters-mode)
-(add-hook 'cider-repl-mode-hook #'rainbow-delimiters-mode)
 (add-hook 'clojure-mode-hook #'paredit-mode)
+(add-hook 'cider-repl-mode-hook #'rainbow-delimiters-mode)
 (add-hook 'cider-repl-mode-hook #'paredit-mode)
 
 ;; ---------------------------
 ;; Additional
 ;; ---------------------------
-
 (load! "+bindings")
