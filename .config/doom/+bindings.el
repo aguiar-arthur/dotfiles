@@ -1,5 +1,6 @@
 ;; -*- lexical-binding: t; -*-
 
+;; This will remove some of the default bindinds from
 (after! evil
   (dolist (key '("w" "l" "c"))
     (evil-define-key* 'normal 'global (kbd (concat "SPC " key)) nil)
@@ -22,7 +23,8 @@
        :desc "Show documentation" "h" #'lsp-ui-doc-glance
        :desc "Workspace symbols" "s" #'lsp-ivy-workspace-symbol
        :desc "Restart LSP" "R" #'lsp-restart-workspace
-       :desc "Describe thing" "D" #'lsp-describe-thing-at-point))
+       :desc "Describe thing" "D" #'lsp-describe-thing-at-point
+       :desc "List diagnostics" "l" #'lsp-treemacs-errors-list))
 
 ;; ---------------------------
 ;; Code
@@ -83,12 +85,8 @@
 (map! :after clojure-mode
       :map clojure-mode-map
       :localleader
-
-      ;; This is a remap to avoid the smart keys in some systems
       "'" nil
-
-      :desc "Cider jack in CLJ"
-      "s" #'cider-jack-in-clj)
+      :desc "Cider jack in CLJ" "s" #'cider-jack-in-clj)
 
 (after! paredit
   (map! :map paredit-mode-map

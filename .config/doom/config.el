@@ -3,9 +3,12 @@
 ;; ---------------------------
 ;; Core
 ;; ---------------------------
+(add-to-list 'initial-frame-alist '(fullscreen . maximized))
+
 (setq doom-theme 'doom-dracula)
 (setq which-key-idle-delay 0.5)
 (setq display-line-numbers-type 'relative)
+(setq fancy-splash-image (concat "~/dotfiles/.config/doom/" "splash.png"))
 
 (setq confirm-kill-emacs nil
       delete-by-moving-to-trash t
@@ -30,8 +33,9 @@
 (after! ace-window
   (custom-set-faces!
     '(aw-leading-char-face
-       :foreground "white" :background "red" :weight bold :height 2.0)))
-       
+       :foreground "white"
+       :weight bold)))
+
 ;; ---------------------------
 ;; Clojure
 ;; ---------------------------
@@ -66,6 +70,7 @@
 
 (add-hook 'clojure-mode-hook #'rainbow-delimiters-mode)
 (add-hook 'clojure-mode-hook #'paredit-mode)
+(add-hook 'clojure-mode-hook #'flycheck-mode)
 (add-hook 'cider-repl-mode-hook #'rainbow-delimiters-mode)
 (add-hook 'cider-repl-mode-hook #'paredit-mode)
 
