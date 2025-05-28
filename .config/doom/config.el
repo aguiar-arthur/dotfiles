@@ -5,9 +5,13 @@
 ;; ---------------------------
 (add-to-list 'initial-frame-alist '(fullscreen . maximized))
 
+(setq doom-font (font-spec :family "FiraCode Nerd Font Mono" :size 12))
+
 (setq doom-theme 'doom-dracula)
-(setq which-key-idle-delay 0.5)
 (setq display-line-numbers-type 'relative)
+
+(setq doom-localleader-key ",")
+
 (setq fancy-splash-image (concat "~/dotfiles/.config/doom/" "splash.png"))
 
 (setq confirm-kill-emacs nil
@@ -16,7 +20,8 @@
       evil-want-fine-undo t
       auto-save-default t
       truncate-string-ellipsis "…"
-      require-final-newline t)
+      require-final-newline t
+      which-key-idle-delay 0.5)
 
 (after! flycheck
   (setq flycheck-check-syntax-automatically '(save mode-enabled)

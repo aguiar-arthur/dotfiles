@@ -1,3 +1,5 @@
+### Setup core
+- Font: **"FiraCode Nerd Font Mono"**
 ### For emacs:
 - Core
     - ripgrep
