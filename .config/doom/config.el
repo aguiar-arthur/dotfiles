@@ -21,7 +21,8 @@
       auto-save-default t
       truncate-string-ellipsis "…"
       require-final-newline t
-      which-key-idle-delay 0.5)
+      which-key-idle-delay 0.5
+      org-directory "~/org/")
 
 (after! flycheck
   (setq flycheck-check-syntax-automatically '(save mode-enabled)
