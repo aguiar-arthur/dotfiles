@@ -4,6 +4,7 @@
 ;; Core
 ;; ---------------------------
 (add-to-list 'initial-frame-alist '(fullscreen . maximized))
+(global-visual-line-mode t)
 
 (setq doom-font (font-spec :family "FiraCode Nerd Font Mono" :size 12))
 
