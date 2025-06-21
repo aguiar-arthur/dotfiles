@@ -120,6 +120,16 @@
               home.sessionVariables = {
                 EDITOR = "vim";
                 BROWSER = if pkgs.stdenv.isLinux then "firefox" else "open";
+                NIX_CONFIG = "experimental-features = nix-command flakes";
+              };
+
+              # Nix configuration
+              nix = {
+                package = pkgs.nix;
+                settings = {
+                  experimental-features = [ "nix-command" "flakes" ];
+                  trusted-users = [ "arthuraguiar" ];
+                };
               };
 
               # Platform-specific configurations
