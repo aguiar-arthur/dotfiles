@@ -23,7 +23,7 @@
           modules = [
             {
               # Basic home-manager configuration
-              home.username = "your-username";  # Replace with your actual username
+              home.username = "arthuraguiar";  # Replace with your actual username
               home.homeDirectory = if pkgs.stdenv.isDarwin then "/Users/your-username" else "/home/your-username";
               home.stateVersion = "23.11";
               
