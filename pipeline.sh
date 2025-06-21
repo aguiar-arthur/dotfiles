@@ -1,6 +1,6 @@
 #!/bin/sh
 
-source /.bash_functions.sh || {
+source ./pipeline/bash_functions.sh || {
     echo "Error: Failed to load bash functions"
     exit 1
 }
@@ -30,9 +30,6 @@ echo "1 - Adding utils shell commands to the terminal source"
 ZSHRC_FILE="$HOME/.zshrc"
 ZSHRC_FILE_TEXT_TO_APPEND="source $HOME/dotfiles/config/terminal/utils.sh"
 append_text_to_file "$ZSHRC_FILE" "$ZSHRC_FILE_TEXT_TO_APPEND"
-
-echo "2 - Changing zsh theme to agnoster"
-sed -i -e 's/^ZSH_THEME=.*/ZSH_THEME="agnoster"/' $HOME/.zshrc && source $HOME/.zshrc
 
 echo "terminal setup finished"
 # end terminal
