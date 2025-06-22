@@ -4,9 +4,18 @@ source ./pipeline/bash_functions.sh || {
     echo "Error: Failed to load bash functions"
     exit 1
 }
+# nix
+echo "Starting nix setup"
+
+echo "1 - creating nix config symlink" 
+create_directory_symlinks "$HOME/dotfiles/config/nix" "$HOME/.config/nix"
+
+echo "nix setup finished"
+# end nix
 
 # emacs
 echo "Starting emacs setup"
+
 echo "1 - Creating symlink for init.el"
 create_symlink "$HOME/dotfiles/config/doom/init.el" "$HOME/.config/doom/init.el"
 
