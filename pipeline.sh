@@ -8,7 +8,7 @@ source ./pipeline/bash_functions.sh || {
 echo "Starting nix setup"
 
 echo "1 - creating nix config symlink" 
-create_directory_symlinks "$HOME/dotfiles/config/nix" "$HOME/.config/nix"
+create_directory_symlink "$HOME/dotfiles/config/nix" "$HOME/.config/nix"
 
 echo "nix setup finished"
 # end nix
