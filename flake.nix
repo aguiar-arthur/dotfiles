@@ -114,6 +114,27 @@
                   clock24 = true;
                   keyMode = "emacs";
                 };
+                
+                # Alacritty configuration
+                alacritty = {
+                  enable = true;
+                  settings = {
+                    window = {
+                      opacity = 0.9;
+                      decorations = "full";
+                    };
+                    font = {
+                      normal.family = "FiraCode Nerd Font";
+                      size = 12;
+                    };
+                    colors = {
+                      primary = {
+                        background = "#1e1e1e";
+                        foreground = "#d4d4d4";
+                      };
+                    };
+                  };
+                };
               };
 
               # Environment variables
