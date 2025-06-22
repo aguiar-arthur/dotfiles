@@ -22,7 +22,7 @@
         home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
           modules = [
-            {
+            ({ config, ... }: {
               # Basic home-manager configuration
               home.username = "arthuraguiar";
               home.homeDirectory = if pkgs.stdenv.isDarwin then "/Users/arthuraguiar" else "/home/arthuraguiar";
@@ -145,26 +145,26 @@
                 })
               ];
 
-              # Assertions for validation
+              # Assertions for validation - now with proper config reference
               assertions = [
                 {
-                  assertion = builtins.stringLength home.username > 0;
+                  assertion = builtins.stringLength config.home.username > 0;
                   message = "Username cannot be empty";
                 }
                 {
-                  assertion = builtins.stringLength home.homeDirectory > 0;
+                  assertion = builtins.stringLength config.home.homeDirectory > 0;
                   message = "Home directory cannot be empty";
                 }
                 {
-                  assertion = pkgs.stdenv.isDarwin -> (builtins.substring 0 6 home.homeDirectory == "/Users");
+                  assertion = pkgs.stdenv.isDarwin -> (builtins.substring 0 6 config.home.homeDirectory == "/Users");
                   message = "macOS home directory should start with /Users";
                 }
                 {
-                  assertion = pkgs.stdenv.isLinux -> (builtins.substring 0 5 home.homeDirectory == "/home");
+                  assertion = pkgs.stdenv.isLinux -> (builtins.substring 0 5 config.home.homeDirectory == "/home");
                   message = "Linux home directory should start with /home";
                 }
               ];
-            }
+            })
           ];
         };
 
