@@ -1,0 +1,18 @@
+import = [
+    "~/.config/alacritty/themes/themes/dracula.toml"
+]
+
+[window]
+opacity = 0.95
+padding = { x = 15, y = 15 }
+decorations = "buttonless"
+
+[font]
+size = 12.0
+normal = { family = "FiraCode Nerd Font", style = "Regular" }
+bold = { family = "FiraCode Nerd Font", style = "Bold" }
+italic = { family = "FiraCode Nerd Font", style = "Light" }
+bold_italic = { family = "FiraCode Nerd Font", style = "Medium" }
+
+[cursor]
+style = { shape = "Block", blinking = "Off" }

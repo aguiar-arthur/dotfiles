@@ -40,5 +40,9 @@ ZSHRC_FILE="$HOME/.zshrc"
 ZSHRC_FILE_TEXT_TO_APPEND="source $HOME/dotfiles/terminal/utils.sh"
 append_text_to_file "$ZSHRC_FILE" "$ZSHRC_FILE_TEXT_TO_APPEND"
 
+echo "2 - Cloning theme to alacritty"
+mkdir -p $HOME/.config/alacritty/themes
+git clone https://github.com/alacritty/alacritty-theme $HOME/.config/alacritty/themes
+
 echo "terminal setup finished"
 # end terminal
