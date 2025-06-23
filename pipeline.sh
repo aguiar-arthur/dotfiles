@@ -37,7 +37,7 @@ echo "Starting terminal setup"
 
 echo "1 - Adding utils shell commands to the terminal source"
 ZSHRC_FILE="$HOME/.zshrc"
-ZSHRC_FILE_TEXT_TO_APPEND="source $HOME/dotfiles/config/terminal/utils.sh"
+ZSHRC_FILE_TEXT_TO_APPEND="source $HOME/dotfiles/terminal/utils.sh"
 append_text_to_file "$ZSHRC_FILE" "$ZSHRC_FILE_TEXT_TO_APPEND"
 
 echo "terminal setup finished"
