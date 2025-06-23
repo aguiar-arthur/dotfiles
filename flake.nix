@@ -58,7 +58,7 @@
                 findutils
                 
                 # Fonts
-                (nerdfonts.override { fonts = [ "FiraCode" ]; })
+                nerd-fonts.fira-code
                 
                 # Terminal tools
                 tmux
