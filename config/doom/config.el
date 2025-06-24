@@ -13,7 +13,7 @@
 
 (setq doom-localleader-key ",")
 
-(setq fancy-splash-image (concat "~/dotfiles/.config/doom/" "splash.png"))
+(setq fancy-splash-image (concat "~/dotfiles/config/doom/" "splash.png"))
 
 (setq confirm-kill-emacs nil
       delete-by-moving-to-trash t

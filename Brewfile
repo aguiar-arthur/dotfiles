@@ -2,8 +2,14 @@ tap "homebrew/cask"
 # development tools
 brew "emacs"
 brew "nvim"
-# development languages 
+# python
 brew "python3"
+brew "pipenv"
+# clojure
+brew "borkdude/brew/clj-kondo"
+brew "clojure-lsp"
+brew "leiningen"
+brew "clojure"
 # terminal tools
 brew "coreutils"
 brew "findutils"
