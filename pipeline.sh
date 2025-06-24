@@ -62,10 +62,29 @@ check_dependencies() {
 setup_emacs() {
     log "Starting emacs setup"
     
+    log "1 - Installing Doom Emacs"
+    if [ ! -d "$HOME/.config/emacs" ]; then
+        if git clone --depth 1 --single-branch https://github.com/doomemacs/doomemacs ~/.config/emacs; then
+            success "Doom Emacs cloned successfully"
+        else
+            error "Failed to clone Doom Emacs"
+            return 1
+        fi
+    else
+        log "Doom Emacs directory already exists, skipping clone"
+    fi
+    
+    if "$HOME/.config/emacs/bin/doom" install; then
+        success "Doom Emacs installed successfully"
+    else
+        error "Failed to install Doom Emacs"
+        return 1
+    fi
+    
     # Ensure doom config directory exists
     mkdir -p "$HOME/.config/doom"
     
-    log "1 - Creating symlink for init.el"
+    log "2 - Creating symlink for init.el"
     if create_symlink "$DOTFILES_DIR/config/doom/init.el" "$HOME/.config/doom/init.el"; then
         success "Emacs init.el symlink created successfully"
     else
@@ -73,7 +92,7 @@ setup_emacs() {
         return 1
     fi
     
-    log "2 - Configuring config.el"
+    log "3 - Configuring config.el"
     local config_el="$HOME/.config/doom/config.el"
     local config_el_text="(load \"$DOTFILES_DIR/config/doom/config.el\")"
     
@@ -87,7 +106,7 @@ setup_emacs() {
         return 1
     fi
     
-    log "3 - Configuring packages.el"
+    log "4 - Configuring packages.el"
     local packages_el="$HOME/.config/doom/packages.el"
     local packages_el_text="(load \"$DOTFILES_DIR/config/doom/packages.el\")"
     
