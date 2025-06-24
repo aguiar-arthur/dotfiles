@@ -1,6 +1,4 @@
-tap "homebrew/cask"
 # development tools
-brew "emacs"
 brew "nvim"
 # python
 brew "python3"
@@ -25,4 +23,6 @@ brew "fd"
 brew "neofetch"
 brew "zsh"
 # fonts
+cask "alacritty", args: { "no-quarantine": true }
 cask "font-fira-code-nerd-font"
+cask "emacs"
