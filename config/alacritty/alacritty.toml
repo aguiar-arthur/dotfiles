@@ -1,18 +1,89 @@
+[general]
 import = [
     "~/.config/alacritty/themes/themes/dracula.toml"
 ]
+live_config_reload = true
+
+[env]
+TERM = "alacritty"
 
 [window]
 opacity = 0.95
 padding = { x = 15, y = 15 }
 decorations = "buttonless"
+startup_mode = "Windowed"
+title = "Alacritty"
+class = { instance = "Alacritty" }
+
+[scrolling]
+history = 10000
+multiplier = 3
 
 [font]
-size = 12.0
-normal = { family = "FiraCode Nerd Font", style = "Regular" }
-bold = { family = "FiraCode Nerd Font", style = "Bold" }
-italic = { family = "FiraCode Nerd Font", style = "Light" }
-bold_italic = { family = "FiraCode Nerd Font", style = "Medium" }
+size = 13.0
+normal = { family = "FiraCode Nerd Font Mono", style = "Regular" }
+bold = { family = "FiraCode Nerd Font Mono", style = "Bold" }
+italic = { family = "FiraCode Nerd Font Mono", style = "Light" }
+bold_italic = { family = "FiraCode Nerd Font Mono", style = "Medium" }
 
 [cursor]
 style = { shape = "Block", blinking = "Off" }
+
+[mouse]
+hide_when_typing = true
+
+[[mouse.bindings]]
+mouse = "Right"
+action = "PasteSelection"
+
+[[keyboard.bindings]]
+key = "N"
+mods = "Command"
+action = "SpawnNewInstance"
+
+[[keyboard.bindings]]
+key = "Plus"
+mods = "Command"
+action = "IncreaseFontSize"
+
+[[keyboard.bindings]]
+key = "Minus"
+mods = "Command"
+action = "DecreaseFontSize"
+
+[[keyboard.bindings]]
+key = "Key0"
+mods = "Command"
+action = "ResetFontSize"
+
+[[keyboard.bindings]]
+key = "C"
+mods = "Command"
+action = "Copy"
+
+[[keyboard.bindings]]
+key = "V"
+mods = "Command"
+action = "Paste"
+
+[[keyboard.bindings]]
+key = "Q"
+mods = "Command"
+action = "Quit"
+
+[[keyboard.bindings]]
+key = "W"
+mods = "Command"
+action = "Quit"
+
+# Clear screen
+[[keyboard.bindings]]
+key = "K"
+mods = "Command"
+action = "ClearHistory"
+
+# Search
+[[keyboard.bindings]]
+key = "F"
+mods = "Command"
+action = "SearchForward"
