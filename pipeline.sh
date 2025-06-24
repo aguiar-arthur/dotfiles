@@ -36,7 +36,7 @@ warning() {
 
 # Load bash functions
 source "$SCRIPT_DIR/bash_functions.sh" || {
-    error "Failed to load bash functions from $SCRIPT_DIR/bash_functions.sh"
+    error "Failed to load bash functions from $SCRIPT_DIR/pipeline/bash_functions.sh"
     exit 1
 }
 
