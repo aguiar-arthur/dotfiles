@@ -1,16 +1,22 @@
 tap "homebrew/cask"
+# development tools
 brew "emacs"
+brew "nvim"
+# development languages 
 brew "python3"
+# terminal tools
 brew "coreutils"
 brew "findutils"
-brew "neofetch"
 brew "ripgrep"
-brew "zsh"
 brew "curl"
-brew "fd"
+cask "wget"
 brew "bat"
 brew "eza"
 cask "fzf"
 cask "jq"
-cask "wget"
+brew "fd"
+# beautiful terminal
+brew "neofetch"
+brew "zsh"
+# fonts
 cask "font-fira-code-nerd-font"
