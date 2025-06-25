@@ -178,63 +178,73 @@ setup_terminal_customization() {
         fi
     fi
     
-    log "2 - Creating symlink for alacritty configuration"
+    log "2 - Setting up alacritty configuration"
     local alacritty_source="$DOTFILES_DIR/config/alacritty"
     local alacritty_target="$HOME/.config/alacritty"
     
     if [ ! -d "$alacritty_source" ]; then
         warning "Alacritty config directory not found at $alacritty_source"
     else
-        if create_directory_symlink "$alacritty_source" "$alacritty_target"; then
-            success "Alacritty configuration symlink created successfully"
+        mkdir -p "$alacritty_target"
+        
+        log "Creating symlinks for alacritty configuration files"
+        for file in "$alacritty_source"/*; do
+            if [ -f "$file" ]; then
+                local filename=$(basename "$file")
+                if create_symlink "$file" "$alacritty_target/$filename"; then
+                    log "Symlinked $filename"
+                else
+                    error "Failed to symlink $filename"
+                    return 1
+                fi
+            fi
+        done
+        success "Alacritty configuration files symlinked successfully"
+    fi
+    
+    log "3 - Setting up alacritty themes in dotfiles"
+    local themes_dir="$DOTFILES_DIR/config/alacritty/themes"
+    
+    # Clone themes into dotfiles directory structure
+    if [ ! -d "$themes_dir/.git" ]; then
+        log "Cloning alacritty themes repository into dotfiles"
+        if git clone https://github.com/alacritty/alacritty-theme "$themes_dir"; then
+            success "Alacritty themes cloned successfully into dotfiles"
         else
-            error "Failed to create alacritty configuration symlink"
+            error "Failed to clone alacritty themes"
             return 1
+        fi
+    else
+        log "Alacritty themes already cloned in dotfiles, updating..."
+        if (cd "$themes_dir" && git pull); then
+            success "Alacritty themes updated successfully"
+        else
+            warning "Failed to update alacritty themes"
         fi
     fi
     
-    log "3 - Setting up alacritty themes"
-    local themes_dir="$HOME/.config/alacritty/themes"
-    
-    # Only proceed if alacritty config exists
-    if [ -d "$HOME/.config/alacritty" ]; then
-        mkdir -p "$themes_dir"
-        
-        if [ ! -d "$themes_dir/.git" ]; then
-            log "Cloning alacritty themes repository"
-            if git clone https://github.com/alacritty/alacritty-theme "$themes_dir"; then
-                success "Alacritty themes cloned successfully"
-            else
-                error "Failed to clone alacritty themes"
-                return 1
-            fi
+    # Symlink themes directory to the actual config directory if it exists
+    if [ -d "$HOME/.config/alacritty" ] && [ -d "$themes_dir" ]; then
+        log "Creating symlink for themes directory"
+        if create_symlink "$themes_dir" "$HOME/.config/alacritty/themes"; then
+            success "Alacritty themes directory symlinked successfully"
         else
-            log "Alacritty themes already cloned, updating..."
-            if (cd "$themes_dir" && git pull); then
-                success "Alacritty themes updated successfully"
-            else
-                warning "Failed to update alacritty themes"
-            fi
+            warning "Failed to create themes directory symlink"
         fi
-    else
-        warning "Alacritty config directory not found, skipping themes setup"
     fi
     
     success "Terminal customization setup completed"
 }
 
-# Main execution
 main() {
     log "Starting dotfiles setup pipeline"
     log "Dotfiles directory: $DOTFILES_DIR"
     log "Log file: $LOG_FILE"
     
-    # Check dependencies first
     check_dependencies
     
     local failed_steps=()
     
-    # Run setup steps
     if ! setup_emacs; then
         failed_steps+=("emacs")
     fi
@@ -247,7 +257,6 @@ main() {
         failed_steps+=("terminal-customization")
     fi
     
-    # Final report
     echo
     if [ ${#failed_steps[@]} -eq 0 ]; then
         success "All setup steps completed successfully!"
