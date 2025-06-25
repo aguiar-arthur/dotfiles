@@ -34,13 +34,11 @@ warning() {
     echo -e "${YELLOW}[WARNING]${NC} $1" | tee -a "$LOG_FILE"
 }
 
-# Load bash functions
 source "$SCRIPT_DIR/pipeline/bash_functions.sh" || {
     error "Failed to load bash functions from $SCRIPT_DIR/pipeline/bash_functions.sh"
     exit 1
 }
 
-# Check dependencies
 check_dependencies() {
     local deps=("git" "wget" "sed")
     local missing=()
@@ -58,7 +56,6 @@ check_dependencies() {
     fi
 }
 
-# Setup emacs configuration
 setup_emacs() {
     log "Starting emacs setup"
     
@@ -123,7 +120,6 @@ setup_emacs() {
     success "Emacs setup completed"
 }
 
-# Setup Oh My ZSH
 setup_oh_my_zsh() {
     log "Starting Oh My ZSH setup"
     
@@ -159,7 +155,6 @@ setup_oh_my_zsh() {
     success "Oh My ZSH setup completed"
 }
 
-# Setup terminal customization
 setup_terminal_customization() {
     log "Starting terminal customization setup"
     
@@ -185,7 +180,6 @@ setup_terminal_customization() {
     if [ ! -f "$alacritty_source" ]; then
         warning "Alacritty config file not found at $alacritty_source"
     else
-        # Create target directory
         mkdir -p "$HOME/.config/alacritty"
         
         # Symlink the alacritty.toml file
