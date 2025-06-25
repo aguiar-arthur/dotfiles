@@ -202,49 +202,45 @@ setup_terminal_customization() {
         success "Alacritty configuration files symlinked successfully"
     fi
     
-    log "3 - Setting up alacritty themes in dotfiles"
-    local themes_dir="$DOTFILES_DIR/config/alacritty/themes"
+    log "3 - Setting up alacritty themes"
+    local themes_dir="$HOME/.config/alacritty/themes"
     
-    # Clone themes into dotfiles directory structure
-    if [ ! -d "$themes_dir/.git" ]; then
-        log "Cloning alacritty themes repository into dotfiles"
-        if git clone https://github.com/alacritty/alacritty-theme "$themes_dir"; then
-            success "Alacritty themes cloned successfully into dotfiles"
+    if [ -d "$HOME/.config/alacritty" ]; then
+        if [ ! -d "$themes_dir/.git" ]; then
+            log "Cloning alacritty themes repository"
+            if git clone https://github.com/alacritty/alacritty-theme "$themes_dir"; then
+                success "Alacritty themes cloned successfully"
+            else
+                error "Failed to clone alacritty themes"
+                return 1
+            fi
         else
-            error "Failed to clone alacritty themes"
-            return 1
+            log "Alacritty themes already cloned, updating..."
+            if (cd "$themes_dir" && git pull); then
+                success "Alacritty themes updated successfully"
+            else
+                warning "Failed to update alacritty themes"
+            fi
         fi
     else
-        log "Alacritty themes already cloned in dotfiles, updating..."
-        if (cd "$themes_dir" && git pull); then
-            success "Alacritty themes updated successfully"
-        else
-            warning "Failed to update alacritty themes"
-        fi
-    fi
-    
-    # Symlink themes directory to the actual config directory if it exists
-    if [ -d "$HOME/.config/alacritty" ] && [ -d "$themes_dir" ]; then
-        log "Creating symlink for themes directory"
-        if create_symlink "$themes_dir" "$HOME/.config/alacritty/themes"; then
-            success "Alacritty themes directory symlinked successfully"
-        else
-            warning "Failed to create themes directory symlink"
-        fi
+        warning "Alacritty config directory not found, skipping themes setup"
     fi
     
     success "Terminal customization setup completed"
 }
 
+# Main execution
 main() {
     log "Starting dotfiles setup pipeline"
     log "Dotfiles directory: $DOTFILES_DIR"
     log "Log file: $LOG_FILE"
     
+    # Check dependencies first
     check_dependencies
     
     local failed_steps=()
     
+    # Run setup steps
     if ! setup_emacs; then
         failed_steps+=("emacs")
     fi
@@ -257,6 +253,7 @@ main() {
         failed_steps+=("terminal-customization")
     fi
     
+    # Final report
     echo
     if [ ${#failed_steps[@]} -eq 0 ]; then
         success "All setup steps completed successfully!"
