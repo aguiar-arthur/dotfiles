@@ -326,8 +326,8 @@ replace_text_in_file() {
     fi
     
     log "$description"
-    # Use different delimiter to avoid conflicts with file paths
-    if sed -i.bak "s${pattern}${replacement}g" "$file"; then
+    # Use | as delimiter since it's unlikely to appear in patterns/replacements
+    if sed -i.bak "s|${pattern}|${replacement}|g" "$file"; then
         success "$description completed successfully"
         return 0
     else
