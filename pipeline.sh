@@ -39,6 +39,218 @@ source "$SCRIPT_DIR/pipeline/bash_functions.sh" || {
     exit 1
 }
 
+# ============================================================================
+# EXTRACTED REUSABLE METHODS
+# ============================================================================
+
+# Clone or update a git repository
+clone_or_update_repo() {
+    local repo_url="$1"
+    local target_dir="$2"
+    local repo_name="${3:-$(basename "$repo_url" .git)}"
+    
+    if [ ! -d "$target_dir/.git" ]; then
+        log "Cloning $repo_name repository"
+        if git clone "$repo_url" "$target_dir"; then
+            success "$repo_name cloned successfully"
+            return 0
+        else
+            error "Failed to clone $repo_name"
+            return 1
+        fi
+    else
+        log "$repo_name already exists, updating..."
+        if (cd "$target_dir" && git pull); then
+            success "$repo_name updated successfully"
+            return 0
+        else
+            warning "Failed to update $repo_name"
+            return 1
+        fi
+    fi
+}
+
+# Clone repository with specific options (depth, branch, etc.)
+clone_repo_with_options() {
+    local repo_url="$1"
+    local target_dir="$2"
+    local repo_name="$3"
+    shift 3
+    local git_options=("$@")
+    
+    if [ ! -d "$target_dir" ]; then
+        log "Cloning $repo_name with options: ${git_options[*]}"
+        if git clone "${git_options[@]}" "$repo_url" "$target_dir"; then
+            success "$repo_name cloned successfully"
+            return 0
+        else
+            error "Failed to clone $repo_name"
+            return 1
+        fi
+    else
+        log "$repo_name directory already exists, skipping clone"
+        return 0
+    fi
+}
+
+# Execute a command if directory exists
+execute_if_dir_exists() {
+    local dir="$1"
+    local description="$2"
+    shift 2
+    local command=("$@")
+    
+    if [ -d "$dir" ]; then
+        log "Executing: $description"
+        if "${command[@]}"; then
+            success "$description completed successfully"
+            return 0
+        else
+            error "Failed to execute: $description"
+            return 1
+        fi
+    else
+        error "Directory $dir does not exist, cannot execute: $description"
+        return 1
+    fi
+}
+
+# Download and execute script with options
+download_and_execute_script() {
+    local script_url="$1"
+    local description="$2"
+    shift 2
+    local script_options=("$@")
+    
+    log "$description"
+    if sh -c "$(wget -O- "$script_url")" "" "${script_options[@]}"; then
+        success "$description completed successfully"
+        return 0
+    else
+        error "Failed: $description"
+        return 1
+    fi
+}
+
+# Ensure directory exists and create if needed
+ensure_directory() {
+    local dir="$1"
+    local description="${2:-$dir}"
+    
+    if [ ! -d "$dir" ]; then
+        log "Creating directory: $description"
+        if mkdir -p "$dir"; then
+            success "Directory created: $description"
+            return 0
+        else
+            error "Failed to create directory: $description"
+            return 1
+        fi
+    else
+        log "Directory already exists: $description"
+        return 0
+    fi
+}
+
+# Ensure file exists and create if needed
+ensure_file() {
+    local file="$1"
+    local template_file="${2:-}"
+    local description="${3:-$file}"
+    
+    if [ ! -f "$file" ]; then
+        log "Creating file: $description"
+        if [ -n "$template_file" ] && [ -f "$template_file" ]; then
+            if cp "$template_file" "$file"; then
+                success "File created from template: $description"
+                return 0
+            else
+                error "Failed to create file from template: $description"
+                return 1
+            fi
+        else
+            if touch "$file"; then
+                success "File created: $description"
+                return 0
+            else
+                error "Failed to create file: $description"
+                return 1
+            fi
+        fi
+    else
+        log "File already exists: $description"
+        return 0
+    fi
+}
+
+# Replace text in file using sed
+replace_text_in_file() {
+    local file="$1"
+    local pattern="$2"
+    local replacement="$3"
+    local description="$4"
+    
+    log "$description"
+    if sed -i.bak "s|$pattern|$replacement|" "$file"; then
+        success "$description completed successfully"
+        return 0
+    else
+        error "Failed: $description"
+        return 1
+    fi
+}
+
+# Load configuration into existing file
+load_config_into_file() {
+    local target_file="$1"
+    local config_file="$2"
+    local description="$3"
+    
+    local load_text="(load \"$config_file\")"
+    
+    ensure_file "$target_file"
+    
+    log "$description"
+    if append_text_to_file "$target_file" "$load_text"; then
+        success "$description completed successfully"
+        return 0
+    else
+        error "Failed: $description"
+        return 1
+    fi
+}
+
+# Setup configuration with symlink or file operations
+setup_config_file() {
+    local source_file="$1"
+    local target_file="$2"
+    local description="$3"
+    local create_parent_dir="${4:-true}"
+    
+    if [ ! -f "$source_file" ]; then
+        warning "Source file not found: $source_file"
+        return 1
+    fi
+    
+    if [ "$create_parent_dir" = "true" ]; then
+        local parent_dir="$(dirname "$target_file")"
+        ensure_directory "$parent_dir"
+    fi
+    
+    log "$description"
+    if create_symlink "$source_file" "$target_file"; then
+        success "$description completed successfully"
+        return 0
+    else
+        error "Failed: $description"
+        return 1
+    fi
+}
+
+# ============================================================================
+# SETUP FUNCTIONS USING EXTRACTED METHODS
+# ============================================================================
+
 check_dependencies() {
     local deps=("git" "wget" "sed")
     local missing=()
@@ -59,70 +271,62 @@ check_dependencies() {
 setup_emacs() {
     log "Starting emacs setup"
     
-    log "1 - Installing Doom Emacs"
-    if [ ! -d "$HOME/.config/emacs" ]; then
-        if git clone --depth 1 --single-branch https://github.com/doomemacs/doomemacs ~/.config/emacs; then
-            success "Doom Emacs cloned successfully"
-            
-            # Install Doom Emacs only after cloning
-            if "$HOME/.config/emacs/bin/doom" install; then
-                success "Doom Emacs installed successfully"
-            else
-                error "Failed to install Doom Emacs"
-                return 1
-            fi
-        else
-            error "Failed to clone Doom Emacs"
+    # 1. Clone Doom Emacs
+    if ! clone_repo_with_options \
+        "https://github.com/doomemacs/doomemacs" \
+        "$HOME/.config/emacs" \
+        "Doom Emacs" \
+        --depth 1 --single-branch; then
+        return 1
+    fi
+    
+    # Install Doom Emacs if we just cloned it
+    if [ ! -f "$HOME/.config/emacs/bin/doom" ]; then
+        error "Doom binary not found after cloning"
+        return 1
+    fi
+    
+    # Only install if directory was just created
+    if [ ! -f "$HOME/.doom.d/init.el" ] && [ ! -f "$HOME/.config/doom/init.el" ]; then
+        if ! execute_if_dir_exists \
+            "$HOME/.config/emacs" \
+            "Installing Doom Emacs" \
+            "$HOME/.config/emacs/bin/doom" install; then
             return 1
         fi
-    else
-        log "Doom Emacs directory already exists, skipping clone and installation"
     fi
     
-    # Ensure doom config directory exists
-    mkdir -p "$HOME/.config/doom"
+    # 2. Ensure doom config directory
+    ensure_directory "$HOME/.config/doom" "Doom config directory"
     
-    log "2 - Creating symlink for init.el"
-    if create_symlink "$DOTFILES_DIR/config/doom/init.el" "$HOME/.config/doom/init.el"; then
-        success "Emacs init.el symlink created successfully"
-    else
-        error "Failed to create emacs init.el symlink"
+    # 3. Setup configuration files
+    if ! setup_config_file \
+        "$DOTFILES_DIR/config/doom/init.el" \
+        "$HOME/.config/doom/init.el" \
+        "Creating symlink for init.el" \
+        false; then
         return 1
     fi
     
-    log "3 - Configuring config.el"
-    local config_el="$HOME/.config/doom/config.el"
-    local config_el_text="(load \"$DOTFILES_DIR/config/doom/config.el\")"
-    
-    # Create config.el if it doesn't exist
-    [ ! -f "$config_el" ] && touch "$config_el"
-    
-    if append_text_to_file "$config_el" "$config_el_text"; then
-        success "Emacs config.el configured successfully"
-    else
-        error "Failed to configure emacs config.el"
+    if ! load_config_into_file \
+        "$HOME/.config/doom/config.el" \
+        "$DOTFILES_DIR/config/doom/config.el" \
+        "Configuring config.el"; then
         return 1
     fi
     
-    log "4 - Configuring packages.el"
-    local packages_el="$HOME/.config/doom/packages.el"
-    local packages_el_text="(load \"$DOTFILES_DIR/config/doom/packages.el\")"
-    
-    # Create packages.el if it doesn't exist
-    [ ! -f "$packages_el" ] && touch "$packages_el"
-    
-    if append_text_to_file "$packages_el" "$packages_el_text"; then
-        success "Emacs packages.el configured successfully"
-    else
-        error "Failed to configure emacs packages.el"
+    if ! load_config_into_file \
+        "$HOME/.config/doom/packages.el" \
+        "$DOTFILES_DIR/config/doom/packages.el" \
+        "Configuring packages.el"; then
         return 1
     fi
     
-    log "5 - Running doom sync"
-    if "$HOME/.config/emacs/bin/doom" sync; then
-        success "Doom sync completed successfully"
-    else
-        error "Failed to run doom sync"
+    # 4. Run doom sync
+    if ! execute_if_dir_exists \
+        "$HOME/.config/emacs" \
+        "Running doom sync" \
+        "$HOME/.config/emacs/bin/doom" sync; then
         return 1
     fi
     
@@ -132,92 +336,64 @@ setup_emacs() {
 setup_oh_my_zsh() {
     log "Starting Oh My ZSH setup"
     
-    # Check if Oh My ZSH is already installed
-    if [ -d "$HOME/.oh-my-zsh" ]; then
-        log "Oh My ZSH already installed, skipping installation"
-    else
-        log "1 - Installing Oh My ZSH"
-        # Use RUNZSH=no to prevent automatic shell switching during script
-        if sh -c "$(wget -O- https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended; then
-            success "Oh My ZSH installed successfully"
-        else
-            error "Failed to install Oh My ZSH"
+    # Install Oh My ZSH if not present
+    if [ ! -d "$HOME/.oh-my-zsh" ]; then
+        if ! download_and_execute_script \
+            "https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh" \
+            "Installing Oh My ZSH" \
+            --unattended; then
             return 1
         fi
+    else
+        log "Oh My ZSH already installed, skipping installation"
     fi
     
     # Ensure .zshrc exists
-    if [ ! -f "$HOME/.zshrc" ]; then
-        warning ".zshrc not found, creating basic configuration"
-        cp "$HOME/.oh-my-zsh/templates/zshrc.zsh-template" "$HOME/.zshrc"
-    fi
+    ensure_file "$HOME/.zshrc" "$HOME/.oh-my-zsh/templates/zshrc.zsh-template" ".zshrc configuration"
     
-    log "2 - Configuring zsh theme to agnoster"
-    if sed -i.bak 's/^ZSH_THEME=.*/ZSH_THEME="agnoster"/' "$HOME/.zshrc"; then
-        success "ZSH theme configured successfully"
-        log "Note: Please restart your terminal or run 'source ~/.zshrc' to apply theme changes"
-    else
-        error "Failed to configure zsh theme"
+    # Configure theme
+    if ! replace_text_in_file \
+        "$HOME/.zshrc" \
+        "^ZSH_THEME=.*" \
+        "ZSH_THEME=\"agnoster\"" \
+        "Configuring zsh theme to agnoster"; then
         return 1
     fi
     
+    log "Note: Please restart your terminal or run 'source ~/.zshrc' to apply theme changes"
     success "Oh My ZSH setup completed"
 }
 
 setup_terminal_customization() {
     log "Starting terminal customization setup"
     
-    log "1 - Adding utils shell commands to zsh configuration"
-    local zshrc_file="$HOME/.zshrc"
+    # Add utils shell commands
     local utils_source="source $DOTFILES_DIR/terminal/utils.sh"
-    
-    if [ ! -f "$DOTFILES_DIR/terminal/utils.sh" ]; then
-        warning "Utils script not found at $DOTFILES_DIR/terminal/utils.sh"
-    else
-        if append_text_to_file "$zshrc_file" "$utils_source"; then
+    if [ -f "$DOTFILES_DIR/terminal/utils.sh" ]; then
+        if append_text_to_file "$HOME/.zshrc" "$utils_source"; then
             success "Utils shell commands added successfully"
         else
             error "Failed to add utils shell commands"
             return 1
         fi
+    else
+        warning "Utils script not found at $DOTFILES_DIR/terminal/utils.sh"
     fi
     
-    log "2 - Setting up alacritty configuration"
-    local alacritty_source="$DOTFILES_DIR/config/alacritty/alacritty.toml"
-    local alacritty_target="$HOME/.config/alacritty/alacritty.toml"
-    
-    if [ ! -f "$alacritty_source" ]; then
-        warning "Alacritty config file not found at $alacritty_source"
-    else
-        mkdir -p "$HOME/.config/alacritty"
-        
-        # Symlink the alacritty.toml file
-        if create_symlink "$alacritty_source" "$alacritty_target"; then
-            success "Alacritty configuration file symlinked successfully"
-        else
-            error "Failed to symlink alacritty configuration file"
-            return 1
-        fi
+    # Setup alacritty configuration
+    if ! setup_config_file \
+        "$DOTFILES_DIR/config/alacritty/alacritty.toml" \
+        "$HOME/.config/alacritty/alacritty.toml" \
+        "Setting up alacritty configuration"; then
+        warning "Alacritty configuration setup failed or file not found"
     fi
     
-    log "3 - Setting up alacritty themes"
-    local themes_dir="$HOME/.config/alacritty/themes"
-    
-    if [ ! -d "$themes_dir/.git" ]; then
-        log "Cloning alacritty themes repository"
-        if git clone https://github.com/alacritty/alacritty-theme "$themes_dir"; then
-            success "Alacritty themes cloned successfully"
-        else
-            error "Failed to clone alacritty themes"
-            return 1
-        fi
-    else
-        log "Alacritty themes already cloned, updating..."
-        if (cd "$themes_dir" && git pull); then
-            success "Alacritty themes updated successfully"
-        else
-            warning "Failed to update alacritty themes"
-        fi
+    # Setup alacritty themes
+    if ! clone_or_update_repo \
+        "https://github.com/alacritty/alacritty-theme" \
+        "$HOME/.config/alacritty/themes" \
+        "Alacritty themes"; then
+        warning "Failed to setup alacritty themes"
     fi
     
     success "Terminal customization setup completed"
