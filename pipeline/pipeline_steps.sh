@@ -1,13 +1,11 @@
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DOTFILES_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-source "$SCRIPT_DIR/bash_functions.sh" || {
-    error "Failed to load bash functions from $SCRIPT_DIR/bash_functions.sh"
+source "$HOME/dotfiles/pipeline/bash_functions.sh" || {
+    error "Failed to load bash functions from $HOME/dotfiles/pipeline/bash_functions.sh"
     exit 1
 }
 
-source "$SCRIPT_DIR/observability.sh" || {
-    error "Failed to load bash functions from $SCRIPT_DIR/observability.sh"
+source "$HOME/dotfiles/pipeline/observability.sh" || {
+    error "Failed to load bash functions from $HOME/dotfiles/pipeline/observability.sh"
     exit 1
 }
 
@@ -47,7 +45,7 @@ setup_emacs() {
     fi
     
     # Only install if directory was just created
-    if [ ! -f "$HOME/.doom.d/init.el" ] && [ ! -f "$HOME/.config/doom/init.el" ]; then
+    if [ ! -f "$HOME/.config/doom/init.el" ]; then
         if ! execute_if_dir_exists \
             "$HOME/.config/emacs" \
             "Installing Doom Emacs" \
@@ -61,7 +59,7 @@ setup_emacs() {
     
     # 3. Setup configuration files
     if ! setup_config_file \
-        "$DOTFILES_DIR/config/doom/init.el" \
+        "$HOME/dotfiles/config/doom/init.el" \
         "$HOME/.config/doom/init.el" \
         "Creating symlink for init.el" \
         false; then
@@ -70,14 +68,14 @@ setup_emacs() {
     
     if ! load_config_into_file \
         "$HOME/.config/doom/config.el" \
-        "$DOTFILES_DIR/config/doom/config.el" \
+        "$HOME/dotfiles/config/doom/config.el" \
         "Configuring config.el"; then
         return 1
     fi
     
     if ! load_config_into_file \
         "$HOME/.config/doom/packages.el" \
-        "$DOTFILES_DIR/config/doom/packages.el" \
+        "$HOME/dotfiles/config/doom/packages.el" \
         "Configuring packages.el"; then
         return 1
     fi
@@ -128,8 +126,8 @@ setup_terminal_customization() {
     log "Starting terminal customization setup"
     
     # Add utils shell commands
-    local utils_source="source $DOTFILES_DIR/terminal/utils.sh"
-    if [ -f "$DOTFILES_DIR/terminal/utils.sh" ]; then
+    local utils_source="source $HOME/dotfiles/terminal/utils.sh"
+    if [ -f "$HOME/dotfiles/terminal/utils.sh" ]; then
         if append_text_to_file "$HOME/.zshrc" "$utils_source"; then
             success "Utils shell commands added successfully"
         else
@@ -137,12 +135,12 @@ setup_terminal_customization() {
             return 1
         fi
     else
-        warning "Utils script not found at $DOTFILES_DIR/terminal/utils.sh"
+        warning "Utils script not found at $HOME/dotfiles/terminal/utils.sh"
     fi
     
     # Setup alacritty configuration
     if ! setup_config_file \
-        "$DOTFILES_DIR/config/alacritty/alacritty.toml" \
+        "$HOME/dotfiles/config/alacritty/alacritty.toml" \
         "$HOME/.config/alacritty/alacritty.toml" \
         "Setting up alacritty configuration"; then
         warning "Alacritty configuration setup failed or file not found"

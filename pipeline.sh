@@ -5,16 +5,15 @@
 
 set -euo pipefail  # Exit on error, undefined vars, pipe failures
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LOG_FILE="$HOME/.dotfiles-setup.log"
 
-source "$SCRIPT_DIR/pipeline/pipeline_steps.sh" || {
-    error "Failed to load bash functions from $SCRIPT_DIR/pipeline/pipeline_steps.sh"
+source "$HOME/dotfiles/pipeline/pipeline_steps.sh" || {
+    error "Failed to load bash functions from $HOME/dotfiles/pipeline/pipeline_steps.sh"
     exit 1
 }
 
-source "$SCRIPT_DIR/observability.sh" || {
-    error "Failed to load bash functions from $SCRIPT_DIR/observability.sh"
+source "$HOME/dotfiles/pipeline/observability.sh" || {
+    error "Failed to load bash functions from $HOME/dotfiles/observability.sh"
     exit 1
 }
 

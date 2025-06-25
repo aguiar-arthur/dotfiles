@@ -1,6 +1,5 @@
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/observability.sh" || {
-    error "Failed to load bash functions from $SCRIPT_DIR/observability.sh"
+source "$HOME/dotfiles/pipeline/observability.sh" || {
+    error "Failed to load bash functions from $HOME/dotfiles/pipeline/observability.sh"
     exit 1
 }
 
