@@ -1,3 +1,6 @@
+# ============================================================================
+# Core functions
+# ============================================================================
 create_symlink() {
     source_file="$1"
     target_link="$2"
@@ -101,4 +104,207 @@ append_text_to_file() {
     echo "" >> "$target_file"
     
     echo "Appended text to '$target_file' (backup saved as '$target_file.bak')"
+}
+
+# ============================================================================
+# Enxtended behavior
+# ============================================================================
+clone_or_update_repo() {
+    local repo_url="$1"
+    local target_dir="$2"
+    local repo_name="${3:-$(basename "$repo_url" .git)}"
+    
+    if [ ! -d "$target_dir/.git" ]; then
+        log "Cloning $repo_name repository"
+        if git clone "$repo_url" "$target_dir"; then
+            success "$repo_name cloned successfully"
+            return 0
+        else
+            error "Failed to clone $repo_name"
+            return 1
+        fi
+    else
+        log "$repo_name already exists, updating..."
+        if (cd "$target_dir" && git pull); then
+            success "$repo_name updated successfully"
+            return 0
+        else
+            warning "Failed to update $repo_name"
+            return 1
+        fi
+    fi
+}
+
+# Clone repository with specific options (depth, branch, etc.)
+clone_repo_with_options() {
+    local repo_url="$1"
+    local target_dir="$2"
+    local repo_name="$3"
+    shift 3
+    local git_options=("$@")
+    
+    if [ ! -d "$target_dir" ]; then
+        log "Cloning $repo_name with options: ${git_options[*]}"
+        if git clone "${git_options[@]}" "$repo_url" "$target_dir"; then
+            success "$repo_name cloned successfully"
+            return 0
+        else
+            error "Failed to clone $repo_name"
+            return 1
+        fi
+    else
+        log "$repo_name directory already exists, skipping clone"
+        return 0
+    fi
+}
+
+execute_if_dir_exists() {
+    local dir="$1"
+    local description="$2"
+    shift 2
+    local command=("$@")
+    
+    if [ -d "$dir" ]; then
+        log "Executing: $description"
+        if "${command[@]}"; then
+            success "$description completed successfully"
+            return 0
+        else
+            error "Failed to execute: $description"
+            return 1
+        fi
+    else
+        error "Directory $dir does not exist, cannot execute: $description"
+        return 1
+    fi
+}
+
+download_and_execute_script() {
+    local script_url="$1"
+    local description="$2"
+    shift 2
+    local script_options=("$@")
+    
+    log "$description"
+    if sh -c "$(wget -O- "$script_url")" "" "${script_options[@]}"; then
+        success "$description completed successfully"
+        return 0
+    else
+        error "Failed: $description"
+        return 1
+    fi
+}
+
+# Ensure directory exists and create if needed
+ensure_directory() {
+    local dir="$1"
+    local description="${2:-$dir}"
+    
+    if [ ! -d "$dir" ]; then
+        log "Creating directory: $description"
+        if mkdir -p "$dir"; then
+            success "Directory created: $description"
+            return 0
+        else
+            error "Failed to create directory: $description"
+            return 1
+        fi
+    else
+        log "Directory already exists: $description"
+        return 0
+    fi
+}
+
+# Ensure file exists and create if needed
+ensure_file() {
+    local file="$1"
+    local template_file="${2:-}"
+    local description="${3:-$file}"
+    
+    if [ ! -f "$file" ]; then
+        log "Creating file: $description"
+        if [ -n "$template_file" ] && [ -f "$template_file" ]; then
+            if cp "$template_file" "$file"; then
+                success "File created from template: $description"
+                return 0
+            else
+                error "Failed to create file from template: $description"
+                return 1
+            fi
+        else
+            if touch "$file"; then
+                success "File created: $description"
+                return 0
+            else
+                error "Failed to create file: $description"
+                return 1
+            fi
+        fi
+    else
+        log "File already exists: $description"
+        return 0
+    fi
+}
+
+replace_text_in_file() {
+    local file="$1"
+    local pattern="$2"
+    local replacement="$3"
+    local description="$4"
+    
+    log "$description"
+    if sed -i.bak "s|$pattern|$replacement|" "$file"; then
+        success "$description completed successfully"
+        return 0
+    else
+        error "Failed: $description"
+        return 1
+    fi
+}
+
+# Load configuration into existing file
+load_config_into_file() {
+    local target_file="$1"
+    local config_file="$2"
+    local description="$3"
+    
+    local load_text="(load \"$config_file\")"
+    
+    ensure_file "$target_file"
+    
+    log "$description"
+    if append_text_to_file "$target_file" "$load_text"; then
+        success "$description completed successfully"
+        return 0
+    else
+        error "Failed: $description"
+        return 1
+    fi
+}
+
+# Setup configuration with symlink or file operations
+setup_config_file() {
+    local source_file="$1"
+    local target_file="$2"
+    local description="$3"
+    local create_parent_dir="${4:-true}"
+    
+    if [ ! -f "$source_file" ]; then
+        warning "Source file not found: $source_file"
+        return 1
+    fi
+    
+    if [ "$create_parent_dir" = "true" ]; then
+        local parent_dir="$(dirname "$target_file")"
+        ensure_directory "$parent_dir"
+    fi
+    
+    log "$description"
+    if create_symlink "$source_file" "$target_file"; then
+        success "$description completed successfully"
+        return 0
+    else
+        error "Failed: $description"
+        return 1
+    fi
 }
