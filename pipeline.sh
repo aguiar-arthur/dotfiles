@@ -179,51 +179,42 @@ setup_terminal_customization() {
     fi
     
     log "2 - Setting up alacritty configuration"
-    local alacritty_source="$DOTFILES_DIR/config/alacritty"
-    local alacritty_target="$HOME/.config/alacritty"
+    local alacritty_source="$DOTFILES_DIR/config/alacritty/alacritty.toml"
+    local alacritty_target="$HOME/.config/alacritty/alacritty.toml"
     
-    if [ ! -d "$alacritty_source" ]; then
-        warning "Alacritty config directory not found at $alacritty_source"
+    if [ ! -f "$alacritty_source" ]; then
+        warning "Alacritty config file not found at $alacritty_source"
     else
-        mkdir -p "$alacritty_target"
+        # Create target directory
+        mkdir -p "$HOME/.config/alacritty"
         
-        log "Creating symlinks for alacritty configuration files"
-        for file in "$alacritty_source"/*; do
-            if [ -f "$file" ]; then
-                local filename=$(basename "$file")
-                if create_symlink "$file" "$alacritty_target/$filename"; then
-                    log "Symlinked $filename"
-                else
-                    error "Failed to symlink $filename"
-                    return 1
-                fi
-            fi
-        done
-        success "Alacritty configuration files symlinked successfully"
+        # Symlink the alacritty.toml file
+        if create_symlink "$alacritty_source" "$alacritty_target"; then
+            success "Alacritty configuration file symlinked successfully"
+        else
+            error "Failed to symlink alacritty configuration file"
+            return 1
+        fi
     fi
     
     log "3 - Setting up alacritty themes"
     local themes_dir="$HOME/.config/alacritty/themes"
     
-    if [ -d "$HOME/.config/alacritty" ]; then
-        if [ ! -d "$themes_dir/.git" ]; then
-            log "Cloning alacritty themes repository"
-            if git clone https://github.com/alacritty/alacritty-theme "$themes_dir"; then
-                success "Alacritty themes cloned successfully"
-            else
-                error "Failed to clone alacritty themes"
-                return 1
-            fi
+    if [ ! -d "$themes_dir/.git" ]; then
+        log "Cloning alacritty themes repository"
+        if git clone https://github.com/alacritty/alacritty-theme "$themes_dir"; then
+            success "Alacritty themes cloned successfully"
         else
-            log "Alacritty themes already cloned, updating..."
-            if (cd "$themes_dir" && git pull); then
-                success "Alacritty themes updated successfully"
-            else
-                warning "Failed to update alacritty themes"
-            fi
+            error "Failed to clone alacritty themes"
+            return 1
         fi
     else
-        warning "Alacritty config directory not found, skipping themes setup"
+        log "Alacritty themes already cloned, updating..."
+        if (cd "$themes_dir" && git pull); then
+            success "Alacritty themes updated successfully"
+        else
+            warning "Failed to update alacritty themes"
+        fi
     fi
     
     success "Terminal customization setup completed"
