@@ -1,5 +1,5 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DOTFILES_DIR="$(cd "$SCRIPT_DIR/.." && pwd)/dotfiles"
+DOTFILES_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 source "$SCRIPT_DIR/bash_functions.sh" || {
     error "Failed to load bash functions from $SCRIPT_DIR/bash_functions.sh"
