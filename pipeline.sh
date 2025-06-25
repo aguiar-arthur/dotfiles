@@ -117,6 +117,8 @@ setup_emacs() {
         return 1
     fi
     
+    doom sync
+    
     success "Emacs setup completed"
 }
 
