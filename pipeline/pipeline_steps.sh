@@ -117,7 +117,6 @@ setup_oh_my_zsh() {
         error "Failed to configure zsh theme"
     fi
     
-    log "Note: Please restart your terminal or run 'source ~/.zshrc' to apply theme changes"
     success "Oh My ZSH setup completed"
 }
 
