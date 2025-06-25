@@ -6,6 +6,7 @@
 (package! lsp-mode)
 (package! lsp-ui)
 (package! company-lsp)
+(package! all-the-icons)
 
 ;; ---------------------------
 ;; Clojure
