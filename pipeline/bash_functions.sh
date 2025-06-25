@@ -1,3 +1,4 @@
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/observability.sh" || {
     error "Failed to load bash functions from $SCRIPT_DIR/observability.sh"
     exit 1
