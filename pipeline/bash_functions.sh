@@ -311,31 +311,6 @@ ensure_file() {
     fi
 }
 
-replace_text_in_file() {
-    local file="$1"
-    local pattern="$2"
-    local replacement="$3"
-    local description="$4"
-    
-    # Handle tilde expansion
-    file="${file/#\~/$HOME}"
-    
-    if [ ! -f "$file" ]; then
-        error "File does not exist: $file"
-        return 1
-    fi
-    
-    log "$description"
-    # Use | as delimiter since it's unlikely to appear in patterns/replacements
-    if sed -i.bak "s|${pattern}|${replacement}|g" "$file"; then
-        success "$description completed successfully"
-        return 0
-    else
-        error "Failed: $description"
-        return 1
-    fi
-}
-
 load_config_into_file() {
     local target_file="$1"
     local config_file="$2"

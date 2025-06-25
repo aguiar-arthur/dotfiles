@@ -110,12 +110,11 @@ setup_oh_my_zsh() {
     ensure_file "$HOME/.zshrc" "$HOME/.oh-my-zsh/templates/zshrc.zsh-template" ".zshrc configuration"
     
     # Configure theme
-    if ! replace_text_in_file \
-        "$HOME/.zshrc" \
-        "^ZSH_THEME=.*" \
-        "ZSH_THEME=\"agnoster\"" \
-        "Configuring zsh theme to agnoster"; then
-        return 1
+    if sed -i.bak 's/^ZSH_THEME=.*/ZSH_THEME="agnoster"/' "$HOME/.zshrc"; then
+        success "ZSH theme configured successfully"
+        log "Note: Please restart your terminal or run 'source ~/.zshrc' to apply theme changes"
+    else
+        error "Failed to configure zsh theme"
     fi
     
     log "Note: Please restart your terminal or run 'source ~/.zshrc' to apply theme changes"
