@@ -13,8 +13,8 @@ source "$SCRIPT_DIR/pipeline/pipeline_steps.sh" || {
     exit 1
 }
 
-source "$SCRIPT_DIR/pipeline/obsevability.sh" || {
-    error "Failed to load bash functions from $SCRIPT_DIR/pipeline/obsevability.sh"
+source "$SCRIPT_DIR/pipeline/observability.sh" || {
+    error "Failed to load bash functions from $SCRIPT_DIR/pipeline/observability.sh"
     exit 1
 }
 

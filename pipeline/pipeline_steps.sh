@@ -6,6 +6,11 @@ source "$SCRIPT_DIR/bash_functions.sh" || {
     exit 1
 }
 
+source "$SCRIPT_DIR/observability.sh" || {
+    error "Failed to load bash functions from $SCRIPT_DIR/observability.sh"
+    exit 1
+}
+
 check_dependencies() {
     local deps=("git" "wget" "sed")
     local missing=()

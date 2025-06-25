@@ -1,3 +1,8 @@
+source "$SCRIPT_DIR/observability.sh" || {
+    error "Failed to load bash functions from $SCRIPT_DIR/observability.sh"
+    exit 1
+}
+
 # ============================================================================
 # Core functions
 # ============================================================================
