@@ -63,19 +63,20 @@ setup_emacs() {
     if [ ! -d "$HOME/.config/emacs" ]; then
         if git clone --depth 1 --single-branch https://github.com/doomemacs/doomemacs ~/.config/emacs; then
             success "Doom Emacs cloned successfully"
+            
+            # Install Doom Emacs only after cloning
+            if "$HOME/.config/emacs/bin/doom" install; then
+                success "Doom Emacs installed successfully"
+            else
+                error "Failed to install Doom Emacs"
+                return 1
+            fi
         else
             error "Failed to clone Doom Emacs"
             return 1
         fi
     else
-        log "Doom Emacs directory already exists, skipping clone"
-    fi
-    
-    if "$HOME/.config/emacs/bin/doom" install; then
-        success "Doom Emacs installed successfully"
-    else
-        error "Failed to install Doom Emacs"
-        return 1
+        log "Doom Emacs directory already exists, skipping clone and installation"
     fi
     
     # Ensure doom config directory exists
@@ -117,7 +118,13 @@ setup_emacs() {
         return 1
     fi
     
-    doom sync
+    log "5 - Running doom sync"
+    if "$HOME/.config/emacs/bin/doom" sync; then
+        success "Doom sync completed successfully"
+    else
+        error "Failed to run doom sync"
+        return 1
+    fi
     
     success "Emacs setup completed"
 }
