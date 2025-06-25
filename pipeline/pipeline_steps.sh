@@ -1,4 +1,3 @@
-
 source "$HOME/dotfiles/pipeline/bash_functions.sh" || {
     error "Failed to load bash functions from $HOME/dotfiles/pipeline/bash_functions.sh"
     exit 1
