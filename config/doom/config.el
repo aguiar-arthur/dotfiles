@@ -6,14 +6,14 @@
 (add-to-list 'initial-frame-alist '(fullscreen . maximized))
 (global-visual-line-mode t)
 
-(setq doom-font (font-spec :family "FiraCode Nerd Font Mono" :size 12))
-
-(setq doom-theme 'doom-dracula)
-(setq display-line-numbers-type 'relative)
-
 (setq doom-localleader-key ",")
 
-(setq fancy-splash-image (concat "~/dotfiles/config/doom/" "splash.png"))
+(setq doom-font (font-spec :family "FiraCode Nerd Font Mono" :size 12) ;; For coding
+      doom-variable-pitch-font (font-spec :family "FiraCode Nerd Font" :size 12)) ;; For variable-width text areas
+
+(setq doom-theme 'doom-dracula
+      display-line-numbers-type 'relative
+      fancy-splash-image (concat "~/dotfiles/config/doom/" "splash.png"))
 
 (setq confirm-kill-emacs nil
       delete-by-moving-to-trash t
@@ -22,8 +22,7 @@
       auto-save-default t
       truncate-string-ellipsis "…"
       require-final-newline t
-      which-key-idle-delay 0.5
-      org-directory "~/org/")
+      which-key-idle-delay 0.5)
 
 (after! flycheck
   (setq flycheck-check-syntax-automatically '(save mode-enabled)
@@ -81,6 +80,44 @@
 (add-hook 'cider-repl-mode-hook #'rainbow-delimiters-mode)
 (add-hook 'cider-repl-mode-hook #'paredit-mode)
 
+;; ---------------------------
+;; Org mode
+;; ---------------------------
+
+(use-package! org-modern
+  :after org
+  :hook ((org-mode . org-modern-mode)
+         (org-agenda-finalize . org-modern-agenda))
+  :config
+  (setq org-modern-star '("◉" "○" "●" "○" "●" "○" "●")))
+
+(custom-set-faces!
+  '(org-level-1 :height 1.3 :weight bold :inherit 'font-lock-function-name-face)
+  '(org-level-2 :height 1.2 :weight semi-bold :inherit 'font-lock-variable-name-face)
+  '(org-level-3 :height 1.1 :weight semi-bold :inherit 'font-lock-keyword-face)
+  '(org-level-4 :height 1.05 :weight normal :inherit 'font-lock-type-face)
+
+  '(org-level-5 :inherit 'font-lock-string-face)
+  '(org-level-6 :inherit 'font-lock-constant-face)
+  '(org-level-7 :inherit 'font-lock-builtin-face)
+  '(org-level-8 :inherit 'font-lock-comment-face)
+
+  '(org-document-title :height 1.5 :weight bold :inherit 'font-lock-preprocessor-face))
+
+(setq org-directory "~/org/"
+      org-cycle-separator-lines 1
+
+      org-display-inline-images t
+      org-redisplay-inline-images t
+      org-startup-with-inline-images t
+
+      org-hide-emphasis-markers t
+      org-fontify-done-headline t
+      org-fontify-whole-heading-line t
+      org-fontify-quote-and-verse-blocks t
+      org-blank-before-new-entry '((heading . t) (plain-list-item . nil)))
+
+(add-hook 'org-mode-hook 'org-display-inline-images)
 ;; ---------------------------
 ;; Additional
 ;; ---------------------------
