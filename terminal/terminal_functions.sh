@@ -40,6 +40,6 @@ list_files_with_word() {
     done
 }
 
-update_emacs() {
+emacs_update() {
     setup_emacs
 }

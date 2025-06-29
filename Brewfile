@@ -8,6 +8,8 @@ brew "borkdude/brew/clj-kondo"
 brew "clojure-lsp"
 brew "leiningen"
 brew "clojure"
+# ruby
+brew "ruby"
 # terminal tools
 brew "coreutils"
 brew "findutils"
