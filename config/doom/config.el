@@ -122,4 +122,4 @@
 ;; ---------------------------
 ;; Additional
 ;; ---------------------------
-(load! (expand-file-name "dotfiles/config/doom/+bindings" (getenv "HOME")))
+(load! (expand-file-name "dotfiles/config/doom/+bindings.el" (getenv "HOME")))
