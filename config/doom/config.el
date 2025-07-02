@@ -118,7 +118,8 @@
       org-blank-before-new-entry '((heading . t) (plain-list-item . nil)))
 
 (add-hook 'org-mode-hook 'org-display-inline-images)
+
 ;; ---------------------------
 ;; Additional
 ;; ---------------------------
-(load! "+bindings")
+(load! (expand-file-name "dotfiles/config/doom/+bindings" (getenv "HOME")))
