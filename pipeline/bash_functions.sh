@@ -326,7 +326,7 @@ load_config_into_file() {
         return 1
     fi
     
-    local load_text="(load \"$config_file\")"
+    local load_text="(load! \"$config_file\")"
     
     if ! ensure_file "$target_file"; then
         return 1
