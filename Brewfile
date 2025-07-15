@@ -1,10 +1,10 @@
 # development tools
 brew "nvim"
+brew "git-lfs"
 # python
 brew "python3"
 brew "pipenv"
 # clojure
-brew "borkdude/brew/clj-kondo"
 brew "clojure-lsp"
 brew "leiningen"
 brew "clojure"
@@ -24,7 +24,7 @@ brew "fd"
 # beautiful terminal
 brew "neofetch"
 brew "zsh"
-# fonts
+# casks
 cask "alacritty", args: { "no-quarantine": true }
 cask "font-fira-code-nerd-font"
 cask "emacs"
