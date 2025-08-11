@@ -123,7 +123,7 @@
 ;; Python
 ;; ---------------------------
 (after! python
-  (setq python-shell-interpreter "python3"
+  (setq python-shell-interpreter "python"
         python-pytest-executable "python -m pytest")
 
   (add-hook 'python-mode-hook #'tree-sitter-mode)
