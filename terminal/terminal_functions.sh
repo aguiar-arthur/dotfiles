@@ -3,7 +3,7 @@ source "$HOME/dotfiles/pipeline/pipeline_steps.sh" || {
     exit 1
 }
 
-git-prune-deleted-branches() {
+git_prune_deleted_branches() {
   git checkout main
   git pull
   git fetch --prune

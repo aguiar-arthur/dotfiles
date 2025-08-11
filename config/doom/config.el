@@ -118,6 +118,25 @@
 
 (add-hook 'org-mode-hook 'org-display-inline-images)
 
+
+;; ---------------------------
+;; Python
+;; ---------------------------
+(after! python
+  (setq python-shell-interpreter "python3"
+        python-pytest-executable "python -m pytest")
+
+  (add-hook 'python-mode-hook #'tree-sitter-mode)
+  (add-hook 'python-mode-hook #'tree-sitter-hl-mode)
+
+  (after! lsp-mode
+    (setq lsp-python-server 'pyright)
+
+    (setq lsp-semantic-tokens-enable t)
+
+    (setq lsp-pyright-auto-import-completions t
+          lsp-pyright-typechecking-mode "basic")))  ;; "off", "basic", or "strict"
+
 ;; ---------------------------
 ;; Additional
 ;; ---------------------------

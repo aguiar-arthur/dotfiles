@@ -2,7 +2,7 @@
 brew "nvim"
 brew "git-lfs"
 # python
-brew "python3"
+brew "pyenv"
 brew "pipenv"
 # clojure
 brew "clojure-lsp"

@@ -110,3 +110,36 @@
 
         :desc "Barf forward (exclude last expression)"   "C-c b l" #'paredit-forward-barf-sexp
         :desc "Barf backward (exclude first expression)" "C-c b h" #'paredit-backward-barf-sexp))
+
+;; ---------------------------
+;; Python
+;; ---------------------------
+(map! :after python
+      :map python-mode-map
+      :localleader
+
+      :desc "Python REPL" "'" #'run-python
+      :desc "Send buffer to REPL" "b" #'python-shell-send-buffer
+      :desc "Send region to REPL" "r" #'python-shell-send-region
+      :desc "Send defun to REPL" "d" #'python-shell-send-defun
+      :desc "Send statement to REPL" "s" #'python-shell-send-statement
+
+      (:prefix ("t" . "test")
+       :desc "Run pytest" "t" #'python-pytest
+       :desc "Run pytest current file" "f" #'python-pytest-file
+       :desc "Run pytest current function" "d" #'python-pytest-function)
+
+      (:prefix ("g" . "goto")
+       :desc "Go to definition" "d" #'lsp-find-definition
+       :desc "Go to references" "r" #'lsp-find-references
+       :desc "Go to implementation" "i" #'lsp-find-implementation)
+
+      (:prefix ("f" . "format")
+       :desc "Format buffer" "b" #'lsp-format-buffer
+       :desc "Format region" "r" #'lsp-format-region
+       :desc "Black format buffer" "B" #'python-black-buffer
+       :desc "Isort buffer" "i" #'python-isort-buffer)
+
+      (:prefix ("h" . "help")
+       :desc "Describe at point" "h" #'lsp-describe-thing-at-point
+       :desc "Python help" "p" #'python-eldoc-at-point))
