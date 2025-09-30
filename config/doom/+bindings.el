@@ -1,16 +1,15 @@
 ;; -*- lexical-binding: t; -*-
-
-(use-package general
-  :after evil
-  :config
-  (general-auto-unbind-keys)
-
- (map! :leader
-       :desc "w" nil
-       :desc "l" nil
-       :desc "c" nil
-       :desc "m" nil
-       :desc "o" nil))
+ 
+;; ---------------------------------------------------------------------------
+;; Leader key cleanup
+;; ---------------------------------------------------------------------------
+(after! doom-leader
+  (map! :leader
+        :desc "w" nil
+        :desc "l" nil
+        :desc "c" nil
+        :desc "m" nil
+        :desc "o" nil))
 
 ;; ---------------------------
 ;; Lsp
