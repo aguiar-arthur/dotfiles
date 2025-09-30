@@ -7,6 +7,7 @@
 (package! lsp-ui)
 (package! company-lsp)
 (package! nerd-icons)
+(package! rainbow-delimiters)
 
 ;; ---------------------------
 ;; Clojure
