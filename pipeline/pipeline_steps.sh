@@ -57,6 +57,8 @@ setup_emacs() {
     load_config_into_file "$HOME/.config/doom/packages.el" \
                           "$HOME/dotfiles/config/doom/packages.el" "Configuring packages.el"
 
+    "$HOME/.config/emacs/bin/doom" upgrade
+    "$HOME/.config/emacs/bin/doom" build
     "$HOME/.config/emacs/bin/doom" sync
 
     success "✔ Doom Emacs ready"

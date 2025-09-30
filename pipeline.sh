@@ -15,6 +15,11 @@ load_or_exit() {
 load_or_exit "$HOME/dotfiles/pipeline/pipeline_steps.sh" "pipeline steps"
 load_or_exit "$HOME/dotfiles/pipeline/observability.sh" "observability"
 
+# List available setup steps (all functions starting with setup_)
+available_steps() {
+    declare -F | awk '{print $3}' | grep '^setup_' | sed 's/^setup_//'
+}
+
 main() {
     log "▶ Starting dotfiles setup pipeline"
     check_dependencies
@@ -24,29 +29,26 @@ main() {
 
     # If no arguments given, run all
     if [ ${#steps[@]} -eq 0 ]; then
-        steps=("emacs" "oh-my-zsh" "terminal")
+        steps=("all")
     fi
 
     for step in "${steps[@]}"; do
-        case $step in
-            emacs)
-                setup_emacs || failed_steps+=("emacs")
-                ;;
-            oh-my-zsh|zsh)
-                setup_oh_my_zsh || failed_steps+=("oh-my-zsh")
-                ;;
-            terminal|terminal-customization)
-                setup_terminal_customization || failed_steps+=("terminal-customization")
-                ;;
-            all)
-                setup_emacs || failed_steps+=("emacs")
-                setup_oh_my_zsh || failed_steps+=("oh-my-zsh")
-                setup_terminal_customization || failed_steps+=("terminal-customization")
-                ;;
-            *)
+        if [[ "$step" == "all" ]]; then
+            for fn in $(available_steps); do
+                if ! "setup_$fn"; then
+                    failed_steps+=("$fn")
+                fi
+            done
+        else
+            if declare -f "setup_$step" >/dev/null 2>&1; then
+                if ! "setup_$step"; then
+                    failed_steps+=("$step")
+                fi
+            else
                 warning "Unknown step: $step"
-                ;;
-        esac
+                echo "Available steps: $(available_steps | xargs)"
+            fi
+        fi
     done
 
     echo

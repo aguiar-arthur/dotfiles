@@ -1,8 +1,3 @@
-source "$HOME/dotfiles/pipeline/pipeline_steps.sh" || {
-    error "Failed to load bash functions from $HOME/dotfiles/pipeline/pipeline_steps.sh"
-    exit 1
-}
-
 git_prune_deleted_branches() {
   git checkout main
   git pull
@@ -38,8 +33,4 @@ list_files_with_word() {
             echo "$file"
         fi
     done
-}
-
-emacs_update() {
-    setup_emacs
 }

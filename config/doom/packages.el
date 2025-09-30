@@ -8,6 +8,7 @@
 (package! company-lsp)
 (package! nerd-icons)
 (package! rainbow-delimiters)
+(package! doom-themes)
 
 ;; ---------------------------
 ;; Clojure
