@@ -24,11 +24,14 @@
       require-final-newline t
       which-key-idle-delay 0.5)
 
+(defun aa/indent-buffer ()
+  "Indent the entire current buffer."
+  (interactive)
+  (indent-region (point-min) (point-max)))
+
 (after! flycheck
   (setq flycheck-check-syntax-automatically '(save mode-enabled)
         flycheck-display-errors-delay 0.5))
-
-(add-hook 'after-init-hook #'global-flycheck-mode)
 
 (after! ace-window
   (setq aw-keys '(?1 ?2 ?3 ?4 ?5 ?6 ?7 ?8 ?9 ?0))
@@ -81,6 +84,24 @@
 (add-hook 'cider-repl-mode-hook #'paredit-mode)
 
 ;; ---------------------------
+;; Python
+;; ---------------------------
+(after! python
+  (setq python-shell-interpreter "python"
+        python-pytest-executable "python -m pytest")
+
+  (add-hook 'python-mode-hook #'tree-sitter-mode)
+  (add-hook 'python-mode-hook #'tree-sitter-hl-mode)
+
+  (after! lsp-mode
+    (setq lsp-python-server 'pyright)
+
+    (setq lsp-semantic-tokens-enable t)
+
+    (setq lsp-pyright-auto-import-completions t
+          lsp-pyright-typechecking-mode "basic")))  ;; "off", "basic", or "strict"
+
+;; ---------------------------
 ;; Org mode
 ;; ---------------------------
 (use-package! org-modern
@@ -117,25 +138,6 @@
       org-blank-before-new-entry '((heading . t) (plain-list-item . nil)))
 
 (add-hook 'org-mode-hook 'org-display-inline-images)
-
-
-;; ---------------------------
-;; Python
-;; ---------------------------
-(after! python
-  (setq python-shell-interpreter "python"
-        python-pytest-executable "python -m pytest")
-
-  (add-hook 'python-mode-hook #'tree-sitter-mode)
-  (add-hook 'python-mode-hook #'tree-sitter-hl-mode)
-
-  (after! lsp-mode
-    (setq lsp-python-server 'pyright)
-
-    (setq lsp-semantic-tokens-enable t)
-
-    (setq lsp-pyright-auto-import-completions t
-          lsp-pyright-typechecking-mode "basic")))  ;; "off", "basic", or "strict"
 
 ;; ---------------------------
 ;; Additional

@@ -5,7 +5,6 @@
 ;; ---------------------------
 (package! lsp-mode)
 (package! lsp-ui)
-(package! company-lsp)
 (package! nerd-icons)
 (package! rainbow-delimiters)
 (package! doom-themes)
@@ -15,8 +14,15 @@
 ;; ---------------------------
 (package! clojure-mode)
 (package! cider)
+(package! paredit)
 
 ;; ---------------------------
 ;; Org mode
 ;; ---------------------------
 (package! org-modern)
+
+;; ---------------------------
+;; Python
+;; ---------------------------
+(package! python-black)
+(package! py-isort)
