@@ -1,4 +1,3 @@
--- lua/config/plugins/filetree.lua
 return {
   "nvim-tree/nvim-tree.lua",
   version = "*",
@@ -40,7 +39,5 @@ return {
       highlight NvimTreeNormal guibg=#282A36
       highlight NvimTreeNormalNC guibg=#282A36
     ]])
-
-    -- File tree keymaps are now managed in lua/config/keymaps.lua
   end,
 }

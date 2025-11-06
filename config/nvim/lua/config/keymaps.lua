@@ -1,20 +1,18 @@
 local map = vim.keymap.set
 local opts = { noremap = true, silent = true }
 
--- General
 map("n", "<leader>q", ":q<CR>", opts)
 map("n", "<leader>w", ":w<CR>", opts)
 
--- File Explorer (NvimTree)
+-- File Navigation
 map("n", "<leader>e", ":NvimTreeToggle<CR>", opts)
 map("n", "<leader>r", ":NvimTreeRefresh<CR>", opts)
 map("n", "<leader>f", ":NvimTreeFindFile<CR>", opts)
 
--- Telescope
 map("n", "<leader>ff", ":Telescope find_files<CR>", opts)
 map("n", "<leader>fg", ":Telescope live_grep<CR>", opts)
 
--- LSP
+-- Code Navigation
 map("n", "K", vim.lsp.buf.hover, opts)
 map("n", "gd", vim.lsp.buf.definition, opts)
 map("n", "gr", vim.lsp.buf.references, opts)

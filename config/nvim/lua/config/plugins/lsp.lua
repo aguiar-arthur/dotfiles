@@ -1,4 +1,3 @@
--- lua/config/plugins/lsp.lua
 return {
   "neovim/nvim-lspconfig",
   event = { "BufReadPre", "BufNewFile" },
@@ -7,13 +6,12 @@ return {
   },
 
   config = function()
-    -- LSP keymaps are now managed in lua/config/keymaps.lua
     local on_attach = function(_, _)
       -- Empty on_attach as keymaps are managed globally
     end
 
     -- ================================
-    -- 🧩 Capabilities (for nvim-cmp)
+    -- Capabilities (for nvim-cmp)
     -- ================================
     local capabilities = vim.lsp.protocol.make_client_capabilities()
     local cmp_ok, cmp_lsp = pcall(require, "cmp_nvim_lsp")
@@ -22,7 +20,7 @@ return {
     end
 
     -- ================================
-    -- ⚙️ Define servers (modern style)
+    -- Define servers (modern style)
     -- ================================
     local servers = {
       lua_ls = {
@@ -40,7 +38,7 @@ return {
     }
 
     -- ================================
-    -- 🚀 Register and start each server
+    -- Register and start each server
     -- ================================
     for name, config in pairs(servers) do
       local merged = vim.tbl_deep_extend("force", {
@@ -57,7 +55,7 @@ return {
     end
 
     -- ================================
-    -- 🪶 Diagnostics look
+    -- Diagnostics look
     -- ================================
     vim.diagnostic.config({
       underline = true,
