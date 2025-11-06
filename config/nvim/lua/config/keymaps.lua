@@ -46,7 +46,7 @@ map("n", "<leader>rn", vim.lsp.buf.rename, opts)
 map("n", "<leader>ca", vim.lsp.buf.code_action, opts)
 map("n", "[d", vim.diagnostic.goto_prev, opts)
 map("n", "]d", vim.diagnostic.goto_next, opts)
-map("n", "<leader>d", vim.diagnostic.open_float, opts)  -- Changed from <leader>e to <leader>d
+map("n", "<leader>d", vim.diagnostic.open_float, opts) 
 
 -- Git Navigation
 local ok_gs, gs = pcall(require, "gitsigns")
@@ -83,3 +83,33 @@ map("n", "<leader>tf", "<cmd>ToggleTerm direction=float<cr>", opts)
 map("n", "<leader>th", "<cmd>ToggleTerm size=15 direction=horizontal<cr>", opts)
 map("n", "<leader>tv", "<cmd>ToggleTerm size=60 direction=vertical<cr>", opts)
 map("n", "<leader>tg", "<cmd>lua _lazygit_toggle()<cr>", opts)
+
+-- Buffer Navigation
+map("n", "<Tab>", "<cmd>bnext<CR>", opts)       
+map("n", "<S-Tab>", "<cmd>bprevious<CR>", opts)    
+map("n", "<leader>bd", "<cmd>bp<bar>bd #<CR>", opts)   
+map("n", "<leader>bb", "<cmd>lua if pcall(require, 'telescope.builtin') then require('telescope.builtin').buffers() end<CR>", opts) 
+
+-- Splits
+map("n", "<leader>sv", "<cmd>vsplit<CR>", opts) 
+map("n", "<leader>sh", "<cmd>split<CR>", opts)  
+map("n", "<leader>sc", "<C-w>c", opts)         
+map("n", "<leader>so", "<C-w>o", opts)         
+
+-- Window Movement
+local function is_mapped(mode, lhs)
+  for _, m in ipairs(vim.api.nvim_get_keymap(mode)) do
+    if m.lhs == lhs then return true end
+  end
+  return false
+end
+if not is_mapped("n", "<C-h>") then map("n", "<C-h>", "<C-w>h", opts) end
+if not is_mapped("n", "<C-j>") then map("n", "<C-j>", "<C-w>j", opts) end
+if not is_mapped("n", "<C-k>") then map("n", "<C-k>", "<C-w>k", opts) end
+if not is_mapped("n", "<C-l>") then map("n", "<C-l>", "<C-w>l", opts) end
+
+-- Resize Splits
+map("n", "<C-Up>", "<cmd>resize +2<CR>", opts)
+map("n", "<C-Down>", "<cmd>resize -2<CR>", opts)
+map("n", "<C-Left>", "<cmd>vertical resize -2<CR>", opts)
+map("n", "<C-Right>", "<cmd>vertical resize +2<CR>", opts)

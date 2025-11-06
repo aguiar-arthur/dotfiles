@@ -2,6 +2,7 @@
 brew "nvim"
 brew "npm"
 brew "git-lfs"
+brew "lazygit"
 # python
 brew "pyenv"
 brew "pipenv"
