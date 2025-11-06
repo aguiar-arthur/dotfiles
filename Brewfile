@@ -1,5 +1,6 @@
 # development tools
 brew "nvim"
+brew "npm"
 brew "git-lfs"
 # python
 brew "pyenv"

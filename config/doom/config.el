@@ -24,11 +24,6 @@
       require-final-newline t
       which-key-idle-delay 0.5)
 
-(defun aa/indent-buffer ()
-  "Indent the entire current buffer."
-  (interactive)
-  (indent-region (point-min) (point-max)))
-
 (after! flycheck
   (setq flycheck-check-syntax-automatically '(save mode-enabled)
         flycheck-display-errors-delay 0.5))
@@ -42,8 +37,8 @@
 (after! ace-window
   (custom-set-faces!
     '(aw-leading-char-face
-       :foreground "white"
-       :weight bold)))
+      :foreground "white"
+      :weight bold)))
 
 ;; ---------------------------
 ;; Clojure
@@ -82,24 +77,6 @@
 (add-hook 'clojure-mode-hook #'flycheck-mode)
 (add-hook 'cider-repl-mode-hook #'rainbow-delimiters-mode)
 (add-hook 'cider-repl-mode-hook #'paredit-mode)
-
-;; ---------------------------
-;; Python
-;; ---------------------------
-(after! python
-  (setq python-shell-interpreter "python"
-        python-pytest-executable "python -m pytest")
-
-  (add-hook 'python-mode-hook #'tree-sitter-mode)
-  (add-hook 'python-mode-hook #'tree-sitter-hl-mode)
-
-  (after! lsp-mode
-    (setq lsp-python-server 'pyright)
-
-    (setq lsp-semantic-tokens-enable t)
-
-    (setq lsp-pyright-auto-import-completions t
-          lsp-pyright-typechecking-mode "basic")))  ;; "off", "basic", or "strict"
 
 ;; ---------------------------
 ;; Org mode
@@ -142,4 +119,5 @@
 ;; ---------------------------
 ;; Additional
 ;; ---------------------------
+(load! "+functions")
 (load! "+bindings")

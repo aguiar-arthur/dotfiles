@@ -20,9 +20,3 @@
 ;; Org mode
 ;; ---------------------------
 (package! org-modern)
-
-;; ---------------------------
-;; Python
-;; ---------------------------
-(package! python-black)
-(package! py-isort)
