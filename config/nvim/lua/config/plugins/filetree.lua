@@ -41,12 +41,6 @@ return {
       highlight NvimTreeNormalNC guibg=#282A36
     ]])
 
-    -- keymaps
-    local map = vim.keymap.set
-    local opts = { noremap = true, silent = true }
-
-    map("n", "<leader>e", ":NvimTreeToggle<CR>", opts)
-    map("n", "<leader>r", ":NvimTreeRefresh<CR>", opts)
-    map("n", "<leader>f", ":NvimTreeFindFile<CR>", opts)
+    -- File tree keymaps are now managed in lua/config/keymaps.lua
   end,
 }

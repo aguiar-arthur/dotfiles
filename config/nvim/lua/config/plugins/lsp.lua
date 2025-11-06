@@ -7,23 +7,9 @@ return {
   },
 
   config = function()
-    -- ================================
-    -- 💡 Basic LSP Keymaps
-    -- ================================
-    local on_attach = function(_, bufnr)
-      local map = function(mode, lhs, rhs)
-        vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, silent = true })
-      end
-
-      map("n", "K", vim.lsp.buf.hover)
-      map("n", "gd", vim.lsp.buf.definition)
-      map("n", "gr", vim.lsp.buf.references)
-      map("n", "gi", vim.lsp.buf.implementation)
-      map("n", "<leader>rn", vim.lsp.buf.rename)
-      map("n", "<leader>ca", vim.lsp.buf.code_action)
-      map("n", "[d", vim.diagnostic.goto_prev)
-      map("n", "]d", vim.diagnostic.goto_next)
-      map("n", "<leader>e", vim.diagnostic.open_float)
+    -- LSP keymaps are now managed in lua/config/keymaps.lua
+    local on_attach = function(_, _)
+      -- Empty on_attach as keymaps are managed globally
     end
 
     -- ================================
