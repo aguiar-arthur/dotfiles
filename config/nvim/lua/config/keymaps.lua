@@ -77,3 +77,9 @@ if ok_todo then
   map("n", "<leader>xt", "<cmd>TodoTrouble<cr>", opts)
   map("n", "<leader>xT", "<cmd>TodoTelescope<cr>", opts)
 end
+
+-- Terminal
+map("n", "<leader>tf", "<cmd>ToggleTerm direction=float<cr>", opts)
+map("n", "<leader>th", "<cmd>ToggleTerm size=15 direction=horizontal<cr>", opts)
+map("n", "<leader>tv", "<cmd>ToggleTerm size=60 direction=vertical<cr>", opts)
+map("n", "<leader>tg", "<cmd>lua _lazygit_toggle()<cr>", opts)
