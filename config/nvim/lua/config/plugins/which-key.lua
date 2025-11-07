@@ -1,6 +1,7 @@
 return {
   "folke/which-key.nvim",
   event = "VeryLazy",
+  dependencies = { "echasnovski/mini.icons" },
   config = function()
     local ok, which_key = pcall(require, "which-key")
     if not ok then
@@ -38,7 +39,7 @@ return {
       { "<C-l>", desc = "Harpoon File 4" },
 
       -- LSP / Code
-      { "<leader>r", desc = "Refresh Tree" }, -- already mapped, keep for context
+      { "<leader>r", desc = "Refresh Tree" },
       { "<leader>rn", desc = "Rename Symbol" },
       { "<leader>ca", desc = "Code Action" },
       { "<leader>d", desc = "Diagnostics" },
