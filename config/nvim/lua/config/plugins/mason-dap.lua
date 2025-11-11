@@ -7,7 +7,7 @@ return {
   event = "VeryLazy",
   config = function()
     require("mason-nvim-dap").setup({
-      ensure_installed = { "python" },
+      ensure_installed = { },
       automatic_installation = true,
       handlers = {},
     })
