@@ -22,7 +22,22 @@
       auto-save-default t
       truncate-string-ellipsis "…"
       require-final-newline t
-      which-key-idle-delay 0.5)
+      which-key-idle-delay 0.25
+      which-key-idle-secondary-delay 0.05
+      which-key-max-description-length 40)
+
+(after! doom-modeline
+  (setq doom-modeline-height 24
+        doom-modeline-icon t
+        doom-modeline-major-mode-icon t
+        doom-modeline-buffer-file-name-style 'truncate-upto-project
+        doom-modeline-buffer-encoding nil
+        doom-modeline-vcs-max-length 20))
+
+(after! treemacs
+  (setq treemacs-width 35
+        treemacs-follow-after-init t
+        treemacs-project-follow-cleanup t))
 
 (after! flycheck
   (setq flycheck-check-syntax-automatically '(save mode-enabled)
@@ -32,9 +47,7 @@
   (setq aw-keys '(?1 ?2 ?3 ?4 ?5 ?6 ?7 ?8 ?9 ?0))
   (setq aw-scope 'global)
   (setq aw-background nil)
-  (setq aw-minibuffer-flag t))
-
-(after! ace-window
+  (setq aw-minibuffer-flag t)
   (custom-set-faces!
     '(aw-leading-char-face
       :foreground "white"
@@ -64,14 +77,6 @@
         lsp-enable-snippet t
         lsp-enable-file-watchers t))
 
-(after! company
-  (setq company-idle-delay 0.3
-        company-minimum-prefix-length 2
-        company-tooltip-limit 10
-        company-show-quick-access t
-        company-global-modes '(not eshell-mode shell-mode term-mode vterm-mode)
-        company-dabbrev-downcase nil))
-
 (add-hook 'clojure-mode-hook #'rainbow-delimiters-mode)
 (add-hook 'clojure-mode-hook #'paredit-mode)
 (add-hook 'clojure-mode-hook #'flycheck-mode)
@@ -86,7 +91,24 @@
   :hook ((org-mode . org-modern-mode)
          (org-agenda-finalize . org-modern-agenda))
   :config
-  (setq org-modern-star '("◉" "○" "●" "○" "●" "○" "●")))
+  (setq org-modern-star '("◉" "○" "●" "○" "●" "○" "●")
+        org-modern-variable-pitch t))
+
+(use-package! org-appear
+  :after org
+  :hook (org-mode . org-appear-mode)
+  :config
+  (setq org-appear-delay 0.1
+        org-appear-autoemphasis t
+        org-appear-autosubmarkers t
+        org-appear-autolinks t
+        org-appear-autoentities t))
+
+(after! org
+  (doom-themes-org-config)
+  (setq org-ellipsis "…"
+        org-pretty-entities t
+        org-startup-indented t))
 
 (custom-set-faces!
   '(org-level-1 :height 1.3 :weight bold :inherit 'font-lock-function-name-face)

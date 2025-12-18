@@ -5,7 +5,6 @@
   (define-key doom-leader-map (kbd "l") nil)
   (define-key doom-leader-map (kbd "c") nil)
   (define-key doom-leader-map (kbd "w") nil)
-  (define-key doom-leader-map (kbd "m") nil)
 
   (map! :leader
         :when (modulep! :tools lsp)

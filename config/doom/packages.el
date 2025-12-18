@@ -20,3 +20,4 @@
 ;; Org mode
 ;; ---------------------------
 (package! org-modern)
+(package! org-appear)

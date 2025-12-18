@@ -43,18 +43,3 @@
   (let* ((count (if amount (prefix-numeric-value amount) 1))
          (delta (* (max 1 count) aa/window-resize-step)))
     (enlarge-window delta)))
-
-;; ---------------------------
-;; Bindings Test runner
-;; ---------------------------
-(defun aa/run-bindings-tests ()
-  "Load and run bindings tests"
-  (interactive)
-  (let* ((file (expand-file-name "~/dotfiles/config/doom/test/bindings-test.el")))
-    (unless (file-readable-p file)
-      (user-error "Bindings test not found: %s" file))
-    (let ((bindings-file (expand-file-name "+bindings.el" doom-user-dir)))
-      (when (file-readable-p bindings-file)
-        (load bindings-file nil t)))
-    (load file nil t)
-    (ert "^bindings:")))
