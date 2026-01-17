@@ -3,13 +3,7 @@
 ;; ---------------------------
 ;; Core
 ;; ---------------------------
-(add-to-list 'initial-frame-alist '(fullscreen . maximized))
-(global-visual-line-mode t)
-
 (setq doom-localleader-key ",")
-
-(setq doom-font (font-spec :family "FiraCode Nerd Font Mono" :size 12) ;; For coding
-      doom-variable-pitch-font (font-spec :family "FiraCode Nerd Font" :size 12)) ;; For variable-width text areas
 
 (setq doom-theme 'doom-dracula
       display-line-numbers-type 'relative
@@ -52,6 +46,23 @@
     '(aw-leading-char-face
       :foreground "white"
       :weight bold)))
+
+;; ---------------------------
+;; Visual
+;; ---------------------------
+(add-to-list 'initial-frame-alist '(fullscreen . maximized))
+(global-visual-line-mode t)
+
+(dolist (spec '((doom-font . "FiraCode Nerd Font Mono")
+                (doom-variable-pitch-font . "FiraCode Nerd Font")))
+  (let ((var (car spec))
+        (family (cdr spec)))
+    (if (find-font (font-spec :family family))
+        (set var (font-spec :family family :size 12))
+      (display-warning
+       'doom-font
+       (format "Font '%s' not found. %s was not set." family var)
+       :warning))))
 
 ;; ---------------------------
 ;; Clojure

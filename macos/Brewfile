@@ -2,7 +2,6 @@
 brew "nvim"
 brew "npm"
 brew "git-lfs"
-brew "lazygit"
 # python
 brew "pyenv"
 brew "pipenv"
@@ -19,14 +18,11 @@ brew "ripgrep"
 brew "curl"
 brew "wget"
 brew "bat"
-brew "eza"
 brew "fzf"
 brew "jq"
 brew "fd"
 # beautiful terminal
-brew "neofetch"
 brew "zsh"
 # casks
-cask "alacritty", args: { "no-quarantine": true }
 cask "font-fira-code-nerd-font"
 cask "emacs"
