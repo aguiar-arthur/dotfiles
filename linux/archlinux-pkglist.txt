@@ -13,6 +13,7 @@ less
 neovim
 nodejs
 npm
+pacman-contrib
 pyenv
 ripgrep
 rustup
