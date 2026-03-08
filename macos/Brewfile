@@ -23,6 +23,3 @@ brew "jq"
 brew "fd"
 # beautiful terminal
 brew "zsh"
-# casks
-cask "font-fira-code-nerd-font"
-cask "emacs"

@@ -49,6 +49,11 @@ map("n", "gr", vim.lsp.buf.references, { noremap = true, silent = true, desc = "
 map("n", "gi", vim.lsp.buf.implementation, { noremap = true, silent = true, desc = "Go to Implementation" })
 
 -----------------------------------------------------------
+-- WhichKey
+-----------------------------------------------------------
+map("n", "<leader>?", ":WhichKey<CR>", { noremap = true, silent = true, desc = "Show Key Bindings" })
+
+-----------------------------------------------------------
 -- Code (c prefix - like Emacs)
 -----------------------------------------------------------
 map("n", "<leader>cc", "gcc", { remap = true, desc = "Comment Line" })
