@@ -11,7 +11,8 @@ vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
   spec = {
-    { import = "config.plugins" }
+    { import = "config.plugins" },
+    { import = "config.plugins.languages" },
   },
   defaults = { lazy = true },
   install = { colorscheme = { "dracula" } },

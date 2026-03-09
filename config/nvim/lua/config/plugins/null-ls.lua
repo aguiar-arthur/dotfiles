@@ -13,6 +13,7 @@ return {
           filetypes = { "javascript", "typescript", "css", "html", "json", "yaml", "markdown" },
         }),
         null_ls.builtins.formatting.stylua,
+        null_ls.builtins.formatting.shfmt,
 
         -- Linters
         null_ls.builtins.diagnostics.eslint,
