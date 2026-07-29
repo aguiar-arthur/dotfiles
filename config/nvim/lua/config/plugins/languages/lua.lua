@@ -1,34 +1,27 @@
 return {
-  {
-    "neovim/nvim-lspconfig",
-    optional = true,
-    config = function()
-      local lspconfig = require("lspconfig")
-
-      if not lspconfig.lua_ls.manager then
-        lspconfig.lua_ls.setup({
-          settings = {
-            Lua = {
-              diagnostics = { globals = { "vim", "love" } },
-              workspace = { checkThirdParty = false },
-              telemetry = { enable = false },
-              runtime = { version = "LuaJIT" },
-            },
+  "neovim/nvim-lspconfig",
+  opts = function()
+    vim.lsp.config("lua_ls", {
+      cmd = { "lua-language-server" },
+      filetypes = { "lua" },
+      root_markers = { ".luarc.json", ".luarc.jsonc", ".luacheckrc", ".stylua.toml", "stylua.toml", "selene.toml", "selene.yml", ".git" },
+      settings = {
+        Lua = {
+          diagnostics = {
+            -- Reconhece a variável global 'vim' do Neovim
+            globals = { "vim" },
           },
-        })
-      end
-    end,
-  },
-
-  {
-    "nvimtools/none-ls.nvim",
-    optional = true,
-    config = function()
-      local null_ls = require("null-ls")
-
-      null_ls.builtins.formatting.stylua.with({
-        extra_args = { "--indent-type=Spaces", "--indent-width=2" },
-      })
-    end,
-  },
+          workspace = {
+            checkThirdParty = false,
+          },
+          telemetry = {
+            enable = false,
+          },
+        },
+      },
+    })
+    
+    -- Habilita o servidor usando a API nativa
+    vim.lsp.enable("lua_ls")
+  end,
 }

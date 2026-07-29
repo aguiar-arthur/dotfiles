@@ -42,7 +42,7 @@ map("n", "<leader>ll", vim.diagnostic.setloclist, { noremap = true, silent = tru
 map("n", "[d", vim.diagnostic.goto_prev, { noremap = true, silent = true, desc = "Previous Diagnostic" })
 map("n", "]d", vim.diagnostic.goto_next, { noremap = true, silent = true, desc = "Next Diagnostic" })
 
--- Alternative single-key LSP bindings (optional, for quick access)
+-- Single-key LSP bindings for quick access
 map("n", "K", vim.lsp.buf.hover, { noremap = true, silent = true, desc = "Hover Documentation" })
 map("n", "gd", vim.lsp.buf.definition, { noremap = true, silent = true, desc = "Go to Definition" })
 map("n", "gr", vim.lsp.buf.references, { noremap = true, silent = true, desc = "Go to References" })
@@ -54,47 +54,30 @@ map("n", "gi", vim.lsp.buf.implementation, { noremap = true, silent = true, desc
 map("n", "<leader>?", ":WhichKey<CR>", { noremap = true, silent = true, desc = "Show Key Bindings" })
 
 -----------------------------------------------------------
--- Code (c prefix - like Emacs)
+-- Code (c prefix - Comment / Actions)
 -----------------------------------------------------------
 map("n", "<leader>cc", "gcc", { remap = true, desc = "Comment Line" })
 map("v", "<leader>cc", "gc", { remap = true, desc = "Comment Selection" })
 map("n", "<leader>ct", "gcc", { remap = true, desc = "Toggle Comment" })
-map("n", "<leader>cj", vim.lsp.buf.definition, { noremap = true, silent = true, desc = "Jump to Definition" })
-map("n", "<leader>cf", function() vim.lsp.buf.format({ async = true }) end, { noremap = true, silent = true, desc = "Format Code" })
-map("n", "<leader>ca", vim.lsp.buf.code_action, { noremap = true, silent = true, desc = "Code Action" })
-map("n", "<leader>cr", vim.lsp.buf.rename, { noremap = true, silent = true, desc = "Rename" })
 
 -----------------------------------------------------------
 -- Window Management (w prefix - like Emacs)
 -----------------------------------------------------------
--- Window Navigation
 map("n", "<leader>wh", "<C-w>h", { noremap = true, silent = true, desc = "Move to Left Window" })
 map("n", "<leader>wj", "<C-w>j", { noremap = true, silent = true, desc = "Move to Window Below" })
 map("n", "<leader>wk", "<C-w>k", { noremap = true, silent = true, desc = "Move to Window Above" })
 map("n", "<leader>wl", "<C-w>l", { noremap = true, silent = true, desc = "Move to Right Window" })
 map("n", "<leader>ww", "<C-w>w", { noremap = true, silent = true, desc = "Jump to Next Window" })
-
--- Window Splits
 map("n", "<leader>wv", "<cmd>vsplit<CR>", { noremap = true, silent = true, desc = "Split Window Vertically" })
 map("n", "<leader>ws", "<cmd>split<CR>", { noremap = true, silent = true, desc = "Split Window Horizontally" })
 map("n", "<leader>wo", "<C-w>o", { noremap = true, silent = true, desc = "Close Other Windows (Maximize)" })
-
--- Window Resize
 map("n", "<leader>wH", "<cmd>vertical resize -2<CR>", { noremap = true, silent = true, desc = "Narrow Window (Width)" })
 map("n", "<leader>wJ", "<cmd>resize -2<CR>", { noremap = true, silent = true, desc = "Shrink Window (Height)" })
 map("n", "<leader>wK", "<cmd>resize +2<CR>", { noremap = true, silent = true, desc = "Enlarge Window (Height)" })
 map("n", "<leader>wL", "<cmd>vertical resize +2<CR>", { noremap = true, silent = true, desc = "Widen Window (Width)" })
 map("n", "<leader>w=", "<C-w>=", { noremap = true, silent = true, desc = "Balance Window Sizes" })
-
--- Window Close
 map("n", "<leader>wc", "<C-w>c", { noremap = true, silent = true, desc = "Close Current Window" })
 map("n", "<leader>wq", ":q<CR>", { noremap = true, silent = true, desc = "Quit Window" })
-
--- Alternative arrow key resizing (keep if you like)
-map("n", "<C-Up>", "<cmd>resize +2<CR>", { noremap = true, silent = true, desc = "Increase Window Height" })
-map("n", "<C-Down>", "<cmd>resize -2<CR>", { noremap = true, silent = true, desc = "Decrease Window Height" })
-map("n", "<C-Left>", "<cmd>vertical resize -2<CR>", { noremap = true, silent = true, desc = "Decrease Window Width" })
-map("n", "<C-Right>", "<cmd>vertical resize +2<CR>", { noremap = true, silent = true, desc = "Increase Window Width" })
 
 -----------------------------------------------------------
 -- Buffer Management (b prefix)
@@ -104,8 +87,6 @@ map("n", "<leader>bd", "<cmd>bp<bar>bd #<CR>", { noremap = true, silent = true, 
 map("n", "<leader>bn", "<cmd>bnext<CR>", { noremap = true, silent = true, desc = "Next Buffer" })
 map("n", "<leader>bp", "<cmd>bprevious<CR>", { noremap = true, silent = true, desc = "Previous Buffer" })
 map("n", "<leader>bk", "<cmd>bd<CR>", { noremap = true, silent = true, desc = "Kill Buffer" })
-
--- Alternative Tab navigation (keep if you like)
 map("n", "<Tab>", "<cmd>bnext<CR>", { noremap = true, silent = true, desc = "Next Buffer" })
 map("n", "<S-Tab>", "<cmd>bprevious<CR>", { noremap = true, silent = true, desc = "Previous Buffer" })
 
@@ -126,7 +107,7 @@ if ok_gs then
 end
 
 -----------------------------------------------------------
--- Diagnostics/Trouble (d prefix - for diagnostics)
+-- Diagnostics/Trouble (d prefix)
 -----------------------------------------------------------
 map("n", "<leader>dx", "<cmd>TroubleToggle<CR>", { noremap = true, silent = true, desc = "Toggle Trouble" })
 map("n", "<leader>dw", "<cmd>TroubleToggle workspace_diagnostics<CR>", { noremap = true, silent = true, desc = "Workspace Diagnostics" })
@@ -134,9 +115,6 @@ map("n", "<leader>dd", "<cmd>TroubleToggle document_diagnostics<CR>", { noremap 
 map("n", "<leader>dl", "<cmd>TroubleToggle loclist<CR>", { noremap = true, silent = true, desc = "Loclist" })
 map("n", "<leader>dq", "<cmd>TroubleToggle quickfix<CR>", { noremap = true, silent = true, desc = "Quickfix" })
 
------------------------------------------------------------
--- Todo Comments (still under d prefix since it's diagnostic-related)
------------------------------------------------------------
 local ok_todo, todo = pcall(require, "todo-comments")
 if ok_todo then
   map("n", "]t", function() todo.jump_next() end, { noremap = true, silent = true, desc = "Next Todo" })
@@ -151,32 +129,10 @@ end
 map("n", "<leader>tf", "<cmd>ToggleTerm direction=float<CR>", { noremap = true, silent = true, desc = "Float Terminal" })
 map("n", "<leader>th", "<cmd>ToggleTerm size=15 direction=horizontal<CR>", { noremap = true, silent = true, desc = "Horizontal Terminal" })
 map("n", "<leader>tv", "<cmd>ToggleTerm size=60 direction=vertical<CR>", { noremap = true, silent = true, desc = "Vertical Terminal" })
-map("n", "<leader>tg", "<cmd>lua _lazygit_toggle()<CR>", { noremap = true, silent = true, desc = "Lazygit" })
+map("n", "<leader>tg", "<cmd>lua _lazygit_toggle()<CR>", { noremap = true, silent = title, desc = "Lazygit" })
 
 -----------------------------------------------------------
--- Quick Jump (Hop) - Keep s/S for hop since it's intuitive
------------------------------------------------------------
-local ok_hop, hop = pcall(require, "hop")
-if ok_hop then
-  local directions = require("hop.hint").HintDirection
-  map("", "f", function()
-    hop.hint_char1({ direction = directions.AFTER_CURSOR, current_line_only = true })
-  end, { remap = true, desc = "Hop Forward to Char" })
-  map("", "F", function()
-    hop.hint_char1({ direction = directions.BEFORE_CURSOR, current_line_only = true })
-  end, { remap = true, desc = "Hop Backward to Char" })
-  map("", "t", function()
-    hop.hint_char1({ direction = directions.AFTER_CURSOR, current_line_only = true, hint_offset = -1 })
-  end, { remap = true, desc = "Hop Forward Til Char" })
-  map("", "T", function()
-    hop.hint_char1({ direction = directions.BEFORE_CURSOR, current_line_only = true, hint_offset = 1 })
-  end, { remap = true, desc = "Hop Backward Til Char" })
-  map("n", "s", ":HopChar2<CR>", { noremap = true, silent = true, desc = "Hop to 2 Chars" })
-  map("n", "S", ":HopWord<CR>", { noremap = true, silent = true, desc = "Hop to Word" })
-end
-
------------------------------------------------------------
--- Quick Switch (Harpoon) - m prefix for "marks"
+-- Quick Switch (Harpoon) - m prefix for marks
 -----------------------------------------------------------
 local ok_harpoon, harpoon = pcall(require, "harpoon")
 if ok_harpoon then
@@ -192,7 +148,6 @@ end
 
 -----------------------------------------------------------
 -- Smart Window Movement (Ctrl + hjkl)
--- Only map if not already taken by Harpoon or other plugins
 -----------------------------------------------------------
 local function is_mapped(mode, lhs)
   for _, m in ipairs(vim.api.nvim_get_keymap(mode)) do
@@ -202,7 +157,7 @@ local function is_mapped(mode, lhs)
 end
 
 if not is_mapped("n", "<C-h>") then 
-  map("n", "<C-h>", "<C-w>h", { noremap = true, silent = true, desc = "Move to Left Window" }) 
+  map("n", "<C-h>", "<C-w>h", { noremap = title or true, silent = true, desc = "Move to Left Window" }) 
 end
 if not is_mapped("n", "<C-j>") then 
   map("n", "<C-j>", "<C-w>j", { noremap = true, silent = true, desc = "Move to Bottom Window" }) 
