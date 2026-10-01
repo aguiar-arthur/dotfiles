@@ -1,0 +1,191 @@
+"$schema" = "https://starship.rs/config-schema.json"
+
+# Prompt Starship em duas linhas, estilo "pílulas" com cores Dracula.
+# Requer uma Nerd Font. Os ícones usam escapes \uXXXX, então o arquivo é ASCII puro.
+#   linha 1: SO · diretório · git · linguagens ............ duração · hora
+#   linha 2: usuário/host (ssh) · sudo · jobs · status · ❯
+
+add_newline = true
+palette = "dracula"
+command_timeout = 1000
+
+format = """
+$os\
+$directory\
+$git_branch\
+$git_status\
+$git_metrics\
+$python\
+$nodejs\
+$lua\
+$ruby\
+$rust\
+$golang\
+$java\
+$c\
+$docker_context\
+$nix_shell\
+$fill\
+$cmd_duration\
+$time\
+$line_break\
+$username\
+$hostname\
+$sudo\
+$jobs\
+$status\
+$character"""
+
+continuation_prompt = "[∙](fg:comment) "
+
+[palettes.dracula]
+base = "#282a36"
+text = "#f8f8f2"
+comment = "#6272a4"
+cyan = "#8be9fd"
+green = "#50fa7b"
+orange = "#ffb86c"
+pink = "#ff79c6"
+purple = "#bd93f9"
+red = "#ff5555"
+yellow = "#f1fa8c"
+
+# --- Linha 1 ---------------------------------------------------------------
+
+[os]
+disabled = false
+format = "[](fg:purple)[ $symbol](bg:purple fg:base)[](fg:purple) "
+
+[os.symbols]
+Macos = " "
+Linux = " "
+Arch = " "
+Ubuntu = " "
+Debian = " "
+Fedora = " "
+Windows = " "
+
+[directory]
+format = "[](fg:pink)[ $path$read_only ](bg:pink fg:base bold)[](fg:pink) "
+home_symbol = " ~"
+read_only = " "
+truncation_length = 3
+truncation_symbol = "…/"
+truncate_to_repo = true
+
+[directory.substitutions]
+"Documents" = " Documents"
+"Downloads" = " Downloads"
+"Desktop" = " Desktop"
+"dotfiles" = " dotfiles"
+
+[git_branch]
+symbol = " "
+truncation_length = 24
+truncation_symbol = "…"
+format = "[](fg:green)[ $symbol$branch(:$remote_branch) ](bg:green fg:base)"
+
+[git_status]
+# O fecho da pílula fica fora do grupo (...) para ela fechar mesmo com o repo limpo.
+format = "([$all_status$ahead_behind](bg:green fg:base))[](fg:green) "
+conflicted = "=${count} "
+ahead = "⇡${count} "
+behind = "⇣${count} "
+diverged = "⇕⇡${ahead_count}⇣${behind_count} "
+untracked = "?${count} "
+stashed = " "
+modified = "!${count} "
+staged = "+${count} "
+renamed = "»${count} "
+deleted = "✘${count} "
+up_to_date = ""
+
+[git_metrics]
+disabled = false
+only_nonzero_diffs = true
+format = '([+$added]($added_style) )([-$deleted]($deleted_style) )'
+added_style = "fg:green"
+deleted_style = "fg:red"
+
+# Linguagens: só aparecem quando o diretório tem arquivos/manifestos do projeto.
+
+[python]
+symbol = " "
+format = "[](fg:yellow)[ $symbol$pyenv_prefix($version )(\\($virtualenv\\) )](bg:yellow fg:base)[](fg:yellow) "
+
+[nodejs]
+symbol = " "
+format = "[](fg:orange)[ $symbol($version) ](bg:orange fg:base)[](fg:orange) "
+
+[lua]
+symbol = " "
+format = "[](fg:cyan)[ $symbol($version) ](bg:cyan fg:base)[](fg:cyan) "
+
+[ruby]
+symbol = " "
+format = "[](fg:red)[ $symbol($version) ](bg:red fg:base)[](fg:red) "
+
+[rust]
+symbol = " "
+format = "[](fg:orange)[ $symbol($version) ](bg:orange fg:base)[](fg:orange) "
+
+[golang]
+symbol = " "
+format = "[](fg:cyan)[ $symbol($version) ](bg:cyan fg:base)[](fg:cyan) "
+
+[java]
+symbol = " "
+format = "[](fg:red)[ $symbol($version) ](bg:red fg:base)[](fg:red) "
+
+[c]
+symbol = " "
+format = "[](fg:comment)[ $symbol($version(-$name)) ](bg:comment fg:text)[](fg:comment) "
+
+[docker_context]
+symbol = " "
+format = "[](fg:cyan)[ $symbol$context ](bg:cyan fg:base)[](fg:cyan) "
+
+[nix_shell]
+symbol = " "
+format = "[](fg:purple)[ $symbol$state ](bg:purple fg:base)[](fg:purple) "
+
+[fill]
+symbol = "─"
+style = "fg:comment"
+
+[cmd_duration]
+min_time = 2000
+show_milliseconds = false
+format = "[ $duration](fg:orange) "
+
+[time]
+disabled = false
+time_format = "%H:%M"
+format = "[ $time](fg:comment)"
+
+# --- Linha 2 ---------------------------------------------------------------
+
+[username]
+format = "[ $user](fg:cyan) "
+
+[hostname]
+ssh_only = true
+format = "[ $hostname](fg:cyan) "
+
+[sudo]
+disabled = false
+format = "[ ](fg:yellow)"
+
+[jobs]
+symbol = " "
+number_threshold = 1
+format = "[$symbol$number ](fg:cyan)"
+
+[status]
+disabled = false
+format = "[ $status ](fg:red)"
+
+[character]
+success_symbol = "[❯](bold green)"
+error_symbol = "[❯](bold red)"
+vimcmd_symbol = "[❮](bold green)"

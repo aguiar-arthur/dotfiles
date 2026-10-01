@@ -1,170 +1,90 @@
--- lua/config/keymaps.lua
--- Centralized keybindings configuration (Emacs-style organization)
+-- Keymaps "core" (sem dependência de plugins).
+-- Os atalhos específicos de plugin vivem na própria spec (lua/plugins/*.lua),
+-- via `keys = {}`, o que também faz o lazy.nvim carregar o plugin sob demanda.
+-- Os atalhos de LSP são buffer-locais e ficam em lua/plugins/lsp.lua (LspAttach).
+--
+-- Organização por prefixos de grupo (mantida da configuração anterior):
+--   <leader>b buffer   c code   d diagnostics   D debug    f file/find
+--   <leader>g git      l lsp    m marks         o open     S session
+--   <leader>t terminal u ui     w window
+--   <localleader> (",") → atalhos do filetype (vimtex em .tex)
 
 local map = vim.keymap.set
-
------------------------------------------------------------
--- Basic Commands
------------------------------------------------------------
-map("n", "<leader>q", ":q<CR>", { noremap = true, silent = true, desc = "Quit" })
-map("n", "<leader>s", ":w<CR>", { noremap = true, silent = true, desc = "Save" })
-
------------------------------------------------------------
--- Open/Toggle (o prefix - like Emacs open)
------------------------------------------------------------
-map("n", "<leader>op", ":NvimTreeToggle<CR>", { noremap = true, silent = true, desc = "Toggle File Tree" })
-map("n", "<leader>or", ":NvimTreeRefresh<CR>", { noremap = true, silent = true, desc = "Refresh Tree" })
-map("n", "<leader>of", ":NvimTreeFindFile<CR>", { noremap = true, silent = true, desc = "Find File in Tree" })
-
------------------------------------------------------------
--- File/Find (f prefix)
------------------------------------------------------------
-map("n", "<leader>ff", ":Telescope find_files<CR>", { noremap = true, silent = true, desc = "Find Files" })
-map("n", "<leader>fg", ":Telescope live_grep<CR>", { noremap = true, silent = true, desc = "Live Grep" })
-map("n", "<leader>fr", ":Telescope oldfiles<CR>", { noremap = true, silent = true, desc = "Recent Files" })
-
------------------------------------------------------------
--- LSP (l prefix - like Emacs)
------------------------------------------------------------
-map("n", "<leader>ld", vim.lsp.buf.definition, { noremap = true, silent = true, desc = "Find Definition" })
-map("n", "<leader>lr", vim.lsp.buf.references, { noremap = true, silent = true, desc = "Find References" })
-map("n", "<leader>li", vim.lsp.buf.implementation, { noremap = true, silent = true, desc = "Find Implementation" })
-map("n", "<leader>lt", vim.lsp.buf.type_definition, { noremap = true, silent = true, desc = "Find Type Definition" })
-map("n", "<leader>ln", vim.lsp.buf.rename, { noremap = true, silent = true, desc = "Rename Symbol" })
-map("n", "<leader>lf", function() vim.lsp.buf.format({ async = true }) end, { noremap = true, silent = true, desc = "Format Buffer" })
-map("n", "<leader>la", vim.lsp.buf.code_action, { noremap = true, silent = true, desc = "Execute Code Action" })
-map("n", "<leader>lh", vim.lsp.buf.hover, { noremap = true, silent = true, desc = "Show Documentation" })
-map("n", "<leader>lD", vim.lsp.buf.declaration, { noremap = true, silent = true, desc = "Go to Declaration" })
-map("n", "<leader>lR", ":LspRestart<CR>", { noremap = true, silent = true, desc = "Restart LSP" })
-
--- LSP Diagnostics
-map("n", "<leader>ll", vim.diagnostic.setloclist, { noremap = true, silent = true, desc = "List Diagnostics" })
-map("n", "[d", vim.diagnostic.goto_prev, { noremap = true, silent = true, desc = "Previous Diagnostic" })
-map("n", "]d", vim.diagnostic.goto_next, { noremap = true, silent = true, desc = "Next Diagnostic" })
-
--- Single-key LSP bindings for quick access
-map("n", "K", vim.lsp.buf.hover, { noremap = true, silent = true, desc = "Hover Documentation" })
-map("n", "gd", vim.lsp.buf.definition, { noremap = true, silent = true, desc = "Go to Definition" })
-map("n", "gr", vim.lsp.buf.references, { noremap = true, silent = true, desc = "Go to References" })
-map("n", "gi", vim.lsp.buf.implementation, { noremap = true, silent = true, desc = "Go to Implementation" })
-
------------------------------------------------------------
--- WhichKey
------------------------------------------------------------
-map("n", "<leader>?", ":WhichKey<CR>", { noremap = true, silent = true, desc = "Show Key Bindings" })
-
------------------------------------------------------------
--- Code (c prefix - Comment / Actions)
------------------------------------------------------------
-map("n", "<leader>cc", "gcc", { remap = true, desc = "Comment Line" })
-map("v", "<leader>cc", "gc", { remap = true, desc = "Comment Selection" })
-map("n", "<leader>ct", "gcc", { remap = true, desc = "Toggle Comment" })
-
------------------------------------------------------------
--- Window Management (w prefix - like Emacs)
------------------------------------------------------------
-map("n", "<leader>wh", "<C-w>h", { noremap = true, silent = true, desc = "Move to Left Window" })
-map("n", "<leader>wj", "<C-w>j", { noremap = true, silent = true, desc = "Move to Window Below" })
-map("n", "<leader>wk", "<C-w>k", { noremap = true, silent = true, desc = "Move to Window Above" })
-map("n", "<leader>wl", "<C-w>l", { noremap = true, silent = true, desc = "Move to Right Window" })
-map("n", "<leader>ww", "<C-w>w", { noremap = true, silent = true, desc = "Jump to Next Window" })
-map("n", "<leader>wv", "<cmd>vsplit<CR>", { noremap = true, silent = true, desc = "Split Window Vertically" })
-map("n", "<leader>ws", "<cmd>split<CR>", { noremap = true, silent = true, desc = "Split Window Horizontally" })
-map("n", "<leader>wo", "<C-w>o", { noremap = true, silent = true, desc = "Close Other Windows (Maximize)" })
-map("n", "<leader>wH", "<cmd>vertical resize -2<CR>", { noremap = true, silent = true, desc = "Narrow Window (Width)" })
-map("n", "<leader>wJ", "<cmd>resize -2<CR>", { noremap = true, silent = true, desc = "Shrink Window (Height)" })
-map("n", "<leader>wK", "<cmd>resize +2<CR>", { noremap = true, silent = true, desc = "Enlarge Window (Height)" })
-map("n", "<leader>wL", "<cmd>vertical resize +2<CR>", { noremap = true, silent = true, desc = "Widen Window (Width)" })
-map("n", "<leader>w=", "<C-w>=", { noremap = true, silent = true, desc = "Balance Window Sizes" })
-map("n", "<leader>wc", "<C-w>c", { noremap = true, silent = true, desc = "Close Current Window" })
-map("n", "<leader>wq", ":q<CR>", { noremap = true, silent = true, desc = "Quit Window" })
-
------------------------------------------------------------
--- Buffer Management (b prefix)
------------------------------------------------------------
-map("n", "<leader>bb", "<cmd>lua if pcall(require, 'telescope.builtin') then require('telescope.builtin').buffers() end<CR>", { noremap = true, silent = true, desc = "List Buffers" })
-map("n", "<leader>bd", "<cmd>bp<bar>bd #<CR>", { noremap = true, silent = true, desc = "Close Buffer" })
-map("n", "<leader>bn", "<cmd>bnext<CR>", { noremap = true, silent = true, desc = "Next Buffer" })
-map("n", "<leader>bp", "<cmd>bprevious<CR>", { noremap = true, silent = true, desc = "Previous Buffer" })
-map("n", "<leader>bk", "<cmd>bd<CR>", { noremap = true, silent = true, desc = "Kill Buffer" })
-map("n", "<Tab>", "<cmd>bnext<CR>", { noremap = true, silent = true, desc = "Next Buffer" })
-map("n", "<S-Tab>", "<cmd>bprevious<CR>", { noremap = true, silent = true, desc = "Previous Buffer" })
-
------------------------------------------------------------
--- Git (g prefix)
------------------------------------------------------------
-local ok_gs, gs = pcall(require, "gitsigns")
-if ok_gs then
-  map("n", "<leader>gs", gs.stage_hunk, { noremap = true, silent = true, desc = "Stage Hunk" })
-  map("n", "<leader>gr", gs.reset_hunk, { noremap = true, silent = true, desc = "Reset Hunk" })
-  map("n", "<leader>gu", gs.undo_stage_hunk, { noremap = true, silent = true, desc = "Undo Stage Hunk" })
-  map("n", "<leader>gp", gs.preview_hunk, { noremap = true, silent = true, desc = "Preview Hunk" })
-  map("n", "<leader>gb", function() gs.blame_line({ full = true }) end, { noremap = true, silent = true, desc = "Blame Line" })
-  map("n", "<leader>gB", gs.toggle_current_line_blame, { noremap = true, silent = true, desc = "Toggle Blame" })
-  map("n", "<leader>gd", gs.diffthis, { noremap = true, silent = true, desc = "Diff This" })
-  map("n", "]c", function() gs.next_hunk() end, { noremap = true, silent = true, desc = "Next Git Hunk" })
-  map("n", "[c", function() gs.prev_hunk() end, { noremap = true, silent = true, desc = "Previous Git Hunk" })
+local function o(desc, extra)
+  return vim.tbl_extend("force", { silent = true, desc = desc }, extra or {})
 end
 
------------------------------------------------------------
--- Diagnostics/Trouble (d prefix)
------------------------------------------------------------
-map("n", "<leader>dx", "<cmd>TroubleToggle<CR>", { noremap = true, silent = true, desc = "Toggle Trouble" })
-map("n", "<leader>dw", "<cmd>TroubleToggle workspace_diagnostics<CR>", { noremap = true, silent = true, desc = "Workspace Diagnostics" })
-map("n", "<leader>dd", "<cmd>TroubleToggle document_diagnostics<CR>", { noremap = true, silent = true, desc = "Document Diagnostics" })
-map("n", "<leader>dl", "<cmd>TroubleToggle loclist<CR>", { noremap = true, silent = true, desc = "Loclist" })
-map("n", "<leader>dq", "<cmd>TroubleToggle quickfix<CR>", { noremap = true, silent = true, desc = "Quickfix" })
+-- Basic ----------------------------------------------------------------
+map("n", "<leader>q", "<cmd>q<CR>", o("Quit"))
+map("n", "<leader>s", "<cmd>w<CR>", o("Save"))
+map("n", "<Esc>", "<cmd>nohlsearch<CR>", o("Clear search highlight"))
+map("n", "<leader>?", "<cmd>WhichKey<CR>", o("Show key bindings"))
 
-local ok_todo, todo = pcall(require, "todo-comments")
-if ok_todo then
-  map("n", "]t", function() todo.jump_next() end, { noremap = true, silent = true, desc = "Next Todo" })
-  map("n", "[t", function() todo.jump_prev() end, { noremap = true, silent = true, desc = "Previous Todo" })
-  map("n", "<leader>dt", "<cmd>TodoTrouble<CR>", { noremap = true, silent = true, desc = "Todo Trouble" })
-  map("n", "<leader>dT", "<cmd>TodoTelescope<CR>", { noremap = true, silent = true, desc = "Todo Telescope" })
-end
+-- Movimento consciente de linhas quebradas (útil com wrap em tex/md) ---
+map({ "n", "x" }, "j", "v:count == 0 ? 'gj' : 'j'", o("Down", { expr = true }))
+map({ "n", "x" }, "k", "v:count == 0 ? 'gk' : 'k'", o("Up", { expr = true }))
 
------------------------------------------------------------
--- Terminal (t prefix)
------------------------------------------------------------
-map("n", "<leader>tf", "<cmd>ToggleTerm direction=float<CR>", { noremap = true, silent = true, desc = "Float Terminal" })
-map("n", "<leader>th", "<cmd>ToggleTerm size=15 direction=horizontal<CR>", { noremap = true, silent = true, desc = "Horizontal Terminal" })
-map("n", "<leader>tv", "<cmd>ToggleTerm size=60 direction=vertical<CR>", { noremap = true, silent = true, desc = "Vertical Terminal" })
-map("n", "<leader>tg", "<cmd>lua _lazygit_toggle()<CR>", { noremap = true, silent = title, desc = "Lazygit" })
+-- Edição ---------------------------------------------------------------
+map("x", "<", "<gv", o("Indent left (keep selection)"))
+map("x", ">", ">gv", o("Indent right (keep selection)"))
+map("n", "<A-j>", "<cmd>m .+1<CR>==", o("Move line down"))
+map("n", "<A-k>", "<cmd>m .-2<CR>==", o("Move line up"))
+map("x", "<A-j>", ":m '>+1<CR>gv=gv", o("Move selection down"))
+map("x", "<A-k>", ":m '<-2<CR>gv=gv", o("Move selection up"))
+map("i", ",", ",<c-g>u", o("Undo breakpoint"))
+map("i", ".", ".<c-g>u", o("Undo breakpoint"))
 
------------------------------------------------------------
--- Quick Switch (Harpoon) - m prefix for marks
------------------------------------------------------------
-local ok_harpoon, harpoon = pcall(require, "harpoon")
-if ok_harpoon then
-  map("n", "<leader>ma", function() harpoon:list():append() end, { noremap = true, silent = true, desc = "Add File (Harpoon)" })
-  map("n", "<leader>mm", function() harpoon.ui:toggle_quick_menu(harpoon:list()) end, { noremap = true, silent = true, desc = "Harpoon Menu" })
-  map("n", "<leader>m1", function() harpoon:list():select(1) end, { noremap = true, silent = true, desc = "Harpoon File 1" })
-  map("n", "<leader>m2", function() harpoon:list():select(2) end, { noremap = true, silent = true, desc = "Harpoon File 2" })
-  map("n", "<leader>m3", function() harpoon:list():select(3) end, { noremap = true, silent = true, desc = "Harpoon File 3" })
-  map("n", "<leader>m4", function() harpoon:list():select(4) end, { noremap = true, silent = true, desc = "Harpoon File 4" })
-  map("n", "<leader>mn", function() harpoon:list():next() end, { noremap = true, silent = true, desc = "Harpoon Next" })
-  map("n", "<leader>mp", function() harpoon:list():prev() end, { noremap = true, silent = true, desc = "Harpoon Previous" })
-end
+-- Code (comentário usa o gc nativo do Neovim) ---------------------------
+map("n", "<leader>cc", "gcc", { remap = true, desc = "Comment line" })
+map("v", "<leader>cc", "gc", { remap = true, desc = "Comment selection" })
+map("n", "<leader>ct", "gcc", { remap = true, desc = "Toggle comment" })
 
------------------------------------------------------------
--- Smart Window Movement (Ctrl + hjkl)
------------------------------------------------------------
-local function is_mapped(mode, lhs)
-  for _, m in ipairs(vim.api.nvim_get_keymap(mode)) do
-    if m.lhs == lhs then return true end
+-- Window ---------------------------------------------------------------
+map("n", "<C-h>", "<C-w>h", o("Window left"))
+map("n", "<C-j>", "<C-w>j", o("Window below"))
+map("n", "<C-k>", "<C-w>k", o("Window above"))
+map("n", "<C-l>", "<C-w>l", o("Window right"))
+map("n", "<leader>wh", "<C-w>h", o("Window left"))
+map("n", "<leader>wj", "<C-w>j", o("Window below"))
+map("n", "<leader>wk", "<C-w>k", o("Window above"))
+map("n", "<leader>wl", "<C-w>l", o("Window right"))
+map("n", "<leader>ww", "<C-w>w", o("Next window"))
+map("n", "<leader>wv", "<cmd>vsplit<CR>", o("Split vertically"))
+map("n", "<leader>ws", "<cmd>split<CR>", o("Split horizontally"))
+map("n", "<leader>wo", "<C-w>o", o("Close other windows"))
+map("n", "<leader>wc", "<C-w>c", o("Close window"))
+map("n", "<leader>wq", "<cmd>q<CR>", o("Quit window"))
+map("n", "<leader>w=", "<C-w>=", o("Balance windows"))
+map("n", "<leader>wH", "<cmd>vertical resize -2<CR>", o("Narrower"))
+map("n", "<leader>wL", "<cmd>vertical resize +2<CR>", o("Wider"))
+map("n", "<leader>wJ", "<cmd>resize -2<CR>", o("Shorter"))
+map("n", "<leader>wK", "<cmd>resize +2<CR>", o("Taller"))
+
+-- Buffer ---------------------------------------------------------------
+map("n", "<Tab>", "<cmd>bnext<CR>", o("Next buffer"))
+map("n", "<S-Tab>", "<cmd>bprevious<CR>", o("Previous buffer"))
+map("n", "<leader>bn", "<cmd>bnext<CR>", o("Next buffer"))
+map("n", "<leader>bp", "<cmd>bprevious<CR>", o("Previous buffer"))
+map("n", "<leader>bk", "<cmd>bdelete!<CR>", o("Kill buffer (force)"))
+map("n", "<leader>bd", function()
+  if _G.Snacks then
+    Snacks.bufdelete() -- fecha o buffer sem destruir o layout de janelas
+  else
+    vim.cmd("bdelete")
   end
-  return false
-end
+end, o("Close buffer"))
 
-if not is_mapped("n", "<C-h>") then 
-  map("n", "<C-h>", "<C-w>h", { noremap = title or true, silent = true, desc = "Move to Left Window" }) 
-end
-if not is_mapped("n", "<C-j>") then 
-  map("n", "<C-j>", "<C-w>j", { noremap = true, silent = true, desc = "Move to Bottom Window" }) 
-end
-if not is_mapped("n", "<C-k>") then 
-  map("n", "<C-k>", "<C-w>k", { noremap = true, silent = true, desc = "Move to Top Window" }) 
-end
-if not is_mapped("n", "<C-l>") then 
-  map("n", "<C-l>", "<C-w>l", { noremap = true, silent = true, desc = "Move to Right Window" }) 
-end
+-- Diagnostics ----------------------------------------------------------
+map("n", "]d", function() vim.diagnostic.jump({ count = 1, float = true }) end, o("Next diagnostic"))
+map("n", "[d", function() vim.diagnostic.jump({ count = -1, float = true }) end, o("Previous diagnostic"))
+map("n", "]e", function() vim.diagnostic.jump({ count = 1, severity = vim.diagnostic.severity.ERROR, float = true }) end, o("Next error"))
+map("n", "[e", function() vim.diagnostic.jump({ count = -1, severity = vim.diagnostic.severity.ERROR, float = true }) end, o("Previous error"))
+map("n", "<leader>cd", vim.diagnostic.open_float, o("Line diagnostics"))
+
+-- Terminal mode --------------------------------------------------------
+map("t", "<Esc><Esc>", [[<C-\><C-n>]], o("Exit terminal mode"))
+map("t", "jk", [[<C-\><C-n>]], o("Exit terminal mode"))
+map("t", "<C-h>", [[<C-\><C-n><C-w>h]], o("Window left"))
+map("t", "<C-j>", [[<C-\><C-n><C-w>j]], o("Window below"))
+map("t", "<C-k>", [[<C-\><C-n><C-w>k]], o("Window above"))
+map("t", "<C-l>", [[<C-\><C-n><C-w>l]], o("Window right"))
