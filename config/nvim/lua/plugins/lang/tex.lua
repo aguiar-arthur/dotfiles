@@ -1,35 +1,35 @@
--- LaTeX: vimtex (compilação com latexmk, PDF + SyncTeX, TOC, text objects,
--- surround de comandos/ambientes) + texlab (LSP: completion, \cite/\ref,
--- diagnósticos chktex; ver after/lsp/texlab.lua) + snippets LuaSnip
--- (snippets/tex.lua) + latexindent (formatação, via conform).
+-- LaTeX: vimtex (latexmk compilation, PDF + SyncTeX, TOC, text objects,
+-- surround for commands/environments) + texlab (LSP: completion, \cite/\ref,
+-- chktex diagnostics; see after/lsp/texlab.lua) + LuaSnip snippets
+-- (snippets/tex.lua) + latexindent (formatting, via conform).
 --
--- Requer MacTeX (latexmk, latexindent, chktex) e o visualizador Skim no macOS.
--- Em Linux usa zathura quando disponível.
+-- Requires MacTeX (latexmk, latexindent, chktex) and the Skim viewer on macOS.
+-- On Linux it uses zathura when available.
 return {
   {
     "lervag/vimtex",
-    lazy = false, -- o vimtex cuida do próprio lazy-loading; não use `ft = "tex"`
+    lazy = false, -- vimtex handles its own lazy-loading; do not use `ft = "tex"`
     init = function()
       local g = vim.g
 
-      -- Visualizador de PDF -------------------------------------------------
+      -- PDF viewer -------------------------------------------------
       if vim.fn.has("mac") == 1 then
         g.vimtex_view_method = "skim"
-        g.vimtex_view_skim_sync = 1 -- forward search ao compilar/visualizar
-        g.vimtex_view_skim_activate = 1 -- traz o Skim para frente no \lv
-        g.vimtex_view_skim_reading_bar = 1 -- barra de destaque da linha atual
+        g.vimtex_view_skim_sync = 1 -- forward search on compile/view
+        g.vimtex_view_skim_activate = 1 -- brings Skim to the front on \lv
+        g.vimtex_view_skim_reading_bar = 1 -- highlight bar for the current line
       elseif vim.fn.executable("zathura") == 1 then
         g.vimtex_view_method = "zathura"
       else
         g.vimtex_view_method = "general"
       end
 
-      -- Compilação ------------------------------------------------------------
-      -- latexmk em modo contínuo (recompila ao salvar). O motor padrão é pdflatex;
-      -- para lualatex/xelatex use no topo do .tex:   % !TEX program = lualatex
+      -- Compilation ------------------------------------------------------------
+      -- latexmk in continuous mode (recompiles on save). The default engine is pdflatex;
+      -- for lualatex/xelatex put this at the top of the .tex:   % !TEX program = lualatex
       g.vimtex_compiler_method = "latexmk"
 
-      -- Quickfix: abre só em erros (sem roubar o foco) e filtra ruído
+      -- Quickfix: opens only on errors (without stealing focus) and filters noise
       g.vimtex_quickfix_open_on_warning = 0
       g.vimtex_quickfix_ignore_filters = {
         "Underfull \\\\hbox",
@@ -39,7 +39,7 @@ return {
         "LaTeX Font Warning: Font shape",
       }
 
-      -- Navegação / aparência -----------------------------------------------------
+      -- Navigation / appearance -----------------------------------------------------
       g.vimtex_toc_config = {
         split_pos = "vert topleft",
         split_width = 40,
@@ -52,9 +52,9 @@ return {
         math_symbols = 1, sections = 0, styles = 1,
       }
 
-      -- Os imaps (`a → \alpha) colidem com os snippets LuaSnip: desligados
+      -- vimtex imaps (`a → \alpha) clash with the LuaSnip snippets: disabled
       g.vimtex_imaps_enabled = 0
-      -- Completion vem do texlab (via blink.cmp), não do omnifunc do vimtex
+      -- Completion comes from texlab (via blink.cmp), not vimtex's omnifunc
       g.vimtex_complete_enabled = 0
     end,
     config = function()
@@ -62,13 +62,13 @@ return {
       vim.api.nvim_create_autocmd("User", {
         group = group,
         pattern = "VimtexEventCompileSuccess",
-        callback = function() vim.notify("Compilado com sucesso", vim.log.levels.INFO, { title = "LaTeX" }) end,
+        callback = function() vim.notify("Compiled successfully", vim.log.levels.INFO, { title = "LaTeX" }) end,
       })
       vim.api.nvim_create_autocmd("User", {
         group = group,
         pattern = "VimtexEventCompileFailed",
         callback = function()
-          vim.notify("Falha na compilação — <localleader>le lista os erros", vim.log.levels.ERROR, { title = "LaTeX" })
+          vim.notify("Compilation failed — <localleader>le lists the errors", vim.log.levels.ERROR, { title = "LaTeX" })
         end,
       })
     end,

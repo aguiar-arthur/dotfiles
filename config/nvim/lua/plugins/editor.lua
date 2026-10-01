@@ -41,7 +41,7 @@ return {
     },
   },
 
-  -- Navegação rápida --------------------------------------------------------
+  -- Quick navigation --------------------------------------------------------
   {
     "folke/flash.nvim",
     event = "VeryLazy",
@@ -93,7 +93,7 @@ return {
     event = "VeryLazy",
     opts = {
       modes = { insert = true, command = true, terminal = false },
-      -- crase só faz par em markdown (em LaTeX ela abre aspas: ``texto'')
+      -- backtick pairs only in markdown (in LaTeX it opens quotes: ``text'')
       mappings = { ["`"] = false },
     },
     config = function(_, opts)
@@ -125,7 +125,7 @@ return {
     },
   },
 
-  -- Diagnósticos --------------------------------------------------------------
+  -- Diagnostics ---------------------------------------------------------------
   {
     "folke/trouble.nvim",
     cmd = "Trouble",
@@ -140,7 +140,7 @@ return {
     },
   },
 
-  -- Sessões ------------------------------------------------------------------------
+  -- Sessions ------------------------------------------------------------------------
   {
     "folke/persistence.nvim",
     event = "BufReadPre",

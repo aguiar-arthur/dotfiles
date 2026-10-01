@@ -1,13 +1,13 @@
--- Keymaps "core" (sem dependência de plugins).
--- Os atalhos específicos de plugin vivem na própria spec (lua/plugins/*.lua),
--- via `keys = {}`, o que também faz o lazy.nvim carregar o plugin sob demanda.
--- Os atalhos de LSP são buffer-locais e ficam em lua/plugins/lsp.lua (LspAttach).
+-- "Core" keymaps (no plugin dependencies).
+-- Plugin-specific keymaps live in each plugin spec (lua/plugins/*.lua),
+-- via `keys = {}`, which also makes lazy.nvim load the plugin on demand.
+-- LSP keymaps are buffer-local and live in lua/plugins/lsp.lua (LspAttach).
 --
--- Organização por prefixos de grupo (mantida da configuração anterior):
+-- Group prefixes (kept from the previous configuration):
 --   <leader>b buffer   c code   d diagnostics   D debug    f file/find
 --   <leader>g git      l lsp    m marks         o open     S session
 --   <leader>t terminal u ui     w window
---   <localleader> (",") → atalhos do filetype (vimtex em .tex)
+--   <localleader> (",") → filetype keymaps (vimtex in .tex)
 
 local map = vim.keymap.set
 local function o(desc, extra)
@@ -20,11 +20,11 @@ map("n", "<leader>s", "<cmd>w<CR>", o("Save"))
 map("n", "<Esc>", "<cmd>nohlsearch<CR>", o("Clear search highlight"))
 map("n", "<leader>?", "<cmd>WhichKey<CR>", o("Show key bindings"))
 
--- Movimento consciente de linhas quebradas (útil com wrap em tex/md) ---
+-- Wrapped-line aware movement (useful with wrap in tex/md) -------------
 map({ "n", "x" }, "j", "v:count == 0 ? 'gj' : 'j'", o("Down", { expr = true }))
 map({ "n", "x" }, "k", "v:count == 0 ? 'gk' : 'k'", o("Up", { expr = true }))
 
--- Edição ---------------------------------------------------------------
+-- Editing --------------------------------------------------------------
 map("x", "<", "<gv", o("Indent left (keep selection)"))
 map("x", ">", ">gv", o("Indent right (keep selection)"))
 map("n", "<A-j>", "<cmd>m .+1<CR>==", o("Move line down"))
@@ -34,7 +34,7 @@ map("x", "<A-k>", ":m '<-2<CR>gv=gv", o("Move selection up"))
 map("i", ",", ",<c-g>u", o("Undo breakpoint"))
 map("i", ".", ".<c-g>u", o("Undo breakpoint"))
 
--- Code (comentário usa o gc nativo do Neovim) ---------------------------
+-- Code (commenting uses Neovim's native gc) -----------------------------
 map("n", "<leader>cc", "gcc", { remap = true, desc = "Comment line" })
 map("v", "<leader>cc", "gc", { remap = true, desc = "Comment selection" })
 map("n", "<leader>ct", "gcc", { remap = true, desc = "Toggle comment" })
@@ -68,7 +68,7 @@ map("n", "<leader>bp", "<cmd>bprevious<CR>", o("Previous buffer"))
 map("n", "<leader>bk", "<cmd>bdelete!<CR>", o("Kill buffer (force)"))
 map("n", "<leader>bd", function()
   if _G.Snacks then
-    Snacks.bufdelete() -- fecha o buffer sem destruir o layout de janelas
+    Snacks.bufdelete() -- closes the buffer without destroying the window layout
   else
     vim.cmd("bdelete")
   end

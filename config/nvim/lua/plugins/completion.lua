@@ -1,7 +1,7 @@
 return {
   {
     "saghen/blink.cmp",
-    version = "1.*", -- releases com binário pré-compilado (sem toolchain Rust)
+    version = "1.*", -- releases ship a prebuilt binary (no Rust toolchain needed)
     event = { "InsertEnter", "CmdlineEnter" },
     dependencies = {
       "rafamadriz/friendly-snippets",
@@ -12,14 +12,14 @@ return {
           local ls = require("luasnip")
           ls.setup({
             history = true,
-            enable_autosnippets = true, -- necessário para os snippets LaTeX (snippets/tex.lua)
+            enable_autosnippets = true, -- required for the LaTeX snippets (snippets/tex.lua)
             update_events = { "TextChanged", "TextChangedI" },
             region_check_events = "InsertEnter",
             delete_check_events = "TextChanged",
           })
-          -- Snippets do VSCode (friendly-snippets), exceto LaTeX: usamos os nossos
+          -- VSCode snippets (friendly-snippets), except LaTeX: we use our own
           require("luasnip.loaders.from_vscode").lazy_load({ exclude = { "latex", "tex", "plaintex" } })
-          -- Snippets próprios em Lua: ~/.config/nvim/snippets/<filetype>.lua
+          -- Custom Lua snippets: ~/.config/nvim/snippets/<filetype>.lua
           require("luasnip.loaders.from_lua").lazy_load({ paths = { vim.fn.stdpath("config") .. "/snippets" } })
         end,
       },
@@ -27,7 +27,7 @@ return {
     ---@module 'blink.cmp'
     ---@type blink.cmp.Config
     opts = {
-      -- Mesmos atalhos da configuração anterior (nvim-cmp)
+      -- Same keymaps as the previous configuration (nvim-cmp)
       keymap = {
         preset = "none",
         ["<C-Space>"] = { "show", "show_documentation", "hide_documentation" },
@@ -43,8 +43,8 @@ return {
       },
       appearance = { nerd_font_variant = "mono" },
       completion = {
-        -- Nada pré-selecionado: <CR> só aceita se você escolheu um item
-        -- (evita engolir a quebra de linha ao escrever prosa/LaTeX).
+        -- Nothing preselected: <CR> only accepts if you picked an item
+        -- (avoids swallowing the newline when writing prose/LaTeX).
         list = { selection = { preselect = false, auto_insert = true } },
         menu = { border = "rounded" },
         documentation = { auto_show = true, auto_show_delay_ms = 250, window = { border = "rounded" } },

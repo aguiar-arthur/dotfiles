@@ -1,4 +1,4 @@
--- Debug (DAP). Atalhos sob <leader>D. Python: debugpy é instalado pelo mason-nvim-dap.
+-- Debug (DAP). Keymaps under <leader>D. Python: debugpy is installed by mason-nvim-dap.
 return {
   {
     "mfussenegger/nvim-dap",

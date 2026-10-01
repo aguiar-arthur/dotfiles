@@ -1,161 +1,162 @@
 # Dotfiles
 
-Configuração pessoal de ambiente para macOS: **Neovim** (editor generalista com fluxo
-completo de LaTeX), **Starship** (prompt) e **iTerm2** (perfil Dracula).
+Personal environment configuration for macOS: **Neovim** (a general-purpose editor with a
+complete LaTeX workflow), **Starship** (prompt) and **iTerm2** (Dracula profile).
 
-## Estrutura
+## Layout
 
 ```
-Brewfile                      programas e fontes (brew bundle)
-install.sh                    cria os symlinks e ativa o starship no zsh
+Brewfile                      programs and fonts (brew bundle)
+install.sh                    creates the symlinks and enables starship in zsh
 config/
   nvim/                       Neovim >= 0.11
-  starship/starship.toml      prompt em duas linhas, estilo "pílulas", cores Dracula
-  iterm2/dracula.json         Dynamic Profile do iTerm2 (cores Dracula)
+  starship/starship.toml      two-line prompt, "pill" style, Dracula colors
+  iterm2/dracula.json         iTerm2 Dynamic Profile (Dracula colors)
 ```
 
-## Instalação
+## Installation
 
 ```sh
 git clone <repo> ~/dotfiles && cd ~/dotfiles
-brew bundle      # 1. instala os programas (neovim, starship, lazygit, MacTeX, Skim, fonte Nerd...)
-./install.sh     # 2. cria os links e liga o starship no ~/.zshrc
+brew bundle      # 1. install the programs (neovim, starship, lazygit, MacTeX, Skim, Nerd Font...)
+./install.sh     # 2. create the links and hook starship into ~/.zshrc
 ```
 
-Depois:
+Then:
 
-1. Abra um **novo terminal** (para o Starship carregar).
-2. No iTerm2: *Settings → Profiles → "Dotfiles (Dracula)" → Other Actions → Set as Default*.
-3. Abra o `nvim`. Na primeira vez o lazy.nvim instala os plugins, o Mason instala
-   servidores LSP/formatters e o treesitter compila os parsers (leva um ou dois minutos).
-4. Para LaTeX, configure a busca inversa do Skim (veja [LaTeX](#latex)).
+1. Open a **new terminal** (so Starship loads).
+2. In iTerm2: *Settings → Profiles → "Dotfiles (Dracula)" → Other Actions → Set as Default*.
+3. Open `nvim`. The first time, lazy.nvim installs the plugins, Mason installs the
+   LSP servers/formatters and treesitter compiles the parsers (takes a minute or two).
+4. For LaTeX, set up Skim's inverse search (see [LaTeX](#latex)).
 
-### O que o `install.sh` faz (e o que não faz)
+### What `install.sh` does (and doesn't do)
 
-| Faz | Não faz |
+| Does | Doesn't |
 |---|---|
-| `~/.config/nvim` → `config/nvim` | instalar programas (isso é o `brew bundle`) |
-| `~/.config/starship.toml` → `config/starship/starship.toml` | instalar plugins do nvim (acontece ao abrir o `nvim`) |
-| perfil do iTerm2 → `~/Library/Application Support/iTerm2/DynamicProfiles/` | definir o perfil do iTerm2 como padrão (passo manual acima) |
-| adiciona ao `~/.zshrc` um bloco marcado que roda `starship init zsh` (uma vez) | |
+| `~/.config/nvim` → `config/nvim` | install programs (that's `brew bundle`) |
+| `~/.config/starship.toml` → `config/starship/starship.toml` | install nvim plugins (happens when you open `nvim`) |
+| iTerm2 profile → `~/Library/Application Support/iTerm2/DynamicProfiles/` | set the iTerm2 profile as default (manual step above) |
+| adds a marked block to `~/.zshrc` that runs `starship init zsh` (once) | |
 
-É idempotente: pode ser rodado de novo sem duplicar nada. Se um destino já existir e não
-for o link correto, ele é movido para `<destino>.bak.<data>` antes de criar o link.
+It is idempotent: you can run it again without duplicating anything. If a target already
+exists and is not the correct link, it is moved to `<target>.bak.<timestamp>` before the
+link is created.
 
-Requisitos externos do Neovim: uma **Nerd Font** no terminal, `git`, `rg`, `fd`, `node`
-(alguns servidores do Mason), `tree-sitter-cli` + compilador C (parsers), `lazygit`
-(opcional), **MacTeX** (`latexmk`, `latexindent`, `chktex`) e **Skim** para LaTeX.
-Tudo isso vem do Brewfile; use `:checkhealth` para diagnosticar o que faltar.
+External requirements for Neovim: a **Nerd Font** in the terminal, `git`, `rg`, `fd`, `node`
+(some Mason servers), `tree-sitter-cli` + a C compiler (parsers), `lazygit`
+(optional), **MacTeX** (`latexmk`, `latexindent`, `chktex`) and **Skim** for LaTeX.
+All of this comes from the Brewfile; use `:checkhealth` to diagnose anything missing.
 
 ---
 
 ## Neovim
 
-Configuração modular para **Neovim ≥ 0.11** (testada no 0.12): editor generalista (LSP,
-completion, git, debug, picker, explorer, terminal integrado) com um fluxo completo de
-LaTeX. Leader = `<Space>`, localleader = `,`.
+Modular configuration for **Neovim ≥ 0.11** (tested on 0.12): a general-purpose editor (LSP,
+completion, git, debug, picker, explorer, integrated terminal) with a complete LaTeX
+workflow. Leader = `<Space>`, localleader = `,`.
 
-### Estrutura
+### Structure
 
 ```
 config/nvim/
-  init.lua                    ponto de entrada (checa versão, carrega config/*)
+  init.lua                    entry point (checks version, loads config/*)
   lua/config/
-    options.lua               opções e leaders
-    keymaps.lua               atalhos "core" (janelas, buffers, diagnósticos...)
-    autocmds.lua              highlight no yank, restore cursor, spell/wrap em prosa...
-    lazy.lua                  bootstrap do lazy.nvim
-  lua/plugins/                uma spec por assunto
-    snacks.lua                picker, explorer, terminal, lazygit, dashboard, notificações
+    options.lua               options and leaders
+    keymaps.lua               "core" keymaps (windows, buffers, diagnostics...)
+    autocmds.lua              yank highlight, restore cursor, spell/wrap for prose...
+    lazy.lua                  lazy.nvim bootstrap
+  lua/plugins/                one spec per topic
+    snacks.lua                picker, explorer, terminal, lazygit, dashboard, notifications
     completion.lua            blink.cmp + LuaSnip
-    lsp.lua                   nvim-lspconfig + mason (lista de servidores/ferramentas no topo)
+    lsp.lua                   nvim-lspconfig + mason (server/tool list at the top)
     formatting.lua            conform.nvim
-    treesitter.lua            nvim-treesitter (branch main)
-    editor.lua                gitsigns, flash, harpoon, mini.{ai,surround,pairs}, trouble, todo, sessões
+    treesitter.lua            nvim-treesitter (main branch)
+    editor.lua                gitsigns, flash, harpoon, mini.{ai,surround,pairs}, trouble, todo, sessions
     debug.lua                 nvim-dap (+ UI, debugpy)
-    ui.lua / colorscheme.lua  lualine, which-key, ícones, Dracula
+    ui.lua / colorscheme.lua  lualine, which-key, icons, Dracula
     lang/tex.lua              vimtex
     lang/markdown.lua         render-markdown
-  after/lsp/<servidor>.lua    ajustes por servidor (lua_ls, basedpyright, jsonls, yamlls, texlab)
-  after/ftplugin/tex.lua      opções e atalhos de buffer para LaTeX
-  snippets/tex.lua            snippets LaTeX (LuaSnip)
+  after/lsp/<server>.lua      per-server overrides (lua_ls, basedpyright, jsonls, yamlls, texlab)
+  after/ftplugin/tex.lua      buffer options and keymaps for LaTeX
+  snippets/tex.lua            LaTeX snippets (LuaSnip)
 ```
 
-### Como descobrir atalhos
+### Discovering keymaps
 
-- Aperte `<Space>` e espere: o which-key mostra os grupos e, dentro deles, cada atalho.
-- `<Space>?` abre o painel de atalhos; `<Space>fk` busca em todos os keymaps.
-- Num `.tex`, a mesma coisa vale para `,` (atalhos do vimtex).
+- Press `<Space>` and wait: which-key shows the groups and, inside them, every keymap.
+- `<Space>?` opens the keymap panel; `<Space>fk` searches all keymaps.
+- In a `.tex` file the same applies to `,` (vimtex keymaps).
 
-### Atalhos (`<Space>` = leader)
+### Keymaps (`<Space>` = leader)
 
-| Prefixo | Grupo | Exemplos |
+| Prefix | Group | Examples |
 |---|---|---|
-| `<leader>f` | file/find (snacks picker) | `ff` arquivos · `fg` grep · `fr` recentes · `fb` buffers · `fc` config · `fk` atalhos · `fs` símbolos · `fR` retomar |
-| `<leader>o` | open | `op` explorer · `of` revelar arquivo atual · `on` histórico de notificações |
-| `<leader>l` | lsp | `ld` definição · `lr` referências · `ln` rename · `la` code action · `lf` formatar · `ll` diagnósticos |
+| `<leader>f` | file/find (snacks picker) | `ff` files · `fg` grep · `fr` recent · `fb` buffers · `fc` config · `fk` keymaps · `fs` symbols · `fR` resume |
+| `<leader>o` | open | `op` explorer · `of` reveal current file · `on` notification history |
+| `<leader>l` | lsp | `ld` definition · `lr` references · `ln` rename · `la` code action · `lf` format · `ll` diagnostics |
 | `<leader>d` | diagnostics (Trouble) | `dx` · `dd` buffer · `dq` quickfix · `dt` TODOs |
 | `<leader>g` | git | `gg` lazygit · `gs` stage hunk · `gp` preview · `gb` blame · `gl` log · `]c`/`[c` hunks |
-| `<leader>b` / `w` | buffer / window | `bd` fecha buffer · `bb` lista · `wv`/`ws` splits · `Ctrl-h/j/k/l` navega |
-| `<leader>t` | terminal | `tf` float · `th` horizontal · `tv` vertical · `Ctrl-\` alterna |
-| `<leader>m` | harpoon | `ma` adiciona · `mm` menu · `m1…m5` salta |
-| `<leader>D` | debug (DAP) | `Db` breakpoint · `Dc` continuar · `Di/Do/DO` step · `Du` UI |
-| `<leader>S` | sessões | `Sr` restaurar · `Sl` última |
+| `<leader>b` / `w` | buffer / window | `bd` close buffer · `bb` list · `wv`/`ws` splits · `Ctrl-h/j/k/l` navigate |
+| `<leader>t` | terminal | `tf` float · `th` horizontal · `tv` vertical · `Ctrl-\` toggle |
+| `<leader>m` | harpoon | `ma` add · `mm` menu · `m1…m5` jump |
+| `<leader>D` | debug (DAP) | `Db` breakpoint · `Dc` continue · `Di/Do/DO` step · `Du` UI |
+| `<leader>S` | sessions | `Sr` restore · `Sl` last |
 | `<leader>u` | toggles | `us` spell · `uw` wrap · `uc` conceal · `uf` auto-format · `uh` inlay hints |
-| `s` / `S` | flash | salto rápido / seleção por treesitter |
-| `gsa gsd gsr` | surround | adicionar / remover / trocar |
+| `s` / `S` | flash | quick jump / treesitter selection |
+| `gsa gsd gsr` | surround | add / delete / replace |
 
 ### LaTeX
 
-Fluxo: **vimtex** compila (latexmk contínuo) e abre o PDF no **Skim** com SyncTeX;
-**texlab** dá completion (`\cite`, `\ref`, comandos), diagnósticos (chktex), rename e
-go-to-definition; **LuaSnip** expande snippets matemáticos; **latexindent** formata.
+Workflow: **vimtex** compiles (continuous latexmk) and opens the PDF in **Skim** with SyncTeX;
+**texlab** provides completion (`\cite`, `\ref`, commands), diagnostics (chktex), rename and
+go-to-definition; **LuaSnip** expands math snippets; **latexindent** formats.
 
-Atalhos em arquivos `.tex` (`<localleader>` = `,`):
+Keymaps in `.tex` files (`<localleader>` = `,`):
 
-| Atalho | Ação |
+| Keymap | Action |
 |---|---|
-| `,ll` | liga/desliga compilação contínua (latexmk) |
-| `,lv` | abre/atualiza o PDF e faz forward search |
-| `,le` / `,lo` / `,lg` | erros / saída do latexmk / status |
-| `,lt` / `,lT` | índice (TOC) / alterna |
-| `,lc` / `,lC` | limpa arquivos auxiliares / + PDF |
-| `,lw` | contagem de palavras |
-| `<leader>lf` | formata com latexindent (não roda ao salvar, de propósito) |
-| `<leader>uc` | alterna conceal (símbolos renderizados) |
+| `,ll` | toggle continuous compilation (latexmk) |
+| `,lv` | open/refresh the PDF and run forward search |
+| `,le` / `,lo` / `,lg` | errors / latexmk output / status |
+| `,lt` / `,lT` | table of contents (TOC) / toggle |
+| `,lc` / `,lC` | clean auxiliary files / + PDF |
+| `,lw` | word count |
+| `<leader>lf` | format with latexindent (deliberately not run on save) |
+| `<leader>uc` | toggle conceal (rendered symbols) |
 
-Edição do vimtex: `dse`/`cse` (ambiente), `dsc`/`csc` (comando), `ie`/`ae` (ambiente),
-`i$`/`a$` (matemática inline), `tsf` (alterna fração), `]]`/`[[` (seções).
+vimtex editing: `dse`/`cse` (environment), `dsc`/`csc` (command), `ie`/`ae` (environment),
+`i$`/`a$` (inline math), `tsf` (toggle fraction), `]]`/`[[` (sections).
 
-**Skim → Neovim (busca inversa, Cmd+Shift+clique no PDF):** em
-*Skim → Preferences → Sync* escolha *Custom*, *Command* `nvim` e *Arguments*
+**Skim → Neovim (inverse search, Cmd+Shift+click on the PDF):** in
+*Skim → Preferences → Sync* choose *Custom*, *Command* `nvim` and *Arguments*
 `--headless -c "VimtexInverseSearch %line '%file'"`.
 
-**Outro motor** (lualatex/xelatex): primeira linha do arquivo `% !TEX program = lualatex`.
-Para `minted`/`-shell-escape`, crie um `.latexmkrc` no projeto com
+**Another engine** (lualatex/xelatex): first line of the file `% !TEX program = lualatex`.
+For `minted`/`-shell-escape`, create a `.latexmkrc` in the project with
 `$pdflatex = 'pdflatex -shell-escape %O %S';`.
 
 #### Snippets (`snippets/tex.lua`)
 
-Autosnippets (expandem sozinhos):
+Autosnippets (expand by themselves):
 
-| Contexto | Digite | Resultado |
+| Context | Type | Result |
 |---|---|---|
-| texto | `mk` · `dm` · `beg` | `$…$` · `\[…\]` · `\begin{…}…\end{…}` |
-| matemática | `a//` · `(a+b)//` | `\frac{a}{}` · `\frac{a+b}{}` |
-| matemática | `x2` · `__` · `td` · `sr` · `cb` | `x_2` · `_{}` · `^{}` · `^2` · `^3` |
-| matemática | `;a` `;b` `;G` `;o`… | `\alpha` `\beta` `\Gamma` `\omega`… |
-| matemática | `->` `=>` `<=` `!=` `...` `xx` `ooo` | `\to` `\implies` `\leq` `\neq` `\dots` `\times` `\infty` |
-| matemática | `sum` `int` `lim` `part` `sq` `lr(` | somatório, integral, limite, derivada parcial, raiz, `\left( \right)` |
-| matemática | `RR` `NN` `ZZ` `QQ` `CC` | `\mathbb{R}`… |
+| text | `mk` · `dm` · `beg` | `$…$` · `\[…\]` · `\begin{…}…\end{…}` |
+| math | `a//` · `(a+b)//` | `\frac{a}{}` · `\frac{a+b}{}` |
+| math | `x2` · `__` · `td` · `sr` · `cb` | `x_2` · `_{}` · `^{}` · `^2` · `^3` |
+| math | `;a` `;b` `;G` `;o`… | `\alpha` `\beta` `\Gamma` `\omega`… |
+| math | `->` `=>` `<=` `!=` `...` `xx` `ooo` | `\to` `\implies` `\leq` `\neq` `\dots` `\times` `\infty` |
+| math | `sum` `int` `lim` `part` `sq` `lr(` | summation, integral, limit, partial derivative, root, `\left( \right)` |
+| math | `RR` `NN` `ZZ` `QQ` `CC` | `\mathbb{R}`… |
 
-Snippets pelo menu de completion: `eqn`, `ali`, `thm`, `prf`, `ite`, `enu`, `fig`, `tab`,
-`sec`/`ssec`, `cit`, `ref`, `eqr`, `doc` (preâmbulo completo)… Adicione os seus em
-`snippets/tex.lua` (ou crie `snippets/<filetype>.lua`).
+Snippets via the completion menu: `eqn`, `ali`, `thm`, `prf`, `ite`, `enu`, `fig`, `tab`,
+`sec`/`ssec`, `cit`, `ref`, `eqr`, `doc` (full preamble)… Add your own in
+`snippets/tex.lua` (or create `snippets/<filetype>.lua`).
 
-### LSP, formatação e debug
+### LSP, formatting and debug
 
-| Linguagem | LSP | Formatter |
+| Language | LSP | Formatter |
 |---|---|---|
 | Lua | lua_ls (+ lazydev) | stylua |
 | Python | basedpyright + ruff | ruff |
@@ -163,63 +164,63 @@ Snippets pelo menu de completion: `eqn`, `ali`, `thm`, `prf`, `ite`, `enu`, `fig
 | Bash | bashls (+ shellcheck) | shfmt |
 | JS/TS/HTML/CSS/JSON/YAML/MD | vtsls, html, cssls, jsonls, yamlls, marksman | prettier |
 | TOML · C/C++ | taplo · clangd | LSP |
-| Clojure | clojure-lsp (do Brewfile; habilitado se estiver no PATH) | LSP |
+| Clojure | clojure-lsp (from the Brewfile; enabled if on PATH) | LSP |
 
-Para adicionar um servidor: inclua o nome em `mason_servers` (topo de `lua/plugins/lsp.lua`)
-e, se precisar de ajustes, crie `after/lsp/<nome>.lua`. Formatters ficam em `formatting.lua`.
-Auto-format ao salvar: `<leader>uf` (global) ou `:FormatToggle!` (só o buffer).
+To add a server: add its name to `mason_servers` (top of `lua/plugins/lsp.lua`)
+and, if it needs tweaks, create `after/lsp/<name>.lua`. Formatters live in `formatting.lua`.
+Auto-format on save: `<leader>uf` (global) or `:FormatToggle!` (current buffer only).
 
-### Notas
+### Notes
 
-- Na primeira abertura de um `.tex`/`.md` o Neovim oferece baixar os dicionários
-  (`en`, `pt`) para o spell check.
-- Os parsers do treesitter são compilados localmente na primeira execução.
+- The first time you open a `.tex`/`.md` file, Neovim offers to download the dictionaries
+  (`en`, `pt`) for spell checking.
+- Treesitter parsers are compiled locally on the first run.
 
 ---
 
 ## Starship
 
-Prompt em duas linhas, com ícones (Nerd Font) e informações contextuais:
+Two-line prompt, with icons (Nerd Font) and contextual information:
 
 ```
 (mac) (~/dotfiles) (main !1 ?2) +4 (py 3.13) ───────────────── 3s  11:10
 ❯
 ```
 
-(Cada item entre parênteses é uma "pílula" colorida com ícone.)
+(Each item in parentheses is a colored "pill" with an icon.)
 
-- **Linha 1:** SO, diretório, branch do git com status (`!` modificado, `?` não rastreado,
-  `+` staged, `⇡⇣` à frente/atrás) e linhas adicionadas/removidas, versões de
-  Python/Node/Lua/Ruby/Rust/Go/Java/C (só quando o diretório é desse tipo); à direita,
-  duração de comandos com mais de 2 s e a hora.
-- **Linha 2:** usuário/host (apenas em ssh ou root), sudo, jobs em segundo plano, código de
-  erro e o `❯` (vermelho quando o último comando falhou).
-- Para ajustar: edite `config/starship/starship.toml`. As cores estão em
-  `[palettes.dracula]` e cada módulo tem seu `format`/`symbol`. Os ícones são escritos como
-  escapes `\uXXXX`, então o arquivo é ASCII puro.
+- **Line 1:** OS, directory, git branch with status (`!` modified, `?` untracked,
+  `+` staged, `⇡⇣` ahead/behind) and added/removed lines, versions of
+  Python/Node/Lua/Ruby/Rust/Go/Java/C (only when the directory is that kind of project); on
+  the right, duration of commands longer than 2 s and the time.
+- **Line 2:** user/host (only over ssh or as root), sudo, background jobs, error code and
+  the `❯` (red when the last command failed).
+- To customize: edit `config/starship/starship.toml`. Colors are in
+  `[palettes.dracula]` and each module has its own `format`/`symbol`. Icons are written as
+  `\uXXXX` escapes, so the file is plain ASCII.
 
 ## iTerm2
 
-`config/iterm2/dracula.json` é um **Dynamic Profile**: o iTerm2 lê o arquivo sozinho e
-mostra o perfil "Dotfiles (Dracula)". Ele herda o perfil *Default* (inclusive a fonte) e
-altera apenas:
+`config/iterm2/dracula.json` is a **Dynamic Profile**: iTerm2 reads the file on its own and
+shows the "Dotfiles (Dracula)" profile. It inherits the *Default* profile (including the font) and
+only changes:
 
-- paleta Dracula (16 cores ANSI, fundo, cursor, seleção)
-- *Option* como Meta/Esc+ (necessário para os atalhos `Alt-j/k` do Neovim)
-- cursor em barra, transparência leve com blur, 140×40, scrollback de 100 mil linhas
+- Dracula palette (16 ANSI colors, background, cursor, selection)
+- *Option* as Meta/Esc+ (required for Neovim's `Alt-j/k` keymaps)
+- bar cursor, slight transparency with blur, 140×40, 100k-line scrollback
 
-A fonte precisa ser uma **Nerd Font** para os ícones do prompt e do Neovim aparecerem
-(o Brewfile instala a JetBrainsMono Nerd Font). Para trocar a fonte, mude no perfil
-dentro do iTerm2 ou adicione `"Normal Font"` ao JSON.
+The font must be a **Nerd Font** for the prompt and Neovim icons to show up
+(the Brewfile installs JetBrainsMono Nerd Font). To change the font, set it in the profile
+inside iTerm2 or add `"Normal Font"` to the JSON.
 
-## Manutenção
+## Maintenance
 
-- **Atualizar programas:** `brew update && brew upgrade`
-- **Atualizar plugins do nvim:** `:Lazy update` (o lockfile `lazy-lock.json` está no
-  `.gitignore`; remova a linha `**/lazy-lock.json` para versioná-lo e ter versões
-  reproduzíveis entre máquinas)
-- **Instalação limpa do nvim:** `rm -rf ~/.local/share/nvim ~/.local/state/nvim ~/.cache/nvim`
-- **Diagnóstico:** `:checkhealth` no Neovim · `starship explain` no shell
+- **Update programs:** `brew update && brew upgrade`
+- **Update nvim plugins:** `:Lazy update` (the `lazy-lock.json` lockfile is in
+  `.gitignore`; remove the `**/lazy-lock.json` line to version it and get
+  reproducible versions across machines)
+- **Clean nvim install:** `rm -rf ~/.local/share/nvim ~/.local/state/nvim ~/.cache/nvim`
+- **Diagnostics:** `:checkhealth` in Neovim · `starship explain` in the shell
 
 ## License
 

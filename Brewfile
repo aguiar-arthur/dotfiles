@@ -27,7 +27,7 @@ brew "lazygit"
 brew "starship"
 # ui
 cask "mactex"
-# latex viewer (SyncTeX) + fonte com ícones; MacTeX está acima
+# LaTeX viewer (SyncTeX) + icon font; MacTeX is above
 cask "skim"
 cask "font-jetbrains-mono-nerd-font"
 cask "iterm2"

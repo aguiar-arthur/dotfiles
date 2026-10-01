@@ -1,12 +1,12 @@
--- LSP com a API nativa do Neovim >= 0.11 (vim.lsp.config / vim.lsp.enable).
---   * defaults de cada servidor: nvim-lspconfig (pasta lsp/ do plugin)
---   * ajustes pessoais por servidor: ~/.config/nvim/after/lsp/<servidor>.lua
---   * instalação dos binários: mason (servidores + formatters)
+-- LSP using the native Neovim >= 0.11 API (vim.lsp.config / vim.lsp.enable).
+--   * per-server defaults: nvim-lspconfig (the plugin's lsp/ folder)
+--   * personal per-server overrides: ~/.config/nvim/after/lsp/<server>.lua
+--   * binary installation: mason (servers + formatters)
 
--- Servidores instalados/gerenciados pelo Mason
+-- Servers installed/managed by Mason
 local mason_servers = {
   "lua_ls", -- Lua
-  "basedpyright", -- Python (tipos)
+  "basedpyright", -- Python (types)
   "ruff", -- Python (lint/format)
   "bashls", -- Bash
   "texlab", -- LaTeX / BibTeX
@@ -20,21 +20,21 @@ local mason_servers = {
   "clangd", -- C / C++
 }
 
--- Servidores instalados fora do Mason (ex.: Brewfile). Só habilita se o binário existir.
+-- Servers installed outside Mason (e.g. Brewfile). Only enabled if the binary exists.
 local system_servers = {
   clojure_lsp = "clojure-lsp",
 }
 
--- Formatters / ferramentas (usados pelo conform.nvim)
+-- Formatters / tools (used by conform.nvim)
 local mason_tools = {
   "stylua",
   "shfmt",
-  "shellcheck", -- usado pelo bashls
+  "shellcheck", -- used by bashls
   "prettier",
 }
 
 return {
-  -- Tipos da API do Neovim para o lua_ls
+  -- Neovim API types for lua_ls
   {
     "folke/lazydev.nvim",
     ft = "lua",
@@ -68,12 +68,12 @@ return {
       "saghen/blink.cmp",
     },
     config = function()
-      -- Capabilities de todos os servidores (completion do blink.cmp)
+      -- Capabilities for all servers (blink.cmp completion)
       vim.lsp.config("*", {
         capabilities = require("blink.cmp").get_lsp_capabilities(),
       })
 
-      -- Instala e habilita automaticamente os servidores do Mason
+      -- Automatically install and enable the Mason servers
       require("mason-lspconfig").setup({
         ensure_installed = mason_servers,
         automatic_enable = true,
@@ -104,7 +104,7 @@ return {
         },
       })
 
-      -- Atalhos buffer-locais, criados quando um servidor anexa ao buffer
+      -- Buffer-local keymaps, created when a server attaches to the buffer
       vim.api.nvim_create_autocmd("LspAttach", {
         group = vim.api.nvim_create_augroup("user_lsp_attach", { clear = true }),
         callback = function(ev)
@@ -115,13 +115,13 @@ return {
             vim.keymap.set(mode or "n", lhs, rhs, { buffer = buf, silent = true, desc = desc })
           end
 
-          -- Atalhos de uma tecla
+          -- Single-key shortcuts
           map("gd", function() Snacks.picker.lsp_definitions() end, "Go to definition")
           map("gr", function() Snacks.picker.lsp_references() end, "Go to references")
           map("gi", function() Snacks.picker.lsp_implementations() end, "Go to implementation")
           map("K", vim.lsp.buf.hover, "Hover documentation")
 
-          -- Prefixo <leader>l
+          -- <leader>l prefix
           map("<leader>ld", function() Snacks.picker.lsp_definitions() end, "Definition")
           map("<leader>lr", function() Snacks.picker.lsp_references() end, "References")
           map("<leader>li", function() Snacks.picker.lsp_implementations() end, "Implementation")
@@ -137,7 +137,7 @@ return {
             require("conform").format({ async = true, lsp_format = "fallback" })
           end, "Format buffer/selection", { "n", "v" })
 
-          -- ruff cuida de lint/format; hover fica com o basedpyright
+          -- ruff handles lint/format; hover is left to basedpyright
           if client and client.name == "ruff" then
             client.server_capabilities.hoverProvider = false
           end

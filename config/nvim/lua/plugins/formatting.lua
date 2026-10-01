@@ -1,6 +1,6 @@
--- Formatação com conform.nvim (substitui o none-ls).
--- Diagnósticos/lint vêm dos próprios servidores LSP (ruff, bashls+shellcheck,
--- texlab+chktex, lua_ls...), então não há camada extra de linters.
+-- Formatting with conform.nvim (replaces none-ls).
+-- Diagnostics/lint come from the LSP servers themselves (ruff, bashls+shellcheck,
+-- texlab+chktex, lua_ls...), so there is no extra linter layer.
 return {
   "stevearc/conform.nvim",
   event = "BufWritePre",
@@ -21,13 +21,13 @@ return {
       jsonc = { "prettier" },
       yaml = { "prettier" },
       markdown = { "prettier" },
-      tex = { "latexindent" }, -- vem com o MacTeX
-      -- sem entrada (ex.: clojure, toml, c): cai no formatador do LSP (lsp_format)
+      tex = { "latexindent" }, -- ships with MacTeX
+      -- no entry (e.g. clojure, toml, c): falls back to the LSP formatter (lsp_format)
     },
     default_format_opts = { lsp_format = "fallback" },
 
-    -- Formata ao salvar, exceto em tex/bib (latexindent é lento e reindenta o
-    -- arquivo inteiro; use <leader>lf quando quiser) e quando desativado
+    -- Format on save, except in tex/bib (latexindent is slow and reindents the
+    -- whole file; use <leader>lf when you want it) and when disabled
     -- (:FormatToggle, <leader>uf).
     format_on_save = function(buf)
       if vim.g.disable_autoformat or vim.b[buf].disable_autoformat then return end
@@ -38,7 +38,7 @@ return {
   init = function()
     vim.api.nvim_create_user_command("FormatToggle", function(args)
       if args.bang then
-        vim.b.disable_autoformat = not vim.b.disable_autoformat -- só o buffer atual
+        vim.b.disable_autoformat = not vim.b.disable_autoformat -- current buffer only
       else
         vim.g.disable_autoformat = not vim.g.disable_autoformat
       end
@@ -48,6 +48,6 @@ return {
           args.bang and " (buffer)" or ""
         )
       )
-    end, { bang = true, desc = "Toggle auto-format (! = apenas este buffer)" })
+    end, { bang = true, desc = "Toggle auto-format (! = this buffer only)" })
   end,
 }

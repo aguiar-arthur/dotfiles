@@ -1,7 +1,7 @@
 return {
   settings = {
     basedpyright = {
-      disableOrganizeImports = true, -- imports ficam com o ruff
+      disableOrganizeImports = true, -- imports are handled by ruff
       analysis = {
         typeCheckingMode = "standard",
         autoImportCompletions = true,

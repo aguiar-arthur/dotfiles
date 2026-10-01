@@ -7,9 +7,9 @@ if not vim.uv.fs_stat(lazypath) then
   })
   if vim.v.shell_error ~= 0 then
     vim.api.nvim_echo({
-      { "Falha ao clonar lazy.nvim:\n", "ErrorMsg" },
+      { "Failed to clone lazy.nvim:\n", "ErrorMsg" },
       { out, "WarningMsg" },
-      { "\nPressione qualquer tecla para sair..." },
+      { "\nPress any key to exit..." },
     }, true, {})
     vim.fn.getchar()
     os.exit(1)
@@ -27,7 +27,7 @@ require("lazy").setup({
   checker = { enabled = true, notify = false },
   change_detection = { notify = false },
   ui = { border = "rounded" },
-  rocks = { enabled = false }, -- nenhum plugin daqui precisa de luarocks
+  rocks = { enabled = false }, -- none of these plugins need luarocks
   performance = {
     rtp = {
       disabled_plugins = { "gzip", "tarPlugin", "tohtml", "tutor", "zipPlugin" },

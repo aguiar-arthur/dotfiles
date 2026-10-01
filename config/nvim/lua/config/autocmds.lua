@@ -3,13 +3,13 @@ local function augroup(name)
 end
 local au = vim.api.nvim_create_autocmd
 
--- Destaca o texto copiado
+-- Highlight yanked text
 au("TextYankPost", {
   group = augroup("yank"),
   callback = function() vim.hl.on_yank() end,
 })
 
--- Recarrega arquivos alterados fora do editor (ex.: latexmk, git)
+-- Reload files changed outside the editor (e.g. latexmk, git)
 au({ "FocusGained", "TermClose", "TermLeave" }, {
   group = augroup("checktime"),
   callback = function()
@@ -17,7 +17,7 @@ au({ "FocusGained", "TermClose", "TermLeave" }, {
   end,
 })
 
--- Reabre no último cursor conhecido
+-- Restore the last known cursor position
 au("BufReadPost", {
   group = augroup("last_loc"),
   callback = function(ev)
@@ -31,7 +31,7 @@ au("BufReadPost", {
   end,
 })
 
--- Reequilibra splits ao redimensionar a janela do terminal
+-- Rebalance splits when the terminal window is resized
 au("VimResized", {
   group = augroup("resize"),
   callback = function()
@@ -41,7 +41,7 @@ au("VimResized", {
   end,
 })
 
--- `q` fecha janelas auxiliares
+-- `q` closes auxiliary windows
 au("FileType", {
   group = augroup("close_with_q"),
   pattern = { "help", "qf", "man", "checkhealth", "lspinfo", "notify", "startuptime", "vimtex-toc" },
@@ -51,7 +51,7 @@ au("FileType", {
   end,
 })
 
--- Prosa: wrap + spell
+-- Prose: wrap + spell
 au("FileType", {
   group = augroup("prose"),
   pattern = { "tex", "markdown", "text", "gitcommit", "plaintex", "bib" },
@@ -62,11 +62,11 @@ au("FileType", {
   end,
 })
 
--- Cria diretórios intermediários ao salvar
+-- Create intermediate directories on save
 au("BufWritePre", {
   group = augroup("auto_mkdir"),
   callback = function(ev)
-    if ev.match:match("^%w%w+:[\\/][\\/]") then return end -- ignora URLs
+    if ev.match:match("^%w%w+:[\\/][\\/]") then return end -- ignore URLs
     local file = vim.uv.fs_realpath(ev.match) or ev.match
     vim.fn.mkdir(vim.fn.fnamemodify(file, ":p:h"), "p")
   end,

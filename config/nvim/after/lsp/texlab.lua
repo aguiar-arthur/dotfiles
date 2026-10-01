@@ -1,5 +1,5 @@
--- texlab: completion (comandos, \cite, \ref), diagnósticos (chktex), rename,
--- go-to-definition em labels/citações. A compilação e o PDF ficam com o vimtex.
+-- texlab: completion (commands, \cite, \ref), diagnostics (chktex), rename,
+-- go-to-definition on labels/citations. Compilation and the PDF are handled by vimtex.
 return {
   settings = {
     texlab = {

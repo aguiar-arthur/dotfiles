@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Cria os symlinks do dotfiles. Idempotente: pode rodar quantas vezes quiser.
-# Se o destino já existir (e não for o link certo), ele é movido para <destino>.bak.<data>.
+# Creates the dotfiles symlinks. Idempotent: safe to run as many times as you like.
+# If the target already exists (and is not the right link), it is moved to <target>.bak.<timestamp>.
 set -euo pipefail
 
 DOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -20,16 +20,16 @@ link() {
   echo "link   $dst -> $src"
 }
 
-# Neovim e Starship (macOS e Linux)
+# Neovim and Starship (macOS and Linux)
 link "$DOT/config/nvim" "$HOME/.config/nvim"
 link "$DOT/config/starship/starship.toml" "$HOME/.config/starship.toml"
 
-# iTerm2 (só macOS): o iTerm lê Dynamic Profiles desta pasta automaticamente
+# iTerm2 (macOS only): iTerm reads Dynamic Profiles from this folder automatically
 if [[ "$OSTYPE" == darwin* ]]; then
   link "$DOT/config/iterm2/dracula.json" "$HOME/Library/Application Support/iTerm2/DynamicProfiles/dotfiles-dracula.json"
 fi
 
-# Ativa o Starship no zsh (bloco marcado, adicionado uma única vez)
+# Enable Starship in zsh (marked block, added only once)
 ZSHRC="$HOME/.zshrc"
 MARK="# >>> dotfiles: starship >>>"
 if ! grep -qF "$MARK" "$ZSHRC" 2>/dev/null; then
@@ -39,10 +39,10 @@ if ! grep -qF "$MARK" "$ZSHRC" 2>/dev/null; then
 command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"
 # <<< dotfiles: starship <<<
 ZSH
-  echo "zshrc  bloco do starship adicionado em $ZSHRC"
+  echo "zshrc  starship block added to $ZSHRC"
 else
-  echo "ok     $ZSHRC (starship já configurado)"
+  echo "ok     $ZSHRC (starship already configured)"
 fi
 
 echo
-echo "Pronto. Abra um novo terminal. No iTerm2: Settings > Profiles > 'Dotfiles (Dracula)' > Other Actions > Set as Default."
+echo "Done. Open a new terminal. In iTerm2: Settings > Profiles > 'Dotfiles (Dracula)' > Other Actions > Set as Default."

@@ -1,5 +1,5 @@
--- snacks.nvim substitui, num único plugin: telescope, nvim-tree, toggleterm,
--- indent-blankline, dressing e noice (notificações/inputs).
+-- snacks.nvim replaces, in a single plugin: telescope, nvim-tree, toggleterm,
+-- indent-blankline, dressing and noice (notifications/inputs).
 return {
   "folke/snacks.nvim",
   priority = 1000,
@@ -76,7 +76,7 @@ return {
     { "<leader>tv", function() Snacks.terminal(nil, { win = { position = "right", width = 60 } }) end, desc = "Vertical terminal" },
     { "<leader>tg", function() Snacks.lazygit() end, desc = "Lazygit" },
 
-    -- Palavras sob o cursor (LSP references) -------------------------------
+    -- Words under the cursor (LSP references) -------------------------------
     { "]]", function() Snacks.words.jump(vim.v.count1) end, desc = "Next reference", mode = { "n", "t" } },
     { "[[", function() Snacks.words.jump(-vim.v.count1) end, desc = "Previous reference", mode = { "n", "t" } },
   },

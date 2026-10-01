@@ -1,5 +1,5 @@
 return {
-  -- Ícones (mini.icons também "finge" ser nvim-web-devicons para os plugins que o exigem)
+  -- Icons (mini.icons also "pretends" to be nvim-web-devicons for plugins that require it)
   {
     "echasnovski/mini.icons",
     lazy = true,
@@ -25,7 +25,7 @@ return {
         return #names > 0 and ("LSP: " .. table.concat(names, ",")) or ""
       end
 
-      -- Estado do latexmk (vimtex) apenas em buffers .tex
+      -- latexmk (vimtex) status, only in .tex buffers
       local function vimtex_status()
         if vim.bo.filetype ~= "tex" or not vim.b.vimtex then return "" end
         local ok, running = pcall(vim.fn["vimtex#compiler#is_running"])
@@ -53,7 +53,7 @@ return {
     end,
   },
 
-  -- Which-key: grupos do esquema <leader> ------------------------------
+  -- Which-key: <leader> scheme groups ------------------------------
   {
     "folke/which-key.nvim",
     event = "VeryLazy",
