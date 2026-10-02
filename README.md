@@ -154,6 +154,21 @@ Snippets via the completion menu: `eqn`, `ali`, `thm`, `prf`, `ite`, `enu`, `fig
 `sec`/`ssec`, `cit`, `ref`, `eqr`, `doc` (full preamble)… Add your own in
 `snippets/tex.lua` (or create `snippets/<filetype>.lua`).
 
+#### Beamer (slides)
+
+Beamer is a normal LaTeX document class (included in MacTeX), so the same workflow applies:
+`,ll` compiles, `,lv` opens the PDF in Skim (View → Presentation for full screen), and
+forward/inverse search work per slide. Snippets (completion menu):
+
+| Type | Result |
+|---|---|
+| `bdoc` | full Beamer preamble + title slide + outline |
+| `frm` | `\begin{frame}{…}…\end{frame}` |
+| `fimg` | frame with a centered image |
+| `col` | two-column layout |
+| `blk` / `ablk` | block / alert block |
+| `pau` | `\pause` |
+
 ### LSP, formatting and debug
 
 | Language | LSP | Formatter |

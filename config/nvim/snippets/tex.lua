@@ -133,6 +133,45 @@ snip("doc", fmta([[
 \end{document}
 ]], { i(1, "12pt,a4paper"), i(2, "article"), i(3, "brazil"), i(4), i(5), i(0) }))
 
+-- Beamer (slides) -----------------------------------------------------------------
+snip("bdoc", fmta([[
+\documentclass[aspectratio=169]{beamer}
+
+\usetheme{<>}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[<>]{babel}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+
+\title{<>}
+\author{<>}
+\date{\today}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\begin{frame}{Outline}
+	\tableofcontents
+\end{frame}
+
+\section{<>}
+
+\begin{frame}{<>}
+	<>
+\end{frame}
+
+\end{document}
+]], { i(1, "Madrid"), i(2, "english"), i(3), i(4), i(5, "Introduction"), i(6, "First slide"), i(0) }))
+
+snip("frm", fmta("\\begin{frame}{<>}\n\t<>\n\\end{frame}<>", { i(1), i(0), i(2) }))
+snip("fimg", fmta("\\begin{frame}{<>}\n\t\\centering\n\t\\includegraphics[width=<>\\textwidth]{<>}\n\\end{frame}<>", { i(1), i(2, "0.8"), i(3), i(0) }))
+snip("col", fmta("\\begin{columns}\n\t\\begin{column}{0.5\\textwidth}\n\t\t<>\n\t\\end{column}\n\t\\begin{column}{0.5\\textwidth}\n\t\t<>\n\t\\end{column}\n\\end{columns}<>", { i(1), i(2), i(0) }))
+snip("blk", fmta("\\begin{block}{<>}\n\t<>\n\\end{block}<>", { i(1), i(0), i(2) }))
+snip("ablk", fmta("\\begin{alertblock}{<>}\n\t<>\n\\end{alertblock}<>", { i(1), i(0), i(2) }))
+snip("pau", t("\\pause"))
+
 -- Math mode: autosnippets ------------------------------------------------------
 -- Fractions: `a//` → \frac{a}{}, `(a+b)//` → \frac{a+b}{}
 auto({ trig = "([%w%^_\\]+)//", trigEngine = "pattern" }, fmta("\\frac{<>}{<>}<>", { cap(1), i(1), i(0) }), in_math, false)
