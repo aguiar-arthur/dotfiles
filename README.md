@@ -79,6 +79,7 @@ config/nvim/
     lang/markdown.lua         render-markdown
   after/lsp/<server>.lua      per-server overrides (lua_ls, basedpyright, jsonls, yamlls, texlab)
   after/ftplugin/tex.lua      buffer options and keymaps for LaTeX
+  after/ftplugin/markdown.lua browser preview (pandoc)
   snippets/tex.lua            LaTeX snippets (LuaSnip)
 ```
 
@@ -168,6 +169,14 @@ forward/inverse search work per slide. Snippets (completion menu):
 | `col` | two-column layout |
 | `blk` / `ablk` | block / alert block |
 | `pau` | `\pause` |
+
+### Markdown
+
+`render-markdown.nvim` renders headings, lists, checkboxes, tables and code blocks in the
+buffer. For the final result, `,p` (in a markdown file) builds an HTML page with **pandoc**
+and opens it in the browser. Math written as `$...$`, `$$...$$`, `\(...\)` or `\[...\]` is
+rendered as MathML (no internet needed), and images are embedded. After the first `,p`, each
+save rebuilds the page; refresh the browser tab (Cmd+R) to see it. Needs `pandoc` (Brewfile).
 
 ### LSP, formatting and debug
 

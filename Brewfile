@@ -25,9 +25,9 @@ brew "jq"
 brew "fd"
 brew "lazygit"
 brew "starship"
+brew "pandoc"
 # ui
 cask "mactex"
-# LaTeX viewer (SyncTeX) + icon font; MacTeX is above
 cask "skim"
 cask "font-jetbrains-mono-nerd-font"
 cask "iterm2"
