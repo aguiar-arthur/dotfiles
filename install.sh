@@ -29,6 +29,7 @@ for old in "$HOME/.emacs" "$HOME/.emacs.el" "$HOME/.emacs.d"; do
   fi
 done
 link "$DOT/config/starship/starship.toml" "$HOME/.config/starship.toml"
+link "$DOT/config/rumdl/rumdl.toml" "$HOME/.config/rumdl/rumdl.toml"
 
 # iTerm2 (macOS only): iTerm reads Dynamic Profiles from this folder automatically
 if [[ "$OSTYPE" == darwin* ]]; then

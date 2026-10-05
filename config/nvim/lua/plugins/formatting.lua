@@ -20,7 +20,7 @@ return {
       json = { "prettier" },
       jsonc = { "prettier" },
       yaml = { "prettier" },
-      markdown = { "prettier" },
+      markdown = { "rumdl" }, -- markdownlint-style fixes only; never rewraps prose
       tex = { "latexindent" }, -- ships with MacTeX
       -- no entry (e.g. clojure, toml, c): falls back to the LSP formatter (lsp_format)
     },

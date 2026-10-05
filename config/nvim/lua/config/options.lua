@@ -20,7 +20,7 @@ opt.pumheight = 12
 opt.winborder = "rounded"
 opt.list = true
 opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
-opt.fillchars = { eob = " ", fold = " ", foldopen = "▾", foldclose = "▸", foldsep = " " }
+opt.fillchars = { eob = " ", fold = " ", foldopen = "▾", foldclose = "▸", foldsep = " ", diff = "╱" }
 opt.splitright = true
 opt.splitbelow = true
 opt.splitkeep = "screen"
@@ -44,6 +44,10 @@ opt.jumpoptions = "view"
 opt.mouse = "a"
 opt.grepprg = "rg --vimgrep --smart-case"
 opt.grepformat = "%f:%l:%c:%m"
+
+-- Diff: histogram aligns moved/rewritten blocks better (the defaults already pair changed
+-- lines with linematch and highlight the changed characters with inline:char)
+opt.diffopt:append("algorithm:histogram")
 
 -- Persistence / performance --------------------------------------------
 opt.undofile = true

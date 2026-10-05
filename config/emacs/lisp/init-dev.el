@@ -148,7 +148,9 @@
 ;; ------------------------------------------------------------------
 (use-package magit
   :defer t
-  :custom (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
+  :custom
+  (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1)
+  (magit-diff-refine-hunk 'all))                 ; word-level highlights, like inline:char in nvim
 
 (use-package diff-hl
   :hook ((magit-pre-refresh . diff-hl-magit-pre-refresh)

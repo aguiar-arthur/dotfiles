@@ -41,6 +41,34 @@ return {
     },
   },
 
+  -- Side-by-side diffs, file history and merge conflicts ----------------------
+  {
+    "sindrets/diffview.nvim",
+    cmd = { "DiffviewOpen", "DiffviewClose", "DiffviewFileHistory" },
+    keys = {
+      {
+        "<leader>gv",
+        function()
+          if next(require("diffview.lib").views) then vim.cmd("DiffviewClose") else vim.cmd("DiffviewOpen") end
+        end,
+        desc = "Diff view (toggle)",
+      },
+      { "<leader>gV", "<cmd>DiffviewOpen origin/HEAD...HEAD --imply-local<CR>", desc = "Diff view: branch vs origin" },
+      { "<leader>gh", "<cmd>DiffviewFileHistory %<CR>", desc = "File history" },
+      { "<leader>gh", ":DiffviewFileHistory<CR>", mode = "x", desc = "History of selection" },
+      { "<leader>gH", "<cmd>DiffviewFileHistory<CR>", desc = "Repo history" },
+    },
+    opts = {
+      enhanced_diff_hl = true, -- deleted lines in red on the left, not as "changed"
+      view = { merge_tool = { layout = "diff3_mixed" } }, -- ours | result | theirs
+      keymaps = {
+        view = { { "n", "q", "<cmd>DiffviewClose<CR>", { desc = "Close diff view" } } },
+        file_panel = { { "n", "q", "<cmd>DiffviewClose<CR>", { desc = "Close diff view" } } },
+        file_history_panel = { { "n", "q", "<cmd>DiffviewClose<CR>", { desc = "Close diff view" } } },
+      },
+    },
+  },
+
   -- Quick navigation --------------------------------------------------------
   {
     "folke/flash.nvim",

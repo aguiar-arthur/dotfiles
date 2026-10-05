@@ -6,7 +6,7 @@ complete LaTeX workflow), **Emacs** (Org mode and Clojure, with the same keymaps
 
 ## Layout
 
-```
+```text
 Brewfile                      programs and fonts (brew bundle)
 install.sh                    creates the symlinks and enables starship in zsh
 AGENTS.md                     conventions for AI agents working in this repo (CLAUDE.md points to it)
@@ -14,6 +14,7 @@ config/
   nvim/                       Neovim >= 0.11
   emacs/                      Emacs >= 29 (Org + Clojure, evil keymaps mirroring nvim)
   starship/starship.toml      two-line prompt, "pill" style, Dracula colors
+  rumdl/rumdl.toml            Markdown lint rules (user-level default)
   iterm2/dracula.json         iTerm2 Dynamic Profile (Dracula colors)
 ```
 
@@ -42,7 +43,7 @@ Then:
 |---|---|
 | `~/.config/nvim` → `config/nvim` | install programs (that's `brew bundle`) |
 | `~/.config/emacs` → `config/emacs` | install Emacs packages (they install on first launch) |
-| `~/.config/starship.toml` → `config/starship/starship.toml` | install nvim plugins (happens when you open `nvim`) |
+| `~/.config/starship.toml` → `config/starship/starship.toml`, `~/.config/rumdl/rumdl.toml` → `config/rumdl/rumdl.toml` | install nvim plugins (happens when you open `nvim`) |
 | iTerm2 profile → `~/Library/Application Support/iTerm2/DynamicProfiles/` | set the iTerm2 profile as default (manual step above) |
 | adds a marked block to `~/.zshrc` that runs `starship init zsh` (once) | |
 | adds the `e` alias (`emacsclient`, starts a daemon if needed) to `~/.zshrc` (once) | |
@@ -67,7 +68,7 @@ workflow. Leader = `<Space>`, localleader = `,`.
 
 ### Structure
 
-```
+```text
 config/nvim/
   init.lua                    entry point (checks version, loads config/*)
   lua/config/
@@ -105,7 +106,7 @@ config/nvim/
 | `<leader>o` | open | `op` explorer · `of` reveal current file · `on` notification history |
 | `<leader>l` | lsp | `ld` definition · `lr` references · `ln` rename · `la` code action · `lf` format · `ll` diagnostics |
 | `<leader>d` | diagnostics (Trouble) | `dx` · `dd` buffer · `dq` quickfix · `dt` TODOs |
-| `<leader>g` | git | `gg` lazygit · `gs` stage hunk · `gp` preview · `gb` blame · `gl` log · `]c`/`[c` hunks |
+| `<leader>g` | git | `gg` lazygit · `gv` diff view · `gh` file history · `gs` stage hunk · `gp` preview · `gb` blame · `gl` log · `]c`/`[c` hunks |
 | `<leader>b` / `w` | buffer / window | `bd` close buffer · `bb` list · `wv`/`ws` splits · `Ctrl-h/j/k/l` navigate |
 | `<leader>t` | terminal | `tf` float · `th` horizontal · `tv` vertical · `Ctrl-\` toggle |
 | `<leader>m` | harpoon | `ma` add · `mm` menu · `m1…m5` jump |
@@ -178,12 +179,39 @@ forward/inverse search work per slide. Snippets (completion menu):
 | `blk` / `ablk` | block / alert block |
 | `pau` | `\pause` |
 
+### Git diffs
+
+| Keymap | Shows |
+|---|---|
+| `<leader>gv` | **diff view** (diffview.nvim): every changed file in a side panel, each one side by side; toggles |
+| `<leader>gV` | the current branch against `origin/HEAD` (what a PR would contain) |
+| `<leader>gh` / `<leader>gH` | history of this file / of the repo, each commit as a diff (in visual mode: history of the selected lines) |
+| `<leader>gd` · `<leader>gp` | quick diff of the buffer against the index · preview the hunk under the cursor (gitsigns) |
+| `]c` / `[c` | next / previous hunk (also inside the diff view) |
+
+Inside the diff view: `Tab`/`S-Tab` next/previous file, `-` stages or unstages a file in the
+panel, `g?` lists every key, `q` closes. With merge conflicts the view opens three columns
+(ours · result · theirs): `[x`/`]x` jump between conflicts, `<leader>co`/`ct`/`cb`/`ca` take ours /
+theirs / base / all.
+
+Diff colors are tinted backgrounds (green added, red removed, blue changed, brighter blue for
+the exact characters that changed), so syntax highlighting stays readable. Removed lines show as
+`╱` on the other side. Emacs gets the same keys through magit, with word-level highlighting.
+
 ### Markdown
 
 No in-editor rendering: `,p` (in a markdown file) builds an HTML page with **pandoc**
 and opens it in the browser. Math written as `$...$`, `$$...$$`, `\(...\)` or `\[...\]` is
 rendered as MathML (no internet needed), and images are embedded. After the first `,p`, each
 save rebuilds the page; refresh the browser tab (Cmd+R) to see it. Needs `pandoc` (Brewfile).
+
+**rumdl** is the Markdown language server (Rust, single binary from Mason). It lints with
+markdownlint-compatible rules as you type (broken relative links and `#anchors` included),
+completes file paths and heading anchors inside links, gives `gd`/`gr`/rename on links and an
+outline for `<leader>fs`. On save it applies only safe fixes (fence languages, list markers,
+spacing) and never rewraps paragraphs. Code actions (`<leader>la`) fix one issue or ignore a
+rule for that line. Rules live in `config/rumdl/rumdl.toml` (line length 100); a project's own
+`.rumdl.toml` takes precedence.
 
 ### LSP, formatting and debug
 
@@ -193,7 +221,8 @@ save rebuilds the page; refresh the browser tab (Cmd+R) to see it. Needs `pandoc
 | Python | basedpyright + ruff | ruff |
 | LaTeX/BibTeX | texlab | latexindent |
 | Bash | bashls (+ shellcheck) | shfmt |
-| JS/TS/HTML/CSS/JSON/YAML/MD | vtsls, html, cssls, jsonls, yamlls, marksman | prettier |
+| JS/TS/HTML/CSS/JSON/YAML | vtsls, html, cssls, jsonls, yamlls | prettier |
+| Markdown | rumdl (lint, links, outline) | rumdl |
 | TOML · C/C++ | taplo · clangd | LSP |
 | Clojure | clojure-lsp (from the Brewfile; enabled if on PATH) | LSP |
 
@@ -220,7 +249,7 @@ The repo holds only configuration. Everything generated (packages, native-comp c
 history, databases) goes to `~/.local/share/emacs` (`early-init.el`, `no-littering`), and
 `.gitignore` whitelists just `early-init.el`, `init.el` and `lisp/`.
 
-```
+```text
 config/emacs/
   early-init.el               data dir, byte-code only (no native-comp), clean frame
   init.el                     package archives, no-littering, loads lisp/* (failing modules are skipped)
@@ -243,7 +272,7 @@ config/emacs/
 | `<leader>op` `of` | treemacs · reveal file |
 | `<leader>l…` `gd` `gr` `gi` `K` | eglot + xref + eldoc (definition, references, rename, code action, format…) |
 | `<leader>d…` `]d` `[d` `]e` `[e` | flymake diagnostics |
-| `<leader>g…` `]c` `[c` | magit (in place of lazygit) + diff-hl hunks (stage, reset, preview) |
+| `<leader>g…` `]c` `[c` | magit (in place of lazygit and diffview: `gv` diff, `gh`/`gH` history) + diff-hl hunks (stage, reset, preview) |
 | `<leader>b…` `w…` `Ctrl-h/j/k/l` `Tab` | buffers · windows · navigation (same keys) |
 | `<leader>t…` `Ctrl-\` | terminal (eat) |
 | `<leader>m…` | harpoon-style marks, per project (own implementation) |
@@ -251,10 +280,10 @@ config/emacs/
 | `s` `S` · `gsa gsd gsr` · `gc` · `Alt-j/k` | avy jump · surround · comment · move lines |
 
 Differences: `<leader>D` is the **CIDER** debugger/tracer (not DAP); `<leader>lM` lists packages
-(no Mason); `<leader>od` opens the dashboard (recent files, projects, today's agenda); `Tab` cycles headings in
-Org buffers and switches buffers elsewhere. Extra letters Neovim does not use: `<leader>a`
-(agenda), `<leader>i` (capture), `<leader>n` (notes), `<leader>h` (help), `<leader>.` (embark actions, also
-`C-.`). `<leader>ug` toggles indent guides.
+(no Mason); `<leader>od` opens the dashboard (recent files, projects, today's agenda); `Tab`
+cycles headings in Org buffers and switches buffers elsewhere. Extra letters Neovim does not
+use: `<leader>a` (agenda), `<leader>i` (capture), `<leader>n` (notes), `<leader>h` (help),
+`<leader>.` (embark actions, also `C-.`). `<leader>ug` toggles indent guides.
 
 ### Org
 
@@ -318,7 +347,7 @@ Debugger: `<leader>Dd` debug defun · `Dt` trace var · `Di` inspect last result
 
 Two-line prompt, with icons (Nerd Font) and contextual information:
 
-```
+```text
 (mac) (~/dotfiles) (main !1 ?2) +4 (py 3.13) ───────────────── 3s  11:10
 ❯
 ```

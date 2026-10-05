@@ -5,10 +5,11 @@ Personal dotfiles for macOS: Neovim, Emacs, Starship and an iTerm2 profile.
 
 ## Layout
 
-```
+```text
 config/nvim/        Neovim >= 0.11 (lazy.nvim, native LSP in after/lsp/, snippets/)
 config/emacs/       Emacs >= 29: early-init.el, init.el, lisp/init-*.el
 config/starship/    starship.toml
+config/rumdl/       rumdl.toml (Markdown lint rules, user-level)
 config/iterm2/      dracula.json (Dynamic Profile)
 install.sh          symlinks + marked ~/.zshrc blocks
 Brewfile            every dependency

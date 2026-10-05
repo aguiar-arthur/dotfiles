@@ -168,6 +168,10 @@
     "g b" '(magit-blame-addition :wk "blame")
     "g B" '(aa/blame-toggle :wk "toggle blame")
     "g d" '(magit-diff-buffer-file :wk "diff this")
+    "g v" '(magit-diff-dwim :wk "diff view")
+    "g V" '(magit-diff-range :wk "diff view: range / branch")
+    "g h" '(magit-log-buffer-file :wk "file history")
+    "g H" '(magit-log-all :wk "repo history")
     "g O" '(browse-at-remote :wk "open in browser")
 
     ;; LSP ------------------------------------------------------------

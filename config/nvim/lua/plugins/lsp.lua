@@ -13,7 +13,7 @@ local mason_servers = {
   "jsonls",
   "yamlls",
   "taplo", -- TOML
-  "marksman", -- Markdown
+  "rumdl", -- Markdown: lint, format, link completion/navigation, outline
   "html",
   "cssls",
   "vtsls", -- TypeScript / JavaScript
