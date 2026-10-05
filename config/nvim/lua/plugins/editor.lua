@@ -132,7 +132,6 @@ return {
     opts = {},
     keys = {
       { "<leader>dx", "<cmd>Trouble diagnostics toggle<CR>", desc = "Diagnostics (Trouble)" },
-      { "<leader>dw", "<cmd>Trouble diagnostics toggle<CR>", desc = "Workspace diagnostics" },
       { "<leader>dd", "<cmd>Trouble diagnostics toggle filter.buf=0<CR>", desc = "Document diagnostics" },
       { "<leader>ds", "<cmd>Trouble symbols toggle focus=false<CR>", desc = "Symbols (Trouble)" },
       { "<leader>dl", "<cmd>Trouble loclist toggle<CR>", desc = "Location list" },

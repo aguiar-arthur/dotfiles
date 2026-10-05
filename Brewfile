@@ -26,8 +26,13 @@ brew "fd"
 brew "lazygit"
 brew "starship"
 brew "pandoc"
+brew "aspell" # spell check (Emacs flyspell)
+brew "prettier" # formatters used by Emacs apheleia (Neovim gets them via Mason)
+brew "shfmt"
+brew "stylua"
 # ui
 cask "mactex"
 cask "skim"
 cask "font-jetbrains-mono-nerd-font"
 cask "iterm2"
+cask "emacs-app"

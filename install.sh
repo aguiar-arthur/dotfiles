@@ -20,8 +20,14 @@ link() {
   echo "link   $dst -> $src"
 }
 
-# Neovim and Starship (macOS and Linux)
+# Neovim, Emacs and Starship (macOS and Linux)
 link "$DOT/config/nvim" "$HOME/.config/nvim"
+link "$DOT/config/emacs" "$HOME/.config/emacs"
+for old in "$HOME/.emacs" "$HOME/.emacs.el" "$HOME/.emacs.d"; do
+  if [ -e "$old" ]; then
+    echo "WARN   $old exists: Emacs loads it instead of ~/.config/emacs (move it away)"
+  fi
+done
 link "$DOT/config/starship/starship.toml" "$HOME/.config/starship.toml"
 
 # iTerm2 (macOS only): iTerm reads Dynamic Profiles from this folder automatically
@@ -42,6 +48,20 @@ ZSH
   echo "zshrc  starship block added to $ZSHRC"
 else
   echo "ok     $ZSHRC (starship already configured)"
+fi
+
+# Emacs: `e file` opens it in the running Emacs (starts a daemon if needed)
+MARK_E="# >>> dotfiles: emacs >>>"
+if ! grep -qF "$MARK_E" "$ZSHRC" 2>/dev/null; then
+  cat >> "$ZSHRC" <<'ZSH'
+
+# >>> dotfiles: emacs >>>
+alias e='emacsclient -n -c -a ""'
+# <<< dotfiles: emacs <<<
+ZSH
+  echo "zshrc  emacs alias added to $ZSHRC"
+else
+  echo "ok     $ZSHRC (emacs alias already configured)"
 fi
 
 echo

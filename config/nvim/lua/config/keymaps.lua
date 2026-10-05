@@ -37,7 +37,15 @@ map("i", ".", ".<c-g>u", o("Undo breakpoint"))
 -- Code (commenting uses Neovim's native gc) -----------------------------
 map("n", "<leader>cc", "gcc", { remap = true, desc = "Comment line" })
 map("v", "<leader>cc", "gc", { remap = true, desc = "Comment selection" })
-map("n", "<leader>ct", "gcc", { remap = true, desc = "Toggle comment" })
+
+-- LSP defaults ----------------------------------------------------------
+-- Neovim 0.11+ maps grn/grr/gra/gri/grt/grx globally. Our `gr` (references, lsp.lua)
+-- would then wait 'timeoutlen' for a longer match; <leader>l covers all of them.
+for _, lhs in ipairs({ "grn", "grr", "gra", "gri", "grt", "grx" }) do
+  for _, mode in ipairs({ "n", "x" }) do
+    pcall(vim.keymap.del, mode, lhs)
+  end
+end
 
 -- Window ---------------------------------------------------------------
 map("n", "<C-h>", "<C-w>h", o("Window left"))
