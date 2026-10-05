@@ -134,8 +134,13 @@
   (dashboard-center-content t)
   (dashboard-startup-banner 'logo)
   (dashboard-banner-logo-title "Emacs")
-  (initial-buffer-choice (lambda () (get-buffer-create "*dashboard*")))
-  :config (dashboard-setup-startup-hook))
+  :config
+  ;; Plain `emacs': the startup hook shows the dashboard only when no file was given.
+  (dashboard-setup-startup-hook)
+  ;; Daemon (`e', emacsclient): new frames without a file start on the dashboard. Not set
+  ;; outside the daemon, where `emacs file.org' would split the frame to show both.
+  (when (daemonp)
+    (setq initial-buffer-choice (lambda () (get-buffer-create "*dashboard*")))))
 
 (provide 'init-ui)
 ;;; init-ui.el ends here
