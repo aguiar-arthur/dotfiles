@@ -27,7 +27,7 @@ require("lazy").setup({
   checker = { enabled = true, notify = false },
   change_detection = { notify = false },
   ui = { border = "rounded" },
-  rocks = { enabled = false }, -- none of these plugins need luarocks
+  rocks = { enabled = false },
   performance = {
     rtp = {
       disabled_plugins = { "gzip", "tarPlugin", "tohtml", "tutor", "zipPlugin" },

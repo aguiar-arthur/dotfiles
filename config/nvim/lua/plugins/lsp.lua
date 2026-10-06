@@ -1,40 +1,47 @@
--- LSP using the native Neovim >= 0.11 API (vim.lsp.config / vim.lsp.enable).
---   * per-server defaults: nvim-lspconfig (the plugin's lsp/ folder)
---   * personal per-server overrides: ~/.config/nvim/after/lsp/<server>.lua
---   * binary installation: mason (servers + formatters)
-
--- Servers installed/managed by Mason
 local mason_servers = {
-  "lua_ls", -- Lua
-  "basedpyright", -- Python (types)
-  "ruff", -- Python (lint/format)
-  "bashls", -- Bash
-  "texlab", -- LaTeX / BibTeX
+  "lua_ls",
+  "basedpyright",
+  "ruff",
+  "bashls",
+  "texlab",
   "jsonls",
   "yamlls",
-  "taplo", -- TOML
-  "rumdl", -- Markdown: lint, format, link completion/navigation, outline
+  "taplo",
+  "rumdl",
   "html",
   "cssls",
-  "vtsls", -- TypeScript / JavaScript
-  "clangd", -- C / C++
+  "vtsls",
+  "clangd",
 }
 
--- Servers installed outside Mason (e.g. Brewfile). Only enabled if the binary exists.
 local system_servers = {
   clojure_lsp = "clojure-lsp",
 }
 
--- Formatters / tools (used by conform.nvim)
 local mason_tools = {
   "stylua",
   "shfmt",
-  "shellcheck", -- used by bashls
+  "shellcheck",
   "prettier",
 }
 
+local function lsp_pick(source)
+  return function()
+    local opts = {}
+    if package.loaded["diffview.lib"] and require("diffview.lib").get_current_view() then
+      local here = vim.api.nvim_buf_get_name(0)
+      opts.confirm = function(picker, item)
+        local other = item and Snacks.picker.util.path(item) ~= here
+
+        require("snacks.picker.actions").jump(picker, item, { cmd = other and "tab" or nil })
+      end
+    end
+    Snacks.picker[source](opts)
+  end
+end
+
 return {
-  -- Neovim API types for lua_ls
+
   {
     "folke/lazydev.nvim",
     ft = "lua",
@@ -68,12 +75,11 @@ return {
       "saghen/blink.cmp",
     },
     config = function()
-      -- Capabilities for all servers (blink.cmp completion)
+
       vim.lsp.config("*", {
         capabilities = require("blink.cmp").get_lsp_capabilities(),
       })
 
-      -- Automatically install and enable the Mason servers
       require("mason-lspconfig").setup({
         ensure_installed = mason_servers,
         automatic_enable = true,
@@ -104,7 +110,6 @@ return {
         },
       })
 
-      -- Buffer-local keymaps, created when a server attaches to the buffer
       vim.api.nvim_create_autocmd("LspAttach", {
         group = vim.api.nvim_create_augroup("user_lsp_attach", { clear = true }),
         callback = function(ev)
@@ -115,29 +120,25 @@ return {
             vim.keymap.set(mode or "n", lhs, rhs, { buffer = buf, silent = true, desc = desc })
           end
 
-          -- Single-key shortcuts
-          map("gd", function() Snacks.picker.lsp_definitions() end, "Go to definition")
-          map("gr", function() Snacks.picker.lsp_references() end, "Go to references")
-          map("gi", function() Snacks.picker.lsp_implementations() end, "Go to implementation")
+          map("gd", lsp_pick("lsp_definitions"), "Go to definition")
+          map("gr", lsp_pick("lsp_references"), "Go to references")
+          map("gi", lsp_pick("lsp_implementations"), "Go to implementation")
           map("K", vim.lsp.buf.hover, "Hover documentation")
 
-          -- <leader>l prefix
-          map("<leader>ld", function() Snacks.picker.lsp_definitions() end, "Definition")
-          map("<leader>lr", function() Snacks.picker.lsp_references() end, "References")
-          map("<leader>li", function() Snacks.picker.lsp_implementations() end, "Implementation")
-          map("<leader>lt", function() Snacks.picker.lsp_type_definitions() end, "Type definition")
+          map("<leader>ld", lsp_pick("lsp_definitions"), "Definition")
+          map("<leader>lr", lsp_pick("lsp_references"), "References")
+          map("<leader>li", lsp_pick("lsp_implementations"), "Implementation")
+          map("<leader>lt", lsp_pick("lsp_type_definitions"), "Type definition")
           map("<leader>lD", vim.lsp.buf.declaration, "Declaration")
           map("<leader>ln", vim.lsp.buf.rename, "Rename symbol")
           map("<leader>la", vim.lsp.buf.code_action, "Code action", { "n", "v" })
           map("<leader>lh", vim.lsp.buf.hover, "Hover documentation")
           map("<leader>ls", vim.lsp.buf.signature_help, "Signature help")
-          map("<leader>ll", function() Snacks.picker.diagnostics_buffer() end, "Buffer diagnostics")
           map("<leader>lR", "<cmd>LspRestart<CR>", "Restart LSP")
           map("<leader>lf", function()
             require("conform").format({ async = true, lsp_format = "fallback" })
           end, "Format buffer/selection", { "n", "v" })
 
-          -- ruff handles lint/format; hover is left to basedpyright
           if client and client.name == "ruff" then
             client.server_capabilities.hoverProvider = false
           end

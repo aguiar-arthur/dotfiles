@@ -1,13 +1,4 @@
-;;; init-org.el --- Org: layout, TODOs, capture, refile, agenda, babel, export -*- lexical-binding: t -*-
-
-;; ~/org (created on first start, nothing is overwritten):
-;;   inbox.org     everything that arrives; empty it by refiling
-;;   tasks.org     projects and next actions, by area
-;;   calendar.org  appointments
-;;   journal.org   week/day journal
-;;   notes/        org-roam notes (notes/daily/ for dailies)
-;;   slides/       Beamer presentations
-;;   archive/      archived tasks
+;;; -*- lexical-binding: t -*-
 
 (defconst aa/org-dir (file-name-as-directory (expand-file-name "~/org/"))
   "Root of the Org files.")
@@ -50,20 +41,16 @@
   (setq-local org-hide-emphasis-markers (not org-hide-emphasis-markers))
   (when (derived-mode-p 'org-mode) (org-restart-font-lock)))
 
-;; ------------------------------------------------------------------
-;; Org (built in)
-;; ------------------------------------------------------------------
 (use-package org
   :ensure nil
   :defer t
   :config
   (require 'org-habit)
-  (require 'org-tempo)                          ; <s TAB, <q TAB...
+  (require 'org-tempo)
 
   (setq org-directory aa/org-dir
         org-default-notes-file (aa/org-file "inbox.org")
 
-        ;; Look and editing
         org-startup-indented t
         org-startup-folded 'content
         org-startup-with-inline-images t
@@ -86,7 +73,6 @@
         org-edit-src-content-indentation 0
         org-confirm-babel-evaluate t
 
-        ;; TODO flow
         org-todo-keywords
         '((sequence "TODO(t)" "NEXT(n)" "WAIT(w@/!)" "|" "DONE(d!)" "CANCELLED(c@)"))
         org-todo-keyword-faces
@@ -99,7 +85,6 @@
         org-log-reschedule 'time
         org-log-redeadline 'time
 
-        ;; Contexts (mutually exclusive) and markers
         org-tag-alist
         '((:startgroup)
           ("@home" . ?h) ("@work" . ?w) ("@study" . ?s) ("@out" . ?o)
@@ -108,7 +93,6 @@
         org-tags-exclude-from-inheritance '("PROJECT")
         org-stuck-projects '("+PROJECT/-DONE-CANCELLED" ("NEXT") nil "")
 
-        ;; Refile and archive
         org-refile-targets `((,(aa/org-file "tasks.org") :maxlevel . 3)
                              (,(aa/org-file "calendar.org") :level . 1))
         org-refile-use-outline-path 'file
@@ -116,7 +100,6 @@
         org-refile-allow-creating-parent-nodes 'confirm
         org-archive-location (concat (aa/org-file "archive/") "%s_archive::")
 
-        ;; Clock and habits
         org-clock-persist 'history
         org-clock-persist-file (expand-file-name "org-clock-save.el" aa/data-dir)
         org-clock-out-remove-zero-time-clocks t
@@ -124,20 +107,17 @@
         org-habit-graph-column 60
         org-habit-show-habits-only-for-today t
 
-        ;; LaTeX preview (C-c C-x C-l)
         org-preview-latex-default-process 'dvisvgm)
 
   (plist-put org-format-latex-options :scale 1.4)
   (org-clock-persistence-insinuate)
 
-  ;; Babel. Clojure blocks run through CIDER: jack in first (`, j' in Clojure).
   (require 'ob-clojure)
   (setq org-babel-clojure-backend 'cider)
   (org-babel-do-load-languages
    'org-babel-load-languages
    '((emacs-lisp . t) (shell . t) (python . t) (latex . t) (clojure . t)))
 
-  ;; Heading sizes survive theme changes
   (custom-theme-set-faces
    'user
    '(org-document-title ((t (:height 1.5 :weight bold))))
@@ -146,14 +126,10 @@
    '(org-level-3 ((t (:height 1.1 :weight semi-bold))))
    '(org-level-4 ((t (:height 1.05)))))
 
-  ;; Keep the agenda files on disk up to date
   (add-hook 'auto-save-hook #'org-save-all-org-buffers)
   (dolist (fn '(org-refile org-archive-subtree))
     (advice-add fn :after (lambda (&rest _) (org-save-all-org-buffers)))))
 
-;; ------------------------------------------------------------------
-;; Capture (SPC i): everything lands in the inbox, except events and journal
-;; ------------------------------------------------------------------
 (setq org-capture-templates
       `(("t" "Task" entry (file ,(aa/org-file "inbox.org"))
          "* TODO %?\n:PROPERTIES:\n:CREATED: %U\n:END:\n%i" :empty-lines 1)
@@ -182,9 +158,6 @@
 (aa/def-capture aa/capture-meeting "m" "Capture a meeting (clocked).")
 (aa/def-capture aa/capture-journal "j" "Write in the journal.")
 
-;; ------------------------------------------------------------------
-;; Agenda (inbox, tasks and calendar; journal and archive stay out)
-;; ------------------------------------------------------------------
 (setq org-agenda-files (mapcar #'aa/org-file '("inbox.org" "tasks.org" "calendar.org"))
       calendar-week-start-day 1)
 
@@ -237,15 +210,12 @@
 (aa/def-agenda aa/agenda-stuck "s" "Stuck projects.")
 (aa/def-agenda aa/agenda-review "r" "Weekly review.")
 
-;; ------------------------------------------------------------------
-;; Look
-;; ------------------------------------------------------------------
 (use-package org-modern
   :hook ((org-mode . org-modern-mode)
          (org-agenda-finalize . org-modern-agenda))
   :custom (org-modern-star '("◉" "○" "◈" "◇" "●" "○" "◈")))
 
-(use-package org-appear                         ; reveal markers under the cursor
+(use-package org-appear
   :hook (org-mode . org-appear-mode)
   :custom
   (org-appear-delay 0.1)
@@ -254,9 +224,6 @@
   (org-appear-autolinks t)
   (org-appear-autoentities t))
 
-;; ------------------------------------------------------------------
-;; Export: PDF via MacTeX; Beamer slides with `#+latex_class: beamer'
-;; ------------------------------------------------------------------
 (with-eval-after-load 'ox-latex
   (setq org-latex-compiler "pdflatex"
         org-latex-pdf-process
@@ -268,4 +235,3 @@
         org-export-coding-system 'utf-8))
 
 (provide 'init-org)
-;;; init-org.el ends here

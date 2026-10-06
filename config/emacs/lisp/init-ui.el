@@ -1,11 +1,9 @@
-;;; init-ui.el --- Theme, modeline, completion, file tree -*- lexical-binding: t -*-
+;;; -*- lexical-binding: t -*-
 
 (use-package dracula-theme
   :config
   (load-theme 'dracula t))
 
-;; Icons: run `M-x nerd-icons-install-fonts' once if symbols look broken
-;; (the JetBrainsMono Nerd Font from the Brewfile already covers most of them).
 (use-package nerd-icons)
 
 (use-package nerd-icons-completion
@@ -28,16 +26,12 @@
         which-key-idle-secondary-delay 0.05
         which-key-max-description-length 40))
 
-;; ------------------------------------------------------------------
-;; Minibuffer: vertico + orderless + marginalia + consult (C-j / C-k like nvim)
-;; ------------------------------------------------------------------
 (use-package vertico
   :init (vertico-mode 1)
   :bind (:map vertico-map
               ("C-j" . vertico-next)
               ("C-k" . vertico-previous)))
 
-;; Resume the last picker (SPC f R)
 (use-package vertico-repeat
   :ensure nil
   :after vertico
@@ -56,7 +50,6 @@
   :bind (("C-s" . consult-line)
          ("C-x b" . consult-buffer)))
 
-;; Actions on the thing at point (SPC .). `embark-export' + wgrep edits results in place.
 (use-package embark
   :bind (("C-." . embark-act)
          ("C-;" . embark-dwim))
@@ -67,10 +60,6 @@
   :after (embark consult)
   :hook (embark-collect-mode . consult-preview-at-point-mode))
 
-;; ------------------------------------------------------------------
-;; In-buffer: corfu + cape. Tab/S-Tab/C-j/C-k select; RET accepts only a selected
-;; candidate (like blink.cmp).
-;; ------------------------------------------------------------------
 (defun aa/corfu-ret ()
   "Accept the selected Corfu candidate, else behave as a plain RET."
   (interactive)
@@ -107,9 +96,6 @@
   (add-hook 'completion-at-point-functions #'cape-file)
   (add-hook 'completion-at-point-functions #'cape-dabbrev))
 
-;; ------------------------------------------------------------------
-;; File tree (SPC o p)
-;; ------------------------------------------------------------------
 (use-package treemacs
   :defer t
   :custom
@@ -120,9 +106,6 @@
   :after treemacs
   :config (treemacs-load-theme "nerd-icons"))
 
-;; ------------------------------------------------------------------
-;; Dashboard (SPC o d): recent files, projects and today's agenda
-;; ------------------------------------------------------------------
 (use-package dashboard
   :demand t
   :custom
@@ -135,12 +118,10 @@
   (dashboard-startup-banner 'logo)
   (dashboard-banner-logo-title "Emacs")
   :config
-  ;; Plain `emacs': the startup hook shows the dashboard only when no file was given.
+
   (dashboard-setup-startup-hook)
-  ;; Daemon (`e', emacsclient): new frames without a file start on the dashboard. Not set
-  ;; outside the daemon, where `emacs file.org' would split the frame to show both.
+
   (when (daemonp)
     (setq initial-buffer-choice (lambda () (get-buffer-create "*dashboard*")))))
 
 (provide 'init-ui)
-;;; init-ui.el ends here

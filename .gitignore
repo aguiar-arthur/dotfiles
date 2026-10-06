@@ -1,8 +1,5 @@
-# macOS
 .DS_Store
 
-# emacs: track only the configuration; ignore anything Emacs or packages generate
-# (packages, caches, history and databases live in ~/.local/share/emacs)
 /config/emacs/*
 !/config/emacs/early-init.el
 !/config/emacs/init.el

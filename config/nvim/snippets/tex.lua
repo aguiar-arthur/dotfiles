@@ -1,17 +1,8 @@
--- LaTeX snippets (LuaSnip). Loaded by lua/plugins/completion.lua.
---
---  * `autosnippets`: expand by themselves when the trigger is typed (context-aware:
---    text/math, via vimtex#syntax#in_mathzone).
---  * `snippets`: show up in the completion menu (blink.cmp) and expand with <CR>/<Tab>.
---
--- Inside a snippet, <Tab>/<S-Tab> jump between fields.
-
 local ls = require("luasnip")
 local s, t, i, f = ls.snippet, ls.text_node, ls.insert_node, ls.function_node
 local rep = require("luasnip.extras").rep
 local fmta = require("luasnip.extras.fmt").fmta
 
--- Context -------------------------------------------------------------------
 local function in_math()
   local ok, r = pcall(vim.fn["vimtex#syntax#in_mathzone"])
   return ok and r == 1
@@ -22,13 +13,8 @@ local function cap(n)
   return f(function(_, snip) return snip.captures[n] end)
 end
 
--- Helpers for declaring snippets ------------------------------------------------
 local snippets, autosnippets = {}, {}
 
----@param ctx string|table  trigger or LuaSnip context
----@param nodes table
----@param cond? fun():boolean
----@param word? boolean  false = expands even when attached to another word
 local function auto(ctx, nodes, cond, word)
   ctx = type(ctx) == "string" and { trig = ctx } or ctx
   ctx.snippetType = "autosnippet"
@@ -41,7 +27,6 @@ local function snip(ctx, nodes, cond)
   table.insert(snippets, s(ctx, nodes, { condition = cond }))
 end
 
--- Text mode: environments -------------------------------------------------------
 auto("mk", fmta("$<>$<>", { i(1), i(0) }), in_text)
 auto("dm", fmta("\\[\n\t<>\n\\]<>", { i(1), i(0) }), in_text)
 auto("beg", fmta("\\begin{<>}\n\t<>\n\\end{<>}", { i(1), i(0), rep(1) }), in_text)
@@ -90,7 +75,6 @@ snip("tab", fmta([[
 	\end{tabular}
 \end{table}<>]], { i(1, "htbp"), i(2), i(3), i(4, "lcc"), i(5), i(0) }))
 
--- Text mode: structure and references ---------------------------------------------
 snip("sec", fmta("\\section{<>}\n\\label{sec:<>}\n<>", { i(1), i(2), i(0) }))
 snip("ssec", fmta("\\subsection{<>}\n\\label{sec:<>}\n<>", { i(1), i(2), i(0) }))
 snip("sssec", fmta("\\subsubsection{<>}\n\\label{sec:<>}\n<>", { i(1), i(2), i(0) }))
@@ -133,7 +117,6 @@ snip("doc", fmta([[
 \end{document}
 ]], { i(1, "12pt,a4paper"), i(2, "article"), i(3, "brazil"), i(4), i(5), i(0) }))
 
--- Beamer (slides) -----------------------------------------------------------------
 snip("bdoc", fmta([[
 \documentclass[aspectratio=169]{beamer}
 
@@ -172,22 +155,18 @@ snip("blk", fmta("\\begin{block}{<>}\n\t<>\n\\end{block}<>", { i(1), i(0), i(2) 
 snip("ablk", fmta("\\begin{alertblock}{<>}\n\t<>\n\\end{alertblock}<>", { i(1), i(0), i(2) }))
 snip("pau", t("\\pause"))
 
--- Math mode: autosnippets ------------------------------------------------------
--- Fractions: `a//` → \frac{a}{}, `(a+b)//` → \frac{a+b}{}
 auto({ trig = "([%w%^_\\]+)//", trigEngine = "pattern" }, fmta("\\frac{<>}{<>}<>", { cap(1), i(1), i(0) }), in_math, false)
 auto({ trig = "(%b())//", trigEngine = "pattern" }, fmta("\\frac{<>}{<>}<>", {
   f(function(_, sn) return sn.captures[1]:sub(2, -2) end), i(1), i(0),
 }), in_math, false)
 auto("//", fmta("\\frac{<>}{<>}<>", { i(1), i(2), i(0) }), in_math, false)
 
--- Sub/superscripts: `x2` → x_2 ; `__` → _{} ; `td` → ^{} ; `sr` → ^2 ; `cb` → ^3
 auto({ trig = "(%a)(%d)", trigEngine = "pattern" }, fmta("<>_<>", { cap(1), cap(2) }), in_math)
 auto("__", fmta("_{<>}<>", { i(1), i(0) }), in_math, false)
 auto("td", fmta("^{<>}<>", { i(1), i(0) }), in_math, false)
 auto("sr", t("^2"), in_math, false)
 auto("cb", t("^3"), in_math, false)
 
--- Symbols
 local symbols = {
   ["!="] = "\\neq", ["<="] = "\\leq", [">="] = "\\geq", ["->"] = "\\to", ["<-"] = "\\gets",
   ["=>"] = "\\implies", ["=<"] = "\\impliedby", ["<=>"] = "\\iff", ["~~"] = "\\approx",
@@ -198,11 +177,10 @@ local symbols = {
   ["emp"] = "\\emptyset", ["pm"] = "\\pm", ["nabla"] = "\\nabla",
 }
 for trig, out in pairs(symbols) do
-  -- alphabetic triggers respect word boundaries; symbols do not
+
   auto(trig, t(out), in_math, trig:match("^%a+$") ~= nil)
 end
 
--- Greek letters: `;a` → \alpha, `;G` → \Gamma ...
 local greek = {
   a = "alpha", b = "beta", g = "gamma", G = "Gamma", d = "delta", D = "Delta",
   e = "epsilon", E = "varepsilon", z = "zeta", h = "eta", t = "theta", T = "Theta",
@@ -214,7 +192,6 @@ for key, name in pairs(greek) do
   auto(";" .. key, t("\\" .. name), in_math, false)
 end
 
--- Operators and structures
 auto("sum", fmta("\\sum_{<>=<>}^{<>} <>", { i(1, "i"), i(2, "1"), i(3, "n"), i(0) }), in_math)
 auto("prod", fmta("\\prod_{<>=<>}^{<>} <>", { i(1, "i"), i(2, "1"), i(3, "n"), i(0) }), in_math)
 auto("lim", fmta("\\lim_{<> \\to <>} <>", { i(1, "n"), i(2, "\\infty"), i(0) }), in_math)
@@ -230,14 +207,12 @@ auto("mcal", fmta("\\mathcal{<>}<>", { i(1), i(0) }), in_math)
 auto("mbb", fmta("\\mathbb{<>}<>", { i(1), i(0) }), in_math)
 auto("mbf", fmta("\\mathbf{<>}<>", { i(1), i(0) }), in_math)
 
--- Auto-sizing delimiters: `lr(` → \left( ... \right)
 auto("lr(", fmta("\\left( <> \\right)<>", { i(1), i(0) }), in_math, false)
 auto("lr[", fmta("\\left[ <> \\right]<>", { i(1), i(0) }), in_math, false)
 auto("lr{", fmta("\\left\\{ <> \\right\\}<>", { i(1), i(0) }), in_math, false)
 auto("lr|", fmta("\\left| <> \\right|<>", { i(1), i(0) }), in_math, false)
 auto("norm", fmta("\\left\\| <> \\right\\|<>", { i(1), i(0) }), in_math)
 
--- Common functions: `sin` → \sin etc. (only if they don't already have the backslash)
 for _, fn in ipairs({ "sin", "cos", "tan", "log", "ln", "exp", "max", "min", "arcsin", "arccos", "arctan" }) do
   auto({ trig = "([^\\%a])" .. fn, trigEngine = "pattern", wordTrig = false }, { cap(1), t("\\" .. fn) }, in_math)
 end

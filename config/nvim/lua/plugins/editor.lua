@@ -1,5 +1,5 @@
 return {
-  -- Git ------------------------------------------------------------------
+
   {
     "lewis6991/gitsigns.nvim",
     event = { "BufReadPre", "BufNewFile" },
@@ -41,10 +41,19 @@ return {
     },
   },
 
-  -- Side-by-side diffs, file history and merge conflicts ----------------------
   {
     "sindrets/diffview.nvim",
     cmd = { "DiffviewOpen", "DiffviewClose", "DiffviewFileHistory" },
+    init = function()
+
+      vim.api.nvim_create_autocmd("BufFilePost", {
+        group = vim.api.nvim_create_augroup("user_diffview_no_lsp", { clear = true }),
+        pattern = "diffview://*",
+        callback = function(ev)
+          if vim.bo[ev.buf].buftype == "" then vim.bo[ev.buf].buftype = "acwrite" end
+        end,
+      })
+    end,
     keys = {
       {
         "<leader>gv",
@@ -59,8 +68,8 @@ return {
       { "<leader>gH", "<cmd>DiffviewFileHistory<CR>", desc = "Repo history" },
     },
     opts = {
-      enhanced_diff_hl = true, -- deleted lines in red on the left, not as "changed"
-      view = { merge_tool = { layout = "diff3_mixed" } }, -- ours | result | theirs
+      enhanced_diff_hl = true,
+      view = { merge_tool = { layout = "diff3_mixed" } },
       keymaps = {
         view = { { "n", "q", "<cmd>DiffviewClose<CR>", { desc = "Close diff view" } } },
         file_panel = { { "n", "q", "<cmd>DiffviewClose<CR>", { desc = "Close diff view" } } },
@@ -69,7 +78,6 @@ return {
     },
   },
 
-  -- Quick navigation --------------------------------------------------------
   {
     "folke/flash.nvim",
     event = "VeryLazy",
@@ -102,7 +110,6 @@ return {
     end,
   },
 
-  -- Text objects / surround / pairs ------------------------------------------
   { "echasnovski/mini.ai", event = "VeryLazy", opts = { n_lines = 500 } },
 
   {
@@ -121,7 +128,7 @@ return {
     event = "VeryLazy",
     opts = {
       modes = { insert = true, command = true, terminal = false },
-      -- backtick pairs only in markdown (in LaTeX it opens quotes: ``text'')
+
       mappings = { ["`"] = false },
     },
     config = function(_, opts)
@@ -139,7 +146,6 @@ return {
     end,
   },
 
-  -- TODO/FIXME/NOTE ----------------------------------------------------------
   {
     "folke/todo-comments.nvim",
     dependencies = { "nvim-lua/plenary.nvim" },
@@ -148,12 +154,10 @@ return {
     keys = {
       { "]t", function() require("todo-comments").jump_next() end, desc = "Next todo" },
       { "[t", function() require("todo-comments").jump_prev() end, desc = "Previous todo" },
-      { "<leader>dt", "<cmd>Trouble todo toggle<CR>", desc = "Todos (Trouble)" },
-      { "<leader>dT", function() Snacks.picker.todo_comments() end, desc = "Todos (picker)" },
+      { "<leader>dt", "<cmd>Trouble todo toggle<CR>", desc = "Todos (project)" },
     },
   },
 
-  -- Diagnostics ---------------------------------------------------------------
   {
     "folke/trouble.nvim",
     cmd = "Trouble",
@@ -167,7 +171,6 @@ return {
     },
   },
 
-  -- Sessions ------------------------------------------------------------------------
   {
     "folke/persistence.nvim",
     event = "BufReadPre",

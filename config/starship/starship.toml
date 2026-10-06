@@ -1,10 +1,5 @@
 "$schema" = "https://starship.rs/config-schema.json"
 
-# Two-line Starship prompt, "pill" style with Dracula colors.
-# Requires a Nerd Font. Icons use \uXXXX escapes, so the file is plain ASCII.
-#   line 1: OS · directory · git · languages ............ duration · time
-#   line 2: user/host (ssh) · sudo · jobs · status · ❯
-
 add_newline = true
 palette = "dracula"
 command_timeout = 1000
@@ -50,8 +45,6 @@ purple = "#bd93f9"
 red = "#ff5555"
 yellow = "#f1fa8c"
 
-# --- Line 1 ---------------------------------------------------------------
-
 [os]
 disabled = false
 format = "[](fg:purple)[ $symbol](bg:purple fg:base)[](fg:purple) "
@@ -86,7 +79,6 @@ truncation_symbol = "…"
 format = "[](fg:green)[ $symbol$branch(:$remote_branch) ](bg:green fg:base)"
 
 [git_status]
-# The pill's closing cap sits outside the (...) group so it closes even when the repo is clean.
 format = "([$all_status$ahead_behind](bg:green fg:base))[](fg:green) "
 conflicted = "=${count} "
 ahead = "⇡${count} "
@@ -106,8 +98,6 @@ only_nonzero_diffs = true
 format = '([+$added]($added_style) )([-$deleted]($deleted_style) )'
 added_style = "fg:green"
 deleted_style = "fg:red"
-
-# Languages: only shown when the directory has project files/manifests.
 
 [python]
 symbol = " "
@@ -162,8 +152,6 @@ format = "[ $duration](fg:orange) "
 disabled = false
 time_format = "%H:%M"
 format = "[ $time](fg:comment)"
-
-# --- Line 2 ---------------------------------------------------------------
 
 [username]
 format = "[ $user](fg:cyan) "

@@ -1,10 +1,7 @@
-;;; init-dev.el --- Projects, LSP, formatting, git, terminal, marks -*- lexical-binding: t -*-
+;;; -*- lexical-binding: t -*-
 
 (require 'cl-lib)
 
-;; ------------------------------------------------------------------
-;; Projects and search
-;; ------------------------------------------------------------------
 (use-package project
   :ensure nil
   :custom (project-vc-extra-root-markers '("deps.edn" "project.clj" "bb.edn")))
@@ -33,9 +30,6 @@
   (interactive)
   (consult-fd (file-truename aa/config-dir)))
 
-;; ------------------------------------------------------------------
-;; LSP (eglot) and diagnostics (flymake). clojure-lsp is eglot's default server.
-;; ------------------------------------------------------------------
 (use-package eglot
   :ensure nil
   :defer t
@@ -50,6 +44,18 @@
   :custom (flymake-no-changes-timeout 0.5))
 
 (setq eldoc-idle-delay 0.3)
+
+(defun aa/line-diagnostics ()
+  "Show the Flymake diagnostics of the current line."
+  (interactive)
+  (if-let* ((diags (flymake-diagnostics (line-beginning-position) (line-end-position))))
+      (message "%s" (mapconcat #'flymake-diagnostic-text diags "\n"))
+    (message "No diagnostics on this line")))
+
+(defun aa/todos-project ()
+  "Search TODO/FIXME/HACK/NOTE/BUG comments in the project with ripgrep."
+  (interactive)
+  (consult-ripgrep nil "\\b(TODO|FIXME|HACK|NOTE|BUG)\\b"))
 
 (defun aa/next-error-diag ()
   "Jump to the next error diagnostic."
@@ -68,10 +74,6 @@
       (eglot-inlay-hints-mode 'toggle)
     (user-error "Inlay hints need Emacs 30 or newer")))
 
-;; ------------------------------------------------------------------
-;; Formatting: eglot in LSP buffers, apheleia (prettier, shfmt, stylua...) elsewhere.
-;; Both run on save; SPC u f toggles, SPC l f formats on demand.
-;; ------------------------------------------------------------------
 (defvar aa/autoformat t
   "Non-nil formats buffers on save.")
 
@@ -109,10 +111,6 @@
   (add-to-list 'apheleia-inhibit-functions (lambda () (or (not aa/autoformat) (aa/lsp-p))))
   (apheleia-global-mode 1))
 
-;; ------------------------------------------------------------------
-;; Editing aids
-;; ------------------------------------------------------------------
-;; Indent guides (SPC u g), not in Lisp where they add noise
 (defun aa/enable-indent-bars ()
   "Enable indent guides outside Lisp modes."
   (unless (derived-mode-p 'clojure-mode 'emacs-lisp-mode)
@@ -124,33 +122,27 @@
   (indent-bars-prefer-character t)
   (indent-bars-width-frac 0.2))
 
-;; Brackets: electric-pair everywhere but Clojure (smartparens does it there)
 (add-hook 'prog-mode-hook
           (lambda () (unless (derived-mode-p 'clojure-mode) (electric-pair-local-mode 1))))
 
-;; Edit grep / embark-export buffers in place: C-c C-p, then C-c C-c
 (use-package wgrep
   :defer t
   :custom (wgrep-auto-save-buffer t))
 
-(use-package vundo :defer t)                    ; undo tree (SPC f u)
+(use-package vundo :defer t)
 
-(use-package hl-todo                            ; TODO/FIXME highlighting, ]t [t
+(use-package hl-todo
   :hook (prog-mode . hl-todo-mode))
 
-;; `emacsclient file' (alias `e' from install.sh) reuses this instance
 (unless noninteractive
   (require 'server)
   (unless (server-running-p) (server-start)))
 
-;; ------------------------------------------------------------------
-;; Git: magit + diff-hl (gitsigns)
-;; ------------------------------------------------------------------
 (use-package magit
   :defer t
   :custom
   (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1)
-  (magit-diff-refine-hunk 'all))                 ; word-level highlights, like inline:char in nvim
+  (magit-diff-refine-hunk 'all))
 
 (use-package diff-hl
   :hook ((magit-pre-refresh . diff-hl-magit-pre-refresh)
@@ -160,6 +152,99 @@
 
 (use-package browse-at-remote :commands browse-at-remote)
 
+(use-package ediff
+  :ensure nil
+  :defer t
+  :custom
+  (ediff-window-setup-function #'ediff-setup-windows-plain)
+  (ediff-split-window-function #'split-window-horizontally)
+  (ediff-merge-split-window-function #'split-window-horizontally)
+  (ediff-keep-variants nil))
+
+(defun aa/git-changed-file ()
+  "Open a changed, staged or untracked file of the current repository."
+  (interactive)
+  (require 'magit)
+  (let* ((default-directory (or (magit-toplevel) (user-error "Not in a git repository")))
+         (files (delete-dups (append (magit-unstaged-files) (magit-staged-files)
+                                     (magit-untracked-files)))))
+    (find-file (completing-read "Changed file: "
+                                (or files (user-error "No changed files")) nil t))))
+
+(defun aa/git-diff-view ()
+  "Pick a changed file and show it side by side."
+  (interactive)
+  (require 'magit)
+  (let* ((default-directory (or (magit-toplevel) (user-error "Not in a git repository")))
+         (unstaged (magit-unstaged-files))
+         (staged (magit-staged-files))
+         (files (delete-dups (append unstaged staged)))
+         (here (car (member (magit-current-file) files)))
+         (file (cond ((null files) (user-error "No changes to diff"))
+                     ((null (cdr files)) (car files))
+                     (t (completing-read "Diff file: " files nil t nil nil here)))))
+    (if (member file unstaged)
+        (magit-ediff-show-unstaged file)
+      (magit-ediff-show-staged file))))
+
+(defun aa/git-diff-file ()
+  "Show this file side by side: index (left) against the working tree (right)."
+  (interactive)
+  (require 'magit)
+  (magit-ediff-show-unstaged
+   (or (magit-current-file) (user-error "Not visiting a file in a git repository"))))
+
+(defconst aa/diff-backgrounds
+  '((magit-diff-added . "#2c3f3d") (magit-diff-added-highlight . "#2f4f42")
+    (magit-diff-removed . "#3e2e39") (magit-diff-removed-highlight . "#4f323c")
+    (magit-diff-refine-added . "#36734e") (magit-diff-refine-removed . "#733941")
+    (ediff-current-diff-A . "#4f323c") (ediff-fine-diff-A . "#733941")
+    (ediff-current-diff-B . "#2f4f42") (ediff-fine-diff-B . "#36734e")
+    (ediff-current-diff-C . "#34414e") (ediff-fine-diff-C . "#466372")
+    (ediff-current-diff-Ancestor . "#34414e") (ediff-fine-diff-Ancestor . "#466372")
+    (ediff-even-diff-A . "#313546") (ediff-odd-diff-A . "#313546")
+    (ediff-even-diff-B . "#313546") (ediff-odd-diff-B . "#313546")
+    (ediff-even-diff-C . "#313546") (ediff-odd-diff-C . "#313546"))
+  "Background of each diff face.")
+
+(defun aa/diff-faces (&rest _)
+  "Apply `aa/diff-backgrounds' to the diff faces that are already defined."
+  (pcase-dolist (`(,face . ,bg) aa/diff-backgrounds)
+    (when (facep face)
+
+      (set-face-attribute face nil :background bg :foreground 'unspecified :extend t))))
+
+(with-eval-after-load 'magit-diff (aa/diff-faces))
+(with-eval-after-load 'ediff-init (aa/diff-faces))
+(add-hook 'enable-theme-functions #'aa/diff-faces)
+
+(defun aa/display-in-new-tab-unless-current (buffer alist)
+  "Display action: show BUFFER in a new tab unless it is the current buffer."
+  (unless (eq buffer (window-buffer))
+    (display-buffer-in-new-tab buffer alist)))
+
+(defun aa/call-keeping-diff (command)
+  "Call COMMAND interactively; inside ediff, buffers it opens go to a new tab."
+
+  (let ((this-command command))
+    (if (bound-and-true-p ediff-this-buffer-ediff-sessions)
+        (let ((display-buffer-overriding-action '(aa/display-in-new-tab-unless-current))
+              (switch-to-buffer-obey-display-actions t))
+          (call-interactively command))
+      (call-interactively command))))
+
+(defmacro aa/def-nav (name command)
+  "Define NAME, which runs COMMAND through `aa/call-keeping-diff'."
+  `(defun ,name ()
+     ,(format "Run `%s'; inside a diff, another file opens in a new tab." command)
+     (interactive)
+     (aa/call-keeping-diff #',command)))
+
+(aa/def-nav aa/goto-definition xref-find-definitions)
+(aa/def-nav aa/goto-references xref-find-references)
+(aa/def-nav aa/goto-implementation eglot-find-implementation)
+(aa/def-nav aa/goto-type-definition eglot-find-typeDefinition)
+
 (defun aa/blame-toggle ()
   "Toggle magit blame for the current file."
   (interactive)
@@ -167,9 +252,6 @@
       (magit-blame-quit)
     (call-interactively #'magit-blame-addition)))
 
-;; ------------------------------------------------------------------
-;; Terminal (eat): SPC t f / h / v, C-\ toggles
-;; ------------------------------------------------------------------
 (use-package eat :commands eat)
 
 (defun aa/term-full ()
@@ -198,9 +280,6 @@
       (eat)
     (if (one-window-p) (previous-buffer) (delete-window))))
 
-;; ------------------------------------------------------------------
-;; Marks (harpoon): SPC m. A per-project file list, persisted in the data dir.
-;; ------------------------------------------------------------------
 (defvar aa/harpoon-file (expand-file-name "harpoon.eld" aa/data-dir)
   "Where the harpoon lists are saved.")
 
@@ -270,4 +349,3 @@
       (format "Open marked file %d." n))))
 
 (provide 'init-dev)
-;;; init-dev.el ends here

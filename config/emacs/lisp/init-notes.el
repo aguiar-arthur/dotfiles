@@ -1,6 +1,4 @@
-;;; init-notes.el --- Linked notes with org-roam (SPC n) -*- lexical-binding: t -*-
-
-;; Notes live in ~/org/notes/, dailies in notes/daily/. Needs Emacs 29+ (SQLite).
+;;; -*- lexical-binding: t -*-
 
 (use-package org-roam
   :defer t
@@ -23,4 +21,3 @@
   :config (org-roam-db-autosync-mode 1))
 
 (provide 'init-notes)
-;;; init-notes.el ends here

@@ -1,7 +1,3 @@
--- Browser preview via pandoc: `,p` builds a standalone HTML page (in Neovim's cache dir)
--- and opens it in the browser. Understands $...$, $$...$$ and \( ... \), \[ ... \] math, rendered as
--- MathML (no JS/CDN needed). Images are embedded. Saving the buffer rebuilds the file
--- after the first `,p`; refresh the browser tab (Cmd+R) to see the update.
 local css = [[
 body { max-width: 46em; margin: 2em auto; padding: 0 1em; font: 18px/1.6 -apple-system, "Helvetica Neue", sans-serif; }
 @media (prefers-color-scheme: dark) { body { background: #282a36; color: #f8f8f2; } a { color: #8be9fd; } code, pre { background: #44475a; } }

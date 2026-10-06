@@ -1,8 +1,5 @@
-;;; init-core.el --- Defaults, macOS, fonts, sessions -*- lexical-binding: t -*-
+;;; -*- lexical-binding: t -*-
 
-;; ------------------------------------------------------------------
-;; Defaults
-;; ------------------------------------------------------------------
 (setq use-short-answers t
       ring-bell-function #'ignore
       initial-scratch-message nil
@@ -25,7 +22,7 @@
 (setq-default indent-tabs-mode nil
               tab-width 2
               fill-column 90
-              truncate-lines t                  ; prose turns wrapping back on
+              truncate-lines t
               display-line-numbers-type 'relative)
 
 (dolist (mode '(global-auto-revert-mode delete-selection-mode show-paren-mode
@@ -41,39 +38,31 @@
 
 (add-hook 'text-mode-hook (lambda () (setq-local truncate-lines nil) (visual-line-mode 1)))
 
-;; Spell check (SPC u s); needs `brew install aspell'
 (when (executable-find "aspell")
   (setq ispell-program-name "aspell"
         ispell-dictionary "en_US"
         ispell-extra-args '("--sug-mode=ultra"))
   (add-hook 'text-mode-hook #'flyspell-mode))
 
-;; ------------------------------------------------------------------
-;; macOS
-;; ------------------------------------------------------------------
 (when (eq system-type 'darwin)
   (setq ns-use-proxy-icon nil
-        ns-alternate-modifier 'meta            ; left Option = Meta (M-j / M-k)
-        ns-right-alternate-modifier 'none      ; right Option still types accents
+        ns-alternate-modifier 'meta
+        ns-right-alternate-modifier 'none
         ns-command-modifier 'super)
   (add-to-list 'default-frame-alist '(ns-appearance . dark))
   (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t)))
 
-;; A GUI Emacs does not inherit the shell PATH: clojure, clojure-lsp, rg, fd...
 (use-package exec-path-from-shell
   :if (memq window-system '(mac ns x))
   :config
   (setq exec-path-from-shell-variables '("PATH" "MANPATH" "LANG"))
   (exec-path-from-shell-initialize))
 
-(let ((texbin "/Library/TeX/texbin"))           ; MacTeX
+(let ((texbin "/Library/TeX/texbin"))
   (when (and (file-directory-p texbin) (not (member texbin exec-path)))
     (add-to-list 'exec-path texbin)
     (setenv "PATH" (concat texbin ":" (getenv "PATH")))))
 
-;; ------------------------------------------------------------------
-;; Fonts (the Brewfile installs JetBrainsMono Nerd Font)
-;; ------------------------------------------------------------------
 (defcustom aa/font-height 130
   "Default font height in 1/10 pt."
   :type 'integer
@@ -90,19 +79,21 @@
 (aa/setup-fonts)
 (add-hook 'server-after-make-frame-hook #'aa/setup-fonts)
 
-;; ------------------------------------------------------------------
-;; Commands
-;; ------------------------------------------------------------------
 (defun aa/update-packages ()
   "Refresh the package index and upgrade every installed package."
   (interactive)
   (package-refresh-contents)
   (package-upgrade-all))
 
-;; Sessions (SPC S): windows and buffers
 (setq desktop-dirname aa/data-dir
       desktop-path (list aa/data-dir)
       desktop-base-file-name "emacs.desktop")
+
+(defun aa/kill-buffer-force ()
+  "Kill the current buffer, discarding unsaved changes."
+  (interactive)
+  (set-buffer-modified-p nil)
+  (kill-current-buffer))
 
 (defun aa/session-save ()
   "Save the current session."
@@ -119,7 +110,6 @@
   (interactive)
   (desktop-remove))
 
-;; Window resizing (SPC w H/J/K/L); a prefix argument multiplies the step
 (defcustom aa/window-resize-step 2
   "Columns or lines changed per keypress when resizing windows."
   :type 'integer
@@ -138,4 +128,3 @@
 (aa/def-resize aa/window-increase-height enlarge-window 1 "Heighten the window.")
 
 (provide 'init-core)
-;;; init-core.el ends here

@@ -1,10 +1,6 @@
-# User-level rumdl config (linked to ~/.config/rumdl/rumdl.toml by install.sh).
-# Used only when a project has no .rumdl.toml / pyproject [tool.rumdl] of its own.
-# Rules: https://rumdl.dev  ·  per-line escape hatch: <!-- rumdl-disable-line line-length -->
-
 [global]
-line-length = 100 # 80 flags most prose; 100 matches how this repo is wrapped
+line-length = 100
 
 [MD013]
-code-blocks = false # long commands and URLs in code are fine
+code-blocks = false
 tables = false

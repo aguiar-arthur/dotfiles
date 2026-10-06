@@ -1,18 +1,15 @@
--- Buffer settings for LaTeX (runs after vimtex's ftplugin).
 local o = vim.opt_local
 
 o.wrap = true
 o.linebreak = true
 o.breakindent = true
 o.spell = true
-o.conceallevel = 2 -- "rendered" symbols/accents; <leader>uc toggles; the cursor line shows the source
+o.conceallevel = 2
 o.textwidth = 0
 o.shiftwidth = 2
 o.tabstop = 2
-o.formatoptions:remove("t") -- do not hard-wrap lines automatically
+o.formatoptions:remove("t")
 
--- <localleader> = "," → ,ll compiles, ,lv opens the PDF, etc.
--- (defined here, with descriptions, so they show up in which-key)
 local function map(lhs, cmd, desc, mode)
   vim.keymap.set(mode or "n", "<localleader>" .. lhs, "<cmd>" .. cmd .. "<CR>", {
     buffer = true, silent = true, desc = desc,

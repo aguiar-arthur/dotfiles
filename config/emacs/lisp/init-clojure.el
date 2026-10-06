@@ -1,27 +1,21 @@
-;;; init-clojure.el --- clojure-mode, CIDER, clojure-lsp, structural editing -*- lexical-binding: t -*-
-
-;; CIDER owns the REPL, evaluation, completion, docs and tests; eglot + clojure-lsp
-;; (with clj-kondo) owns diagnostics, rename, references and formatting. LSP
-;; completion is off so it does not compete with CIDER's REPL-aware completion.
-;; Needs (Brewfile): clojure, leiningen, clojure-lsp, clj-kondo.
+;;; -*- lexical-binding: t -*-
 
 (use-package rainbow-delimiters
   :hook ((clojure-mode emacs-lisp-mode) . rainbow-delimiters-mode))
 
-;; Strict mode keeps parentheses balanced
 (use-package smartparens
   :hook (clojure-mode . smartparens-strict-mode)
   :config (require 'smartparens-config))
 
-;; Makes evil operators (d, y, c, x...) respect structure
 (use-package evil-smartparens
   :after (evil smartparens)
   :hook (smartparens-enabled . evil-smartparens-mode))
 
 (defun aa/clojure-lsp ()
-  "Start clojure-lsp in this buffer, leaving completion to CIDER."
-  (setq-local eglot-ignored-server-capabilities '(:completionProvider))
-  (eglot-ensure))
+  "Start clojure-lsp, leaving completion to CIDER; skip revision buffers."
+  (unless (string-match-p "\\.~[^~]+~\\'" (buffer-name))
+    (setq-local eglot-ignored-server-capabilities '(:completionProvider))
+    (eglot-ensure)))
 
 (use-package clojure-mode
   :hook ((clojure-mode clojurec-mode clojurescript-mode) . aa/clojure-lsp)
@@ -40,4 +34,3 @@
   (nrepl-hide-special-buffers t))
 
 (provide 'init-clojure)
-;;; init-clojure.el ends here

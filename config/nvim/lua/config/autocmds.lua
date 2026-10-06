@@ -3,13 +3,11 @@ local function augroup(name)
 end
 local au = vim.api.nvim_create_autocmd
 
--- Highlight yanked text
 au("TextYankPost", {
   group = augroup("yank"),
   callback = function() vim.hl.on_yank() end,
 })
 
--- Reload files changed outside the editor (e.g. latexmk, git)
 au({ "FocusGained", "TermClose", "TermLeave" }, {
   group = augroup("checktime"),
   callback = function()
@@ -17,7 +15,6 @@ au({ "FocusGained", "TermClose", "TermLeave" }, {
   end,
 })
 
--- Restore the last known cursor position
 au("BufReadPost", {
   group = augroup("last_loc"),
   callback = function(ev)
@@ -31,7 +28,6 @@ au("BufReadPost", {
   end,
 })
 
--- Rebalance splits when the terminal window is resized
 au("VimResized", {
   group = augroup("resize"),
   callback = function()
@@ -41,7 +37,6 @@ au("VimResized", {
   end,
 })
 
--- `q` closes auxiliary windows
 au("FileType", {
   group = augroup("close_with_q"),
   pattern = { "help", "qf", "man", "checkhealth", "lspinfo", "notify", "startuptime", "vimtex-toc" },
@@ -51,7 +46,6 @@ au("FileType", {
   end,
 })
 
--- Prose: wrap + spell
 au("FileType", {
   group = augroup("prose"),
   pattern = { "tex", "markdown", "text", "gitcommit", "plaintex", "bib" },
@@ -62,11 +56,10 @@ au("FileType", {
   end,
 })
 
--- Create intermediate directories on save
 au("BufWritePre", {
   group = augroup("auto_mkdir"),
   callback = function(ev)
-    if ev.match:match("^%w%w+:[\\/][\\/]") then return end -- ignore URLs
+    if ev.match:match("^%w%w+:[\\/][\\/]") then return end
     local file = vim.uv.fs_realpath(ev.match) or ev.match
     vim.fn.mkdir(vim.fn.fnamemodify(file, ":p:h"), "p")
   end,
