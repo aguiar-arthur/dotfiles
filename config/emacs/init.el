@@ -46,6 +46,7 @@
         init-org
         init-notes
         init-clojure
+        init-review
         init-keys))
 
 (add-hook 'emacs-startup-hook

@@ -97,8 +97,8 @@ the CIDER debugger and tracer for Clojure.
 | Key | Neovim | Emacs |
 |---|---|---|
 | `gg` | lazygit | magit status |
-| `gv` | diff view: every changed file, side by side (toggle) | pick a changed file, open it side by side |
-| `gV` | everything the branch changed against `origin/HEAD`, side by side | pick a file the branch changed against `origin/HEAD`, open it side by side |
+| `gv` | review every change: file panel + side-by-side diff (toggle) | same (review panel + ediff) |
+| `gV` | review everything the branch changed against `origin/HEAD` | same |
 | `gd` | this file against the index, side by side | same (ediff) |
 | `gc` | every changed hunk (picker with preview) | every change in one magit buffer |
 | `gh` | history of this file (visual: of the selected lines) | history of this file |
@@ -110,6 +110,10 @@ the CIDER debugger and tracer for Clojure.
 | `gp` | preview hunk | same |
 | `gb` / `gB` | blame line / toggle line blame | blame / toggle blame |
 | `gO` | open in the browser (GitHub, GitLab…) | same |
+
+Inside a review (`gv`, `gV`) both editors use the same keys: `Tab` / `S-Tab` next / previous
+file, `RET` on the panel opens a file, `-` on the panel stages or unstages it, `q` closes the
+review.
 
 ### `l` LSP
 

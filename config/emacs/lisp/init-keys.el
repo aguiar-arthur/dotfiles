@@ -134,9 +134,9 @@
     "g b" '(magit-blame-addition :wk "blame")
     "g B" '(aa/blame-toggle :wk "toggle blame")
     "g d" '(aa/git-diff-file :wk "diff this (side by side)")
-    "g v" '(aa/git-diff-view :wk "diff view (side by side)")
+    "g v" '(aa/review-worktree :wk "review changes (side by side)")
     "g c" '(magit-diff-dwim :wk "changes (unified, magit)")
-    "g V" '(aa/git-diff-branch :wk "diff view: branch vs origin")
+    "g V" '(aa/review-branch :wk "review branch vs origin")
     "g h" '(magit-log-buffer-file :wk "file history")
     "g H" '(magit-log-all :wk "repo history")
     "g O" '(browse-at-remote :wk "open in browser")
@@ -262,6 +262,25 @@
               emacs-lisp-mode-map lisp-data-mode-map)
    "TAB" 'aa/tab-lisp
    "<tab>" 'aa/tab-lisp)
+
+  (general-define-key
+   :states '(normal motion emacs)
+   :keymaps 'aa/review-mode-map
+   "TAB" 'aa/review-next
+   "<tab>" 'aa/review-next
+   "<backtab>" 'aa/review-prev
+   "q" 'aa/review-quit)
+
+  (general-define-key
+   :states '(normal motion emacs)
+   :keymaps 'aa/review-panel-mode-map
+   "RET" 'aa/review-open-at-point
+   "<return>" 'aa/review-open-at-point
+   "TAB" 'aa/review-next
+   "<tab>" 'aa/review-next
+   "<backtab>" 'aa/review-prev
+   "-" 'aa/review-toggle-stage
+   "q" 'aa/review-quit)
 
   (with-eval-after-load 'smerge-mode
     (general-define-key

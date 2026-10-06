@@ -171,49 +171,6 @@
     (find-file (completing-read "Changed file: "
                                 (or files (user-error "No changed files")) nil t))))
 
-(defun aa/git-diff-view ()
-  "Pick a changed file and show it side by side."
-  (interactive)
-  (require 'magit)
-  (let* ((default-directory (or (magit-toplevel) (user-error "Not in a git repository")))
-         (unstaged (magit-unstaged-files))
-         (staged (magit-staged-files))
-         (files (delete-dups (append unstaged staged)))
-         (here (car (member (magit-current-file) files)))
-         (file (cond ((null files) (user-error "No changes to diff"))
-                     ((null (cdr files)) (car files))
-                     (t (completing-read "Diff file: " files nil t nil nil here)))))
-    (if (member file unstaged)
-        (magit-ediff-show-unstaged file)
-      (magit-ediff-show-staged file))))
-
-(defun aa/git--side (rev file)
-  "Buffer of FILE at REV (\"{worktree}\" for the working tree), or an empty one if absent."
-  (if (if (equal rev "{worktree}")
-          (file-exists-p file)
-        (magit-git-success "cat-file" "-e" (concat rev ":" file)))
-      (magit-ediff--find-file rev file)
-    (with-current-buffer (get-buffer-create (format " *absent %s:%s*" rev file))
-      (erase-buffer)
-      (current-buffer))))
-
-(defun aa/git-diff-branch ()
-  "Pick a file this branch changed against origin and show it side by side."
-  (interactive)
-  (require 'magit)
-  (require 'magit-ediff)
-  (let* ((default-directory (or (magit-toplevel) (user-error "Not in a git repository")))
-         (upstream (or (seq-find #'magit-rev-verify '("origin/HEAD" "origin/main" "origin/master"))
-                       (user-error "No origin/HEAD, origin/main or origin/master")))
-         (base (or (magit-git-string "merge-base" upstream "HEAD")
-                   (user-error "No common ancestor with %s" upstream)))
-         (files (magit-git-lines "diff" "--name-only" base))
-         (file (cond ((null files) (user-error "No changes against %s" upstream))
-                     ((null (cdr files)) (car files))
-                     (t (completing-read (format "Diff against %s: " upstream) files nil t nil nil
-                                         (car (member (magit-current-file) files)))))))
-    (magit-ediff-buffers (aa/git--side base file) (aa/git--side "{worktree}" file))))
-
 (defun aa/git-diff-file ()
   "Show this file side by side: index (left) against the working tree (right)."
   (interactive)

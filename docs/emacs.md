@@ -18,6 +18,7 @@ config/emacs/
     init-org.el        ~/org layout, TODO flow, capture, agenda, babel, export
     init-notes.el      org-roam
     init-clojure.el    clojure-mode, CIDER, clojure-lsp, structural editing
+    init-review.el     diff review: file panel + side-by-side diffs (SPC g v / SPC g V)
     init-keys.el       every SPC and `,` binding
 ```
 
@@ -57,7 +58,7 @@ code.
   backups there too; `custom.el` lives in `etc/`;
 - modules load through `aa/load-module`: a module that fails shows
   `Module … failed` in `*Warnings*` and the rest still load. Order: core, ui, evil, dev, org,
-  notes, clojure, keys. A module may use the ones before it, never the ones after.
+  notes, clojure, review, keys. A module may use the ones before it, never the ones after.
 
 ## Modules
 
@@ -207,18 +208,46 @@ Same model and colors as Neovim, built on magit and ediff:
 
 | Key | What |
 |---|---|
-| `SPC g v` | pick a changed file (the current one first) and open it side by side |
+| `SPC g v` | review every change: file panel + side-by-side diff, starting at the current file |
+| `SPC g V` | review everything the branch changed against `origin/HEAD` the same way |
 | `SPC g d` | the current file side by side: index on the left, working tree on the right |
-| `SPC g V` | pick a file the branch changed against `origin/HEAD` and open it side by side |
 | `SPC g c` | every change in one magit buffer; `e` on a file opens it side by side |
 | `SPC g h` / `SPC g H` | history of the file / of the repository |
 | `SPC g t` | open a changed, staged or untracked file |
 
-An unstaged file compares the index with the working tree; a staged-only file compares
-`HEAD` with the index. `SPC g V` compares the point where the branch left `origin/HEAD`
-(falling back to `origin/main` or `origin/master`) with the working tree, so uncommitted
-changes count too, as in diffview. Added and deleted files show an empty buffer on the
-missing side. ediff runs with the control panel inside the frame (no separate
+### Review (`init-review.el`)
+
+`SPC g v` and `SPC g V` open a review, the counterpart of diffview: a panel on the left lists
+the files and the selected one is shown side by side on the right. The panel stays while you
+move through the files, so there is no need to leave and press the leader key again.
+
+| Key | Where | Action |
+|---|---|---|
+| `Tab` / `S-Tab` | anywhere in the review | next / previous file (wraps around) |
+| `RET` | panel | open the file on that line |
+| `-` | panel (`SPC g v`) | stage or unstage the file on that line; the list refreshes |
+| `q` | anywhere in the review | end the review and restore the previous layout |
+| `n` / `p` | diff | next / previous change inside the file (ediff) |
+
+The same keys work in Neovim's diffview.
+
+- `SPC g v` lists three sections: **Changes** (index → working tree), **Untracked** (empty →
+  file) and **Staged** (`HEAD` → index). A file with both staged and unstaged edits appears in
+  both sections.
+- `SPC g V` compares the point where the branch left `origin/HEAD` (falling back to
+  `origin/main` or `origin/master`) with the working tree, so uncommitted changes count too.
+- Added and deleted files show an empty buffer on the missing side; renamed files compare the
+  old name with the new one.
+- The panel is a side window with `no-delete-other-windows`, so ediff's layout leaves it in
+  place. Moving to another file closes the current ediff session without the usual "kill
+  buffer?" questions (magit removes its revision buffers itself) and opens the next one.
+- The review keys come from `aa/review-mode`, a minor mode turned on in the control buffer and
+  in both sides while the review runs, so they take precedence over the global `Tab`
+  (next buffer) and are gone afterwards.
+
+### Single files
+
+ediff runs with the control panel inside the frame (no separate
 window), panes side by side (also for merges) and revision buffers dropped on quit. In ediff,
 `n` / `p` move between changes and `q` restores the previous layout. A conflicted file opened
 with `e` in magit shows three columns.
