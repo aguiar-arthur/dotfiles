@@ -98,7 +98,7 @@ the CIDER debugger and tracer for Clojure.
 |---|---|---|
 | `gg` | lazygit | magit status |
 | `gv` | diff view: every changed file, side by side (toggle) | pick a changed file, open it side by side |
-| `gV` | branch against `origin/HEAD`, side by side | diff of a range or branch (magit) |
+| `gV` | everything the branch changed against `origin/HEAD`, side by side | pick a file the branch changed against `origin/HEAD`, open it side by side |
 | `gd` | this file against the index, side by side | same (ediff) |
 | `gc` | every changed hunk (picker with preview) | every change in one magit buffer |
 | `gh` | history of this file (visual: of the selected lines) | history of this file |

@@ -136,7 +136,7 @@
     "g d" '(aa/git-diff-file :wk "diff this (side by side)")
     "g v" '(aa/git-diff-view :wk "diff view (side by side)")
     "g c" '(magit-diff-dwim :wk "changes (unified, magit)")
-    "g V" '(magit-diff-range :wk "diff view: range / branch")
+    "g V" '(aa/git-diff-branch :wk "diff view: branch vs origin")
     "g h" '(magit-log-buffer-file :wk "file history")
     "g H" '(magit-log-all :wk "repo history")
     "g O" '(browse-at-remote :wk "open in browser")

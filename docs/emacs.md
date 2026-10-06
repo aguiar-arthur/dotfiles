@@ -209,12 +209,16 @@ Same model and colors as Neovim, built on magit and ediff:
 |---|---|
 | `SPC g v` | pick a changed file (the current one first) and open it side by side |
 | `SPC g d` | the current file side by side: index on the left, working tree on the right |
+| `SPC g V` | pick a file the branch changed against `origin/HEAD` and open it side by side |
 | `SPC g c` | every change in one magit buffer; `e` on a file opens it side by side |
 | `SPC g h` / `SPC g H` | history of the file / of the repository |
 | `SPC g t` | open a changed, staged or untracked file |
 
 An unstaged file compares the index with the working tree; a staged-only file compares
-`HEAD` with the index. ediff runs with the control panel inside the frame (no separate
+`HEAD` with the index. `SPC g V` compares the point where the branch left `origin/HEAD`
+(falling back to `origin/main` or `origin/master`) with the working tree, so uncommitted
+changes count too, as in diffview. Added and deleted files show an empty buffer on the
+missing side. ediff runs with the control panel inside the frame (no separate
 window), panes side by side (also for merges) and revision buffers dropped on quit. In ediff,
 `n` / `p` move between changes and `q` restores the previous layout. A conflicted file opened
 with `e` in magit shows three columns.
