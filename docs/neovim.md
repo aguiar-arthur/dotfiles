@@ -43,7 +43,11 @@ exist before any key is mapped.
   context, global statusline (`laststatus=3`), rounded borders on every floating window
   (`winborder`), visible tabs/trailing spaces, splits open right and below,
   `splitkeep=screen` (the text does not jump when a split opens).
-- No wrap by default; prose filetypes turn it on (see Autocmds).
+- Long lines wrap on screen in every buffer and stay one line in the file (`wrap`): breaks
+  fall between words (`linebreak`), continuation lines keep the indent plus two columns
+  (`breakindent`, `breakindentopt=shift:2`), and scrolling moves by screen line
+  (`smoothscroll`). `j` / `k` move by screen line too (by file line when given a count), and
+  `<leader>uw` turns wrapping off for the current window.
 - Editing: 2-space indent with spaces, smart case search, live `:s` preview in a split,
   block selection past line end, `confirm` instead of failing on `:q` with unsaved changes,
   persistent undo (10 000 levels), `grepprg` = ripgrep.
@@ -67,7 +71,7 @@ exist before any key is mapped.
 | file read | restores the last cursor position (not for git commit/rebase messages) |
 | terminal resized | rebalances the splits in every tab |
 | help, quickfix, man, checkhealth, vimtex TOC… | `q` closes the window |
-| tex, markdown, text, gitcommit, bib | wrap + linebreak; spell on (not in `.bib`) |
+| tex, markdown, text, gitcommit, plaintex | spell on |
 | before save | creates missing parent directories (ignores URLs like `scp://`) |
 
 ## Plugins
@@ -250,8 +254,8 @@ Settings worth knowing:
 - vimtex's insert-mode maps (`` `a `` → `\alpha`) clash with the snippets and are off; its
   completion is off too, because texlab provides it through blink.cmp.
 - A notification reports each successful or failed compilation; `,le` lists the errors.
-- Buffer options (`after/ftplugin/tex.lua`): wrap at word boundaries, spell on, conceal level
-  2, no hard wrapping (`textwidth=0`, no `t` in `formatoptions`).
+- Buffer options (`after/ftplugin/tex.lua`): spell on, conceal level 2, no hard wrapping
+  (`textwidth=0`, no `t` in `formatoptions`).
 - The `,l…` keys are defined in `after/ftplugin/tex.lua` (not left to vimtex) so they carry
   descriptions for which-key.
 

@@ -1,8 +1,5 @@
 local o = vim.opt_local
 
-o.wrap = true
-o.linebreak = true
-o.breakindent = true
 o.spell = true
 o.conceallevel = 2
 o.textwidth = 0

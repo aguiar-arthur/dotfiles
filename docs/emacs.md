@@ -67,7 +67,10 @@ code.
 - Short answers, no bell, no lock files, trash instead of delete, final newline, single space
   after sentences, 8-line scroll margin, smooth pixel scrolling, `…` for truncation.
 - Indent with spaces (width 2), fill column 90, relative line numbers in code, text and
-  config modes. Text modes wrap (`visual-line-mode`); code does not.
+  config modes.
+- Long lines wrap on screen in code, text and config buffers and stay one line in the file:
+  `visual-line-mode` breaks between words and `visual-wrap-prefix-mode` (Emacs 30+) indents
+  the continuation like the line it belongs to. `SPC u w` toggles it for the buffer.
 - Global modes: auto-revert, delete-selection, show-paren, column number, current-line
   highlight, recent files, minibuffer history, saved places.
 - Spell check with aspell (English; `M-x ispell-change-dictionary` for `pt_BR`) in text modes,
@@ -102,10 +105,12 @@ code.
 ### init-evil
 
 evil with evil-collection (`evil-want-keybinding` off so evil-collection owns the mode keys),
-`C-u` scrolls, `C-i` does not jump (Tab stays free for Org and buffer switching), fine-grained
-undo with `undo-redo`, splits open right and below. Also evil-surround (`ys` / `ds` / `cs`
-plus the `gs…` keys from `init-keys.el`), evil-commentary (`gc`), avy (`s` / `S`, 0.3 s
-timeout, current window), move-text (`M-j` / `M-k`) and evil-org (with agenda keys).
+`C-u` scrolls, `j` / `k` move by screen line in wrapped buffers
+(`evil-respect-visual-line-mode`), `C-i` does not jump (Tab stays free for Org and buffer
+switching), fine-grained undo with `undo-redo`, splits open right and below. Also evil-surround
+(`ys` / `ds` / `cs` plus the `gs…` keys from `init-keys.el`), evil-commentary (`gc`), avy (`s`
+/ `S`, 0.3 s timeout, current window), move-text (`M-j` / `M-k`) and evil-org (with agenda
+keys).
 
 ### init-dev
 

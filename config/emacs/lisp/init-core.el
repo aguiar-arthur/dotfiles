@@ -22,7 +22,6 @@
 (setq-default indent-tabs-mode nil
               tab-width 2
               fill-column 90
-              truncate-lines t
               display-line-numbers-type 'relative)
 
 (dolist (mode '(global-auto-revert-mode delete-selection-mode show-paren-mode
@@ -36,7 +35,10 @@
 (dolist (hook '(prog-mode-hook text-mode-hook conf-mode-hook))
   (add-hook hook #'display-line-numbers-mode))
 
-(add-hook 'text-mode-hook (lambda () (setq-local truncate-lines nil) (visual-line-mode 1)))
+(dolist (hook '(prog-mode-hook text-mode-hook conf-mode-hook))
+  (add-hook hook #'visual-line-mode)
+  (when (fboundp 'visual-wrap-prefix-mode)
+    (add-hook hook #'visual-wrap-prefix-mode)))
 
 (when (executable-find "aspell")
   (setq ispell-program-name "aspell"

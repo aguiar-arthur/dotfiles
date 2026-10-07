@@ -9,7 +9,8 @@
         evil-want-fine-undo t
         evil-vsplit-window-right t
         evil-split-window-below t
-        evil-undo-system 'undo-redo)
+        evil-undo-system 'undo-redo
+        evil-respect-visual-line-mode t)
   :config
   (evil-mode 1))
 

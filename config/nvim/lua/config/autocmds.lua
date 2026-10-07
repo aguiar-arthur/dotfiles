@@ -50,8 +50,6 @@ au("FileType", {
   group = augroup("prose"),
   pattern = { "tex", "markdown", "text", "gitcommit", "plaintex", "bib" },
   callback = function(ev)
-    vim.wo.wrap = true
-    vim.wo.linebreak = true
     if ev.match ~= "bib" then vim.wo.spell = true end
   end,
 })
