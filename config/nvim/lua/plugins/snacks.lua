@@ -78,7 +78,16 @@ return {
       callback = function()
 
         Snacks.toggle.option("spell", { name = "Spelling" }):map("<leader>us")
-        Snacks.toggle.option("wrap", { name = "Wrap" }):map("<leader>uw")
+        Snacks.toggle({
+          name = "Wrap (all windows)",
+          get = function() return vim.go.wrap end,
+          set = function(state)
+            vim.go.wrap = state
+            for _, win in ipairs(vim.api.nvim_list_wins()) do
+              vim.wo[win].wrap = state
+            end
+          end,
+        }):map("<leader>uw")
         Snacks.toggle.option("relativenumber", { name = "Relative number" }):map("<leader>uL")
         Snacks.toggle.option("conceallevel", { off = 0, on = vim.o.conceallevel > 0 and vim.o.conceallevel or 2, name = "Conceal" }):map("<leader>uc")
         Snacks.toggle.diagnostics():map("<leader>ud")

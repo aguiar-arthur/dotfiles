@@ -54,6 +54,13 @@ au("FileType", {
   end,
 })
 
+au("BufWinEnter", {
+  group = augroup("wrap"),
+  callback = function(ev)
+    if vim.bo[ev.buf].buftype == "" and not vim.wo.diff then vim.wo.wrap = vim.go.wrap end
+  end,
+})
+
 au("BufWritePre", {
   group = augroup("auto_mkdir"),
   callback = function(ev)

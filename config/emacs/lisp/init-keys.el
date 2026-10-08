@@ -185,7 +185,7 @@
 
     "u" '(:ignore t :wk "ui toggles")
     "u s" '(flyspell-mode :wk "spelling")
-    "u w" '(visual-line-mode :wk "wrap")
+    "u w" '(aa/toggle-wrap :wk "wrap (all buffers)")
     "u L" '(aa/toggle-relative-numbers :wk "relative number")
     "u c" '(aa/toggle-emphasis-markers :wk "conceal (Org markers)")
     "u d" '(flymake-mode :wk "diagnostics")

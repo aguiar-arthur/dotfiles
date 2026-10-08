@@ -47,7 +47,10 @@ exist before any key is mapped.
   fall between words (`linebreak`), continuation lines keep the indent plus two columns
   (`breakindent`, `breakindentopt=shift:2`), and scrolling moves by screen line
   (`smoothscroll`). `j` / `k` move by screen line too (by file line when given a count), and
-  `<leader>uw` turns wrapping off for the current window.
+  `<leader>uw` turns wrapping off or on everywhere: it sets the global value and every open
+  window, and a `BufWinEnter` autocmd applies the global value to each file shown in a window
+  afterwards (Neovim would otherwise restore the value a file had in its last window). Diff
+  windows are left alone.
 - Editing: 2-space indent with spaces, smart case search, live `:s` preview in a split,
   block selection past line end, `confirm` instead of failing on `:q` with unsaved changes,
   persistent undo (10 000 levels), `grepprg` = ripgrep.
@@ -72,6 +75,7 @@ exist before any key is mapped.
 | terminal resized | rebalances the splits in every tab |
 | help, quickfix, man, checkhealth, vimtex TOC… | `q` closes the window |
 | tex, markdown, text, gitcommit, plaintex | spell on |
+| a file enters a window | applies the global `wrap` (see Options), except in diff windows |
 | before save | creates missing parent directories (ignores URLs like `scp://`) |
 
 ## Plugins

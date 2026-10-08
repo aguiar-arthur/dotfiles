@@ -174,7 +174,7 @@ new tab, so the diff layout survives.
 | Key | Neovim | Emacs |
 |---|---|---|
 | `us` | spelling | same (flyspell) |
-| `uw` | wrap | same |
+| `uw` | wrap long lines on screen: on by default, toggles every window and the ones opened later | same, for every buffer |
 | `uL` | relative line numbers | same |
 | `uc` | conceal | Org emphasis markers |
 | `ud` | diagnostics | same |

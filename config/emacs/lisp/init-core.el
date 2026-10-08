@@ -35,10 +35,27 @@
 (dolist (hook '(prog-mode-hook text-mode-hook conf-mode-hook))
   (add-hook hook #'display-line-numbers-mode))
 
+(defvar aa/wrap t
+  "Non-nil wraps long lines on screen in code, text and config buffers.")
+
+(defun aa/apply-wrap ()
+  "Wrap or truncate long lines in this buffer according to `aa/wrap'."
+  (let ((arg (if aa/wrap 1 -1)))
+    (visual-line-mode arg)
+    (when (fboundp 'visual-wrap-prefix-mode) (visual-wrap-prefix-mode arg))
+    (setq-local truncate-lines (not aa/wrap))))
+
 (dolist (hook '(prog-mode-hook text-mode-hook conf-mode-hook))
-  (add-hook hook #'visual-line-mode)
-  (when (fboundp 'visual-wrap-prefix-mode)
-    (add-hook hook #'visual-wrap-prefix-mode)))
+  (add-hook hook #'aa/apply-wrap))
+
+(defun aa/toggle-wrap ()
+  "Turn on-screen wrapping of long lines on or off in every buffer."
+  (interactive)
+  (setq aa/wrap (not aa/wrap))
+  (dolist (buf (buffer-list))
+    (with-current-buffer buf
+      (when (derived-mode-p 'prog-mode 'text-mode 'conf-mode) (aa/apply-wrap))))
+  (message "Wrap %s" (if aa/wrap "on" "off")))
 
 (when (executable-find "aspell")
   (setq ispell-program-name "aspell"

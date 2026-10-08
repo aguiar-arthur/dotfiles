@@ -70,7 +70,9 @@ code.
   config modes.
 - Long lines wrap on screen in code, text and config buffers and stay one line in the file:
   `visual-line-mode` breaks between words and `visual-wrap-prefix-mode` (Emacs 30+) indents
-  the continuation like the line it belongs to. `SPC u w` toggles it for the buffer.
+  the continuation like the line it belongs to. `SPC u w` (`aa/toggle-wrap`) turns wrapping
+  off or on in every such buffer, and buffers opened afterwards follow the same choice
+  (`aa/wrap`). When it is off, long lines are truncated at the window edge.
 - Global modes: auto-revert, delete-selection, show-paren, column number, current-line
   highlight, recent files, minibuffer history, saved places.
 - Spell check with aspell (English; `M-x ispell-change-dictionary` for `pt_BR`) in text modes,
