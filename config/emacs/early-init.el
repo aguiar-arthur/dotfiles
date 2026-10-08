@@ -9,7 +9,7 @@
 (setq package-enable-at-startup nil
       package-user-dir (expand-file-name "elpa/" aa/data-dir))
 
-(when (fboundp 'startup-redirect-eln-cache)
+(when (featurep 'native-compile)
   (startup-redirect-eln-cache (expand-file-name "eln-cache/" aa/data-dir)))
 
 (setq native-comp-jit-compilation nil

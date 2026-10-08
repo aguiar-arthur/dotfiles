@@ -32,8 +32,8 @@ code.
 
 - garbage collection is suspended during startup (`init.el` sets 64 MB afterwards);
 - `aa/data-dir` = `$XDG_DATA_HOME/emacs/` (normally `~/.local/share/emacs/`) holds everything
-  Emacs generates; `package-user-dir` points to its `elpa/`, and the native-compilation cache
-  to `eln-cache/`;
+  Emacs generates; `package-user-dir` points to its `elpa/`, and, on builds with native
+  compilation (`(featurep 'native-compile)`), the native-compilation cache to `eln-cache/`;
 - native compilation is off: with the macOS toolchain of this setup clang rejects
   `-mmacosx-version-min=…`, so Emacs stays on byte-code. JIT compilation and subr trampolines
   are both disabled; evil advises the primitive `select-window`, which would trigger a
@@ -98,7 +98,11 @@ code.
   Nothing is preselected and `RET` accepts only a selected candidate, otherwise it inserts a
   newline, the same behaviour as blink.cmp in Neovim. `Tab` / `S-Tab` / `C-j` / `C-k` move.
   corfu-popupinfo shows documentation.
-- treemacs file tree (32 columns) with nerd icons.
+- treemacs file tree (32 columns) with nerd icons. `SPC o p` (`aa/tree-toggle`) shows only
+  the project of the current buffer (project.el, or the buffer's directory outside a project)
+  and closes the tree when it is open; `SPC o f` (`aa/tree-reveal`) does the same and moves to
+  the current file. treemacs on its own always shows the workspace it saved last, whatever
+  file you are in, which is why `SPC o p` does not call it directly.
 - Dashboard with recent files, projects and today's agenda. A plain `emacs` shows it only when
   no file was given. In the daemon (`e`), `initial-buffer-choice` makes new frames without a
   file start on it. It is not set outside the daemon, because `emacs file.org` would then split

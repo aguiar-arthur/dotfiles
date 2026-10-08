@@ -168,8 +168,8 @@
     "m 5" '(aa/harpoon-goto-5 :wk "harpoon file 5")
 
     "o" '(:ignore t :wk "open/toggle")
-    "o p" '(treemacs :wk "toggle file tree")
-    "o f" '(treemacs-find-file :wk "find file in tree")
+    "o p" '(aa/tree-toggle :wk "toggle file tree (project)")
+    "o f" '(aa/tree-reveal :wk "find file in tree")
     "o n" '(view-echo-area-messages :wk "message history")
     "o d" '(dashboard-open :wk "dashboard")
 

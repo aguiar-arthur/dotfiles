@@ -52,6 +52,7 @@ why the script warns about them.
 | Search and files | `ripgrep`, `fd`, `fzf`, `bat`, `coreutils`, `findutils`, `jq` | both editors, shell |
 | Git | `git-lfs`, `lazygit` | Neovim (`<leader>gg`) |
 | Formatters for Emacs | `prettier`, `shfmt`, `stylua` | Emacs (apheleia); Neovim gets its own copies from Mason |
+| Markdown lint | `rumdl` | the shell and agents (`rumdl check docs`); Neovim gets its own copy from Mason |
 | Writing | `pandoc` (Markdown preview), `aspell` (Emacs spell check), casks `mactex`, `skim` | LaTeX, Markdown, Org |
 | Clojure | `clojure`, `leiningen`, `clojure-lsp`, `clj-kondo` (tap `borkdude/brew`) | both editors |
 | Python, Ruby | `pyenv`, `pipenv`, `ruby` | shell |

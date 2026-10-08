@@ -146,7 +146,7 @@ new tab, so the diff layout survives.
 
 | Key | Neovim | Emacs |
 |---|---|---|
-| `op` | file tree | file tree (treemacs) |
+| `op` | file tree of the working directory (toggle) | file tree of the current buffer's project (toggle) |
 | `of` | reveal the current file in the tree | same |
 | `on` | notification history | messages |
 | `od` | dashboard | same |

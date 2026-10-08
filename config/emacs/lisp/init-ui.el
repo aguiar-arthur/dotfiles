@@ -102,6 +102,22 @@
   (treemacs-width 32)
   (treemacs-follow-after-init t))
 
+(defun aa/tree-toggle ()
+  "Show only the current project in treemacs, or close the tree when it is open."
+  (interactive)
+  (require 'treemacs)
+  (if (eq (treemacs-current-visibility) 'visible)
+      (delete-window (treemacs-get-local-window))
+    (treemacs-add-and-display-current-project-exclusively)))
+
+(defun aa/tree-reveal ()
+  "Show the current project in treemacs and move to the current file."
+  (interactive)
+  (require 'treemacs)
+  (let ((buf (current-buffer)))
+    (treemacs-add-and-display-current-project-exclusively)
+    (with-current-buffer buf (treemacs-find-file))))
+
 (use-package treemacs-nerd-icons
   :after treemacs
   :config (treemacs-load-theme "nerd-icons"))
