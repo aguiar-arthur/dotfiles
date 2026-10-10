@@ -111,37 +111,17 @@ end
 
 local function check_mason(settings)
   health.start("Mason")
-  local ok, registry = pcall(require, "mason-registry")
-  if not ok then
+  local mason = require("dotfiles.mason")
+  local absent = mason.missing(settings)
+  if not absent then
     health.info("mason is not loaded yet (it loads with the first file)")
-    return
-  end
-  local installed = {}
-  for _, name in ipairs(registry.get_installed_package_names()) do
-    installed[name] = true
-  end
-  local wanted = vim.deepcopy(settings.mason_tools)
-  local mapping = {}
-  local mok, mlsp = pcall(require, "mason-lspconfig")
-  if mok and mlsp.get_mappings then
-    mapping = mlsp.get_mappings().lspconfig_to_package or {}
-  end
-  for _, server in ipairs(settings.mason_servers) do
-    wanted[#wanted + 1] = mapping[server] or server
-  end
-  local absent = {}
-  for _, name in ipairs(wanted) do
-    if not installed[name] then
-      absent[#absent + 1] = name
-    end
-  end
-  if #absent > 0 then
-    health.warn(
-      "not installed yet: " .. table.concat(absent, ", "),
-      ":Mason shows progress and errors"
-    )
+  elseif #absent > 0 then
+    health.warn("not installed yet: " .. table.concat(absent, ", "), {
+      "./install.sh installs them",
+      ":Mason shows progress and errors",
+    })
   else
-    health.ok(#wanted .. " tools installed")
+    health.ok(#mason.wanted(settings) .. " tools installed")
   end
 end
 

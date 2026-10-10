@@ -33,7 +33,7 @@ Details of `config/starship/starship.toml`:
 ## iTerm2
 
 `config/iterm2/dracula.json` is a **Dynamic Profile**: iTerm2 reads it from
-`~/Library/Application Support/iTerm2/DynamicProfiles/` (linked by `install.sh`) and shows the
+`~/Library/Application Support/iTerm2/DynamicProfiles/` (linked by `link.sh`) and shows the
 profile "Dotfiles (Dracula)". It inherits the *Default* profile, including the font, and only
 changes:
 
@@ -47,7 +47,7 @@ iTerm2 reloads the file by itself after edits.
 
 ## zsh
 
-`install.sh` keeps one marked block in `~/.zshrc`:
+`link.sh` keeps one marked block in `~/.zshrc`:
 
 ```sh
 # >>> dotfiles >>>
@@ -65,6 +65,6 @@ reaches every machine with `git pull`; the block itself never needs editing. The
 | `starship init zsh` | the prompt, when `starship` is installed |
 | `alias e='emacsclient -n -c -a ""'` | open a file in a new frame of the running Emacs, starting the daemon if needed |
 
-Older installs had two blocks (`dotfiles: starship` and `dotfiles: emacs`); `install.sh`
-replaces them with this one and backs up `~/.zshrc` first. `./install.sh --uninstall` removes
+Older installs had two blocks (`dotfiles: starship` and `dotfiles: emacs`); `link.sh`
+replaces them with this one and backs up `~/.zshrc` first. `./link.sh --uninstall` removes
 the block and leaves the rest of the file alone.

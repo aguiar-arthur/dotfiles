@@ -43,7 +43,7 @@ WORKS=()
 
 cleanup() {
   local dir
-  for dir in "${WORKS[@]}"; do rm -rf "$dir"; done
+  for dir in ${WORKS[@]+"${WORKS[@]}"}; do rm -rf "$dir"; done
 }
 trap cleanup EXIT
 

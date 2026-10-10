@@ -8,7 +8,7 @@ result.
 
 ```sh
 test/run.sh              # everything
-test/run.sh static       # one level: static | install | smoke | keys | behavior
+test/run.sh static       # one level: static | scripts | smoke | keys | behavior
 test/run.sh all --clean  # forget the cached plugins and packages first
 ```
 
@@ -24,7 +24,7 @@ every commit.
 | Level | Takes | Needs | Catches |
 |---|---|---|---|
 | `static` | seconds | `emacs`, `nvim`, `python3`, `shfmt`, `stylua`, `rumdl`, `gitleaks`, `zsh` | syntax, formatting, lint, broken links, secrets, comments in code |
-| `install` | 10 s | `git`, `zsh` | `install.sh`, `bin/dotfiles` and the hook misbehaving |
+| `scripts` | 15 s | `git`, `zsh` | `install.sh`, `link.sh`, `bin/dotfiles` and the hook misbehaving |
 | `smoke` | 1 min, plus the first install | `nvim`, `emacs`, `git`, network on first run | a config that no longer starts |
 | `keys` | 1 min | `nvim`, `emacs`, `python3`, `git` | a key that drifted from `docs/keymaps.md` |
 | `behavior` | 45 s | `nvim`, `emacs`, `git` | a regression of an invariant from `AGENTS.md` |
@@ -44,12 +44,12 @@ every commit.
   plugin cache never produces false alarms). rumdl also checks that relative links between
   pages resolve.
 
-### install
+### scripts
 
 A copy of the repository (its tracked files, committed into a fresh git repository) and a
-throwaway `HOME` whose `~/.zshrc` has the old two-block layout. Checks that:
+throwaway `HOME` whose `~/.zshrc` has the old two-block layout. For `link.sh`, checks that:
 
-- `--check` reports pending changes, then nothing after an install;
+- `--check` reports pending changes, then nothing after a run;
 - the links point into the copy and a replaced directory is backed up, keeping only three;
 - `~/.zshrc` keeps the user's lines, ends with exactly one block and loses the old ones; a
   second run changes nothing;
@@ -57,6 +57,17 @@ throwaway `HOME` whose `~/.zshrc` has the old two-block layout. Checks that:
 - `dotfiles` rejects unknown commands, lists backups and `rollback emacs` restores one;
 - the pre-commit hook passes on a clean tree and blocks a comment in code;
 - `--uninstall` removes the links, the block and the hook and keeps the user's lines.
+
+For `install.sh`, `brew`, `nvim` and `emacs` are stubs that record how they were called, so
+nothing is downloaded. Checks that:
+
+- unknown groups and steps are rejected;
+- `brew bundle` runs on the Brewfile and only on the groups asked for (`--all`: every group);
+- Neovim restores the lock and runs the headless installer, Emacs loads the configuration,
+  and both read it from the repository (`XDG_CONFIG_HOME`), never from `~/.config`;
+- `install.sh` links nothing;
+- `--skip` leaves steps out; a failing step makes the script exit 1, names the step, and the
+  following steps still run.
 
 ### smoke
 
@@ -145,4 +156,4 @@ Nothing runs on a schedule and nothing updates itself: updates happen when you r
 - The `gd` / `gr` / `gi` navigation inside a diff (it needs a live server); the guard that
   keeps servers out of diff buffers is covered instead.
 - LaTeX compilation and Skim inverse search, Org agenda content, CIDER and clojure-lsp.
-- `install.sh` itself, beyond syntax and formatting.
+- Real downloads by `install.sh` (Homebrew, Mason, parsers): the tests use stubs.

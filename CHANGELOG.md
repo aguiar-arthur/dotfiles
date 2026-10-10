@@ -9,7 +9,7 @@ and `git log` have them.
 ### Added
 
 - `dotfiles` command (`bin/dotfiles`): `doctor`, `update`, `rollback`, `backups`, `install`,
-  `test`.
+  `link`, `test`.
 - Health reports: `<Space>oh` (`:checkhealth dotfiles`) in Neovim and `SPC o h`
   (`aa/doctor`) in Emacs. Emacs also announces failed modules at startup.
 - Per-machine settings: `lua/config/local.lua` and `config/emacs/local.el`, both ignored by
@@ -17,7 +17,9 @@ and `git log` have them.
   can be turned off.
 - Emacs package backups before every update (newest three kept) and
   `aa/rollback-packages` / `dotfiles rollback emacs`.
-- `install.sh --check` and `--uninstall`; pre-commit hook running the static checks.
+- `install.sh` now installs everything (Homebrew, Brewfile and groups, Neovim plugins, Mason
+  servers and tools, treesitter parsers, Emacs packages); the old linking script is
+  `link.sh`, with `--check` and `--uninstall`. Pre-commit hook running the static checks.
 - `test/run.sh` with five levels (static, install, smoke, keys, behavior) and CI on Ubuntu
   and macOS for pushes and pull requests. Nothing runs on a schedule: updates happen with
   `dotfiles update` (`--test` also runs the tests on the new versions).
@@ -32,6 +34,8 @@ and `git log` have them.
 - Emacs file tree: `treemacs-evil` keys (it was unusable in `emacs -nw`), Dracula git colors
   (modified files looked unchanged), missing projects dropped without a prompt.
 - ediff sessions start on their first change, so the diff is colored right away.
+- Treesitter parsers follow the enabled languages, like servers and tools; Mason servers are
+  installed by mason-tool-installer together with the tools.
 - Lua reformatted with stylua (two spaces, 100 columns).
 
 ### Fixed
@@ -39,6 +43,9 @@ and `git log` have them.
 - Obsolete Emacs APIs found by the byte-compile check: `if-let` / `when-let`,
   `org-edit-src-content-indentation`, `diff-hl-magit-pre-refresh`,
   `native-comp-deferred-compilation`; `magit-blame-quit` called interactively.
+
+- `.gitignore` covers editor backups and locks, merge leftovers, rumdl's cache and compiled
+  spell files.
 
 ### Removed
 

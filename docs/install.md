@@ -1,38 +1,68 @@
 # Installation
 
+Two scripts, kept apart on purpose:
+
+| Script | Does | Never does |
+|---|---|---|
+| `install.sh` | installs: Homebrew, the programs in the Brewfiles, Neovim plugins, Mason servers and tools, treesitter parsers, Emacs packages | touch your home directory |
+| `link.sh` | connects: links into `~/.config`, the `~/.zshrc` block, the git hook | install anything |
+
 ```sh
 git clone <repo> ~/dotfiles && cd ~/dotfiles
-brew bundle                                  # 1. the programs every machine needs
-brew bundle --file brew/latex.Brewfile       #    optional groups, as needed (customizing.md)
-./install.sh                                 # 2. links, the ~/.zshrc block, the git hook
-dotfiles doctor                              # 3. in a new terminal: is everything in place?
+./install.sh --with latex --with clojure     # 1. everything the configuration needs
+./link.sh                                    # 2. links, the ~/.zshrc block, the git hook
+exec zsh && dotfiles doctor                  # 3. is everything in place?
 ```
+
+Either script can run again at any time; each only does what is missing.
 
 Then:
 
-1. Open a **new terminal** so the zsh block loads (prompt, `e`, `dotfiles`).
-2. In iTerm2: *Settings → Profiles → "Dotfiles (Dracula)" → Other Actions → Set as Default*.
-3. Open `nvim`. The first time, lazy.nvim installs the plugins at the versions in
-   `lazy-lock.json`, Mason installs the LSP servers and formatters of the enabled languages,
-   and treesitter compiles the parsers. It takes a minute or two.
-4. Open Emacs (`e` or the app). The first launch installs every package (a few minutes).
-5. For LaTeX, install the `latex` group and set up Skim's inverse search
-   ([neovim.md](neovim.md#latex)).
-6. Per-machine choices (theme, languages, font size…) go in the local files
-   ([customizing.md](customizing.md)).
-7. The first time you open a `.tex` or `.md` file, Neovim asks to download the Portuguese
+1. In iTerm2: *Settings → Profiles → "Dotfiles (Dracula)" → Other Actions → Set as Default*.
+2. For LaTeX, set up Skim's inverse search ([neovim.md](neovim.md#latex)).
+3. Per-machine choices (theme, languages, font size…) go in the local files
+   ([customizing.md](customizing.md)). Turning a language off there also means `install.sh`
+   skips its servers, tools and parsers.
+4. The first time you open a `.tex` or `.md` file, Neovim asks to download the Portuguese
    spell file; answer `y` once (or drop `pt_br` from `spelllang`).
 
 ## What `install.sh` does
+
+```text
+./install.sh [--with GROUP]... [--all] [--skip STEP]...
+```
+
+| Step | What it installs |
+|---|---|
+| `brew` | Homebrew itself when it is missing (its official installer, which asks for your password; macOS only), then `brew bundle` on the `Brewfile` and on each group given with `--with` (`--all` for every group in `brew/`) |
+| `nvim` | the plugins at the versions in `lazy-lock.json` (`:Lazy! restore`), then the Mason servers and tools and the treesitter parsers of the enabled languages (`lua/dotfiles/install.lua`) |
+| `emacs` | every package the configuration uses, by loading it once in batch mode; fails if a module does not load |
+
+`--skip brew`, `--skip nvim` or `--skip emacs` leaves a step out. The editors read the
+configuration straight from the repository (`XDG_CONFIG_HOME` points at `config/` for these
+runs), so `install.sh` works before `link.sh` and never writes to `~/.config`. Plugins and
+packages land where the editors normally keep them (`~/.local/share/nvim`,
+`~/.local/share/emacs`).
+
+Each step reports `ok` or `ERROR` lines; at the end the script lists the failed steps and exits
+1, otherwise it points to `link.sh`. A failed step does not stop the next one. The Neovim step
+gives up after a minute if Mason's registry does not answer and reports it, instead of
+waiting forever as `:MasonToolsInstallSync` does.
+
+Without `install.sh`, the editors still install what they need on first launch: lazy.nvim,
+Mason and treesitter in the background, Emacs packages at startup. `install.sh` does it
+up front, all at once, and tells you what failed.
+
+## What `link.sh` does
 
 It only creates links, one marked block in `~/.zshrc` and a git setting. It never installs
 programs, plugins or packages, and it is idempotent: running it again changes nothing.
 
 | Mode | Does |
 |---|---|
-| `./install.sh` | create or repair everything below |
-| `./install.sh --check` | print what would change and exit 1 if anything would (nothing is written) |
-| `./install.sh --uninstall` | remove the links that point into the repository, the `~/.zshrc` block and the git setting; backups stay |
+| `./link.sh` | create or repair everything below |
+| `./link.sh --check` | print what would change and exit 1 if anything would (nothing is written) |
+| `./link.sh --uninstall` | remove the links that point into the repository, the `~/.zshrc` block and the git setting; backups stay |
 
 | Item | Target |
 |---|---|
@@ -59,15 +89,16 @@ code, broken Markdown, secrets). `git commit --no-verify` skips it when you must
 
 ## `dotfiles`
 
-`bin/dotfiles` is on `PATH` once the zsh block loads:
+`bin/dotfiles` is on `PATH` once the zsh block loads (after `link.sh` and a new shell):
 
 | Command | Does |
 |---|---|
-| `dotfiles doctor` | Brewfile and groups, `install.sh --check`, `:checkhealth dotfiles`, `aa/doctor`; exit 1 on an error |
+| `dotfiles doctor` | Brewfile and groups, `link.sh --check`, `:checkhealth dotfiles`, `aa/doctor`; exit 1 on an error |
 | `dotfiles update [nvim\|emacs] [--test]` | update with a backup, then `doctor`; `--test` also runs the tests on the new versions ([maintenance.md](maintenance.md#updating)) |
 | `dotfiles rollback nvim\|emacs [backup]` | go back after a bad update |
 | `dotfiles backups` | list the Emacs package backups |
-| `dotfiles install [--check\|--uninstall]` | `install.sh` |
+| `dotfiles install [--with GROUP]… [--all] [--skip STEP]…` | `install.sh` |
+| `dotfiles link [--check\|--uninstall]` | `link.sh` |
 | `dotfiles test [level…]` | `test/run.sh` ([testing.md](testing.md)) |
 
 ## Brewfile

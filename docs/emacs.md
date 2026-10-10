@@ -152,7 +152,7 @@ keys).
 - **Editing aids:** indent-bars outside Lisp modes (they add noise in Lisp); electric-pair
   everywhere except Clojure, where smartparens pairs; wgrep to edit grep / embark-export
   results in place (`C-c C-p`, then `C-c C-c`); vundo; hl-todo (`]t` `[t`).
-- **Server:** Emacs starts a server, so `e file` (`emacsclient`, alias from `install.sh`)
+- **Server:** Emacs starts a server, so `e file` (`emacsclient`, alias from `config/zsh/dotfiles.zsh`)
   reuses the running instance.
 - **Git:** magit (status in the same window, word-level refinement of every hunk), diff-hl
   in the fringe (updated live and after magit refreshes), browse-at-remote.

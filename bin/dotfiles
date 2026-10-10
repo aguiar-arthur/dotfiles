@@ -16,7 +16,10 @@ usage: dotfiles <command>
   rollback nvim          go back to the plugin versions in the committed lazy-lock.json
   rollback emacs [NAME]  restore the newest (or the named) backup of the Emacs packages
   backups                list the Emacs package backups
-  install [--check|--uninstall]
+  install [--with GROUP]... [--all] [--skip STEP]...
+                         install Homebrew, programs, plugins and packages (install.sh)
+  link [--check|--uninstall]
+                         links, the ~/.zshrc block and the git hook (link.sh)
   test [LEVEL...]        run test/run.sh
 USAGE
 }
@@ -50,8 +53,8 @@ doctor_programs() {
 
 doctor_links() {
   title "Links and shell"
-  if "$DOT/install.sh" --check; then :; else
-    echo "WARN   run ./install.sh"
+  if "$DOT/link.sh" --check; then :; else
+    echo "WARN   run ./link.sh"
   fi
 }
 
@@ -194,6 +197,7 @@ update) cmd_update "$@" ;;
 rollback) cmd_rollback "$@" ;;
 backups) cmd_backups ;;
 install) exec "$DOT/install.sh" "$@" ;;
+link) exec "$DOT/link.sh" "$@" ;;
 test) exec "$DOT/test/run.sh" "$@" ;;
 help | -h | --help) usage ;;
 *)

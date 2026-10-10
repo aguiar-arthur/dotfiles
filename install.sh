@@ -1,184 +1,165 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -uo pipefail
 
 DOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ZSHRC="$HOME/.zshrc"
-BEGIN="# >>> dotfiles >>>"
-END="# <<< dotfiles <<<"
-KEEP_BACKUPS=3
-MODE=install
-PENDING=0
+GROUPS_WANTED=()
+SKIP=()
+FAILED=()
+STEP_OK=0
 
 usage() {
   cat <<'USAGE'
-usage: ./install.sh [--check | --uninstall]
+usage: ./install.sh [--with GROUP]... [--all] [--skip STEP]...
 
-  (none)       create the links, the ~/.zshrc block and the git hooks
-  --check      show what would change and exit 1 if anything would
-  --uninstall  remove the links, the ~/.zshrc block and the git hooks
+Installs what the configuration needs; ./link.sh connects it to your home directory.
+
+  --with GROUP   also install an optional Brewfile group from brew/ (latex, clojure, python, ruby)
+  --all          install every group
+  --skip STEP    skip a step: brew, nvim, emacs
+
+steps, in order:
+  brew    Homebrew itself if missing, then brew bundle (Brewfile and the chosen groups)
+  nvim    plugins at the versions in lazy-lock.json, Mason servers and tools, treesitter parsers
+  emacs   every package the configuration uses
+
+Every step can run again safely; it only installs what is missing.
 USAGE
 }
 
-case "${1:-}" in
-"") ;;
---check) MODE=check ;;
---uninstall) MODE=uninstall ;;
--h | --help)
-  usage
-  exit 0
-  ;;
-*)
-  usage >&2
-  exit 2
-  ;;
-esac
-
-say() { printf '%-8s %s\n' "$1" "$2"; }
-
-links() {
-  printf '%s\n' \
-    "config/nvim|$HOME/.config/nvim" \
-    "config/emacs|$HOME/.config/emacs" \
-    "config/starship/starship.toml|$HOME/.config/starship.toml" \
-    "config/rumdl/rumdl.toml|$HOME/.config/rumdl/rumdl.toml"
-  if [[ "$OSTYPE" == darwin* ]]; then
-    printf '%s\n' "config/iterm2/dracula.json|$HOME/Library/Application Support/iTerm2/DynamicProfiles/dotfiles-dracula.json"
-  fi
-}
-
-prune_backups() {
-  local dst="$1" old
-  local -a all=()
-  while IFS= read -r old; do all+=("$old"); done < <(ls -1d "$dst".bak.* 2>/dev/null | sort)
-  local excess=$((${#all[@]} - KEEP_BACKUPS))
-  local i
-  for ((i = 0; i < excess; i++)); do
-    rm -rf "${all[$i]}"
-    say prune "${all[$i]}"
+available_groups() {
+  local file
+  for file in "$DOT"/brew/*.Brewfile; do
+    [ -e "$file" ] && basename "$file" .Brewfile
   done
 }
 
-link() {
-  local src="$DOT/$1" dst="$2"
-  if [ -L "$dst" ] && [ "$(readlink "$dst")" = "$src" ]; then
-    say ok "$dst"
-    return
-  fi
-  if [ "$MODE" = check ]; then
-    say change "$dst would link to $src"
-    PENDING=1
-    return
-  fi
-  mkdir -p "$(dirname "$dst")"
-  if [ -e "$dst" ] || [ -L "$dst" ]; then
-    mv "$dst" "$dst.bak.$(date +%Y%m%d%H%M%S)"
-    say backup "$dst"
-    prune_backups "$dst"
-  fi
-  ln -s "$src" "$dst"
-  say link "$dst -> $src"
-}
-
-unlink_one() {
-  local src="$DOT/$1" dst="$2"
-  if [ -L "$dst" ] && [ "$(readlink "$dst")" = "$src" ]; then
-    rm "$dst"
-    say remove "$dst"
-  fi
-}
-
-strip_blocks() {
-  awk '
-    /^# >>> dotfiles(: [a-z]+)? >>>$/ { skip = 1; next }
-    /^# <<< dotfiles(: [a-z]+)? <<<$/ { skip = 0; next }
-    !skip { print }
-  ' "$1" | awk '{ lines[NR] = $0 } END { n = NR; while (n > 0 && lines[n] == "") n--; for (i = 1; i <= n; i++) print lines[i] }'
-}
-
-wanted_zshrc() {
-  local base
-  base="$(strip_blocks "$ZSHRC")"
-  if [ -n "$base" ]; then
-    printf '%s\n\n' "$base"
-  fi
-  printf '%s\n%s\n%s\n' "$BEGIN" "[ -r \"$DOT/config/zsh/dotfiles.zsh\" ] && source \"$DOT/config/zsh/dotfiles.zsh\"" "$END"
-}
-
-zshrc() {
-  [ -e "$ZSHRC" ] || : >>"$ZSHRC"
-  local wanted
-  if [ "$MODE" = uninstall ]; then
-    wanted="$(strip_blocks "$ZSHRC")"
-    [ -n "$wanted" ] && wanted="$wanted"$'\n'
-  else
-    wanted="$(wanted_zshrc)"$'\n'
-  fi
-  if printf '%s' "$wanted" | cmp -s - "$ZSHRC"; then
-    say ok "$ZSHRC"
-    return
-  fi
-  if [ "$MODE" = check ]; then
-    say change "$ZSHRC would get the dotfiles block (old blocks removed)"
-    PENDING=1
-    return
-  fi
-  cp "$ZSHRC" "$ZSHRC.bak.$(date +%Y%m%d%H%M%S)"
-  prune_backups "$ZSHRC"
-  printf '%s' "$wanted" >"$ZSHRC"
-  if [ "$MODE" = uninstall ]; then
-    say remove "dotfiles block from $ZSHRC"
-  else
-    say zshrc "$ZSHRC sources config/zsh/dotfiles.zsh"
-  fi
-}
-
-hooks() {
-  [ -d "$DOT/.git" ] || return 0
-  local current
-  current="$(git -C "$DOT" config --get core.hooksPath || true)"
-  case "$MODE" in
-  uninstall)
-    if [ "$current" = .githooks ]; then
-      git -C "$DOT" config --unset core.hooksPath
-      say remove "git hooks"
+while [ $# -gt 0 ]; do
+  case "$1" in
+  --with)
+    [ $# -ge 2 ] || {
+      usage >&2
+      exit 2
+    }
+    if [ ! -f "$DOT/brew/$2.Brewfile" ]; then
+      printf 'unknown group: %s (available: %s)\n' "$2" "$(available_groups | tr '\n' ' ')" >&2
+      exit 2
     fi
+    GROUPS_WANTED+=("$2")
+    shift 2
     ;;
-  check)
-    if [ "$current" = .githooks ]; then say ok "git hooks"; else
-      say change "git would use .githooks"
-      PENDING=1
-    fi
+  --all)
+    while IFS= read -r group; do GROUPS_WANTED+=("$group"); done < <(available_groups)
+    shift
+    ;;
+  --skip)
+    case "${2:-}" in
+    brew | nvim | emacs) SKIP+=("$2") ;;
+    *)
+      usage >&2
+      exit 2
+      ;;
+    esac
+    shift 2
+    ;;
+  -h | --help)
+    usage
+    exit 0
     ;;
   *)
-    if [ "$current" = .githooks ]; then say ok "git hooks"; else
-      git -C "$DOT" config core.hooksPath .githooks
-      say hooks "git uses .githooks (pre-commit runs test/run.sh static)"
-    fi
+    usage >&2
+    exit 2
     ;;
   esac
+done
+
+title() { printf '\n== %s\n' "$*"; }
+skipped() { [[ " ${SKIP[*]-} " == *" $1 "* ]]; }
+have() { command -v "$1" >/dev/null 2>&1; }
+failed() {
+  STEP_OK=1
+  printf 'ERROR  %s\n' "$1"
 }
 
-warn_old_emacs() {
-  local old
-  for old in "$HOME/.emacs" "$HOME/.emacs.el" "$HOME/.emacs.d"; do
-    if [ -e "$old" ]; then
-      say WARN "$old exists: Emacs loads it instead of ~/.config/emacs (move it away)"
+step_brew() {
+  title "Homebrew and programs"
+  if ! have brew; then
+    for candidate in /opt/homebrew/bin/brew /usr/local/bin/brew /home/linuxbrew/.linuxbrew/bin/brew; do
+      [ -x "$candidate" ] && eval "$("$candidate" shellenv)" && break
+    done
+  fi
+  if ! have brew; then
+    if [[ "$OSTYPE" != darwin* ]]; then
+      failed "Homebrew is not installed; see https://brew.sh"
+      return
     fi
+    echo "Installing Homebrew (it asks for your password)"
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || {
+      failed "Homebrew installation"
+      return
+    }
+    for candidate in /opt/homebrew/bin/brew /usr/local/bin/brew; do
+      [ -x "$candidate" ] && eval "$("$candidate" shellenv)" && break
+    done
+  fi
+  brew bundle --file "$DOT/Brewfile" || failed "brew bundle (Brewfile)"
+  local group
+  for group in "${GROUPS_WANTED[@]+"${GROUPS_WANTED[@]}"}"; do
+    brew bundle --file "$DOT/brew/$group.Brewfile" || failed "brew bundle (brew/$group.Brewfile)"
   done
 }
 
-while IFS='|' read -r src dst; do
-  if [ "$MODE" = uninstall ]; then unlink_one "$src" "$dst"; else link "$src" "$dst"; fi
-done < <(links)
-zshrc
-hooks
-[ "$MODE" = uninstall ] || warn_old_emacs
+step_nvim() {
+  title "Neovim: plugins, Mason servers and tools, treesitter parsers"
+  if ! have nvim; then
+    failed "nvim is not installed (run the brew step first)"
+    return 1
+  fi
+  export XDG_CONFIG_HOME="$DOT/config"
+  if nvim --headless "+Lazy! restore" +qa; then
+    echo "ok     plugins at the versions in lazy-lock.json"
+  else
+    failed "Lazy! restore"
+    return 1
+  fi
+  nvim --headless "+lua require('dotfiles.install').run()" || failed "Neovim tools or parsers"
+  return "$STEP_OK"
+}
 
-case "$MODE" in
-check)
-  if [ "$PENDING" -eq 0 ]; then echo "Nothing to change."; else echo "Run ./install.sh to apply."; fi
-  exit "$PENDING"
-  ;;
-uninstall) echo "Removed. Backups (*.bak.*) were left in place." ;;
-*) echo "Done. Open a new terminal. In iTerm2: Settings > Profiles > 'Dotfiles (Dracula)' > Other Actions > Set as Default." ;;
-esac
+step_emacs() {
+  title "Emacs: packages"
+  if ! have emacs; then
+    failed "emacs is not installed (run the brew step first)"
+    return 1
+  fi
+  export XDG_CONFIG_HOME="$DOT/config"
+  if emacs --batch -l "$DOT/config/emacs/early-init.el" -l "$DOT/config/emacs/init.el" \
+    --eval '(kill-emacs (if aa/failed-modules 1 0))'; then
+    echo "ok     every package installed and every module loads"
+  else
+    failed "Emacs packages (a module failed to load; see the output above)"
+  fi
+  return "$STEP_OK"
+}
+
+run_step() {
+  local step="$1"
+  skipped "$step" && return
+  STEP_OK=0
+  if [ "$step" = brew ]; then
+    step_brew
+  else
+    ("step_$step")
+    STEP_OK=$?
+  fi
+  [ "$STEP_OK" -eq 0 ] || FAILED+=("$step")
+}
+
+run_step brew
+run_step nvim
+run_step emacs
+
+if [ "${#FAILED[@]}" -gt 0 ]; then
+  printf '\nSome steps failed: %s\n' "${FAILED[*]}"
+  exit 1
+fi
+printf '\nInstalled. Next: ./link.sh, then open a new terminal and run dotfiles doctor.\n'

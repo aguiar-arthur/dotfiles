@@ -18,6 +18,8 @@ config/nvim/
     autocmds.lua              editor behaviour driven by events
     lazy.lua                  lazy.nvim bootstrap and settings
   lua/dotfiles/health.lua     :checkhealth dotfiles (<Space>oh)
+  lua/dotfiles/install.lua    headless install of Mason packages and parsers (used by install.sh)
+  lua/dotfiles/mason.lua      Mason package names wanted by the enabled languages
   lua/plugins/                one spec file per concern
     colorscheme.lua           Dracula + diff colors
     snacks.lua                picker, file tree, terminal, lazygit, dashboard, notifications, toggles
@@ -67,7 +69,9 @@ exist before any key is mapped.
   (`inline:char`). Removed lines are drawn as `╱` (`fillchars diff`).
 - Folds come from treesitter and start open (`foldlevel=99`).
 - Spell languages `en_us` and `pt_br`, only turned on for prose. The first time a prose file
-  opens, Neovim asks to download the `pt` spell file.
+  opens, Neovim asks to download the `pt` spell file. Words added with `zg` go to
+  `config/nvim/spell/<lang>.utf-8.add` in the repository (versioned, so they follow you); the
+  compiled `.spl` next to it is ignored by git.
 - The system clipboard is set with `vim.schedule` so its provider check does not slow
   startup.
 - `.tex` files are LaTeX, not plain TeX (`g:tex_flavor`).
@@ -187,11 +191,13 @@ snippets from `snippets/<filetype>.lua`.
 The `main` branch of nvim-treesitter is the rewrite for Neovim 0.11+: there is no
 `nvim-treesitter.configs` module any more, parsers are compiled locally (needs the
 `tree-sitter` CLI from the Brewfile and a C compiler from the Xcode tools), and highlighting
-and indent are switched on by a `FileType` autocmd in `treesitter.lua`. Parsers installed:
-bash, c, clojure, cpp, css, diff, html, javascript, json, latex, lua, luadoc, markdown,
+and indent are switched on by a `FileType` autocmd in `treesitter.lua`. The parsers come from
+`settings.parsers`: diff, query, regex, ruby, vim and vimdoc always, plus those of each
+enabled language ([customizing.md](customizing.md)); with every language on that is bash, c,
+clojure, cpp, css, diff, html, javascript, json, latex, lua, luadoc, markdown,
 markdown_inline, python, query, regex, ruby, toml, tsx, typescript, vim, vimdoc, yaml.
-Installation is asynchronous and skips what already exists; without the CLI a warning
-explains what to install. Filetypes without a parser are skipped silently.
+Installation at startup is asynchronous and skips what already exists; without the CLI a
+warning explains what to install. Filetypes without a parser are skipped silently.
 
 LaTeX buffers do not start treesitter: vimtex handles highlighting, folds and concealment, and
 vimtex advises against running both.
@@ -358,3 +364,19 @@ checkhealth `OK` / `WARNING` / `ERROR` lines and advice:
 | Extras | a Nerd Font in the font folders, spell files not downloaded yet |
 
 `dotfiles doctor` runs it headless and prints the same lines.
+
+## Installing from the shell
+
+`install.sh` runs Neovim twice, headless, with `XDG_CONFIG_HOME` pointing at the repository:
+`:Lazy! restore` for the plugins, then `require("dotfiles.install").run()`, which:
+
+- refreshes the Mason registry and gives up after a minute if it does not answer (an empty
+  registry means it could not be downloaded);
+- installs every missing Mason package of the enabled languages (servers through their Mason
+  names, from mason-lspconfig's mapping) and waits up to 15 minutes for them;
+- installs the parsers of `settings.parsers` and waits for them;
+- prints an `ok` or `ERROR` line per part and exits 1 when something is missing.
+
+It does not use `:MasonToolsInstallSync`: that command loops forever when the registry cannot
+be reached. At startup, mason-tool-installer still installs the same list (tools and servers
+together) in the background.

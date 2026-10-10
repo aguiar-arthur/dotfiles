@@ -1,29 +1,4 @@
-local parsers = {
-  "bash",
-  "c",
-  "clojure",
-  "cpp",
-  "css",
-  "diff",
-  "html",
-  "javascript",
-  "json",
-  "latex",
-  "lua",
-  "luadoc",
-  "markdown",
-  "markdown_inline",
-  "python",
-  "query",
-  "regex",
-  "ruby",
-  "toml",
-  "tsx",
-  "typescript",
-  "vim",
-  "vimdoc",
-  "yaml",
-}
+local parsers = require("config.settings").parsers
 
 local skip_highlight = { tex = true, plaintex = true, latex = true }
 

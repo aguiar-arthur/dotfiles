@@ -16,13 +16,14 @@ config/rumdl/       rumdl.toml (Markdown lint rules, user-level)
 config/iterm2/      dracula.json (Dynamic Profile)
 docs/               all documentation (index.md lists the pages)
 test/               run.sh and the checks behind it (see Testing)
-bin/dotfiles        doctor, update, rollback, backups, install, test
+bin/dotfiles        doctor, update, rollback, backups, install, link, test
 brew/               optional Brewfile groups (latex, clojure, python, ruby)
 .githooks/          pre-commit: test/run.sh static
 CHANGELOG.md        notable changes, newest first
 .github/workflows/  CI: test/run.sh on Ubuntu and macOS
 .editorconfig       shell formatting (Lua: config/nvim/stylua.toml)
-install.sh          symlinks + marked ~/.zshrc blocks
+install.sh          installs: Homebrew, Brewfiles, Neovim plugins/tools/parsers, Emacs packages
+link.sh             links, the ~/.zshrc block, the git hook; installs nothing
 Brewfile            what every machine needs
 README.md           entry point: install commands and links to docs/
 ```
@@ -40,8 +41,8 @@ This applies to every file in the repository: Lua, Emacs Lisp, shell, TOML, the 
 - **Allowed exceptions** (they are directives, not comments):
   - the first line of every `.el` file, exactly `;;; -*- lexical-binding: t -*-`;
   - the `#!` line of shell scripts;
-  - text that the code writes or matches, such as the `# >>> dotfiles: … >>>` markers in
-    `install.sh`;
+  - text that the code writes or matches, such as the `# >>> dotfiles >>>` markers in
+    `link.sh`;
   - values that merely contain `#` or `--`, such as colors (`"#282a36"`) or strings.
 - **Docstrings** in Emacs Lisp stay, as one short line. Lua type annotations (`---@type`)
   are comments and are not used.
@@ -54,7 +55,7 @@ This applies to every file in the repository: Lua, Emacs Lisp, shell, TOML, the 
 
 | Change | Page |
 |---|---|
-| Installation, `install.sh`, Brewfile | `docs/install.md` |
+| Installation, `install.sh`, `link.sh`, Brewfile | `docs/install.md` |
 | Any key, in either editor | `docs/keymaps.md` (both columns) |
 | Neovim behaviour, plugins, LSP, formatting, LaTeX, Markdown | `docs/neovim.md` |
 | Emacs startup, modules, Org, Clojure, review | `docs/emacs.md` |
@@ -74,8 +75,12 @@ length 100, tables exempt).
   Portuguese. Reply to the user in the language they used.
 - **Documentation only in `docs/`**, plus the short root `README.md`. No other README files.
 - **One `.gitignore`**, at the root. Never commit generated files.
-- **`install.sh` installs nothing.** It only creates symlinks and the marked zshrc blocks, and
-  stays idempotent. Neovim plugins, Mason tools and Emacs packages install on first launch.
+- **Installing and linking stay separate.** `install.sh` installs (Homebrew, Brewfiles, editor
+  plugins, tools, parsers, packages) and never touches `$HOME`; `link.sh` only links, writes
+  the `~/.zshrc` block and sets the git hook, and never installs. Both stay idempotent. Editor
+  installs in `install.sh` read the configuration from the repository (`XDG_CONFIG_HOME`), so
+  it works before `link.sh`. Every install step has a timeout or a failure path: nothing may
+  wait forever on the network.
 - **Dependencies go in a Brewfile**, not in docs alone: the base `Brewfile` when every machine
   needs it (including the tools this file asks you to run), a group in `brew/` otherwise. A
   program the editors rely on also goes in the health checks (`aa/doctor-executables`,
@@ -179,7 +184,7 @@ saying a change is done, and report its result.
 | Level | Checks |
 |---|---|
 | `static` | formatting, syntax, rumdl, parentheses, secrets, no comments in any file |
-| `install` | `install.sh`, `bin/dotfiles` and the hook in a throwaway `HOME` |
+| `scripts` | `install.sh` (with stub `brew`/`nvim`/`emacs`), `link.sh`, `bin/dotfiles` and the hook in a throwaway `HOME` |
 | `smoke` | both editors start from scratch without errors, warnings, network or prompts |
 | `keys` | the real leader maps equal `docs/keymaps.md`, no duplicate actions |
 | `behavior` | the invariants above (`test/nvim/behavior.lua`, `test/emacs/behavior-tests.el`) |
@@ -200,9 +205,11 @@ saying a change is done, and report its result.
 The checks above cover the routine. These steps are for what they do not: interactive
 behaviour and debugging.
 
-### Install script
+### Install and link scripts
 
-- Run `install.sh` twice in a throwaway `HOME`: the second run changes nothing.
+- `scripts` covers both with stubs. A real `install.sh` run needs the network (Homebrew,
+  GitHub, the Mason registry); off the Mac use `--skip brew` and point `HOME` and
+  `XDG_DATA_HOME` at throwaway directories.
 
 ### Neovim from scratch
 

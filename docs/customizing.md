@@ -31,22 +31,24 @@ return {
 | `wrap` | `true` | wrap long lines on screen at startup (`<Space>uw` still toggles) |
 | `format_on_save` | `true` | initial state of `<Space>uf` |
 | `spelllang` | `{ "en_us", "pt_br" }` | spelling languages; dropping `pt_br` also skips its download prompt |
-| `languages` | all `true` | turning one off drops its servers and tools from Mason, its programs from the health report and, for `tex`, the vimtex plugin |
+| `languages` | all `true` | turning one off drops its servers, tools and treesitter parsers from what is installed, its programs from the health report and, for `tex`, the vimtex plugin |
 
 The language catalog in `settings.lua` says what each language brings:
 
-| Language | Servers (Mason) | Tools (Mason) | Programs checked |
-|---|---|---|---|
-| `lua` | lua_ls | stylua | |
-| `python` | basedpyright, ruff | | |
-| `shell` | bashls | shfmt, shellcheck | |
-| `tex` | texlab | | latexmk |
-| `json`, `yaml` | jsonls, yamlls | prettier | |
-| `toml` | taplo | | |
-| `markdown` | rumdl | | |
-| `web` | html, cssls, vtsls | prettier | |
-| `c` | clangd | | |
-| `clojure` | clojure_lsp (from the Brewfile group) | | clojure-lsp |
+| Language | Servers (Mason) | Tools (Mason) | Parsers | Programs checked |
+|---|---|---|---|---|
+| `lua` | lua_ls | stylua | lua, luadoc | |
+| `python` | basedpyright, ruff | | python | |
+| `shell` | bashls | shfmt, shellcheck | bash | |
+| `tex` | texlab | | latex | latexmk |
+| `json`, `yaml` | jsonls, yamlls | prettier | json, yaml | |
+| `toml` | taplo | | toml | |
+| `markdown` | rumdl | | markdown, markdown_inline | |
+| `web` | html, cssls, vtsls | prettier | html, css, javascript, typescript, tsx | |
+| `c` | clangd | | c, cpp | |
+| `clojure` | clojure_lsp (from the Brewfile group) | | clojure | clojure-lsp |
+
+diff, query, regex, ruby, vim and vimdoc parsers are always installed.
 
 Tables merge deeply, so `languages = { tex = false }` keeps the other languages on. Turning a
 language off does not uninstall what Mason already installed: `:Mason` removes it.

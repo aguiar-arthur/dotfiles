@@ -57,12 +57,9 @@ return {
         capabilities = require("blink.cmp").get_lsp_capabilities(),
       })
 
-      require("mason-lspconfig").setup({
-        ensure_installed = mason_servers,
-        automatic_enable = true,
-      })
+      require("mason-lspconfig").setup({ automatic_enable = true })
       require("mason-tool-installer").setup({
-        ensure_installed = mason_tools,
+        ensure_installed = vim.list_extend(vim.deepcopy(mason_tools), mason_servers),
         run_on_start = true,
         start_delay = 2000,
       })

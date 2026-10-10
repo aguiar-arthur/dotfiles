@@ -24,7 +24,7 @@ and rewrites the lock. A fresh machine installs exactly the versions in the comm
 `bin/dotfiles` (on `PATH` through the zsh block) wraps the routine and keeps a way back:
 
 ```sh
-cd ~/dotfiles && git pull && ./install.sh
+cd ~/dotfiles && git pull && ./link.sh
 brew update && brew upgrade
 dotfiles update
 ```
@@ -45,7 +45,7 @@ lock ([testing.md](testing.md)).
 
 | What | How |
 |---|---|
-| **These dotfiles** | `git pull`, then `./install.sh` (`./install.sh --check` shows what it would change) |
+| **These dotfiles** | `git pull`, then `./link.sh` (`./link.sh --check` shows what it would change); `./install.sh` when the Brewfile or the languages changed |
 | **Programs and CLI tools** | `brew update && brew upgrade` (`--greedy` also upgrades casks that update themselves) |
 | **MacTeX** | large; update it on its own with `brew upgrade --cask mactex` |
 | **Brewfile changes** | `brew bundle` installs what is new · `brew bundle check` reports what is missing · `brew bundle cleanup` lists what is no longer listed (`--force` removes it); the groups in `brew/` take `--file brew/<group>.Brewfile` |
@@ -81,8 +81,9 @@ release.
   `nvim` and commit the spec with the updated `lazy-lock.json`. To remove one, delete the
   spec, run `:Lazy clean` and commit the lock.
 - **LSP server or tool:** add it to the language's entry in the `catalog` of
-  `lua/config/settings.lua` (`servers`, `tools`, `executables`, or `system` for servers Mason
-  does not manage, like clojure-lsp); settings go in `after/lsp/<server>.lua`. A new language
+  `lua/config/settings.lua` (`servers`, `tools`, `parsers`, `executables`, or `system` for
+  servers Mason does not manage, like clojure-lsp); settings go in `after/lsp/<server>.lua`.
+  `./install.sh --skip brew --skip emacs` installs what is new. A new language
   also gets a key in `defaults.languages` ([customizing.md](customizing.md)).
 - **Emacs package:** a `use-package` block in the matching `lisp/init-*.el`; it installs on
   the next start. To remove one, delete the block and run `M-x package-autoremove`.

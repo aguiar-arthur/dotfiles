@@ -1,4 +1,13 @@
 .DS_Store
+*~
+\#*\#
+.#*
+*.swp
+*.orig
+*.rej
+
+/.test-cache/
+.rumdl_cache/
 
 /config/emacs/*
 !/config/emacs/early-init.el
@@ -7,6 +16,5 @@
 *.elc
 *.eln
 
-/.test-cache/
-
 /config/nvim/lua/config/local.lua
+/config/nvim/spell/*.spl

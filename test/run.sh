@@ -4,10 +4,10 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 usage() {
   cat <<'USAGE'
-usage: test/run.sh [static|install|smoke|keys|behavior|all] [--clean]
+usage: test/run.sh [static|scripts|smoke|keys|behavior|all] [--clean]
 
   static    formatting, syntax, lint, secrets, no comments in code
-  install   install.sh, bin/dotfiles and the git hook in a throwaway HOME
+  scripts   install.sh, link.sh, bin/dotfiles and the git hook in a throwaway HOME
   smoke     Neovim and Emacs start from scratch without errors
   keys      real leader maps against docs/keymaps.md
   behavior  the invariants listed in AGENTS.md
@@ -25,7 +25,7 @@ levels=()
 clean=0
 for arg in "$@"; do
   case "$arg" in
-  static | install | smoke | keys | behavior | all) levels+=("$arg") ;;
+  static | scripts | smoke | keys | behavior | all) levels+=("$arg") ;;
   --clean) clean=1 ;;
   -h | --help)
     usage
@@ -46,7 +46,7 @@ fi
 status=0
 for level in "${levels[@]}"; do
   if [ "$level" = all ]; then
-    selected=(static install smoke keys behavior)
+    selected=(static scripts smoke keys behavior)
   else
     selected=("$level")
   fi

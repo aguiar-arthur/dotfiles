@@ -6,7 +6,7 @@ section "Static checks"
 cd "$REPO" || exit 1
 
 shell_files() {
-  printf '%s\n' install.sh bin/dotfiles .githooks/pre-commit test/*.sh test/lib/*.sh
+  printf '%s\n' install.sh link.sh bin/dotfiles .githooks/pre-commit test/*.sh test/lib/*.sh
 }
 
 check_syntax() {

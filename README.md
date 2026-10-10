@@ -8,21 +8,22 @@ and **iTerm2** (Dracula profile).
 
 ```sh
 git clone <repo> ~/dotfiles && cd ~/dotfiles
-brew bundle
 ./install.sh
-dotfiles doctor
+./link.sh
+exec zsh && dotfiles doctor
 ```
 
-`brew bundle` installs the programs every machine needs (optional groups are in `brew/`);
-`install.sh` only creates links, one marked block in `~/.zshrc` and the git hook. Plugins and
-packages install the first time each editor opens. `dotfiles doctor` (in a new terminal) says
-whether everything is in place. Details are in [docs/install.md](docs/install.md).
+`install.sh` installs everything the configuration needs: Homebrew, the programs in the
+Brewfile (`--with latex`, `--with clojure`… adds optional groups), Neovim plugins, servers and
+parsers, Emacs packages. `link.sh` only connects the repository to your home directory: links,
+one marked block in `~/.zshrc`, the git hook. `dotfiles doctor` says whether everything is in
+place. Details are in [docs/install.md](docs/install.md).
 
 ## Documentation
 
 | Page | Covers |
 |---|---|
-| [docs/install.md](docs/install.md) | installation, `install.sh`, the Brewfile |
+| [docs/install.md](docs/install.md) | installation, `install.sh`, `link.sh`, the Brewfile |
 | [docs/keymaps.md](docs/keymaps.md) | every leader and local-leader key, Neovim and Emacs side by side |
 | [docs/neovim.md](docs/neovim.md) | Neovim: plugins, LSP, formatting, LaTeX, Markdown, git diffs |
 | [docs/emacs.md](docs/emacs.md) | Emacs: startup, modules, Org, Clojure, git diffs |

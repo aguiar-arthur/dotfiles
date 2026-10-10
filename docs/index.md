@@ -5,7 +5,7 @@ want to know why something is configured the way it is, look it up in these page
 
 | Page | Covers |
 |---|---|
-| [install.md](install.md) | Installing on a new Mac, what `install.sh` and the `Brewfile` do |
+| [install.md](install.md) | Installing on a new Mac: `install.sh` (installs), `link.sh` (links), the Brewfile |
 | [keymaps.md](keymaps.md) | Every `<Space>` (leader) and `,` (local leader) key, Neovim and Emacs side by side |
 | [neovim.md](neovim.md) | Neovim: structure, plugins, LSP, formatting, LaTeX, Markdown, git diffs, design notes |
 | [emacs.md](emacs.md) | Emacs: startup, modules, Org, notes, Clojure, git diffs, design notes |
@@ -19,8 +19,9 @@ want to know why something is configured the way it is, look it up in these page
 ```text
 Brewfile                      what every machine needs (brew bundle)
 brew/                         optional Brewfile groups: latex, clojure, python, ruby
-install.sh                    links, the ~/.zshrc block, the git hook; --check, --uninstall
-bin/dotfiles                  doctor, update, rollback, backups, install, test
+install.sh                    installs: Homebrew, Brewfiles, editor plugins, tools, parsers, packages
+link.sh                       links, the ~/.zshrc block, the git hook; --check, --uninstall
+bin/dotfiles                  doctor, update, rollback, backups, install, link, test
 CHANGELOG.md                  notable changes, newest first
 AGENTS.md                     conventions for AI agents (CLAUDE.md points to it)
 README.md                     short entry point
@@ -48,4 +49,17 @@ config/
   the last working state in `lazy-lock.json` so it can roll back
   ([maintenance.md](maintenance.md)).
 - **The repository holds configuration only.** Everything generated (plugins, packages,
-  caches, history) lives under `~/.local/share` and `~/.local/state`.
+  caches, history) lives under `~/.local/share` and `~/.local/state`. The few things that can
+  still appear inside the repository are ignored by the root `.gitignore`:
+
+| Pattern | What it is |
+|---|---|
+| `.DS_Store` | Finder metadata |
+| `*~`, `\#*\#`, `.#*`, `*.swp` | editor backups, auto-saves and locks (an Emacs or Vim without this configuration) |
+| `*.orig`, `*.rej` | leftovers of merges and patches |
+| `/.test-cache/` | plugins and packages kept between test runs ([testing.md](testing.md#cache)) |
+| `.rumdl_cache/` | rumdl's lint cache, wherever rumdl ran |
+| `/config/emacs/*` except `early-init.el`, `init.el`, `lisp/` | anything Emacs writes next to its configuration, including your `local.el` |
+| `*.elc`, `*.eln` | Emacs byte-code and native code |
+| `/config/nvim/lua/config/local.lua` | your Neovim local settings ([customizing.md](customizing.md)) |
+| `/config/nvim/spell/*.spl` | compiled spell files; the word lists you add with `zg` (`*.add`) are versioned, so they follow you to other machines |

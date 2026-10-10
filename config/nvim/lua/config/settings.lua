@@ -18,18 +18,28 @@ local defaults = {
   },
 }
 
+local core_parsers = { "diff", "query", "regex", "vim", "vimdoc", "ruby" }
+
 local catalog = {
-  lua = { servers = { "lua_ls" }, tools = { "stylua" } },
-  python = { servers = { "basedpyright", "ruff" } },
-  shell = { servers = { "bashls" }, tools = { "shfmt", "shellcheck" } },
-  tex = { servers = { "texlab" }, executables = { "latexmk" } },
-  json = { servers = { "jsonls" }, tools = { "prettier" } },
-  yaml = { servers = { "yamlls" }, tools = { "prettier" } },
-  toml = { servers = { "taplo" } },
-  markdown = { servers = { "rumdl" } },
-  web = { servers = { "html", "cssls", "vtsls" }, tools = { "prettier" } },
-  c = { servers = { "clangd" } },
-  clojure = { system = { clojure_lsp = "clojure-lsp" }, executables = { "clojure-lsp" } },
+  lua = { servers = { "lua_ls" }, tools = { "stylua" }, parsers = { "lua", "luadoc" } },
+  python = { servers = { "basedpyright", "ruff" }, parsers = { "python" } },
+  shell = { servers = { "bashls" }, tools = { "shfmt", "shellcheck" }, parsers = { "bash" } },
+  tex = { servers = { "texlab" }, executables = { "latexmk" }, parsers = { "latex" } },
+  json = { servers = { "jsonls" }, tools = { "prettier" }, parsers = { "json" } },
+  yaml = { servers = { "yamlls" }, tools = { "prettier" }, parsers = { "yaml" } },
+  toml = { servers = { "taplo" }, parsers = { "toml" } },
+  markdown = { servers = { "rumdl" }, parsers = { "markdown", "markdown_inline" } },
+  web = {
+    servers = { "html", "cssls", "vtsls" },
+    tools = { "prettier" },
+    parsers = { "html", "css", "javascript", "typescript", "tsx" },
+  },
+  c = { servers = { "clangd" }, parsers = { "c", "cpp" } },
+  clojure = {
+    system = { clojure_lsp = "clojure-lsp" },
+    executables = { "clojure-lsp" },
+    parsers = { "clojure" },
+  },
 }
 
 local M = vim.deepcopy(defaults)
@@ -71,6 +81,13 @@ end
 M.mason_servers = collect("servers")
 M.mason_tools = collect("tools")
 M.executables = collect("executables")
+M.parsers = collect("parsers")
+for _, parser in ipairs(core_parsers) do
+  if not vim.tbl_contains(M.parsers, parser) then
+    M.parsers[#M.parsers + 1] = parser
+  end
+end
+table.sort(M.parsers)
 
 M.system_servers = {}
 for name, enabled in pairs(M.languages) do

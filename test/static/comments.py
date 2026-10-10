@@ -50,9 +50,14 @@ def python_comments(path):
 
 def text_comments(path):
     found = []
+    line_comments_only = os.path.basename(path) == ".gitignore"
     with open(path, encoding="utf-8") as handle:
         for number, line in enumerate(handle, 1):
-            if "#" in strip_strings(line):
+            if line_comments_only:
+                hit = line.startswith("#")
+            else:
+                hit = "#" in strip_strings(line)
+            if hit:
                 found.append((number, line.strip()))
     return found
 
