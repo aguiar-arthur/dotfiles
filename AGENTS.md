@@ -174,7 +174,10 @@ details are in the linked docs.
   - quit ediff programmatically with `ediff-keep-variants` bound to `t`, or it asks "Kill
     buffer A?" and blocks;
   - `(require 'magit)` does not load `magit-ediff`; require submodules you call;
-  - xref decides whether to prompt from `this-command`: wrappers set it to the real command.
+  - xref decides whether to prompt from `this-command`: wrappers set it to the real command;
+  - on builds with native compilation (Emacs.app from Homebrew), advising a primitive compiles
+    a trampoline, which macOS clang rejects: load `early-init.el` (it disables trampolines)
+    before any `advice-add`, as `test/emacs/boot.el` does.
 
 ## Testing
 
@@ -195,6 +198,9 @@ saying a change is done, and report its result.
   `docs/keymaps.md` (both columns), or `keys` fails.
 - Tests obey every rule of this file: no comments, English, `stylua` / `shfmt` formatting.
 - Never edit `lazy-lock.json` by hand to make `smoke` pass; see Neovim above.
+- The tests run on macOS too: compare paths after `pwd -P` (`$TMPDIR` ends in `/` and `/var`
+  is a link to `/private/var`), and keep shell code working on bash 3.2 (no empty
+  `"${array[@]}"` under `set -u`).
 - What the tests cannot see (GUI, real language servers, LaTeX) still needs the manual steps
   below. Say plainly what was not tested.
 - The pre-commit hook runs `static`; do not bypass it with `--no-verify` to land a change.

@@ -48,7 +48,9 @@ cleanup() {
 trap cleanup EXIT
 
 work_dir() {
-  WORK="$(mktemp -d "${TMPDIR:-/tmp}/dotfiles-test.XXXXXX")"
+  local base="${TMPDIR:-/tmp}"
+  WORK="$(mktemp -d "${base%/}/dotfiles-test.XXXXXX")"
+  WORK="$(cd "$WORK" && pwd -P)"
   WORKS+=("$WORK")
   mkdir -p "$CACHE"
 }
@@ -119,6 +121,8 @@ read_ert() {
   done < <(grep -E '^ +(passed|FAILED|SKIPPED) +[0-9]+/[0-9]+ ' "$file")
   if [ "$found" -eq 0 ]; then
     fail "emacs produced no test results"
+    grep -m 8 -iE "error|debugger|symbol.s (value|function)|wrong (type|number)|cannot open|failed" "$file" | sed 's/^/        /'
+    return
   fi
   if [ "$status" -ne 0 ]; then
     sed -n '/^Test .* condition:/,/^   FAILED/p' "$file" | grep -v '^  [#(a-z].*(' | head -40 | sed 's/^/        /'

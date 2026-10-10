@@ -47,6 +47,11 @@ and `git log` have them.
 - `.gitignore` covers editor backups and locks, merge leftovers, rumdl's cache and compiled
   spell files.
 
+- `test/run.sh` on macOS: temporary paths are compared after resolving `/var` →
+  `/private/var` and the trailing `/` of `$TMPDIR`, and the Emacs tests load `early-init.el`
+  before advising primitives, so Emacs.app does not try to compile native trampolines. A
+  failing Emacs test run now prints the error instead of only a backtrace.
+
 ### Removed
 
 - Emacs `SPC h b`: it duplicated `SPC f k`.
