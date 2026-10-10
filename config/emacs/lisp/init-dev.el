@@ -74,9 +74,6 @@
       (eglot-inlay-hints-mode 'toggle)
     (user-error "Inlay hints need Emacs 30 or newer")))
 
-(defvar aa/autoformat t
-  "Non-nil formats buffers on save.")
-
 (defun aa/lsp-p ()
   "Non-nil when the current buffer is managed by eglot."
   (and (fboundp 'eglot-managed-p) (eglot-managed-p)))
@@ -145,8 +142,7 @@
   (magit-diff-refine-hunk 'all))
 
 (use-package diff-hl
-  :hook ((magit-pre-refresh . diff-hl-magit-pre-refresh)
-         (magit-post-refresh . diff-hl-magit-post-refresh))
+  :hook ((magit-post-refresh . diff-hl-magit-post-refresh))
   :init (global-diff-hl-mode 1)
   :config (diff-hl-flydiff-mode 1))
 
@@ -160,6 +156,13 @@
   (ediff-split-window-function #'split-window-horizontally)
   (ediff-merge-split-window-function #'split-window-horizontally)
   (ediff-keep-variants nil))
+
+(defun aa/ediff-select-first-difference ()
+  "Select the first difference so it is highlighted as soon as the session opens."
+  (when (and (< ediff-current-difference 0) (> ediff-number-of-differences 0))
+    (ediff-next-difference)))
+
+(add-hook 'ediff-startup-hook #'aa/ediff-select-first-difference)
 
 (defun aa/git-changed-file ()
   "Open a changed, staged or untracked file of the current repository."
@@ -233,7 +236,7 @@
   "Toggle magit blame for the current file."
   (interactive)
   (if (bound-and-true-p magit-blame-mode)
-      (magit-blame-quit)
+      (call-interactively #'magit-blame-quit)
     (call-interactively #'magit-blame-addition)))
 
 (use-package eat :commands eat)
@@ -276,7 +279,7 @@
 
 (defun aa/harpoon--root ()
   "Root of the current project, else the current directory."
-  (expand-file-name (if-let ((p (project-current))) (project-root p) default-directory)))
+  (expand-file-name (if-let* ((p (project-current))) (project-root p) default-directory)))
 
 (defun aa/harpoon--files ()
   "Files marked in the current project."
@@ -300,20 +303,20 @@
 (defun aa/harpoon-remove ()
   "Unmark a file."
   (interactive)
-  (when-let ((files (aa/harpoon--files))
+  (when-let* ((files (aa/harpoon--files))
              (choice (completing-read "Unmark: " files nil t)))
     (aa/harpoon--set (delete choice files))))
 
 (defun aa/harpoon-menu ()
   "Pick a marked file."
   (interactive)
-  (if-let ((files (aa/harpoon--files)))
+  (if-let* ((files (aa/harpoon--files)))
       (find-file (completing-read "Harpoon: " files nil t))
     (message "No marks in this project")))
 
 (defun aa/harpoon-goto (n)
   "Open the N-th marked file."
-  (if-let ((file (nth (1- n) (aa/harpoon--files))))
+  (if-let* ((file (nth (1- n) (aa/harpoon--files))))
       (find-file file)
     (message "No mark %d" n)))
 

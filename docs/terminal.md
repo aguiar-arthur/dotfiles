@@ -47,11 +47,24 @@ iTerm2 reloads the file by itself after edits.
 
 ## zsh
 
-`install.sh` adds two marked blocks to `~/.zshrc`, each only once:
+`install.sh` keeps one marked block in `~/.zshrc`:
 
-| Block | Content |
+```sh
+# >>> dotfiles >>>
+[ -r "$HOME/dotfiles/config/zsh/dotfiles.zsh" ] && source "$HOME/dotfiles/config/zsh/dotfiles.zsh"
+# <<< dotfiles <<<
+```
+
+Everything else lives in `config/zsh/dotfiles.zsh`, in the repository, so a change there
+reaches every machine with `git pull`; the block itself never needs editing. The file:
+
+| Line | Effect |
 |---|---|
-| `dotfiles: starship` | `eval "$(starship init zsh)"` when `starship` is installed |
-| `dotfiles: emacs` | `alias e='emacsclient -n -c -a ""'`: open a file in a new frame of the running Emacs, starting the daemon if needed |
+| `export DOTFILES=…` | the repository root, found from the file's own path |
+| `path=("$DOTFILES/bin" $path)` | puts `dotfiles` ([maintenance.md](maintenance.md)) on `PATH` |
+| `starship init zsh` | the prompt, when `starship` is installed |
+| `alias e='emacsclient -n -c -a ""'` | open a file in a new frame of the running Emacs, starting the daemon if needed |
 
-To remove one, delete the lines between its `# >>>` and `# <<<` markers.
+Older installs had two blocks (`dotfiles: starship` and `dotfiles: emacs`); `install.sh`
+replaces them with this one and backs up `~/.zshrc` first. `./install.sh --uninstall` removes
+the block and leaves the rest of the file alone.

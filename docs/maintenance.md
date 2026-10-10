@@ -21,36 +21,38 @@ and rewrites the lock. A fresh machine installs exactly the versions in the comm
 
 ## Updating
 
-A routine that keeps a way back:
+`bin/dotfiles` (on `PATH` through the zsh block) wraps the routine and keeps a way back:
 
 ```sh
 cd ~/dotfiles && git pull && ./install.sh
 brew update && brew upgrade
-rm -rf ~/.local/share/emacs/elpa.bak && cp -a ~/.local/share/emacs/elpa{,.bak}
-nvim +"Lazy update"
-git diff --stat config/nvim/lazy-lock.json
+dotfiles update
 ```
 
-1. Update the dotfiles (`install.sh` only matters when links or zshrc blocks changed).
-2. Update programs and casks.
-3. Back up the Emacs packages, then run `M-x aa/update-packages` in Emacs.
-4. Update the Neovim plugins.
-5. See which plugins moved.
+`dotfiles update` (or `dotfiles update nvim` / `dotfiles update emacs`):
+
+1. runs `:Lazy sync` headless and shows which plugins moved in `lazy-lock.json`;
+2. backs up `~/.local/share/emacs/elpa` to `elpa.bak.<date>` (the newest three are kept),
+   refreshes the package index and upgrades every package (`aa/update-packages`);
+3. runs `dotfiles doctor`, and on a failure prints the rollback commands.
 
 Use both editors for a while. If everything works, commit the new lock
-(`git commit -m "Update Neovim plugins" config/nvim/lazy-lock.json`) and delete
-`~/.local/share/emacs/elpa.bak`.
+(`git commit -m "Update Neovim plugins" config/nvim/lazy-lock.json`).
+
+Nothing updates on its own; you decide when. `dotfiles update --test` also runs
+`test/run.sh smoke keys behavior` against the new versions before telling you to commit the
+lock ([testing.md](testing.md)).
 
 | What | How |
 |---|---|
-| **These dotfiles** | `git pull`, then `./install.sh` |
+| **These dotfiles** | `git pull`, then `./install.sh` (`./install.sh --check` shows what it would change) |
 | **Programs and CLI tools** | `brew update && brew upgrade` (`--greedy` also upgrades casks that update themselves) |
 | **MacTeX** | large; update it on its own with `brew upgrade --cask mactex` |
-| **Brewfile changes** | `brew bundle` installs what is new · `brew bundle check` reports what is missing · `brew bundle cleanup` lists what is no longer listed (`--force` removes it) |
-| **Neovim plugins** | `:Lazy update` (or `U` in `:Lazy`); `:Lazy` shows pending updates |
+| **Brewfile changes** | `brew bundle` installs what is new · `brew bundle check` reports what is missing · `brew bundle cleanup` lists what is no longer listed (`--force` removes it); the groups in `brew/` take `--file brew/<group>.Brewfile` |
+| **Neovim plugins** | `dotfiles update nvim`, or `:Lazy update` (`U` in `:Lazy`) |
 | **Treesitter parsers** | `:TSUpdate` (also runs after nvim-treesitter updates) |
-| **Mason tools** | `:Mason`, then `U`; `:MasonToolsUpdate` for the tools listed in `lsp.lua` |
-| **Emacs packages** | `M-x aa/update-packages` (refreshes the index, then upgrades all); `SPC l M` opens the package list (`U` marks upgrades, `x` applies) |
+| **Mason tools** | `:Mason`, then `U`; `:MasonToolsUpdate` for the tools of the enabled languages |
+| **Emacs packages** | `dotfiles update emacs`, or `M-x aa/update-packages` (backup, refresh, upgrade); `SPC l M` opens the package list |
 | **Emacs itself** | `brew upgrade --cask emacs-app`, then restart Emacs |
 | **Nerd Font icons in Emacs** | `M-x nerd-icons-install-fonts` (only if symbols look broken) |
 | **Starship / iTerm2** | binaries come with `brew upgrade`; their configs are live |
@@ -61,53 +63,59 @@ package is missing.
 
 ## When an update breaks something
 
-**Neovim plugin.** `:Lazy update` has already rewritten the lock, so bring the old one back
-from git first, then reinstall those commits:
+| Editor | Command | What it does |
+|---|---|---|
+| Neovim | `dotfiles rollback nvim` | `git restore config/nvim/lazy-lock.json`, then `:Lazy restore`: back to the committed versions |
+| Emacs | `dotfiles rollback emacs` | moves `elpa` aside to `elpa.broken.<date>` and copies the newest backup in; restart Emacs |
+| Emacs | `dotfiles rollback emacs elpa.bak.<date>` | the same with an older backup (`dotfiles backups` lists them) |
+| Emacs | `M-x aa/rollback-packages` | the same from inside Emacs, choosing the backup |
 
-```sh
-git -C ~/dotfiles restore config/nvim/lazy-lock.json
-nvim +"Lazy restore"
-```
-
-To hold back one plugin, add `commit = "<sha>"` (or `pin = true`) to its spec until upstream
-fixes it, and remove it afterwards.
-
-**Emacs package.** Put the backup back:
-
-```sh
-rm -rf ~/.local/share/emacs/elpa && mv ~/.local/share/emacs/elpa{.bak,}
-```
-
-Without a backup, reinstalling from scratch (below) gets the current versions: that fixes a
-half-finished install, not a broken upstream release.
+To hold back one Neovim plugin, add `commit = "<sha>"` (or `pin = true`) to its spec until
+upstream fixes it, and remove it afterwards. Without an Emacs backup, reinstalling from scratch
+(below) gets the current versions: that fixes a half-finished install, not a broken upstream
+release.
 
 ## Adding and removing things
 
 - **Neovim plugin:** a spec in `lua/plugins/` (languages in `lua/plugins/lang/`). Open
   `nvim` and commit the spec with the updated `lazy-lock.json`. To remove one, delete the
   spec, run `:Lazy clean` and commit the lock.
-- **LSP server or tool:** add it to `mason_servers` / `mason_tools` in `lua/plugins/lsp.lua`;
-  settings go in `after/lsp/<server>.lua`. Tools Mason does not manage (like clojure-lsp) go
-  in the Brewfile and in `system_servers`.
+- **LSP server or tool:** add it to the language's entry in the `catalog` of
+  `lua/config/settings.lua` (`servers`, `tools`, `executables`, or `system` for servers Mason
+  does not manage, like clojure-lsp); settings go in `after/lsp/<server>.lua`. A new language
+  also gets a key in `defaults.languages` ([customizing.md](customizing.md)).
 - **Emacs package:** a `use-package` block in the matching `lisp/init-*.el`; it installs on
   the next start. To remove one, delete the block and run `M-x package-autoremove`.
-- **Program:** add it to the `Brewfile` and run `brew bundle`.
+- **Program:** the `Brewfile` when every machine needs it, a group in `brew/` otherwise; then
+  `brew bundle`. Add it to `aa/doctor-executables` and the lists in `lua/dotfiles/health.lua`
+  so the health reports look for it.
 - **Key:** add it to both editors (`keymaps.lua` or the plugin spec ↔ `init-keys.el`) and to
   [keymaps.md](keymaps.md).
 
-Every change that adds or changes behaviour updates the matching page in `docs/`.
+Every change that adds or changes behaviour updates the matching page in `docs/` and
+`CHANGELOG.md`.
 
-## Reset and diagnostics
+## Health and diagnostics
+
+Start with the health reports; each line is `ok`, `info`, `WARN` or `ERROR` and says what to
+run.
+
+| Where | Command |
+|---|---|
+| Shell, everything | `dotfiles doctor`: Brewfile and groups, links and zsh block, both editors; exits 1 on an error |
+| Neovim | `<Space>oh` (`:checkhealth dotfiles`): version, settings and `local.lua`, programs, plugins against the lock, Mason, fonts, spell files |
+| Emacs | `SPC o h` (`M-x aa/doctor`): version, failed modules and `local.el`, theme, programs, font, packages, index age, backups |
+
+Emacs also says it at startup when a module or `local.el` failed: "N part(s) of the
+configuration failed at startup … SPC o h shows the details".
 
 | | |
 |---|---|
 | **Neovim from scratch** | `rm -rf ~/.local/share/nvim ~/.local/state/nvim ~/.cache/nvim`, then `nvim` (plugins return at the versions in the lock) |
 | **Emacs from scratch** | `rm -rf ~/.local/share/emacs/elpa`, then start Emacs (it reinstalls everything) |
-| **Neovim health** | `:checkhealth` · `:Lazy` (failed plugins in red) · `:Mason` · `:ConformInfo` · `:checkhealth vim.lsp` |
+| **Neovim, deeper** | `:checkhealth` · `:Lazy` (failed plugins in red) · `:Mason` · `:ConformInfo` · `:checkhealth vim.lsp` |
 | **Neovim logs** | `~/.local/state/nvim/lsp.log` (language servers), `:messages` |
-| **Emacs health** | `*Warnings*` (a failed module shows `Module … failed`) · `C-h e` (messages) · `M-x eglot-events-buffer` |
+| **Emacs, deeper** | `*Warnings*` · `C-h e` (messages) · `M-x eglot-events-buffer` |
 | **Emacs frozen at startup** | `emacs --debug-init`; if it stops at "Contacting host", the network is the problem |
 | **Prompt** | `starship explain` · `starship timings` |
-| **Config check** | `bash -n install.sh` · `nvim --headless +qa` (no output means no errors) |
-
-After a big Neovim or Emacs upgrade, run `:checkhealth` and look at `*Warnings*` once.
+| **Configuration** | `test/run.sh` ([testing.md](testing.md)) |

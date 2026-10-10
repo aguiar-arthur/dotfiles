@@ -29,25 +29,45 @@
   (no-littering-theme-backups)
   (setq custom-file (no-littering-expand-etc-file-name "custom.el")))
 
+(defvar aa/failed-modules nil
+  "Modules or files that signalled an error at startup, as (NAME . MESSAGE).")
+
 (defun aa/load-module (feature)
-  "Require FEATURE; on error show a warning instead of aborting startup."
+  "Require FEATURE; on error record it and show a warning instead of aborting startup."
   (condition-case err
       (require feature)
     (error
+     (push (cons feature (error-message-string err)) aa/failed-modules)
      (display-warning 'init (format "Module `%s' failed: %s"
                                     feature (error-message-string err))
                       :error))))
 
+(defun aa/load-local ()
+  "Load the untracked local.el next to init.el, recording an error instead of aborting."
+  (let ((file (expand-file-name "local.el" aa/config-dir)))
+    (when (file-exists-p file)
+      (condition-case err
+          (load file nil t)
+        (error
+         (push (cons 'local.el (error-message-string err)) aa/failed-modules)
+         (display-warning 'init (format "local.el failed: %s" (error-message-string err))
+                          :error))))))
+
+(aa/load-module 'init-settings)
+(aa/load-local)
+
 (mapc #'aa/load-module
-      '(init-core
-        init-ui
-        init-evil
-        init-dev
-        init-org
-        init-notes
-        init-clojure
-        init-review
-        init-keys))
+      (append '(init-core
+                init-ui
+                init-evil
+                init-dev
+                init-org
+                init-notes)
+              (when (memq 'clojure (if (boundp 'aa/languages) aa/languages '(clojure)))
+                '(init-clojure))
+              '(init-review
+                init-keys
+                init-health)))
 
 (add-hook 'emacs-startup-hook
           (lambda () (setq gc-cons-threshold (* 64 1024 1024))))

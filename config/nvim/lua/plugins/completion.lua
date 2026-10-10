@@ -18,9 +18,13 @@ return {
             delete_check_events = "TextChanged",
           })
 
-          require("luasnip.loaders.from_vscode").lazy_load({ exclude = { "latex", "tex", "plaintex" } })
+          require("luasnip.loaders.from_vscode").lazy_load({
+            exclude = { "latex", "tex", "plaintex" },
+          })
 
-          require("luasnip.loaders.from_lua").lazy_load({ paths = { vim.fn.stdpath("config") .. "/snippets" } })
+          require("luasnip.loaders.from_lua").lazy_load({
+            paths = { vim.fn.stdpath("config") .. "/snippets" },
+          })
         end,
       },
     },
@@ -45,7 +49,11 @@ return {
 
         list = { selection = { preselect = false, auto_insert = true } },
         menu = { border = "rounded" },
-        documentation = { auto_show = true, auto_show_delay_ms = 250, window = { border = "rounded" } },
+        documentation = {
+          auto_show = true,
+          auto_show_delay_ms = 250,
+          window = { border = "rounded" },
+        },
         ghost_text = { enabled = false },
       },
       signature = { enabled = true, window = { border = "rounded" } },

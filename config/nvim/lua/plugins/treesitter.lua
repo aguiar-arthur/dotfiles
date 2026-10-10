@@ -1,7 +1,28 @@
 local parsers = {
-  "bash", "c", "clojure", "cpp", "css", "diff", "html", "javascript", "json",
-  "latex", "lua", "luadoc", "markdown", "markdown_inline", "python",
-  "query", "regex", "ruby", "toml", "tsx", "typescript", "vim", "vimdoc", "yaml",
+  "bash",
+  "c",
+  "clojure",
+  "cpp",
+  "css",
+  "diff",
+  "html",
+  "javascript",
+  "json",
+  "latex",
+  "lua",
+  "luadoc",
+  "markdown",
+  "markdown_inline",
+  "python",
+  "query",
+  "regex",
+  "ruby",
+  "toml",
+  "tsx",
+  "typescript",
+  "vim",
+  "vimdoc",
+  "yaml",
 }
 
 local skip_highlight = { tex = true, plaintex = true, latex = true }
@@ -26,7 +47,9 @@ return {
     vim.api.nvim_create_autocmd("FileType", {
       group = vim.api.nvim_create_augroup("user_treesitter", { clear = true }),
       callback = function(ev)
-        if skip_highlight[ev.match] then return end
+        if skip_highlight[ev.match] then
+          return
+        end
 
         if pcall(vim.treesitter.start, ev.buf) then
           vim.bo[ev.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"

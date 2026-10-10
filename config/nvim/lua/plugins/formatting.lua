@@ -19,17 +19,23 @@ return {
       yaml = { "prettier" },
       markdown = { "rumdl" },
       tex = { "latexindent" },
-
     },
     default_format_opts = { lsp_format = "fallback" },
 
     format_on_save = function(buf)
-      if vim.g.disable_autoformat or vim.b[buf].disable_autoformat then return end
-      if vim.tbl_contains({ "tex", "plaintex", "bib" }, vim.bo[buf].filetype) then return end
+      if vim.g.disable_autoformat or vim.b[buf].disable_autoformat then
+        return
+      end
+      if vim.tbl_contains({ "tex", "plaintex", "bib" }, vim.bo[buf].filetype) then
+        return
+      end
       return { timeout_ms = 1500 }
     end,
   },
   init = function()
+    if vim.g.disable_autoformat == nil then
+      vim.g.disable_autoformat = not require("config.settings").format_on_save
+    end
     vim.api.nvim_create_user_command("FormatToggle", function(args)
       if args.bang then
         vim.b.disable_autoformat = not vim.b.disable_autoformat

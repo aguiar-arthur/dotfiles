@@ -14,6 +14,10 @@ return {
   },
   config = function(_, opts)
     require("dracula").setup(opts)
-    vim.cmd.colorscheme("dracula")
+    local name = require("config.settings").colorscheme
+    if not pcall(vim.cmd.colorscheme, name) then
+      vim.notify(("Colorscheme %s not found, using dracula"):format(name), vim.log.levels.WARN)
+      vim.cmd.colorscheme("dracula")
+    end
   end,
 }

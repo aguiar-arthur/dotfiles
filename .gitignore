@@ -6,3 +6,7 @@
 !/config/emacs/lisp/
 *.elc
 *.eln
+
+/.test-cache/
+
+/config/nvim/lua/config/local.lua

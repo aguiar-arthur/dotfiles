@@ -1,0 +1,203 @@
+#!/usr/bin/env bash
+set -uo pipefail
+
+DOT="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}" 2>/dev/null || echo "${BASH_SOURCE[0]}")")/.." && pwd)"
+EMACS_DATA="${XDG_DATA_HOME:-$HOME/.local/share}/emacs"
+STATUS=0
+
+usage() {
+  cat <<'USAGE'
+usage: dotfiles <command>
+
+  doctor                 check programs, links, Neovim and Emacs; exit 1 on errors
+  update [nvim|emacs] [--test]
+                         update plugins and packages (both by default), then run doctor;
+                         --test also runs test/run.sh smoke keys behavior on the new versions
+  rollback nvim          go back to the plugin versions in the committed lazy-lock.json
+  rollback emacs [NAME]  restore the newest (or the named) backup of the Emacs packages
+  backups                list the Emacs package backups
+  install [--check|--uninstall]
+  test [LEVEL...]        run test/run.sh
+USAGE
+}
+
+title() { printf '\n== %s\n' "$*"; }
+have() { command -v "$1" >/dev/null 2>&1; }
+
+doctor_programs() {
+  title "Programs (Brewfile)"
+  if ! have brew; then
+    echo "WARN   Homebrew not found; skipping"
+    return
+  fi
+  if brew bundle check --file "$DOT/Brewfile" >/dev/null 2>&1; then
+    echo "ok     base Brewfile satisfied"
+  else
+    echo "ERROR  base Brewfile has missing programs (brew bundle)"
+    STATUS=1
+  fi
+  local group name
+  for group in "$DOT"/brew/*.Brewfile; do
+    [ -e "$group" ] || continue
+    name="$(basename "$group" .Brewfile)"
+    if brew bundle check --file "$group" >/dev/null 2>&1; then
+      echo "ok     group $name installed"
+    else
+      echo "info   group $name not installed (brew bundle --file brew/$name.Brewfile)"
+    fi
+  done
+}
+
+doctor_links() {
+  title "Links and shell"
+  if "$DOT/install.sh" --check; then :; else
+    echo "WARN   run ./install.sh"
+  fi
+}
+
+doctor_nvim() {
+  title "Neovim (:checkhealth dotfiles)"
+  if ! have nvim; then
+    echo "ERROR  nvim not found"
+    STATUS=1
+    return
+  fi
+  local out
+  out="$(mktemp)"
+  nvim --headless -c "lua vim.defer_fn(function() vim.cmd('checkhealth dotfiles'); vim.fn.writefile(vim.api.nvim_buf_get_lines(0, 0, -1, false), '$out'); vim.cmd('qa!') end, 2500)" >/dev/null 2>&1
+  if [ ! -s "$out" ]; then
+    echo "ERROR  Neovim did not produce a report (nvim --headless failed)"
+    STATUS=1
+  else
+    grep -E '^(- |[A-Z][A-Za-z ]+ ~)' "$out" | sed -e 's/^- ✅ OK /ok     /' -e 's/^- ⚠️ WARNING /WARN   /' -e 's/^- ❌ ERROR /ERROR  /' -e 's/^- /info   /' -e 's/ ~$//'
+    grep -q 'ERROR' "$out" && STATUS=1
+  fi
+  rm -f "$out"
+}
+
+doctor_emacs() {
+  title "Emacs (aa/doctor)"
+  if ! have emacs; then
+    echo "ERROR  emacs not found"
+    STATUS=1
+    return
+  fi
+  local dir="$HOME/.config/emacs"
+  if ! emacs --batch -l "$dir/early-init.el" -l "$dir/init.el" --eval '(aa/doctor-batch)' 2>/dev/null; then
+    STATUS=1
+  fi
+}
+
+cmd_doctor() {
+  doctor_programs
+  doctor_links
+  doctor_nvim
+  doctor_emacs
+  if [ "$STATUS" -eq 0 ]; then
+    printf '\nhealthy\n'
+  else
+    printf '\nproblems found; see the ERROR lines above\n'
+  fi
+  return "$STATUS"
+}
+
+update_nvim() {
+  title "Updating Neovim plugins"
+  nvim --headless "+Lazy! sync" +qa
+  git -C "$DOT" --no-optional-locks diff --stat -- config/nvim/lazy-lock.json
+}
+
+update_emacs() {
+  title "Updating Emacs packages (with a backup)"
+  local dir="$HOME/.config/emacs"
+  emacs --batch -l "$dir/early-init.el" -l "$dir/init.el" --eval '(aa/update-packages)'
+}
+
+cmd_update() {
+  local target=all run_tests=0 arg
+  for arg in "$@"; do
+    case "$arg" in
+    nvim | emacs | all) target="$arg" ;;
+    --test) run_tests=1 ;;
+    *)
+      usage >&2
+      return 2
+      ;;
+    esac
+  done
+  case "$target" in
+  nvim) update_nvim ;;
+  emacs) update_emacs ;;
+  all)
+    update_nvim
+    update_emacs
+    ;;
+  *)
+    usage >&2
+    return 2
+    ;;
+  esac
+  local failed=0
+  cmd_doctor || failed=1
+  if [ "$failed" -eq 0 ] && [ "$run_tests" -eq 1 ]; then
+    title "Testing the new versions"
+    "$DOT/test/run.sh" smoke keys behavior || failed=1
+  fi
+  if [ "$failed" -eq 0 ]; then
+    printf 'Commit config/nvim/lazy-lock.json if Neovim works.\n'
+  else
+    printf 'Something broke. Go back with: dotfiles rollback nvim | dotfiles rollback emacs\n'
+    return 1
+  fi
+}
+
+emacs_backups() { ls -1d "$EMACS_DATA"/elpa.bak.* 2>/dev/null | sort -r; }
+
+cmd_backups() {
+  local list
+  list="$(emacs_backups)"
+  if [ -z "$list" ]; then echo "no backups in $EMACS_DATA"; else printf '%s\n' "$list" | xargs -n1 basename; fi
+}
+
+cmd_rollback() {
+  case "${1:-}" in
+  nvim)
+    title "Restoring the plugin versions of the committed lazy-lock.json"
+    git -C "$DOT" restore config/nvim/lazy-lock.json
+    nvim --headless "+Lazy! restore" +qa
+    ;;
+  emacs)
+    local source
+    if [ -n "${2:-}" ]; then source="$EMACS_DATA/$2"; else source="$(emacs_backups | head -n 1)"; fi
+    if [ -z "$source" ] || [ ! -d "$source" ]; then
+      echo "no such backup; see: dotfiles backups" >&2
+      return 1
+    fi
+    local aside
+    aside="$EMACS_DATA/elpa.broken.$(date +%Y%m%d-%H%M%S)"
+    mv "$EMACS_DATA/elpa" "$aside"
+    cp -R "$source" "$EMACS_DATA/elpa"
+    echo "restored $(basename "$source"); the previous packages are in $(basename "$aside"). Restart Emacs."
+    ;;
+  *)
+    usage >&2
+    return 2
+    ;;
+  esac
+}
+
+command="${1:-help}"
+[ $# -gt 0 ] && shift
+case "$command" in
+doctor) cmd_doctor ;;
+update) cmd_update "$@" ;;
+rollback) cmd_rollback "$@" ;;
+backups) cmd_backups ;;
+install) exec "$DOT/install.sh" "$@" ;;
+test) exec "$DOT/test/run.sh" "$@" ;;
+help | -h | --help) usage ;;
+*)
+  usage >&2
+  exit 2
+  ;;
+esac

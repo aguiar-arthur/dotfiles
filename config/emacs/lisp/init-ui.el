@@ -1,8 +1,11 @@
 ;;; -*- lexical-binding: t -*-
 
 (use-package dracula-theme
-  :config
-  (load-theme 'dracula t))
+  :if (eq aa/theme 'dracula))
+
+(condition-case err
+    (load-theme aa/theme t)
+  (error (display-warning 'init (format "Theme `%s' failed: %s" aa/theme (error-message-string err)))))
 
 (use-package nerd-icons)
 
@@ -100,7 +103,18 @@
   :defer t
   :custom
   (treemacs-width 32)
-  (treemacs-follow-after-init t))
+  (treemacs-follow-after-init t)
+  (treemacs-missing-project-action 'remove)
+  :custom-face
+  (treemacs-git-modified-face ((t (:foreground "#ffb86c"))))
+  (treemacs-git-added-face ((t (:foreground "#50fa7b"))))
+  (treemacs-git-untracked-face ((t (:foreground "#8be9fd"))))
+  (treemacs-git-renamed-face ((t (:foreground "#ff79c6"))))
+  (treemacs-git-conflict-face ((t (:foreground "#ff5555" :weight bold))))
+  (treemacs-git-ignored-face ((t (:foreground "#6272a4")))))
+
+(use-package treemacs-evil
+  :after (treemacs evil))
 
 (defun aa/tree-toggle ()
   "Show only the current project in treemacs, or close the tree when it is open."

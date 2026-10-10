@@ -9,7 +9,9 @@ o.formatoptions:remove("t")
 
 local function map(lhs, cmd, desc, mode)
   vim.keymap.set(mode or "n", "<localleader>" .. lhs, "<cmd>" .. cmd .. "<CR>", {
-    buffer = true, silent = true, desc = desc,
+    buffer = true,
+    silent = true,
+    desc = desc,
   })
 end
 

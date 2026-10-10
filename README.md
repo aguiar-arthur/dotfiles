@@ -10,11 +10,13 @@ and **iTerm2** (Dracula profile).
 git clone <repo> ~/dotfiles && cd ~/dotfiles
 brew bundle
 ./install.sh
+dotfiles doctor
 ```
 
-`brew bundle` installs every program; `install.sh` only creates links and two marked blocks in
-`~/.zshrc`. Plugins and packages install the first time each editor opens. Details and the
-manual steps (iTerm2 profile, Skim inverse search) are in [docs/install.md](docs/install.md).
+`brew bundle` installs the programs every machine needs (optional groups are in `brew/`);
+`install.sh` only creates links, one marked block in `~/.zshrc` and the git hook. Plugins and
+packages install the first time each editor opens. `dotfiles doctor` (in a new terminal) says
+whether everything is in place. Details are in [docs/install.md](docs/install.md).
 
 ## Documentation
 
@@ -25,9 +27,12 @@ manual steps (iTerm2 profile, Skim inverse search) are in [docs/install.md](docs
 | [docs/neovim.md](docs/neovim.md) | Neovim: plugins, LSP, formatting, LaTeX, Markdown, git diffs |
 | [docs/emacs.md](docs/emacs.md) | Emacs: startup, modules, Org, Clojure, git diffs |
 | [docs/terminal.md](docs/terminal.md) | Starship, iTerm2, zsh |
+| [docs/customizing.md](docs/customizing.md) | per-machine settings, languages, Brewfile groups |
+| [docs/testing.md](docs/testing.md) | `test/run.sh`: health checks for both editors and the docs |
 | [docs/maintenance.md](docs/maintenance.md) | updating, rollback, reset, diagnostics |
 
-The code carries no comments; the reasons behind each setting are in `docs/`.
+The code carries no comments; the reasons behind each setting are in `docs/`. Changes are
+listed in [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 

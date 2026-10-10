@@ -1,29 +1,7 @@
-local mason_servers = {
-  "lua_ls",
-  "basedpyright",
-  "ruff",
-  "bashls",
-  "texlab",
-  "jsonls",
-  "yamlls",
-  "taplo",
-  "rumdl",
-  "html",
-  "cssls",
-  "vtsls",
-  "clangd",
-}
-
-local system_servers = {
-  clojure_lsp = "clojure-lsp",
-}
-
-local mason_tools = {
-  "stylua",
-  "shfmt",
-  "shellcheck",
-  "prettier",
-}
+local settings = require("config.settings")
+local mason_servers = settings.mason_servers
+local system_servers = settings.system_servers
+local mason_tools = settings.mason_tools
 
 local function lsp_pick(source)
   return function()
@@ -75,7 +53,6 @@ return {
       "saghen/blink.cmp",
     },
     config = function()
-
       vim.lsp.config("*", {
         capabilities = require("blink.cmp").get_lsp_capabilities(),
       })
@@ -91,7 +68,9 @@ return {
       })
 
       for server, bin in pairs(system_servers) do
-        if vim.fn.executable(bin) == 1 then vim.lsp.enable(server) end
+        if vim.fn.executable(bin) == 1 then
+          vim.lsp.enable(server)
+        end
       end
 
       vim.diagnostic.config({

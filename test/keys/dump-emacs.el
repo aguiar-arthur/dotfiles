@@ -1,0 +1,21 @@
+;;; -*- lexical-binding: t -*-
+(defun test/walk-keys (map prefix rows)
+  (map-keymap
+   (lambda (event definition)
+     (let ((key (concat prefix (single-key-description event))))
+       (when (and (consp definition) (stringp (car definition)))
+         (setq definition (cdr definition)))
+       (when (and (consp definition) (eq (car definition) 'menu-item))
+         (setq definition (nth 2 definition)))
+       (when (and (symbolp definition) (boundp definition) (keymapp (symbol-value definition)))
+         (setq definition (symbol-value definition)))
+       (cond ((keymapp definition) (setq rows (test/walk-keys definition key rows)))
+             (definition (push (format "%s\t%s" key definition) rows)))))
+   map)
+  rows)
+
+(let* ((aux (evil-get-auxiliary-keymap general-override-mode-map 'normal))
+       (leader (lookup-key aux (kbd "SPC")))
+       (rows (sort (delete-dups (test/walk-keys leader "" nil)) #'string<)))
+  (with-temp-file (getenv "TEST_OUT")
+    (insert (string-join rows "\n") "\n")))

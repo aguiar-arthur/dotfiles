@@ -172,6 +172,7 @@
     "o f" '(aa/tree-reveal :wk "find file in tree")
     "o n" '(view-echo-area-messages :wk "message history")
     "o d" '(dashboard-open :wk "dashboard")
+    "o h" '(aa/doctor :wk "health report")
 
     "S" '(:ignore t :wk "session")
     "S r" '(aa/session-restore :wk "restore session")
@@ -246,7 +247,6 @@
     "h v" '(describe-variable :wk "variable")
     "h k" '(describe-key :wk "key")
     "h m" '(describe-mode :wk "mode")
-    "h b" '(describe-bindings :wk "bindings")
     "h p" '(describe-package :wk "package")
     "h i" '(info :wk "manuals (Info)"))
 

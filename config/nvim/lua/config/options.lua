@@ -1,4 +1,5 @@
 local opt = vim.opt
+local settings = require("config.settings")
 local g = vim.g
 
 g.mapleader = " "
@@ -11,7 +12,7 @@ opt.cursorline = true
 opt.signcolumn = "yes"
 opt.scrolloff = 8
 opt.sidescrolloff = 8
-opt.wrap = true
+opt.wrap = settings.wrap
 opt.linebreak = true
 opt.smoothscroll = true
 opt.showmode = false
@@ -20,7 +21,8 @@ opt.pumheight = 12
 opt.winborder = "rounded"
 opt.list = true
 opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
-opt.fillchars = { eob = " ", fold = " ", foldopen = "▾", foldclose = "▸", foldsep = " ", diff = "╱" }
+opt.fillchars =
+  { eob = " ", fold = " ", foldopen = "▾", foldclose = "▸", foldsep = " ", diff = "╱" }
 opt.splitright = true
 opt.splitbelow = true
 opt.splitkeep = "screen"
@@ -57,7 +59,7 @@ opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
 opt.foldlevel = 99
 opt.foldtext = ""
 
-opt.spelllang = { "en_us", "pt_br" }
+opt.spelllang = settings.spelllang
 opt.spelloptions = "camel"
 
 vim.schedule(function()

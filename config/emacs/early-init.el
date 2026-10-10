@@ -13,7 +13,6 @@
   (startup-redirect-eln-cache (expand-file-name "eln-cache/" aa/data-dir)))
 
 (setq native-comp-jit-compilation nil
-      native-comp-deferred-compilation nil
       native-comp-enable-subr-trampolines nil
       native-comp-async-report-warnings-errors 'silent)
 

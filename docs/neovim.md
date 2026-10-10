@@ -11,10 +11,13 @@ config/nvim/
   init.lua                    version check, Lua bytecode cache, loads lua/config/*
   lazy-lock.json              last working plugin commits (versioned, see maintenance.md)
   lua/config/
+    settings.lua              defaults, the language catalog and the local.lua merge
+    local.lua                 your per-machine settings; ignored by git (customizing.md)
     options.lua               options and leaders
     keymaps.lua               core keys that need no plugin
     autocmds.lua              editor behaviour driven by events
     lazy.lua                  lazy.nvim bootstrap and settings
+  lua/dotfiles/health.lua     :checkhealth dotfiles (<Space>oh)
   lua/plugins/                one spec file per concern
     colorscheme.lua           Dracula + diff colors
     snacks.lua                picker, file tree, terminal, lazygit, dashboard, notifications, toggles
@@ -31,6 +34,11 @@ config/nvim/
   after/ftplugin/markdown.lua `,p` browser preview
   snippets/tex.lua            LaTeX and Beamer snippets
 ```
+
+`lua/config/settings.lua` is read by `options.lua`, `colorscheme.lua`, `formatting.lua`,
+`lsp.lua` and `lang/tex.lua`; what it holds and how `local.lua` overrides it is in
+[customizing.md](customizing.md). A `local.lua` that fails to load is reported with a
+notification and in the health report; the defaults stay.
 
 `init.lua` stops with an error on Neovim older than 0.11 and enables `vim.loader` (bytecode
 cache) before loading `options`, `keymaps`, `autocmds` and `lazy`, in that order: leaders must
@@ -147,7 +155,7 @@ conform.nvim runs on save (1.5 s timeout) and on `<leader>lf`.
 
 | Filetype | Formatter |
 |---|---|
-| Lua | stylua |
+| Lua | stylua (two spaces, 100 columns, from `config/nvim/stylua.toml`, found through the symlink too) |
 | Python | ruff organize imports + ruff format |
 | sh / bash | shfmt |
 | JS, TS, JSX, TSX, CSS, HTML, JSON, JSONC, YAML | prettier |
@@ -334,3 +342,19 @@ opens quotes (``` ``text'' ```).
 nvim-dap with dap-ui (scopes, breakpoints, stacks and watches on the left; REPL and console at
 the bottom) and virtual text. mason-nvim-dap installs and configures debugpy for Python.
 Keys under `<leader>D` ([keymaps.md](keymaps.md#d-debug)).
+
+## Health
+
+`<Space>oh` runs `:checkhealth dotfiles` (`lua/dotfiles/health.lua`), with the usual
+checkhealth `OK` / `WARNING` / `ERROR` lines and advice:
+
+| Section | Checks |
+|---|---|
+| Neovim | version ≥ 0.11 |
+| Settings | whether `local.lua` loaded or failed, the active colorscheme against the setting, enabled languages |
+| Programs | required: git, rg, fd, tree-sitter, cc; optional: lazygit, node, npm, rumdl, pandoc; plus the programs of enabled languages |
+| Plugins | every plugin installed and at the commit in `lazy-lock.json` (drift is a warning: commit the lock or `:Lazy restore`) |
+| Mason | the servers and tools of enabled languages are installed |
+| Extras | a Nerd Font in the font folders, spell files not downloaded yet |
+
+`dotfiles doctor` runs it headless and prints the same lines.

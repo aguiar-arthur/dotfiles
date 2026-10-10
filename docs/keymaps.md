@@ -63,7 +63,8 @@ the CIDER debugger and tracer for Clojure.
 |---|---|---|
 | `Db` / `DB` | toggle / conditional breakpoint | — |
 | `Dc` | continue or start | — |
-| `Di` `Do` `DO` | step into / over / out | `Di`: inspect last result |
+| `Di` | step into | inspect last result |
+| `Do` `DO` | step over / out | — |
 | `Dd` | — | debug the defun at point |
 | `Dt` | terminate | trace var |
 | `DT` | — | trace namespace |
@@ -150,6 +151,7 @@ new tab, so the diff layout survives.
 | `of` | reveal the current file in the tree | same |
 | `on` | notification history | messages |
 | `od` | dashboard | same |
+| `oh` | health report (`:checkhealth dotfiles`) | health report (`aa/doctor`) |
 
 ### `S` session
 
@@ -202,7 +204,7 @@ new tab, so the diff layout survives.
 | `a` | agenda: `aa` menu · `ad` day · `aw` week · `an` next actions · `aW` waiting · `ai` inbox · `ap` projects · `as` stuck · `ar` weekly review · `af` open an Org file · `a/` grep `~/org` |
 | `i` | capture: `ic` menu · `it` task · `ie` event · `in` note · `ii` idea · `im` meeting · `ij` journal |
 | `n` | notes (org-roam): `nf` find/create · `ni` insert link · `nc` capture · `nb` backlinks · `nt` today · `nd` capture today · `nj` a date · `na` heading → node |
-| `h` | help: `hf` function · `hv` variable · `hk` key · `hm` mode · `hb` bindings · `hp` package · `hi` manuals |
+| `h` | help: `hf` function · `hv` variable · `hk` key · `hm` mode · `hp` package · `hi` manuals |
 
 ## Keys outside the leader
 

@@ -70,7 +70,7 @@
         org-fontify-quote-and-verse-blocks t
         org-src-fontify-natively t
         org-src-tab-acts-natively t
-        org-edit-src-content-indentation 0
+        org-src-content-indentation 0
         org-confirm-babel-evaluate t
 
         org-todo-keywords

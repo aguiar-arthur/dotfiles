@@ -1,0 +1,41 @@
+name: check
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check:
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    env:
+      DOTFILES_TEST_STRICT: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: rhysd/action-setup-vim@v1
+        with:
+          neovim: true
+          version: stable
+
+      - uses: jcs090218/setup-emacs@master
+        with:
+          version: "31.1"
+
+      - name: Install tools
+        run: brew install stylua shfmt rumdl gitleaks tree-sitter-cli ripgrep fd zsh
+
+      - name: Restore plugin and package cache
+        uses: actions/cache@v4
+        with:
+          path: .test-cache
+          key: ${{ runner.os }}-${{ hashFiles('config/nvim/lazy-lock.json', 'config/emacs/**/*.el') }}
+          restore-keys: ${{ runner.os }}-
+
+      - name: Run the checks
+        run: test/run.sh all

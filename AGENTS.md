@@ -8,13 +8,22 @@ is a short entry point that links to it.
 
 ```text
 config/nvim/        Neovim >= 0.11 (lazy.nvim, native LSP in after/lsp/, snippets/)
+                    lua/config/settings.lua (defaults), lua/dotfiles/health.lua
 config/emacs/       Emacs >= 29.1: early-init.el, init.el, lisp/init-*.el (tested on 31.1)
+config/zsh/         dotfiles.zsh, sourced by the one ~/.zshrc block
 config/starship/    starship.toml
 config/rumdl/       rumdl.toml (Markdown lint rules, user-level)
 config/iterm2/      dracula.json (Dynamic Profile)
 docs/               all documentation (index.md lists the pages)
+test/               run.sh and the checks behind it (see Testing)
+bin/dotfiles        doctor, update, rollback, backups, install, test
+brew/               optional Brewfile groups (latex, clojure, python, ruby)
+.githooks/          pre-commit: test/run.sh static
+CHANGELOG.md        notable changes, newest first
+.github/workflows/  CI: test/run.sh on Ubuntu and macOS
+.editorconfig       shell formatting (Lua: config/nvim/stylua.toml)
 install.sh          symlinks + marked ~/.zshrc blocks
-Brewfile            every dependency
+Brewfile            what every machine needs
 README.md           entry point: install commands and links to docs/
 ```
 
@@ -51,6 +60,9 @@ This applies to every file in the repository: Lua, Emacs Lisp, shell, TOML, the 
 | Emacs startup, modules, Org, Clojure, review | `docs/emacs.md` |
 | Starship, iTerm2, zsh | `docs/terminal.md` |
 | Updating, pinning, rollback, reset, diagnostics | `docs/maintenance.md` |
+| Anything under `test/`, CI, what is or is not covered | `docs/testing.md` |
+| A setting, the local files, a language, a Brewfile group | `docs/customizing.md` |
+| Anything a user would notice | an entry in `CHANGELOG.md` (today's date, Added / Changed / Fixed / Removed) |
 | A new page | add it to `docs/index.md` and to the table in `README.md` |
 
 `docs/`, `README.md` and this file are linted by rumdl with `config/rumdl/rumdl.toml` (line
@@ -64,8 +76,14 @@ length 100, tables exempt).
 - **One `.gitignore`**, at the root. Never commit generated files.
 - **`install.sh` installs nothing.** It only creates symlinks and the marked zshrc blocks, and
   stays idempotent. Neovim plugins, Mason tools and Emacs packages install on first launch.
-- **Dependencies go in the `Brewfile`**, not in docs alone, including the tools this file asks
-  you to run (rumdl, stylua, shfmt…).
+- **Dependencies go in a Brewfile**, not in docs alone: the base `Brewfile` when every machine
+  needs it (including the tools this file asks you to run), a group in `brew/` otherwise. A
+  program the editors rely on also goes in the health checks (`aa/doctor-executables`,
+  `lua/dotfiles/health.lua`, or a language's `executables` in `settings.lua`).
+- **Anything a user may want to change is a setting**: a key in `lua/config/settings.lua` and a
+  `defcustom` in `lisp/init-settings.el`, documented in `docs/customizing.md`. Never read
+  machine-specific values from anywhere else, and never commit `lua/config/local.lua` or
+  `config/emacs/local.el`.
 - **Keymaps have parity** between Neovim and Emacs: `<Space>` leader, `,` local leader, the
   same groups (`b c d D f g l m o S t u w`). A key present in both does the same job; one
   leader key per action, no duplicates inside the leader tree. Change one side, check the
@@ -96,12 +114,26 @@ details are in the linked docs.
   ones opened later, not only the current one (`<leader>uw` is the model).
 - **Emacs startup does no network and asks nothing.** A synchronous download froze startup,
   and a prompt in the daemon hangs invisibly.
+- **Nothing fails silently.** A module or local file that fails is recorded, announced at
+  startup (Emacs) or notified (Neovim), and shown as an error by `<leader>oh` / `SPC o h` and
+  `dotfiles doctor`. A new failure path reports through the same channels.
+- **Every update keeps a way back**: the committed `lazy-lock.json` for Neovim, `elpa.bak.*`
+  for Emacs (`aa/update-packages` backs up first). Never add an update path without its
+  rollback.
 - **The file tree follows the current project** (`aa/tree-toggle`); do not bind `treemacs`
-  directly, it shows whatever workspace it saved last.
+  directly, it shows whatever workspace it saved last. Its keys come from `treemacs-evil`
+  (without it evil shadows them) and its git colors are set explicitly because Dracula paints
+  modified files in the plain text color. Missing saved projects are removed without a prompt
+  (`treemacs-missing-project-action`). Look at it in `emacs -nw` too: the tests check faces
+  and keys, not the screen.
+- **ediff sessions start on their first change**, so diffs are colored at once, as in Neovim.
 
 ## Neovim
 
 - Plugins: one spec file per concern in `lua/plugins/`, languages in `lua/plugins/lang/`.
+- `lua/config/settings.lua` holds the defaults and the language catalog (servers, tools,
+  programs per language); `lsp.lua` takes its lists from there. A language plugin uses
+  `cond = require("config.settings").languages.<name>`.
 - LSP servers are configured in `after/lsp/<server>.lua` (native `vim.lsp.config`).
 - `lazy-lock.json` is versioned: it does not pin anything (`:Lazy update` still tracks HEAD);
   it records the last working state so `:Lazy restore` can roll back a broken update. Never
@@ -122,9 +154,11 @@ details are in the linked docs.
 - Native compilation is **off** on purpose (macOS clang rejects its flags). Do not
   re-enable the JIT or subr trampolines. Code that touches it is guarded with
   `(featurep 'native-compile)`, so the same config also runs on builds without it.
-- Modules load through `aa/load-module`: a failing one is reported in `*Warnings*` and the
-  rest still load. Keep each module independent of the later ones; a new module goes in the
-  list in `init.el` and in `docs/emacs.md`.
+- Modules load through `aa/load-module`: a failing one is recorded in `aa/failed-modules`,
+  reported in `*Warnings*`, at startup and by `aa/doctor`, and the rest still load. Order:
+  `init-settings`, then `local.el`, then the others, `init-health` last. Keep each module
+  independent of the later ones; a new module goes in the list in `init.el`, in
+  `test/emacs/smoke-tests.el` and in `docs/emacs.md`.
 - Own helpers use the `aa/` prefix. Leader bindings go through `general.el` in `init-keys.el`.
 - Org files live in `~/org`; Clojure uses CIDER + clojure-lsp via eglot.
 - Pitfalls that already cost a debugging session:
@@ -137,26 +171,50 @@ details are in the linked docs.
   - `(require 'magit)` does not load `magit-ediff`; require submodules you call;
   - xref decides whether to prompt from `this-command`: wrappers set it to the real command.
 
-## Verifying changes
+## Testing
 
-There is no test suite; verify by loading, from scratch when the change touches startup or
-packages.
+`test/run.sh` is the definition of "works". Run it (all levels, or the one that fits) before
+saying a change is done, and report its result.
 
-### Static checks
+| Level | Checks |
+|---|---|
+| `static` | formatting, syntax, rumdl, parentheses, secrets, no comments in any file |
+| `install` | `install.sh`, `bin/dotfiles` and the hook in a throwaway `HOME` |
+| `smoke` | both editors start from scratch without errors, warnings, network or prompts |
+| `keys` | the real leader maps equal `docs/keymaps.md`, no duplicate actions |
+| `behavior` | the invariants above (`test/nvim/behavior.lua`, `test/emacs/behavior-tests.el`) |
 
-- `bash -n install.sh`; run it twice in a throwaway `HOME` (second run changes nothing).
-- `rumdl check docs README.md AGENTS.md`.
-- No comments slipped in (see above) and `check-parens` passes on every edited `.el` file;
-  an unbalanced file breaks its whole module.
+- **A bug fix comes with a test** that fails without the fix. Check that by reverting the fix
+  in a copy; a test that never failed proves nothing.
+- **A new invariant goes in the list above and in `behavior`.** A new leader key needs a row in
+  `docs/keymaps.md` (both columns), or `keys` fails.
+- Tests obey every rule of this file: no comments, English, `stylua` / `shfmt` formatting.
+- Never edit `lazy-lock.json` by hand to make `smoke` pass; see Neovim above.
+- What the tests cannot see (GUI, real language servers, LaTeX) still needs the manual steps
+  below. Say plainly what was not tested.
+- The pre-commit hook runs `static`; do not bypass it with `--no-verify` to land a change.
+- In the user's environment, `dotfiles doctor` is the first diagnostic to run and to ask for.
+
+## Verifying by hand
+
+The checks above cover the routine. These steps are for what they do not: interactive
+behaviour and debugging.
+
+### Install script
+
+- Run `install.sh` twice in a throwaway `HOME`: the second run changes nothing.
 
 ### Neovim from scratch
 
 - Point `XDG_CONFIG_HOME`, `XDG_DATA_HOME`, `XDG_STATE_HOME` and `XDG_CACHE_HOME` at empty
   directories, copy `config/nvim`, run `nvim --headless "+Lazy! restore" +qa`, then open real
   files with `--headless` and read `:messages` from a deferred Lua callback.
-- Headless pitfalls: the `pt` spell-file download prompt blocks every later event (set
-  `spelllang` to `en_us` in the test copy only); `vim.lsp.enable` after a buffer's `FileType`
-  needs `:edit` to attach; if Mason's registry is unreachable, put the server binary on `PATH`.
+- Headless pitfalls: the `pt` spell-file download prompt blocks every later event (give the
+  test copy a `lua/config/local.lua` with `spelllang = { "en_us" }`, as `test/` does);
+  `vim.lsp.enable` after a buffer's `FileType` needs `:edit` to attach; if Mason's registry is
+  unreachable, put the server binary on `PATH`.
+- `XDG_CONFIG_HOME` also moves Emacs' configuration directory (Emacs 29+). A shell that set it
+  for Neovim must reset it to `$HOME/.config` before starting Emacs (`emacs_env` does).
 
 ### Emacs, also off the Mac
 
@@ -167,15 +225,10 @@ packages.
   with `HOME` and `XDG_DATA_HOME` pointing at copies of the config and of
   `~/.local/share/emacs/elpa` (ask the user before copying it). Package archives may be
   unreachable there; the copied `elpa` is enough.
-- Drive real keys through tmux (`tmux send-keys Space g v`) and record state from Lisp
-  (`M-:` calling a probe that writes to a file). In terminal Emacs `Escape` is the Meta
-  prefix: never send it right before another key.
-
-### Keymaps
-
-- Dump the real leader maps (`nvim_get_keymap` / `nvim_buf_get_keymap` after `VeryLazy` and
-  an `LspAttach`; in Emacs walk `(evil-get-auxiliary-keymap general-override-mode-map
-  'normal)` under `SPC`) and compare them with `docs/keymaps.md` in both directions.
+- Drive real keys through tmux when it is available (`tmux send-keys Space g v`; tmux is not
+  in the Brewfile) and record state from Lisp (`M-:` calling a probe that writes to a file).
+  In terminal Emacs `Escape` is the Meta prefix: never send it right before another key.
+  Start it with `LANG=C.UTF-8`, or icons show as `?`.
 
 ### Reporting
 
@@ -198,4 +251,6 @@ When you work on a copy and write files back (for example to the user's machine)
 - write every file of the change, then verify the checksums on the target: a dropped
   connection can leave a partial sync (it happened: `init-dev.el` arrived, `init-keys.el` did
   not);
-- remove any temporary file you created outside the repo.
+- remove any temporary file you created outside the repo;
+- the device bridge refuses to write files inside `.github/`; write them to a temporary folder
+  in the repo and `mv` it into place with the device shell, after the user agreed.

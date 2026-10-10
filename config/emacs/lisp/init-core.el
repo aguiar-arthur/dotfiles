@@ -35,9 +35,6 @@
 (dolist (hook '(prog-mode-hook text-mode-hook conf-mode-hook))
   (add-hook hook #'display-line-numbers-mode))
 
-(defvar aa/wrap t
-  "Non-nil wraps long lines on screen in code, text and config buffers.")
-
 (defun aa/apply-wrap ()
   "Wrap or truncate long lines in this buffer according to `aa/wrap'."
   (let ((arg (if aa/wrap 1 -1)))
@@ -82,27 +79,16 @@
     (add-to-list 'exec-path texbin)
     (setenv "PATH" (concat texbin ":" (getenv "PATH")))))
 
-(defcustom aa/font-height 130
-  "Default font height in 1/10 pt."
-  :type 'integer
-  :group 'faces)
-
 (defun aa/setup-fonts ()
-  "Apply JetBrainsMono Nerd Font when it is installed."
+  "Apply `aa/font-family' and `aa/variable-font-family' when they are installed."
   (when (display-graphic-p)
-    (pcase-dolist (`(,face ,family) '((default "JetBrainsMono Nerd Font Mono")
-                                      (variable-pitch "JetBrainsMono Nerd Font")))
+    (pcase-dolist (`(,face ,family) `((default ,aa/font-family)
+                                      (variable-pitch ,aa/variable-font-family)))
       (when (find-font (font-spec :name family))
         (set-face-attribute face nil :family family :height aa/font-height)))))
 
 (aa/setup-fonts)
 (add-hook 'server-after-make-frame-hook #'aa/setup-fonts)
-
-(defun aa/update-packages ()
-  "Refresh the package index and upgrade every installed package."
-  (interactive)
-  (package-refresh-contents)
-  (package-upgrade-all))
 
 (setq desktop-dirname aa/data-dir
       desktop-path (list aa/data-dir)

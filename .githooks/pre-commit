@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -uo pipefail
+root="$(git rev-parse --show-toplevel)"
+if ! "$root/test/run.sh" static; then
+  printf '\npre-commit: static checks failed; fix them or commit with --no-verify\n' >&2
+  exit 1
+fi

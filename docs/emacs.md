@@ -9,8 +9,10 @@ tested on 31.1).
 ```text
 config/emacs/
   early-init.el        data directory, package directory, native compilation off, clean frame
-  init.el              package archives, use-package, no-littering, module loader
+  init.el              package archives, use-package, no-littering, module loader, local.el
+  local.el             your per-machine settings; ignored by git (customizing.md)
   lisp/
+    init-settings.el   every setting you may want to change (defcustoms, group `aa`)
     init-core.el       defaults, macOS, PATH, fonts, sessions, window resizing
     init-ui.el         theme, icons, modeline, which-key, minibuffer, completion, file tree, dashboard
     init-evil.el       evil and its companions
@@ -20,6 +22,7 @@ config/emacs/
     init-clojure.el    clojure-mode, CIDER, clojure-lsp, structural editing
     init-review.el     diff review: file panel + side-by-side diffs (SPC g v / SPC g V)
     init-keys.el       every SPC and `,` binding
+    init-health.el     health report (SPC o h), startup notice, package backup and rollback
 ```
 
 Each `.el` file starts with `;;; -*- lexical-binding: t -*-`. That line is required (it turns
@@ -56,9 +59,14 @@ code.
 - `use-package-always-ensure`: every package installs on first use;
 - **no-littering** sends history, caches and databases to `aa/data-dir` (`etc/`, `var/`) and
   backups there too; `custom.el` lives in `etc/`;
-- modules load through `aa/load-module`: a module that fails shows
-  `Module … failed` in `*Warnings*` and the rest still load. Order: core, ui, evil, dev, org,
-  notes, clojure, review, keys. A module may use the ones before it, never the ones after.
+- `init-settings` loads first, then `local.el` if it exists ([customizing.md](customizing.md)),
+  so every module sees the final values;
+- modules load through `aa/load-module`: a module that fails is recorded in
+  `aa/failed-modules`, shows `Module … failed` in `*Warnings*`, and the rest still load. Order:
+  settings, core, ui, evil, dev, org, notes, clojure (only when `aa/languages` has it), review,
+  keys, health. A module may use the ones before it, never the ones after;
+- half a second after startup, a failed module or `local.el` produces one message naming them
+  and pointing to `SPC o h`, so a broken part never goes unnoticed.
 
 ## Modules
 
@@ -103,6 +111,16 @@ code.
   and closes the tree when it is open; `SPC o f` (`aa/tree-reveal`) does the same and moves to
   the current file. treemacs on its own always shows the workspace it saved last, whatever
   file you are in, which is why `SPC o p` does not call it directly.
+  The tree uses `treemacs-evil`: without it evil's normal state shadows the tree keys, `j`
+  walks onto the empty last line, `RET` does nothing and `Tab` switches buffer (most visible in
+  `emacs -nw`). In the tree `j` / `k` move, `l` / `RET` open, `h` collapses, `Tab` toggles a
+  directory, `?` lists the rest, and the leader keys still work. Git status uses treemacs'
+  deferred git mode; the faces are set to Dracula colors because the theme paints modified
+  files in the plain text color: modified orange, added green, untracked cyan, renamed pink,
+  conflict red, ignored grey.
+  `treemacs-missing-project-action` is `remove`: a project whose directory was deleted or
+  moved is dropped from the saved workspace instead of stopping `SPC o p` with a "cannot be
+  read" prompt.
 - Dashboard with recent files, projects and today's agenda. A plain `emacs` shows it only when
   no file was given. In the daemon (`e`), `initial-buffer-choice` makes new frames without a
   file start on it. It is not set outside the daemon, because `emacs file.org` would then split
@@ -260,8 +278,10 @@ The same keys work in Neovim's diffview.
 
 ediff runs with the control panel inside the frame (no separate
 window), panes side by side (also for merges) and revision buffers dropped on quit. In ediff,
-`n` / `p` move between changes and `q` restores the previous layout. A conflicted file opened
-with `e` in magit shows three columns.
+`n` / `p` move between changes and `q` restores the previous layout. Every session starts on
+its first change (`aa/ediff-select-first-difference`), so it is colored right away, as in
+Neovim, instead of all changes waiting in grey. A conflicted file opened with `e` in magit
+shows three columns.
 
 **Colors** match Neovim: tinted backgrounds for magit's added / removed lines and their
 word-level refinements, ediff's current and fine differences, and a neutral `#313546` for the
@@ -288,3 +308,17 @@ base / both.
 - If a key does nothing, `SPC f k` lists what is bound.
 - After changing the configuration, restart Emacs; with the daemon, also run
   `emacsclient -e '(kill-emacs)'`.
+
+## Health, backups and rollback (`init-health.el`)
+
+- `SPC o h` (`aa/doctor`) opens `*doctor*`: Emacs version, native compilation, startup time,
+  failed modules and `local.el`, theme, the programs in `aa/doctor-executables` (missing
+  required ones are errors, optional ones warnings, language ones only when the language is
+  on), font (GUI frames), package count, age of the package index, package backups and the
+  data directory. `aa/doctor-batch` prints the same report and exits 1 on an error; `dotfiles
+  doctor` uses it.
+- `aa/update-packages` copies `elpa/` to `elpa.bak.<date>` first (`aa/backup-packages`, keeping
+  `aa/package-backups`), then refreshes the index and upgrades every package.
+- `aa/rollback-packages` moves `elpa/` aside to `elpa.broken.<date>` and copies a chosen backup
+  in; restart Emacs afterwards. `dotfiles rollback emacs` does the same from the shell, without
+  loading the configuration that may be broken.

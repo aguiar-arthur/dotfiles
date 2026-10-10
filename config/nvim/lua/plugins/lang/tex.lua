@@ -1,6 +1,7 @@
 return {
   {
     "lervag/vimtex",
+    cond = require("config.settings").languages.tex,
     lazy = false,
     init = function()
       local g = vim.g
@@ -34,9 +35,19 @@ return {
         mode = 2,
       }
       g.vimtex_syntax_conceal = {
-        accents = 1, ligatures = 1, cites = 1, fancy = 1, spacing = 0, greek = 1,
-        math_bounds = 0, math_delimiters = 1, math_fracs = 1, math_super_sub = 1,
-        math_symbols = 1, sections = 0, styles = 1,
+        accents = 1,
+        ligatures = 1,
+        cites = 1,
+        fancy = 1,
+        spacing = 0,
+        greek = 1,
+        math_bounds = 0,
+        math_delimiters = 1,
+        math_fracs = 1,
+        math_super_sub = 1,
+        math_symbols = 1,
+        sections = 0,
+        styles = 1,
       }
 
       g.vimtex_imaps_enabled = 0
@@ -48,13 +59,19 @@ return {
       vim.api.nvim_create_autocmd("User", {
         group = group,
         pattern = "VimtexEventCompileSuccess",
-        callback = function() vim.notify("Compiled successfully", vim.log.levels.INFO, { title = "LaTeX" }) end,
+        callback = function()
+          vim.notify("Compiled successfully", vim.log.levels.INFO, { title = "LaTeX" })
+        end,
       })
       vim.api.nvim_create_autocmd("User", {
         group = group,
         pattern = "VimtexEventCompileFailed",
         callback = function()
-          vim.notify("Compilation failed — <localleader>le lists the errors", vim.log.levels.ERROR, { title = "LaTeX" })
+          vim.notify(
+            "Compilation failed — <localleader>le lists the errors",
+            vim.log.levels.ERROR,
+            { title = "LaTeX" }
+          )
         end,
       })
     end,

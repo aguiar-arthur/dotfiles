@@ -9,17 +9,84 @@ return {
       "jay-babu/mason-nvim-dap.nvim",
     },
     keys = {
-      { "<leader>Db", function() require("dap").toggle_breakpoint() end, desc = "Toggle breakpoint" },
-      { "<leader>DB", function() require("dap").set_breakpoint(vim.fn.input("Condition: ")) end, desc = "Conditional breakpoint" },
-      { "<leader>Dc", function() require("dap").continue() end, desc = "Continue / start" },
-      { "<leader>Di", function() require("dap").step_into() end, desc = "Step into" },
-      { "<leader>Do", function() require("dap").step_over() end, desc = "Step over" },
-      { "<leader>DO", function() require("dap").step_out() end, desc = "Step out" },
-      { "<leader>Dr", function() require("dap").repl.toggle() end, desc = "Toggle REPL" },
-      { "<leader>Dl", function() require("dap").run_last() end, desc = "Run last" },
-      { "<leader>Dt", function() require("dap").terminate() end, desc = "Terminate" },
-      { "<leader>Du", function() require("dapui").toggle() end, desc = "Toggle DAP UI" },
-      { "<leader>De", function() require("dapui").eval() end, desc = "Eval expression", mode = { "n", "v" } },
+      {
+        "<leader>Db",
+        function()
+          require("dap").toggle_breakpoint()
+        end,
+        desc = "Toggle breakpoint",
+      },
+      {
+        "<leader>DB",
+        function()
+          require("dap").set_breakpoint(vim.fn.input("Condition: "))
+        end,
+        desc = "Conditional breakpoint",
+      },
+      {
+        "<leader>Dc",
+        function()
+          require("dap").continue()
+        end,
+        desc = "Continue / start",
+      },
+      {
+        "<leader>Di",
+        function()
+          require("dap").step_into()
+        end,
+        desc = "Step into",
+      },
+      {
+        "<leader>Do",
+        function()
+          require("dap").step_over()
+        end,
+        desc = "Step over",
+      },
+      {
+        "<leader>DO",
+        function()
+          require("dap").step_out()
+        end,
+        desc = "Step out",
+      },
+      {
+        "<leader>Dr",
+        function()
+          require("dap").repl.toggle()
+        end,
+        desc = "Toggle REPL",
+      },
+      {
+        "<leader>Dl",
+        function()
+          require("dap").run_last()
+        end,
+        desc = "Run last",
+      },
+      {
+        "<leader>Dt",
+        function()
+          require("dap").terminate()
+        end,
+        desc = "Terminate",
+      },
+      {
+        "<leader>Du",
+        function()
+          require("dapui").toggle()
+        end,
+        desc = "Toggle DAP UI",
+      },
+      {
+        "<leader>De",
+        function()
+          require("dapui").eval()
+        end,
+        desc = "Eval expression",
+        mode = { "n", "v" },
+      },
     },
     config = function()
       local dap, dapui = require("dap"), require("dapui")
