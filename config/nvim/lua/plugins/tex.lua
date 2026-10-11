@@ -44,6 +44,7 @@ return {
       }
 
       g.vimtex_imaps_enabled = 0
+      g.vimtex_mappings_disable = { i = { "]]" } }
 
       g.vimtex_complete_enabled = 0
     end,

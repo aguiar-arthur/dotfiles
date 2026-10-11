@@ -46,6 +46,9 @@ Text objects (mini.ai) work in every language with a treesitter parser: `af` / `
 tags (`daf` deletes a function, `ciu` rewrites a call's arguments). The function and class
 queries come from nvim-treesitter-textobjects, which is installed only for them.
 `<A-j>` / `<A-k>` move lines; `C-h/j/k/l` move between windows; `C-\` toggles a terminal.
+`<leader>tf` / `th` / `tv` are three separate terminals (float, bottom, right). Inside a
+terminal every key goes to the program (lazygit, the shell); a quick double `Esc` returns to
+Neovim.
 
 The `<leader>u` toggles are global: they change every window or buffer and the ones opened
 later. A `:setlocal` (wrap, numbers, conceal, spell) stays with its buffer until the next
@@ -105,7 +108,8 @@ clojure-lsp gives navigation, rename, diagnostics and formatting. Conjure evalua
 REPL, nvim-paredit edits s-expressions (`>)` / `<)` slurp and barf, `,o` raises a form; see
 `:h nvim-paredit`). `,cj` in a Clojure file starts an nREPL with cider-nrepl in a terminal
 below (`clojure` for `deps.edn`, `lein` for `project.clj`) and connects as soon as
-`.nrepl-port` appears; when a REPL is already running it only connects. Then `,ee` evaluates
+`.nrepl-port` appears; when a REPL is already running it only connects (a `.nrepl-port` left
+by a dead REPL is removed and a new one starts). Then `,ee` evaluates
 the form under the cursor, `,er` the outer form, `,eb` the buffer, `,tn` runs the
 namespace's tests, `,lv` opens the log. Conjure is limited to Clojure (its other clients
 would map keys in Lua and Python files), and `K` / `gd` stay with the language server. The
@@ -122,9 +126,12 @@ process. macOS lets a debugger attach to native programs only with developer mod
 ## LaTeX
 
 vimtex compiles with latexmk and shows the PDF in Skim with SyncTeX; texlab gives completion
-and diagnostics; the snippets in `snippets/tex.lua` expand as you type. Keys under `,l` in
-`.tex` files: `,ll` compile, `,lv` view / forward search, `,le` errors, `,lt` table of
-contents, `,lc` clean. Cmd+Shift+click in Skim jumps back to the line (set up by `link.sh`).
+and diagnostics; the snippets in `snippets/tex.lua` expand as you type, but never right after
+a `\` (typing `\sum` or `\begin` by hand stays as typed), and `beg` only at the start of a
+line. `<=>` is typed as `<=` then `>`. Keys under `,l` in `.tex` files are vimtex's own,
+labelled in which-key: `,ll` compile, `,lv` view / forward search, `,le` errors, `,lt` table
+of contents, `,lc` clean, `,lx` reload, `,lw` count words. Cmd+Shift+click in Skim jumps
+back to the line (set up by `link.sh`).
 Put `% !TEX program = lualatex` on the first line for another engine.
 
 ## Markdown

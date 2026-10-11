@@ -103,9 +103,6 @@ return {
           map("<leader>lh", vim.lsp.buf.hover, "Hover documentation")
           map("<leader>ls", vim.lsp.buf.signature_help, "Signature help")
           map("<leader>lR", "<cmd>LspRestart<CR>", "Restart LSP")
-          map("<leader>lf", function()
-            require("conform").format({ async = true, lsp_format = "fallback" })
-          end, "Format buffer/selection", { "n", "v" })
 
           if client and client.name == "ruff" then
             client.server_capabilities.hoverProvider = false

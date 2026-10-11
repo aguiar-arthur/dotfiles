@@ -70,7 +70,7 @@ app_preferences() {
   pref com.googlecode.iterm2 "Default Bookmark Guid" \
     "$(sed -n 's/.*"Guid": "\(.*\)".*/\1/p' "$DOT/config/iterm2/dracula.json" | head -n 1)"
   pref "$skim" SKTeXEditorPreset ""
-  pref "$skim" SKTeXEditorCommand nvim
+  pref "$skim" SKTeXEditorCommand "$(command -v nvim || echo nvim)"
   pref "$skim" SKTeXEditorArguments "--headless -c \"VimtexInverseSearch %line '%file'\""
 }
 

@@ -15,6 +15,24 @@ and `git log` have them.
 
 ### Changed (review)
 
+- Enter in the command line runs the command at once: the completion menu no longer
+  preselects its first item, which turned `:w` into `:wall` and `:set nu` into `:set number`
+  and needed a second Enter.
+- `<leader>lf` formats in every buffer, not only where a language server is attached.
+- In LaTeX, `]` appears as soon as it is typed (vimtex's insert-mode `]]` is off); the `,l`
+  keys are vimtex's own, with which-key labels, so `,lr` is its reverse search again (reload is
+  `,lx`); `,lw` counts words. The `doc` and `bdoc` snippets no longer load `inputenc`.
+- `,cj` in Clojure starts a new REPL when `.nrepl-port` is left over from one that died.
+- Skim's inverse search calls Neovim by its full path, so it works when Skim is opened from
+  the Finder (run `./link.sh` again).
+- LaTeX autosnippets no longer fire right after a `\`, so `\sum`, `\int`, `\sqrt` or
+  `\begin` typed by hand stay as typed; `beg` expands only at the start of a line, `<=>`
+  gives `\iff` again, and `frm` / `blk` / `ablk` jump to the body before leaving.
+- Terminals get every key: `jk`, `C-h/j/k/l` and `Esc Esc` are no longer mapped in terminal
+  mode (they delayed `j` in lazygit and took `C-l` / `C-k` from the shell); a quick double
+  `Esc` still returns to Neovim.
+- `<leader>tf`, `<leader>th` and `<leader>tv` open three separate terminals instead of
+  toggling the same one.
 - `<Tab>` / `<S-Tab>` no longer switch buffers, so `<C-i>` moves forward in the jump list
   again; use `<leader>bn` / `<leader>bp` / `<leader>bb`.
 - References of the word under the cursor are `]r` / `[r`, not `]]` / `[[`; `gi` is Vim's

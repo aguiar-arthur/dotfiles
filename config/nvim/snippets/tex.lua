@@ -19,13 +19,25 @@ end
 
 local snippets, autosnippets = {}, {}
 
+local function before_trigger(line_to_cursor, trigger)
+  return line_to_cursor:sub(1, #line_to_cursor - #trigger)
+end
+
+local function at_line_start(line_to_cursor, trigger)
+  return before_trigger(line_to_cursor, trigger):match("^%s*$") ~= nil
+end
+
 local function auto(ctx, nodes, cond, word)
   ctx = type(ctx) == "string" and { trig = ctx } or ctx
   ctx.snippetType = "autosnippet"
   if word == false then
     ctx.wordTrig = false
   end
-  table.insert(autosnippets, s(ctx, nodes, { condition = cond }))
+  local function condition(line_to_cursor, trigger, captures)
+    return before_trigger(line_to_cursor, trigger):sub(-1) ~= "\\"
+      and cond(line_to_cursor, trigger, captures)
+  end
+  table.insert(autosnippets, s(ctx, nodes, { condition = condition }))
 end
 
 local function snip(ctx, nodes, cond)
@@ -35,7 +47,9 @@ end
 
 auto("mk", fmta("$<>$<>", { i(1), i(0) }), in_text)
 auto("dm", fmta("\\[\n\t<>\n\\]<>", { i(1), i(0) }), in_text)
-auto("beg", fmta("\\begin{<>}\n\t<>\n\\end{<>}", { i(1), i(0), rep(1) }), in_text)
+auto("beg", fmta("\\begin{<>}\n\t<>\n\\end{<>}", { i(1), i(0), rep(1) }), function(line, trigger)
+  return at_line_start(line, trigger) and in_text()
+end)
 
 local function env(trig, name, body)
   snip(
@@ -121,7 +135,6 @@ snip(
     [[
 \documentclass[<>]{<>}
 
-\usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[<>]{babel}
 \usepackage{amsmath, amssymb, amsthm}
@@ -150,7 +163,6 @@ snip(
 \documentclass[aspectratio=169]{beamer}
 
 \usetheme{<>}
-\usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[<>]{babel}
 \usepackage{amsmath, amssymb}
@@ -180,7 +192,7 @@ snip(
   )
 )
 
-snip("frm", fmta("\\begin{frame}{<>}\n\t<>\n\\end{frame}<>", { i(1), i(0), i(2) }))
+snip("frm", fmta("\\begin{frame}{<>}\n\t<>\n\\end{frame}<>", { i(1), i(2), i(0) }))
 snip(
   "fimg",
   fmta(
@@ -195,8 +207,8 @@ snip(
     { i(1), i(2), i(0) }
   )
 )
-snip("blk", fmta("\\begin{block}{<>}\n\t<>\n\\end{block}<>", { i(1), i(0), i(2) }))
-snip("ablk", fmta("\\begin{alertblock}{<>}\n\t<>\n\\end{alertblock}<>", { i(1), i(0), i(2) }))
+snip("blk", fmta("\\begin{block}{<>}\n\t<>\n\\end{block}<>", { i(1), i(2), i(0) }))
+snip("ablk", fmta("\\begin{alertblock}{<>}\n\t<>\n\\end{alertblock}<>", { i(1), i(2), i(0) }))
 snip("pau", t("\\pause"))
 
 auto(
@@ -233,7 +245,6 @@ local symbols = {
   ["<-"] = "\\gets",
   ["=>"] = "\\implies",
   ["=<"] = "\\impliedby",
-  ["<=>"] = "\\iff",
   ["~~"] = "\\approx",
   ["..."] = "\\dots",
   ["**"] = "\\cdot",
@@ -258,6 +269,7 @@ local symbols = {
 for trig, out in pairs(symbols) do
   auto(trig, t(out), in_math, trig:match("^%a+$") ~= nil)
 end
+auto("\\leq>", t("\\iff"), in_math, false)
 
 local greek = {
   a = "alpha",

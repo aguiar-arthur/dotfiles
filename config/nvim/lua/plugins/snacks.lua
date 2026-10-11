@@ -224,7 +224,7 @@ return {
     {
       "<c-\\>",
       function()
-        Snacks.terminal(nil, { win = { position = "float" } })
+        Snacks.terminal(nil, { count = 1, win = { position = "float" } })
       end,
       desc = "Toggle terminal",
       mode = { "n", "t" },
@@ -232,21 +232,21 @@ return {
     {
       "<leader>tf",
       function()
-        Snacks.terminal(nil, { win = { position = "float" } })
+        Snacks.terminal(nil, { count = 1, win = { position = "float" } })
       end,
       desc = "Float terminal",
     },
     {
       "<leader>th",
       function()
-        Snacks.terminal(nil, { win = { position = "bottom", height = 15 } })
+        Snacks.terminal(nil, { count = 2, win = { position = "bottom", height = 15 } })
       end,
       desc = "Horizontal terminal",
     },
     {
       "<leader>tv",
       function()
-        Snacks.terminal(nil, { win = { position = "right", width = 60 } })
+        Snacks.terminal(nil, { count = 3, win = { position = "right", width = 60 } })
       end,
       desc = "Vertical terminal",
     },

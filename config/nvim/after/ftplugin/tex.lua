@@ -5,25 +5,34 @@ o.shiftwidth = 2
 o.tabstop = 2
 o.formatoptions:remove("t")
 
-local function map(lhs, cmd, desc, mode)
-  vim.keymap.set(mode or "n", "<localleader>" .. lhs, "<cmd>" .. cmd .. "<CR>", {
-    buffer = true,
-    silent = true,
-    desc = desc,
-  })
-end
+vim.keymap.set(
+  "n",
+  "<localleader>lw",
+  "<cmd>VimtexCountWords<CR>",
+  { buffer = true, silent = true, desc = "Count words" }
+)
 
-map("ll", "VimtexCompile", "Compile (toggle continuous latexmk)")
-map("lk", "VimtexStop", "Stop compiler")
-map("lK", "VimtexStopAll", "Stop all compilers")
-map("lv", "VimtexView", "View PDF / forward search")
-map("lc", "VimtexClean", "Clean aux files")
-map("lC", "VimtexClean!", "Clean aux + output files")
-map("le", "VimtexErrors", "Errors (quickfix)")
-map("lo", "VimtexCompileOutput", "Compiler output")
-map("lg", "VimtexStatus", "Compilation status")
-map("lt", "VimtexTocOpen", "Table of contents")
-map("lT", "VimtexTocToggle", "Toggle table of contents")
-map("li", "VimtexInfo", "Project info")
-map("lw", "VimtexCountWords", "Count words")
-map("lr", "VimtexReload", "Reload vimtex")
+local ok, wk = pcall(require, "which-key")
+if ok then
+  local labels = {
+    ll = "Compile (toggle continuous latexmk)",
+    lk = "Stop compiler",
+    lK = "Stop all compilers",
+    lv = "View PDF / forward search",
+    lc = "Clean aux files",
+    lC = "Clean aux + output files",
+    le = "Errors (quickfix)",
+    lo = "Compiler output",
+    lg = "Compilation status",
+    lt = "Table of contents",
+    lT = "Toggle table of contents",
+    li = "Project info",
+    lx = "Reload vimtex",
+    lq = "Log",
+  }
+  local spec = {}
+  for lhs, desc in pairs(labels) do
+    spec[#spec + 1] = { "<localleader>" .. lhs, desc = desc, buffer = 0 }
+  end
+  wk.add(spec)
+end

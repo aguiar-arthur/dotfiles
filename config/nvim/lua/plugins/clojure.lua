@@ -53,6 +53,20 @@ local function connect_when_ready(port_file)
   )
 end
 
+local function when_port_answers(port_file, callback)
+  local port = tonumber(vim.fn.readfile(port_file)[1] or "")
+  if not port then
+    return callback(false)
+  end
+  local tcp = assert(vim.uv.new_tcp())
+  tcp:connect("127.0.0.1", port, function(err)
+    tcp:close()
+    vim.schedule(function()
+      callback(err == nil)
+    end)
+  end)
+end
+
 local function jack_in()
   local root = vim.fs.root(0, { "deps.edn", "project.clj" })
   local cmd = root and repl_command(root)
@@ -61,13 +75,22 @@ local function jack_in()
     return
   end
   local port_file = root .. "/.nrepl-port"
-  if vim.uv.fs_stat(port_file) then
-    connect()
-    return
+  local function start()
+    Snacks.terminal(cmd, { cwd = root, win = { position = "bottom", height = 12 } })
+    vim.cmd.wincmd("p")
+    connect_when_ready(port_file)
   end
-  Snacks.terminal(cmd, { cwd = root, win = { position = "bottom", height = 12 } })
-  vim.cmd.wincmd("p")
-  connect_when_ready(port_file)
+  if not vim.uv.fs_stat(port_file) then
+    return start()
+  end
+  when_port_answers(port_file, function(alive)
+    if alive then
+      connect()
+    else
+      os.remove(port_file)
+      start()
+    end
+  end)
 end
 
 return {

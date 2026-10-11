@@ -21,7 +21,7 @@ map("i", ",", ",<c-g>u", o("Undo breakpoint"))
 map("i", ".", ".<c-g>u", o("Undo breakpoint"))
 
 map("n", "<leader>cc", "gcc", { remap = true, desc = "Comment line" })
-map("v", "<leader>cc", "gc", { remap = true, desc = "Comment selection" })
+map("x", "<leader>cc", "gc", { remap = true, desc = "Comment selection" })
 
 for _, lhs in ipairs({ "grn", "grr", "gra", "gri", "grt", "grx" }) do
   for _, mode in ipairs({ "n", "x" }) do
@@ -59,23 +59,16 @@ map("n", "<leader>bd", function()
   end
 end, o("Close buffer"))
 
-map("n", "]d", function()
-  vim.diagnostic.jump({ count = 1, float = true })
-end, o("Next diagnostic"))
-map("n", "[d", function()
-  vim.diagnostic.jump({ count = -1, float = true })
-end, o("Previous diagnostic"))
-map("n", "]e", function()
-  vim.diagnostic.jump({ count = 1, severity = vim.diagnostic.severity.ERROR, float = true })
-end, o("Next error"))
-map("n", "[e", function()
-  vim.diagnostic.jump({ count = -1, severity = vim.diagnostic.severity.ERROR, float = true })
-end, o("Previous error"))
+local function diagnostic_jump(count, severity)
+  return function()
+    if vim.diagnostic.jump({ count = count, severity = severity }) then
+      vim.diagnostic.open_float({ scope = "cursor", focus = false })
+    end
+  end
+end
+local error_only = vim.diagnostic.severity.ERROR
+map("n", "]d", diagnostic_jump(1), o("Next diagnostic"))
+map("n", "[d", diagnostic_jump(-1), o("Previous diagnostic"))
+map("n", "]e", diagnostic_jump(1, error_only), o("Next error"))
+map("n", "[e", diagnostic_jump(-1, error_only), o("Previous error"))
 map("n", "<leader>cd", vim.diagnostic.open_float, o("Line diagnostics"))
-
-map("t", "<Esc><Esc>", [[<C-\><C-n>]], o("Exit terminal mode"))
-map("t", "jk", [[<C-\><C-n>]], o("Exit terminal mode"))
-map("t", "<C-h>", [[<C-\><C-n><C-w>h]], o("Window left"))
-map("t", "<C-j>", [[<C-\><C-n><C-w>j]], o("Window below"))
-map("t", "<C-k>", [[<C-\><C-n><C-w>k]], o("Window above"))
-map("t", "<C-l>", [[<C-\><C-n><C-w>l]], o("Window right"))

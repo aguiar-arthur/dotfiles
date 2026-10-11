@@ -75,7 +75,10 @@ return {
           ["<CR>"] = { "accept", "fallback" },
           ["<C-e>"] = { "cancel", "fallback" },
         },
-        completion = { menu = { auto_show = true } },
+        completion = {
+          menu = { auto_show = true },
+          list = { selection = { preselect = false } },
+        },
       },
       fuzzy = { implementation = "prefer_rust_with_warning" },
     },
