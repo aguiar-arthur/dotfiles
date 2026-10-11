@@ -34,9 +34,17 @@ local function connect()
   require("conjure.client.clojure.nrepl.action")["connect-port-file"]()
 end
 
-local function connect_when_ready(port_file)
+local starting = {}
+
+local function job_running(buf)
+  local job = vim.api.nvim_buf_is_valid(buf) and vim.b[buf].terminal_job_id
+  return job and vim.fn.jobwait({ job }, 0)[1] == -1
+end
+
+local function connect_when_ready(port_file, buf)
   local timer = assert(vim.uv.new_timer())
   local waited = 0
+  starting[port_file] = true
   timer:start(
     500,
     500,
@@ -44,9 +52,15 @@ local function connect_when_ready(port_file)
       waited = waited + 500
       if vim.uv.fs_stat(port_file) then
         timer:close()
+        starting[port_file] = nil
         connect()
+      elseif not job_running(buf) then
+        timer:close()
+        starting[port_file] = nil
+        vim.notify("The REPL stopped before it was ready", vim.log.levels.ERROR)
       elseif waited >= 180000 then
         timer:close()
+        starting[port_file] = nil
         vim.notify("The REPL did not start within 3 minutes", vim.log.levels.ERROR)
       end
     end)
@@ -59,12 +73,16 @@ local function when_port_answers(port_file, callback)
     return callback(false)
   end
   local tcp = assert(vim.uv.new_tcp())
-  tcp:connect("127.0.0.1", port, function(err)
+  local ok = tcp:connect("127.0.0.1", port, function(err)
     tcp:close()
     vim.schedule(function()
       callback(err == nil)
     end)
   end)
+  if not ok then
+    tcp:close()
+    callback(false)
+  end
 end
 
 local function jack_in()
@@ -75,10 +93,19 @@ local function jack_in()
     return
   end
   local port_file = root .. "/.nrepl-port"
+  if starting[port_file] then
+    vim.notify("The REPL is still starting; it connects when ready", vim.log.levels.WARN)
+    return
+  end
   local function start()
-    Snacks.terminal(cmd, { cwd = root, win = { position = "bottom", height = 12 } })
+    local opts = { cwd = root, win = { position = "bottom", height = 12 } }
+    local old = Snacks.terminal.get(cmd, vim.tbl_extend("force", opts, { create = false }))
+    if old then
+      old:close()
+    end
+    local term = Snacks.terminal.open(cmd, opts)
     vim.cmd.wincmd("p")
-    connect_when_ready(port_file)
+    connect_when_ready(port_file, term.buf)
   end
   if not vim.uv.fs_stat(port_file) then
     return start()

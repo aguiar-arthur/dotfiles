@@ -25,10 +25,11 @@ return {
       end
 
       local function vimtex_status()
-        if vim.bo.filetype ~= "tex" or not vim.b.vimtex then
+        if vim.bo.filetype ~= "tex" then
           return ""
         end
-        local ok, running = pcall(vim.fn["vimtex#compiler#is_running"])
+        local ok, running =
+          pcall(vim.api.nvim_eval, "exists('b:vimtex.compiler') && b:vimtex.compiler.is_running()")
         return (ok and running == 1) and "⟳ latexmk" or ""
       end
 
@@ -73,13 +74,6 @@ return {
         { "<leader>t", group = "terminal" },
         { "<leader>u", group = "ui toggles" },
         { "<leader>w", group = "window" },
-        {
-          "<localleader>l",
-          group = "vimtex (LaTeX)",
-          cond = function()
-            return vim.bo.filetype == "tex"
-          end,
-        },
       },
     },
   },

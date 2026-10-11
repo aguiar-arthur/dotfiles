@@ -6,6 +6,67 @@ and `git log` have them.
 
 ## 2026-10-11
 
+### Fixed (sixth review)
+
+- The `⟳ latexmk` mark in the status line shows again while vimtex compiles; it called a
+  vimtex function that does not exist and never appeared.
+- Format on save no longer counts a bare `.editorconfig` (Lua, shell) or `pyproject.toml`
+  (Python) as a style: stylua needs a `stylua.toml`, shfmt an `.editorconfig` section for
+  shell files, ruff a `ruff.toml` or `[tool.ruff]`. TOML and Clojure, formatted by their
+  language servers, now also need a `taplo.toml` or a cljfmt config.
+- `<leader>gV` finds origin's default branch (`origin/HEAD`, else `origin/main` or
+  `origin/master`) instead of failing in clones without `origin/HEAD`.
+- The jump list drops entries of deleted buffers again (`jumpoptions` keeps `clean`).
+- Debugger breakpoints and the stopped line have Dracula-colored signs instead of a plain `B`.
+
+### Fixed (fifth review)
+
+- `gq` wraps prose and comments again in Markdown, Python and Lua; the language server's
+  range formatting had taken it over and left long lines as they were.
+- Format on save now also needs a project style file for prettier (a prettier config),
+  ruff (`pyproject.toml` or `ruff.toml`) and rumdl (`.rumdl.toml` or `.markdownlint.*`), so a
+  `:w` no longer restyles JSON, YAML, Python or Markdown in someone else's project.
+  `<leader>lf` still formats anywhere.
+- Searching with `/` or `?` no longer opens a completion menu of buffer words; it opens on
+  the `:` line only.
+- Cancelling `<leader>DB` no longer sets a breakpoint with an empty condition.
+- `,cj` reports a dead REPL even when `.nrepl-port` holds an invalid port.
+
+### Fixed (fourth review)
+
+- On the `:` command line the first `<Tab>` completes (it only showed the menu already shown)
+  and `<CR>` runs a completed line at once instead of needing a second `<CR>`.
+- Python buffers no longer mix UTF-8 (ruff) and UTF-16 (basedpyright) positions, which
+  `:checkhealth vim.lsp` warned about.
+- Lua and shell files format on save only in projects with a `stylua.toml` or
+  `.editorconfig` (Lua) or an `.editorconfig` (shell), like C/C++ with `.clang-format`: a `:w`
+  in someone else's file no longer restyles it (stylua would also turn its indentation into
+  tabs).
+
+### Fixed (third review)
+
+- Debugging Python runs the file with the project's `.venv` (uv projects, not activated in
+  the shell), so the project's imports work; before, debugpy used Mason's own Python.
+- dap-ui stays open when the program ends, so its output can still be read.
+- C and C++ format on save only in projects with a `.clang-format`; other code is not
+  restyled to LLVM style by a `:w`.
+- LaTeX math: `x12` gives `x_{12}` (it gave `x_12`, a subscript of one digit); `sin`, `log`
+  and the other functions expand at the start of a line too; `<->` gives `\leftrightarrow`.
+
+### Fixed (second review)
+
+- In terminals, `C-\ C-n` leaves terminal mode again: `C-\` toggles the terminal only from
+  normal mode, so it no longer opened a second terminal over lazygit or a REPL.
+- The `,l` "vimtex (LaTeX)" label shows in every `.tex` buffer, and no longer in other
+  buffers (in Clojure `,l` is Conjure's log).
+- Snippets with transformations work (LuaSnip's `jsregexp` is built), and `<Tab>` no longer
+  jumps back into a snippet already left.
+- `q` closes a help or quickfix buffer that is the only window instead of failing.
+- Markdown previews of files with the same name in different folders no longer overwrite
+  each other.
+- `,cj` pressed again while the REPL starts only says so; when the REPL dies before it is
+  ready, the wait stops and the next `,cj` replaces its terminal with a new REPL.
+
 ### Added (Neovim only)
 
 - `./install.sh nvim` and `./link.sh nvim` set up Neovim alone, for machines whose shell and

@@ -8,10 +8,10 @@ return {
       {
         "L3MON4D3/LuaSnip",
         version = "v2.*",
+        build = "make install_jsregexp",
         config = function()
           local ls = require("luasnip")
           ls.setup({
-            history = true,
             enable_autosnippets = true,
             update_events = { "TextChanged", "TextChangedI" },
             region_check_events = "InsertEnter",
@@ -68,15 +68,18 @@ return {
       cmdline = {
         keymap = {
           preset = "none",
-          ["<Tab>"] = { "show", "select_next", "fallback" },
+          ["<Tab>"] = { "show_and_insert_or_accept_single", "select_next", "fallback" },
           ["<S-Tab>"] = { "select_prev", "fallback" },
           ["<C-j>"] = { "select_next", "fallback" },
           ["<C-k>"] = { "select_prev", "fallback" },
-          ["<CR>"] = { "accept", "fallback" },
           ["<C-e>"] = { "cancel", "fallback" },
         },
         completion = {
-          menu = { auto_show = true },
+          menu = {
+            auto_show = function()
+              return vim.fn.getcmdtype() == ":"
+            end,
+          },
           list = { selection = { preselect = false } },
         },
       },

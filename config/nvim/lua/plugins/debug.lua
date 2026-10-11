@@ -1,3 +1,15 @@
+local function python_path()
+  local venv =
+    vim.fs.find(".venv", { path = vim.fn.expand("%:p:h"), upward = true, type = "directory" })[1]
+  if venv and vim.fn.executable(venv .. "/bin/python") == 1 then
+    return venv .. "/bin/python"
+  end
+  if vim.env.VIRTUAL_ENV then
+    return vim.env.VIRTUAL_ENV .. "/bin/python"
+  end
+  return vim.fn.exepath("python3")
+end
+
 return {
   {
     "mfussenegger/nvim-dap",
@@ -19,7 +31,11 @@ return {
       {
         "<leader>DB",
         function()
-          require("dap").set_breakpoint(vim.fn.input("Condition: "))
+          vim.ui.input({ prompt = "Condition: " }, function(condition)
+            if condition and condition ~= "" then
+              require("dap").set_breakpoint(condition)
+            end
+          end)
         end,
         desc = "Conditional breakpoint",
       },
@@ -139,10 +155,33 @@ return {
         }
       end
 
-      dap.listeners.before.attach.dapui_config = dapui.open
-      dap.listeners.before.launch.dapui_config = dapui.open
-      dap.listeners.before.event_terminated.dapui_config = dapui.close
-      dap.listeners.before.event_exited.dapui_config = dapui.close
+      dap.configurations.python = {
+        {
+          type = "python",
+          request = "launch",
+          name = "Launch this file",
+          program = "${file}",
+          pythonPath = python_path,
+          console = "integratedTerminal",
+        },
+      }
+
+      local signs = {
+        DapBreakpoint = { text = "●", texthl = "DiagnosticError" },
+        DapBreakpointCondition = { text = "◆", texthl = "DiagnosticWarn" },
+        DapLogPoint = { text = "◆", texthl = "DiagnosticInfo" },
+        DapBreakpointRejected = { text = "○", texthl = "DiagnosticHint" },
+        DapStopped = { text = "→", texthl = "DiagnosticWarn", linehl = "DiffAdd" },
+      }
+      for name, sign in pairs(signs) do
+        vim.fn.sign_define(name, sign)
+      end
+
+      local function open_ui()
+        dapui.open()
+      end
+      dap.listeners.before.attach.dapui_config = open_ui
+      dap.listeners.before.launch.dapui_config = open_ui
     end,
   },
 }

@@ -84,7 +84,7 @@ return {
         group = vim.api.nvim_create_augroup("user_lsp_attach", { clear = true }),
         callback = function(ev)
           local buf = ev.buf
-          local client = vim.lsp.get_client_by_id(ev.data.client_id)
+          vim.bo[buf].formatexpr = ""
 
           local function map(lhs, rhs, desc, mode)
             vim.keymap.set(mode or "n", lhs, rhs, { buffer = buf, silent = true, desc = desc })
@@ -103,10 +103,6 @@ return {
           map("<leader>lh", vim.lsp.buf.hover, "Hover documentation")
           map("<leader>ls", vim.lsp.buf.signature_help, "Signature help")
           map("<leader>lR", "<cmd>LspRestart<CR>", "Restart LSP")
-
-          if client and client.name == "ruff" then
-            client.server_capabilities.hoverProvider = false
-          end
         end,
       })
     end,

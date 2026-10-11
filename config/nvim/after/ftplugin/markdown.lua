@@ -25,7 +25,7 @@ local function build(buf, open)
   local cssfile = dir .. "/style.css"
   vim.fn.writefile(vim.split(css, "\n"), cssfile)
   local name = vim.fn.fnamemodify(src, ":t:r")
-  local out = dir .. "/" .. name .. ".html"
+  local out = dir .. "/" .. name .. "-" .. vim.fn.sha256(src):sub(1, 8) .. ".html"
 
   vim.system(
     {

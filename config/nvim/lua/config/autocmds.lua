@@ -48,12 +48,11 @@ au("FileType", {
   pattern = { "help", "qf", "man", "checkhealth", "vimtex-toc" },
   callback = function(ev)
     vim.bo[ev.buf].buflisted = false
-    vim.keymap.set(
-      "n",
-      "q",
-      "<cmd>close<CR>",
-      { buffer = ev.buf, silent = true, desc = "Close window" }
-    )
+    vim.keymap.set("n", "q", function()
+      if not pcall(vim.cmd.close) then
+        vim.cmd.bdelete()
+      end
+    end, { buffer = ev.buf, silent = true, desc = "Close window" })
   end,
 })
 

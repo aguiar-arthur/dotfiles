@@ -232,6 +232,11 @@ auto(
 auto("//", fmta("\\frac{<>}{<>}<>", { i(1), i(2), i(0) }), in_math, false)
 
 auto({ trig = "(%a)(%d)", trigEngine = "pattern" }, fmta("<>_<>", { cap(1), cap(2) }), in_math)
+auto(
+  { trig = "(%a)_(%d)(%d)", trigEngine = "pattern" },
+  fmta("<>_{<><>}", { cap(1), cap(2), cap(3) }),
+  in_math
+)
 auto("__", fmta("_{<>}<>", { i(1), i(0) }), in_math, false)
 auto("td", fmta("^{<>}<>", { i(1), i(0) }), in_math, false)
 auto("sr", t("^2"), in_math, false)
@@ -270,6 +275,7 @@ for trig, out in pairs(symbols) do
   auto(trig, t(out), in_math, trig:match("^%a+$") ~= nil)
 end
 auto("\\leq>", t("\\iff"), in_math, false)
+auto("\\gets>", t("\\leftrightarrow"), in_math, false)
 
 local greek = {
   a = "alpha",
@@ -343,8 +349,8 @@ for _, fn in ipairs({
   "arctan",
 }) do
   auto(
-    { trig = "([^\\%a])" .. fn, trigEngine = "pattern", wordTrig = false },
-    { cap(1), t("\\" .. fn) },
+    { trig = "%f[%a\\]" .. fn, trigEngine = "pattern", wordTrig = false },
+    t("\\" .. fn),
     in_math
   )
 end

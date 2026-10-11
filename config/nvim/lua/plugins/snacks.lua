@@ -227,7 +227,6 @@ return {
         Snacks.terminal(nil, { count = 1, win = { position = "float" } })
       end,
       desc = "Toggle terminal",
-      mode = { "n", "t" },
     },
     {
       "<leader>tf",

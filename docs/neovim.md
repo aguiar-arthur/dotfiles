@@ -25,7 +25,7 @@ config/nvim/
 | Group | For |
 |---|---|
 | `<leader>f` | find: files, grep, recent, buffers, help, symbols (snacks picker) |
-| `<leader>g` | git: lazygit, hunks, blame, diffview (`gv` changes, `gV` branch vs origin, `gh` history) |
+| `<leader>g` | git: lazygit, hunks, blame, diffview (`gv` changes, `gV` branch vs origin's default branch, `gh` history) |
 | `<leader>l` | LSP: definition, references, rename, code action, format |
 | `<leader>d` | diagnostics and lists (Trouble) |
 | `<leader>D` | debugger (nvim-dap): Python, JavaScript/TypeScript, C/C++ |
@@ -34,21 +34,22 @@ config/nvim/
 | `<leader>r` | search and replace in the whole project (grug-far), prefilled with the word or selection |
 | `<leader>S` | sessions |
 | `<leader>o` | file tree, notifications, dashboard |
-| `<leader>u` | toggles: spelling, wrap, relative numbers, conceal, diagnostics, inlay hints, indent guides, treesitter, format on save |
+| `<leader>u` | toggles: spelling, wrap, relative numbers, conceal, diagnostics, inlay hints, indent guides, treesitter, format on save; `un` dismisses notifications |
 
 `gd` / `gr` / `K` work as usual (implementation is `<leader>li`; `gi` keeps Vim's meaning);
 `]r` / `[r` jump between references of the word under the cursor; `s` / `S` jump with flash;
 `gs…` surrounds. `<Tab>` is left alone so `<C-i>` still walks the jump list forward; in
 insert mode it jumps to the next snippet field first, then moves in the completion menu
-(`<C-j>` / `<C-k>` always move in the menu).
+(`<C-j>` / `<C-k>` always move in the menu). On the `:` command line `<Tab>` completes
+(a single match at once) and `<CR>` runs the line as it reads.
 Text objects (mini.ai) work in every language with a treesitter parser: `af` / `if` function,
 `ac` / `ic` class, `au` / `iu` function call, `aa` / `ia` argument, plus brackets, quotes and
 tags (`daf` deletes a function, `ciu` rewrites a call's arguments). The function and class
 queries come from nvim-treesitter-textobjects, which is installed only for them.
-`<A-j>` / `<A-k>` move lines; `C-h/j/k/l` move between windows; `C-\` toggles a terminal.
-`<leader>tf` / `th` / `tv` are three separate terminals (float, bottom, right). Inside a
-terminal every key goes to the program (lazygit, the shell); a quick double `Esc` returns to
-Neovim.
+`<A-j>` / `<A-k>` move lines; `C-h/j/k/l` move between windows; `C-\` toggles a terminal
+from normal mode. `<leader>tf` / `th` / `tv` are three separate terminals (float, bottom,
+right). Inside a terminal every key goes to the program (lazygit, the shell, a REPL); a quick
+double `Esc` or `C-\ C-n` returns to Neovim, where `q` hides the terminal.
 
 The `<leader>u` toggles are global: they change every window or buffer and the ones opened
 later. A `:setlocal` (wrap, numbers, conceal, spell) stays with its buffer until the next
@@ -95,9 +96,21 @@ Dracula.
 - Treesitter highlights every language with a parser but indents only the ones in
   `settings.treesitter_indent`; elsewhere the ftplugin's indent stays, since treesitter
   indentation is still unreliable in Python, YAML and Markdown.
-- conform formats on save (Lua, Python with ruff, shell, web/JSON/YAML, Markdown with rumdl;
-  LaTeX only on demand with `<leader>lf`). `:FormatToggle` (`!` for one buffer) or
-  `<leader>uf` turns it off.
+- conform formats on save (Lua, Python with ruff, shell, web/JSON/YAML with prettier,
+  Markdown with rumdl; C/C++, TOML and Clojure through clangd, taplo and clojure-lsp), but
+  only in projects that declare that tool's style: C/C++ with a `.clang-format`, Lua with a
+  `stylua.toml`, shell with an `.editorconfig` section for `.sh` or `.bash` files, Python with
+  a `ruff.toml` or a `[tool.ruff]` table in `pyproject.toml`, web/JSON/YAML with a prettier
+  config file, Markdown with a `.rumdl.toml` or `.markdownlint.*`, TOML with a `taplo.toml`,
+  Clojure with a `cljfmt.edn` or `:cljfmt` in `.lsp/config.edn`. Without one each formatter
+  falls back to its own defaults and a `:w` would restyle someone else's code; a bare
+  `.editorconfig` or `pyproject.toml` is too common to count. `<leader>lf` still formats
+  anywhere. LaTeX is formatted only on demand with `<leader>lf`. `:FormatToggle` (`!` for one
+  buffer) or `<leader>uf` turns it off.
+- `gq` wraps text to `textwidth` everywhere (prose, comments): Neovim would hand it to a
+  language server that formats ranges (rumdl, lua_ls), which does not wrap, so it is reset.
+- In Python, ruff is asked for UTF-16 positions like basedpyright (two encodings in one
+  buffer make Neovim warn), and its hover is off so `K` shows basedpyright's.
 - Language servers never attach to `diffview://` buffers: they get `buftype=acwrite`, so
   servers treat them as virtual, and `:w` on the index copy still stages it.
 - Inside a diff, `gd` / `gr` / `<leader>l…` open a result in another file in a new tab.
@@ -109,29 +122,34 @@ REPL, nvim-paredit edits s-expressions (`>)` / `<)` slurp and barf, `,o` raises 
 `:h nvim-paredit`). `,cj` in a Clojure file starts an nREPL with cider-nrepl in a terminal
 below (`clojure` for `deps.edn`, `lein` for `project.clj`) and connects as soon as
 `.nrepl-port` appears; when a REPL is already running it only connects (a `.nrepl-port` left
-by a dead REPL is removed and a new one starts). Then `,ee` evaluates
-the form under the cursor, `,er` the outer form, `,eb` the buffer, `,tn` runs the
-namespace's tests, `,lv` opens the log. Conjure is limited to Clojure (its other clients
+by a dead REPL is removed and a new one starts, replacing the dead REPL's terminal). Then
+`,ee` evaluates the form under the cursor, `,er` the outer form, `,eb` the buffer, `,tn` runs
+the namespace's tests, `,lv` opens the log. Conjure is limited to Clojure (its other clients
 would map keys in Lua and Python files), and `K` / `gd` stay with the language server. The
 nREPL and cider-nrepl versions are at the top of `lua/plugins/clojure.lua`.
 
 ## Debugging
 
-`<leader>D` drives nvim-dap with dap-ui. Python uses debugpy; C/C++ use codelldb (it asks
-for the program to run); JavaScript and TypeScript use js-debug-adapter, which launches the
-current file with Node (recent Node runs `.ts` files directly) or attaches to a running Node
-process. macOS lets a debugger attach to native programs only with developer mode on:
-`sudo DevToolsSecurity -enable` once, or C debugging waits for a password dialog.
+`<leader>D` drives nvim-dap with dap-ui, which stays open after the program ends so its
+output can be read (`<leader>Du` closes it). Breakpoints show as `●` (`◆` with a condition)
+and the stopped line is tinted green. Python uses debugpy and runs the file with the
+project's `.venv` (uv's, found upward from the file), else `$VIRTUAL_ENV`, else `python3`.
+C/C++ use codelldb (it asks for the program to run); JavaScript and TypeScript use
+js-debug-adapter, which launches the current file with Node (recent Node runs `.ts` files
+directly) or attaches to a running Node process. macOS lets a debugger attach to native
+programs only with developer mode on: `sudo DevToolsSecurity -enable` once, or C debugging
+waits for a password dialog.
 
 ## LaTeX
 
 vimtex compiles with latexmk and shows the PDF in Skim with SyncTeX; texlab gives completion
 and diagnostics; the snippets in `snippets/tex.lua` expand as you type, but never right after
 a `\` (typing `\sum` or `\begin` by hand stays as typed), and `beg` only at the start of a
-line. `<=>` is typed as `<=` then `>`. Keys under `,l` in `.tex` files are vimtex's own,
-labelled in which-key: `,ll` compile, `,lv` view / forward search, `,le` errors, `,lt` table
-of contents, `,lc` clean, `,lx` reload, `,lw` count words. Cmd+Shift+click in Skim jumps
-back to the line (set up by `link.sh`).
+line. `<=>` is typed as `<=` then `>`, `<->` as `<-` then `>`; in math `x12` gives
+`x_{12}`. Keys under `,l` in `.tex` files are vimtex's own, labelled in which-key: `,ll`
+compile, `,lv` view / forward search, `,le` errors, `,lt` table of contents, `,lc` clean,
+`,lx` reload, `,lw` count words. Cmd+Shift+click in Skim jumps back to the line (set up by
+`link.sh`).
 Put `% !TEX program = lualatex` on the first line for another engine.
 
 ## Markdown

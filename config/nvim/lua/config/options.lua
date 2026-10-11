@@ -43,7 +43,7 @@ opt.virtualedit = "block"
 opt.confirm = true
 opt.exrc = true
 opt.completeopt = { "menu", "menuone", "noselect" }
-opt.jumpoptions = "view"
+opt.jumpoptions:append("view")
 opt.mouse = "a"
 opt.grepprg = "rg --vimgrep --smart-case"
 opt.grepformat = "%f:%l:%c:%m"

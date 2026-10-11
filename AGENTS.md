@@ -10,7 +10,7 @@ config/nvim/        Neovim >= 0.11: lazy.nvim, one spec per concern in lua/plugi
                     LSP with per-server settings in after/lsp/, lazy-lock.json committed
 config/zsh/         dotfiles.zsh, sourced by the one ~/.zshrc block
 config/starship/    starship.toml
-config/rumdl/       rumdl.toml (Markdown lint rules)
+config/rumdl/       rumdl.toml (Markdown lint rules; the root .rumdl.toml links to it)
 config/iterm2/      dracula.json (Dynamic Profile)
 docs/               neovim.md (everything about the editor)
 Brewfile            every program (includes Brewfile.nvim)
@@ -64,6 +64,18 @@ CHANGELOG.md        notable changes, newest first
   headless Neovim never fires: `:checkhealth snacks` errors there are not real.
 - C/C++ debugging (codelldb) needs macOS developer mode (`sudo DevToolsSecurity -enable`);
   without it the session waits on a password dialog.
+- Formatters run on save only under a project style file (`style_markers` in
+  `lua/plugins/formatting.lua`): their defaults (stylua's tabs, LLVM for clang-format,
+  prettier's, ruff's and rumdl's rewrites) would restyle someone else's code on a `:w`. A
+  formatter added to conform gets an entry there. The repository's `.rumdl.toml` is a link
+  to `config/rumdl/rumdl.toml` so its own Markdown still formats on save, and its
+  `.editorconfig` has a `[*.{sh,bash}]` section so its scripts do.
+- Neovim sets `formatexpr` to the language server's when it can format a range, and `gq`
+  then stops wrapping prose and comments; the `LspAttach` callback clears it again.
+- Two servers on one filetype must agree on the position encoding (`:checkhealth vim.lsp`
+  warns); the extra one is pinned in its `after/lsp/` file, as ruff is to UTF-16.
+- blink.cmp on the `:` line inserts the selected item already: mapping `<CR>` to `accept`
+  there makes a completed command need a second `<CR>`.
 
 ## Checking a change by hand
 
@@ -75,8 +87,18 @@ CHANGELOG.md        notable changes, newest first
   `sleep` keeps stdin open; without it Neovim gets EOF and quits). Work in a scratch
   project, point `XDG_STATE_HOME` at a scratch directory for anything that writes state
   (`:trust`), and stop only the processes you started, never with a broad `pkill`.
+- Typed behaviour (autosnippets, completion, the `:` line) is checked the same way: the probe
+  feeds keys with `nvim_feedkeys(keys, "t", false)` one step at a time, waits with
+  `vim.defer_fn` and records the line or the mode; text set with the API triggers nothing.
+  `E1568` (no answer to a DSR request) in a probe's `:messages` comes from `script`.
+- Health: `nvim --headless <file> -c 'checkhealth <names>' -c 'w! out.txt' -c 'qa!'`, then
+  look for `ERROR` and `WARNING`; load lazy plugins first (`require("lazy").load`) or their
+  checks are skipped.
 - Scripts: `bash -n install.sh link.sh` and `shfmt -d` on what you changed; Lua through
-  `stylua` (rules in `config/nvim/stylua.toml`).
+  `stylua --check .` run from `config/nvim` (from a subdirectory it misses `stylua.toml` and
+  reports false diffs).
+- Markdown: `rumdl check <files> --config config/rumdl/rumdl.toml`; it lets some long prose
+  lines through, so also look for lines over 100 columns outside tables and code blocks.
 - Say plainly what you could not check (GUI, real language servers, LaTeX).
 
 ## Git

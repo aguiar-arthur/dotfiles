@@ -1,8 +1,6 @@
 local o = vim.opt_local
 
 o.textwidth = 0
-o.shiftwidth = 2
-o.tabstop = 2
 o.formatoptions:remove("t")
 
 vim.keymap.set(
@@ -30,7 +28,7 @@ if ok then
     lx = "Reload vimtex",
     lq = "Log",
   }
-  local spec = {}
+  local spec = { { "<localleader>l", group = "vimtex (LaTeX)", buffer = 0 } }
   for lhs, desc in pairs(labels) do
     spec[#spec + 1] = { "<localleader>" .. lhs, desc = desc, buffer = 0 }
   end
