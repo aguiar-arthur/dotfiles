@@ -6,6 +6,13 @@ and `git log` have them.
 
 ## 2026-10-11
 
+### Added (Neovim only)
+
+- `./install.sh nvim` and `./link.sh nvim` set up Neovim alone, for machines whose shell and
+  terminal must not change: only the programs in the new `Brewfile.nvim` (which the main
+  `Brewfile` includes), and only the `~/.config/nvim` and rumdl links. `~/.zshrc`, Starship,
+  iTerm2 and app preferences are left alone.
+
 ### Changed (review)
 
 - `<Tab>` / `<S-Tab>` no longer switch buffers, so `<C-i>` moves forward in the jump list

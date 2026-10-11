@@ -13,7 +13,8 @@ config/starship/    starship.toml
 config/rumdl/       rumdl.toml (Markdown lint rules)
 config/iterm2/      dracula.json (Dynamic Profile)
 docs/               neovim.md (everything about the editor)
-Brewfile            every program
+Brewfile            every program (includes Brewfile.nvim)
+Brewfile.nvim       what Neovim needs, alone
 install.sh          installs everything, running link.sh before Neovim
 link.sh             links, the ~/.zshrc block, iTerm2 and Skim preferences
 CHANGELOG.md        notable changes, newest first
@@ -22,16 +23,19 @@ CHANGELOG.md        notable changes, newest first
 ## Rules
 
 - **Simple first.** No tests, no CI, no health checks, no doctor, no flags. `./install.sh`
-  installs everything with no options and runs `link.sh` before the Neovim step (Neovim then
-  uses the linked `~/.config/nvim`, as every day); both stay idempotent and
-  only do what is missing. Every network step in `install.sh` has a timeout or a failure
-  path.
+  installs everything and runs `link.sh` before the Neovim step (Neovim then uses the linked
+  `~/.config/nvim`, as every day). The one exception to "no flags": both scripts take an
+  optional `nvim` argument that limits them to Neovim (`Brewfile.nvim`, `~/.config/nvim` and
+  the rumdl rules) for machines whose shell and terminal must stay untouched. Both stay
+  idempotent in both modes and only do what is missing. Every network step in `install.sh`
+  has a timeout or a failure path.
 - **No comments in code**, in any file. Names and `desc` / `:wk` labels say what; a reason
   worth keeping goes in one sentence in `docs/`. Exceptions: `#!` lines and text the code
   writes or matches (the `# >>> dotfiles >>>` markers).
 - **macOS only**, no branches for other systems.
 - **English** in code, docs and commit messages; reply to the user in their language.
-- **Every program goes in the Brewfile.**
+- **Every program goes in the Brewfile**; what Neovim needs goes in `Brewfile.nvim`, which
+  the Brewfile includes.
 - **Settings** a user may change live in `config/nvim/lua/config/settings.lua` (including the
   servers, Mason tools and parsers to install); per-machine overrides go in the untracked
   `lua/config/local.lua`, per-project ones in a trusted `.nvim.lua` (`exrc`).

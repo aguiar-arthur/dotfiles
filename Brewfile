@@ -1,15 +1,5 @@
-brew "git"
-brew "ripgrep"
-brew "fd"
-brew "pandoc"
-brew "prettier"
-brew "shfmt"
-brew "stylua"
-brew "rumdl"
-brew "neovim"
-brew "tree-sitter-cli"
-brew "node"
-brew "lazygit"
+instance_eval File.read(File.join(__dir__, "Brewfile.nvim"))
+
 brew "starship"
 brew "clojure"
 brew "leiningen"

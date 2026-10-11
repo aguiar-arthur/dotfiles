@@ -41,6 +41,23 @@ On a Mac with macOS and an internet connection; nothing else is needed beforehan
 
 4. **Open Neovim** (`nvim`) and run `:checkhealth` (see [Check](#check)).
 
+### Neovim only
+
+On a machine whose shell and terminal are already set up and must stay as they are, give
+both scripts the `nvim` argument:
+
+```sh
+cd ~/dotfiles && ./install.sh nvim
+```
+
+It installs only the programs in `Brewfile.nvim` (Neovim, git, ripgrep, fd, tree-sitter,
+node, the formatters, pandoc, lazygit) and links only `~/.config/nvim` and
+`~/.config/rumdl/rumdl.toml`, then sets up the plugins, servers and parsers as usual.
+`~/.zshrc`, Starship, iTerm2, fonts, LaTeX, Clojure and app preferences are left alone, so
+two things stay up to that machine: Homebrew on `PATH` (if Homebrew was just installed, it
+prints the line to add) and a Nerd Font in the terminal for the icons. `./link.sh nvim` does
+the linking part on its own. Running the full `./install.sh` later adds the rest.
+
 Optional: to debug C/C++ programs, turn on developer mode once with
 `sudo DevToolsSecurity -enable`; without it the debugger waits on a password dialog.
 
@@ -69,8 +86,8 @@ Nothing here changes anything; each command says what is missing or wrong.
 
 | What | How | All good when |
 |---|---|---|
-| Programs | `brew bundle check --verbose --file ~/dotfiles/Brewfile` | `The Brewfile's dependencies are satisfied.` |
-| Links, `~/.zshrc`, app preferences | `~/dotfiles/link.sh` (fixes what differs) | every line starts with `ok` |
+| Programs | `brew bundle check --verbose --file ~/dotfiles/Brewfile` (`Brewfile.nvim` for Neovim only) | `The Brewfile's dependencies are satisfied.` |
+| Links, `~/.zshrc`, app preferences | `~/dotfiles/link.sh` (or `link.sh nvim`; fixes what differs) | every line starts with `ok` |
 | Neovim starts cleanly | `nvim --headless "+qa"` | it prints nothing |
 | Everything inside Neovim | `:checkhealth` | no `ERROR` |
 | Language servers in this buffer | `:checkhealth vim.lsp` | the server is under "Active Clients" |
@@ -97,8 +114,9 @@ config/zsh/       dotfiles.zsh, sourced from ~/.zshrc
 config/starship/  starship.toml
 config/iterm2/    dracula.json (Dynamic Profile)
 config/rumdl/     Markdown lint rules
-Brewfile          every program
-install.sh        installs everything (runs link.sh before Neovim)
+Brewfile          every program (includes Brewfile.nvim)
+Brewfile.nvim     what Neovim needs, for ./install.sh nvim
+install.sh        installs everything (runs link.sh before Neovim); `nvim`: Neovim only
 link.sh           links, the ~/.zshrc block, app preferences
 ```
 

@@ -6,15 +6,27 @@ ZSHRC="$HOME/.zshrc"
 BEGIN="# >>> dotfiles >>>"
 END="# <<< dotfiles <<<"
 KEEP_BACKUPS=3
+ONLY="${1:-}"
+
+case "$ONLY" in
+"" | nvim) ;;
+*)
+  echo "usage: ./link.sh [nvim]" >&2
+  exit 2
+  ;;
+esac
 
 say() { printf '%-8s %s\n' "$1" "$2"; }
 
 links() {
   printf '%s\n' \
     "config/nvim|$HOME/.config/nvim" \
-    "config/starship/starship.toml|$HOME/.config/starship.toml" \
-    "config/rumdl/rumdl.toml|$HOME/.config/rumdl/rumdl.toml" \
-    "config/iterm2/dracula.json|$HOME/Library/Application Support/iTerm2/DynamicProfiles/dotfiles-dracula.json"
+    "config/rumdl/rumdl.toml|$HOME/.config/rumdl/rumdl.toml"
+  if [ "$ONLY" != nvim ]; then
+    printf '%s\n' \
+      "config/starship/starship.toml|$HOME/.config/starship.toml" \
+      "config/iterm2/dracula.json|$HOME/Library/Application Support/iTerm2/DynamicProfiles/dotfiles-dracula.json"
+  fi
 }
 
 prune_backups() {
@@ -78,6 +90,8 @@ zshrc() {
 }
 
 while IFS='|' read -r src dst; do link "$src" "$dst"; done < <(links)
-zshrc
-app_preferences
+if [ "$ONLY" != nvim ]; then
+  zshrc
+  app_preferences
+fi
 echo "Done."

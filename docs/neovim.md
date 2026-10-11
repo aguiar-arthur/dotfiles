@@ -82,10 +82,11 @@ Dracula.
 - Mason installs the servers in `settings.mason_servers` and the tools in
   `settings.mason_tools` (shellcheck and the debug adapters). Only the servers in that list
   are enabled (`automatic_enable = mason_servers`): a server left over in Mason stays off.
-  rumdl and clojure-lsp come from the Brewfile and are enabled when the binary exists.
+  rumdl (`Brewfile.nvim`) and clojure-lsp (the full `Brewfile` only) are enabled when the
+  binary exists.
 - blink.cmp adds its completion capabilities to every server by itself; it is a dependency
   of nvim-lspconfig so it loads, and registers them, before the first server starts.
-- stylua, shfmt and prettier also come from the Brewfile; Mason does not install copies.
+- stylua, shfmt and prettier come from `Brewfile.nvim`; Mason does not install copies.
 - Mason installs nothing when Neovim starts: after adding a server or tool to the settings,
   run `./install.sh` again (or `:MasonToolsInstall`).
 - Treesitter highlights every language with a parser but indents only the ones in

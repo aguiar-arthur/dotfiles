@@ -3,6 +3,17 @@ set -uo pipefail
 
 DOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 FAILED=()
+ONLY="${1:-}"
+BREWFILE="$DOT/Brewfile"
+
+case "$ONLY" in
+"") ;;
+nvim) BREWFILE="$DOT/Brewfile.nvim" ;;
+*)
+  echo "usage: ./install.sh [nvim]" >&2
+  exit 2
+  ;;
+esac
 
 title() { printf '\n== %s\n' "$*"; }
 have() { command -v "$1" >/dev/null 2>&1; }
@@ -22,7 +33,7 @@ step_brew() {
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || return 1
     load_brew
   fi
-  brew bundle --no-upgrade --file "$DOT/Brewfile"
+  brew bundle --no-upgrade --file "$BREWFILE"
 }
 
 step_nvim() {
@@ -41,16 +52,24 @@ step_nvim() {
 
 step_link() {
   title "Links and app preferences"
-  "$DOT/link.sh"
+  "$DOT/link.sh" ${ONLY:+"$ONLY"}
 }
 
-echo "Installing everything. Homebrew and MacTeX may ask for your password."
+if [ "$ONLY" = nvim ]; then
+  echo "Installing Neovim only: its programs, ~/.config/nvim and its plugins. Homebrew may ask for your password."
+else
+  echo "Installing everything. Homebrew and MacTeX may ask for your password."
+fi
 for step in brew link nvim; do
   "step_$step" || FAILED+=("$step")
 done
 
 if [ "${#FAILED[@]}" -gt 0 ]; then
-  printf '\nFailed: %s. Fix the errors above and run ./install.sh again.\n' "${FAILED[*]}"
+  printf '\nFailed: %s. Fix the errors above and run ./install.sh%s again.\n' "${FAILED[*]}" "${ONLY:+ $ONLY}"
   exit 1
 fi
-printf '\nDone. Open a new terminal (or run: exec zsh).\n'
+if [ "$ONLY" = nvim ]; then
+  printf '\nDone. Your shell and terminal settings were not touched.\n'
+else
+  printf '\nDone. Open a new terminal (or run: exec zsh).\n'
+fi
