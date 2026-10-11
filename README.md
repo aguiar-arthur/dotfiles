@@ -7,16 +7,42 @@ Personal macOS setup:
 
 ## Install
 
-```sh
-git clone <repo> ~/dotfiles && cd ~/dotfiles
-./install.sh
-```
+On a Mac with macOS and an internet connection; nothing else is needed beforehand.
 
-No options: every machine gets everything. `install.sh` installs Homebrew and the programs in
-the `Brewfile`, runs `link.sh`, then installs the Neovim plugins, servers, parsers and spell
-files through the linked `~/.config/nvim`. It asks for your password when Homebrew and MacTeX
-install. Open a new terminal when it is done. Running it again only does what is missing; a
-failed step does not stop the others, and the script names it at the end.
+1. **Clone the repository.** On a new Mac, `git` asks to install the Command Line Tools
+   first: accept, wait for it to finish, then run the command again.
+
+   ```sh
+   git clone https://github.com/aguiar-arthur/dotfiles.git ~/dotfiles
+   ```
+
+2. **Run the installer.** It takes a while the first time (MacTeX alone is several GB) and
+   asks for your password when Homebrew and MacTeX install.
+
+   ```sh
+   cd ~/dotfiles && ./install.sh
+   ```
+
+   It goes through three steps, and a failed step does not stop the others:
+
+   - **brew**: Homebrew, if missing, then every program in the `Brewfile` that is not
+     installed yet (already installed ones are not upgraded);
+   - **link**: `link.sh`, described below;
+   - **nvim**: the plugins at the versions in `lazy-lock.json`, the Mason servers and tools,
+     the treesitter parsers and the Portuguese spell file, through the linked
+     `~/.config/nvim`.
+
+   It ends with `Done.` or with `Failed: <steps>`; fix the errors printed above and run it
+   again. Running it again only does what is missing.
+
+3. **Quit iTerm2 (Cmd+Q) and open it again.** The new window uses the "Dotfiles (Dracula)"
+   profile with JetBrains Mono Nerd Font, Homebrew on `PATH` and the Starship prompt. If the
+   profile did not become the default, run `./link.sh` with iTerm2 closed.
+
+4. **Open Neovim** (`nvim`) and run `:checkhealth` (see [Check](#check)).
+
+Optional: to debug C/C++ programs, turn on developer mode once with
+`sudo DevToolsSecurity -enable`; without it the debugger waits on a password dialog.
 
 `link.sh` (also run on its own after a `git pull`):
 
@@ -26,8 +52,7 @@ failed step does not stop the others, and the script names it at the end.
 - adds one marked block to `~/.zshrc` that sources `config/zsh/dotfiles.zsh`: Homebrew on
   `PATH`, a valid `LANG` and the Starship prompt;
 - makes "Dotfiles (Dracula)" iTerm2's default profile and sets Skim's inverse search to
-  Neovim (if iTerm2 was running and the profile did not stick, run `./link.sh` again with
-  iTerm2 closed).
+  Neovim.
 
 ## Update
 
@@ -37,6 +62,26 @@ failed step does not stop the others, and the script names it at the end.
 | Neovim plugins | `:Lazy update`, then commit `config/nvim/lazy-lock.json` if all is well |
 | Neovim plugins, roll back | `git restore config/nvim/lazy-lock.json`, then `:Lazy restore` |
 | Mason servers and tools | `:Mason`, then `U` |
+
+## Check
+
+Nothing here changes anything; each command says what is missing or wrong.
+
+| What | How | All good when |
+|---|---|---|
+| Programs | `brew bundle check --verbose --file ~/dotfiles/Brewfile` | `The Brewfile's dependencies are satisfied.` |
+| Links, `~/.zshrc`, app preferences | `~/dotfiles/link.sh` (fixes what differs) | every line starts with `ok` |
+| Neovim starts cleanly | `nvim --headless "+qa"` | it prints nothing |
+| Everything inside Neovim | `:checkhealth` | no `ERROR` |
+| Language servers in this buffer | `:checkhealth vim.lsp` | the server is under "Active Clients" |
+| Plugins | `:Lazy` | nothing in red |
+| Servers and tools from Mason | `:Mason` | all installed |
+| Treesitter parsers | `:checkhealth nvim-treesitter` | the `tree-sitter` CLI is found, parsers listed |
+| Formatters for this buffer | `:ConformInfo` | the formatter shows as ready |
+
+Run `:checkhealth` in a real Neovim window: in `nvim --headless` the Snacks checks report
+errors that are not real. When a check fails, `./install.sh` is the fix for anything
+missing (a program, a server, a parser): it installs only what is not there.
 
 ## Per-machine settings
 
