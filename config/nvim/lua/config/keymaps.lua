@@ -48,8 +48,6 @@ map("n", "<leader>wL", "<cmd>vertical resize +2<CR>", o("Wider"))
 map("n", "<leader>wJ", "<cmd>resize -2<CR>", o("Shorter"))
 map("n", "<leader>wK", "<cmd>resize +2<CR>", o("Taller"))
 
-map("n", "<Tab>", "<cmd>bnext<CR>", o("Next buffer"))
-map("n", "<S-Tab>", "<cmd>bprevious<CR>", o("Previous buffer"))
 map("n", "<leader>bn", "<cmd>bnext<CR>", o("Next buffer"))
 map("n", "<leader>bp", "<cmd>bprevious<CR>", o("Previous buffer"))
 map("n", "<leader>bk", "<cmd>bdelete!<CR>", o("Kill buffer (force)"))

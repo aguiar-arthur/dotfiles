@@ -55,8 +55,7 @@ return {
       require("mason-lspconfig").setup({ automatic_enable = mason_servers })
       require("mason-tool-installer").setup({
         ensure_installed = vim.list_extend(vim.deepcopy(mason_tools), mason_servers),
-        run_on_start = true,
-        start_delay = 2000,
+        run_on_start = false,
       })
 
       for server, bin in pairs(system_servers) do
@@ -93,8 +92,6 @@ return {
 
           map("gd", lsp_pick("lsp_definitions"), "Go to definition")
           map("gr", lsp_pick("lsp_references"), "Go to references")
-          map("gi", lsp_pick("lsp_implementations"), "Go to implementation")
-          map("K", vim.lsp.buf.hover, "Hover documentation")
 
           map("<leader>ld", lsp_pick("lsp_definitions"), "Definition")
           map("<leader>lr", lsp_pick("lsp_references"), "References")

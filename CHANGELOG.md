@@ -6,6 +6,26 @@ and `git log` have them.
 
 ## 2026-10-11
 
+### Changed (review)
+
+- `<Tab>` / `<S-Tab>` no longer switch buffers, so `<C-i>` moves forward in the jump list
+  again; use `<leader>bn` / `<leader>bp` / `<leader>bb`.
+- References of the word under the cursor are `]r` / `[r`, not `]]` / `[[`; `gi` is Vim's
+  again (implementation stays on `<leader>li`).
+- In insert mode `<Tab>` jumps to the next snippet field before moving in the menu.
+- Treesitter indents only the languages in `settings.treesitter_indent`.
+- A `:setlocal` of wrap, relative numbers, conceal or spell survives switching buffers; the
+  global `<leader>u` toggles only reset it when they change. `vim.b.keep_local_opts = true`
+  opts a buffer out of them entirely.
+- Treesitter parsers missing at startup install only in an interactive Neovim, so the
+  headless runs of `install.sh` never quit in the middle of a parser build.
+- `install.sh` runs `link.sh` before the Neovim step, which now uses the linked
+  `~/.config/nvim` instead of overriding `XDG_CONFIG_HOME` (that also hid
+  `~/.config/git/config` from the git that lazy.nvim runs).
+- Neovim no longer checks Mason on every start; `./install.sh` installs servers and tools.
+- `./install.sh` no longer upgrades Homebrew programs that are already installed
+  (`brew bundle --no-upgrade`); `brew upgrade` stays the way to update them.
+
 ### Added
 
 - Clojure in Neovim: Conjure evaluates code in a REPL, nvim-paredit edits s-expressions, and

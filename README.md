@@ -12,11 +12,11 @@ git clone <repo> ~/dotfiles && cd ~/dotfiles
 ./install.sh
 ```
 
-No options: every machine gets everything. `install.sh` installs Homebrew, the programs in the
-`Brewfile` and the Neovim plugins, servers, parsers and spell files, then runs `link.sh`. It
-asks for your password when Homebrew and MacTeX install. Open a new terminal when it is done.
-Running it again only does what is missing; a failed step does not stop the others, and the
-script names it at the end.
+No options: every machine gets everything. `install.sh` installs Homebrew and the programs in
+the `Brewfile`, runs `link.sh`, then installs the Neovim plugins, servers, parsers and spell
+files through the linked `~/.config/nvim`. It asks for your password when Homebrew and MacTeX
+install. Open a new terminal when it is done. Running it again only does what is missing; a
+failed step does not stop the others, and the script names it at the end.
 
 `link.sh` (also run on its own after a `git pull`):
 
@@ -53,7 +53,7 @@ config/starship/  starship.toml
 config/iterm2/    dracula.json (Dynamic Profile)
 config/rumdl/     Markdown lint rules
 Brewfile          every program
-install.sh        installs everything, then link.sh
+install.sh        installs everything (runs link.sh before Neovim)
 link.sh           links, the ~/.zshrc block, app preferences
 ```
 

@@ -22,7 +22,7 @@ step_brew() {
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || return 1
     load_brew
   fi
-  brew bundle --file "$DOT/Brewfile"
+  brew bundle --no-upgrade --file "$DOT/Brewfile"
 }
 
 step_nvim() {
@@ -31,8 +31,12 @@ step_nvim() {
     echo "ERROR  nvim not found"
     return 1
   }
-  XDG_CONFIG_HOME="$DOT/config" nvim --headless "+Lazy! restore" +qa || return 1
-  XDG_CONFIG_HOME="$DOT/config" nvim --headless "+lua require('dotfiles.install').run()"
+  [ "$(readlink "$HOME/.config/nvim")" = "$DOT/config/nvim" ] || {
+    echo "ERROR  ~/.config/nvim does not link to $DOT/config/nvim"
+    return 1
+  }
+  nvim --headless "+Lazy! restore" +qa || return 1
+  nvim --headless "+lua require('dotfiles.install').run()"
 }
 
 step_link() {
@@ -41,7 +45,7 @@ step_link() {
 }
 
 echo "Installing everything. Homebrew and MacTeX may ask for your password."
-for step in brew nvim link; do
+for step in brew link nvim; do
   "step_$step" || FAILED+=("$step")
 done
 

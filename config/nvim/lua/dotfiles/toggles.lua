@@ -2,20 +2,17 @@ local M = {}
 
 M.prose = { "tex", "markdown", "text", "gitcommit", "plaintex" }
 
+M.generation = 0
+
 local function set_local(win, name, value)
   vim.api.nvim_set_option_value(name, value, { scope = "local", win = win })
 end
 
-function M.apply(win)
-  local buf = vim.api.nvim_win_get_buf(win)
-  if vim.bo[buf].buftype ~= "" then
-    return
-  end
-  if not vim.wo[win].diff then
-    set_local(win, "wrap", vim.go.wrap)
-  end
-  set_local(win, "relativenumber", vim.go.relativenumber)
-  set_local(win, "conceallevel", vim.go.conceallevel)
+local function managed(buf)
+  return vim.bo[buf].buftype == "" and not vim.b[buf].keep_local_opts
+end
+
+local function set_spell(win, buf)
   set_local(
     win,
     "spell",
@@ -23,7 +20,22 @@ function M.apply(win)
   )
 end
 
+function M.apply(win)
+  local buf = vim.api.nvim_win_get_buf(win)
+  if not managed(buf) then
+    return
+  end
+  vim.b[buf].toggles_generation = M.generation
+  if not vim.wo[win].diff then
+    set_local(win, "wrap", vim.go.wrap)
+  end
+  set_local(win, "relativenumber", vim.go.relativenumber)
+  set_local(win, "conceallevel", vim.go.conceallevel)
+  set_spell(win, buf)
+end
+
 function M.apply_all()
+  M.generation = M.generation + 1
   for _, win in ipairs(vim.api.nvim_list_wins()) do
     M.apply(win)
   end
@@ -39,7 +51,9 @@ function M.start_treesitter(buf)
   if not M.treesitter_enabled() or skip_highlight[vim.bo[buf].filetype] then
     return
   end
-  if pcall(vim.treesitter.start, buf) then
+  local lang = vim.treesitter.language.get_lang(vim.bo[buf].filetype)
+  local indent = vim.tbl_contains(require("config.settings").treesitter_indent, lang)
+  if pcall(vim.treesitter.start, buf) and indent then
     vim.bo[buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
   end
 end
@@ -91,18 +105,32 @@ function M.map()
 end
 
 function M.setup()
-  vim.api.nvim_create_autocmd({ "BufWinEnter", "FileType" }, {
-    group = vim.api.nvim_create_augroup("user_global_toggles", { clear = true }),
+  local group = vim.api.nvim_create_augroup("user_global_toggles", { clear = true })
+  vim.api.nvim_create_autocmd("BufWinEnter", {
+    group = group,
     callback = function(ev)
-      if ev.event == "FileType" and not M.treesitter_enabled() then
+      if vim.b[ev.buf].toggles_generation == M.generation then
+        return
+      end
+      for _, win in ipairs(vim.fn.win_findbuf(ev.buf)) do
+        M.apply(win)
+      end
+    end,
+  })
+  vim.api.nvim_create_autocmd("FileType", {
+    group = group,
+    callback = function(ev)
+      if not M.treesitter_enabled() then
         vim.schedule(function()
           if vim.api.nvim_buf_is_valid(ev.buf) then
             pcall(vim.treesitter.stop, ev.buf)
           end
         end)
       end
-      for _, win in ipairs(vim.fn.win_findbuf(ev.buf)) do
-        M.apply(win)
+      if managed(ev.buf) then
+        for _, win in ipairs(vim.fn.win_findbuf(ev.buf)) do
+          set_spell(win, ev.buf)
+        end
       end
     end,
   })

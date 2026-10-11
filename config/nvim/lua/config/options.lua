@@ -42,7 +42,6 @@ opt.inccommand = "split"
 opt.virtualedit = "block"
 opt.confirm = true
 opt.exrc = true
-opt.formatoptions = "jcroqlnt"
 opt.completeopt = { "menu", "menuone", "noselect" }
 opt.jumpoptions = "view"
 opt.mouse = "a"

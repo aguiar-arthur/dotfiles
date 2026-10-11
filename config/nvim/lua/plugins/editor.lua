@@ -262,6 +262,7 @@ return {
         })
       end
       vim.api.nvim_create_autocmd("FileType", {
+        group = vim.api.nvim_create_augroup("user_markdown_pairs", { clear = true }),
         pattern = "markdown",
         callback = function(ev)
           md_backtick(ev.buf)

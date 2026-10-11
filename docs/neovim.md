@@ -36,7 +36,11 @@ config/nvim/
 | `<leader>o` | file tree, notifications, dashboard |
 | `<leader>u` | toggles: spelling, wrap, relative numbers, conceal, diagnostics, inlay hints, indent guides, treesitter, format on save |
 
-`gd` / `gr` / `gi` / `K` work as usual; `s` / `S` jump with flash; `gs…` surrounds.
+`gd` / `gr` / `K` work as usual (implementation is `<leader>li`; `gi` keeps Vim's meaning);
+`]r` / `[r` jump between references of the word under the cursor; `s` / `S` jump with flash;
+`gs…` surrounds. `<Tab>` is left alone so `<C-i>` still walks the jump list forward; in
+insert mode it jumps to the next snippet field first, then moves in the completion menu
+(`<C-j>` / `<C-k>` always move in the menu).
 Text objects (mini.ai) work in every language with a treesitter parser: `af` / `if` function,
 `ac` / `ic` class, `au` / `iu` function call, `aa` / `ia` argument, plus brackets, quotes and
 tags (`daf` deletes a function, `ciu` rewrites a call's arguments). The function and class
@@ -44,7 +48,10 @@ queries come from nvim-treesitter-textobjects, which is installed only for them.
 `<A-j>` / `<A-k>` move lines; `C-h/j/k/l` move between windows; `C-\` toggles a terminal.
 
 The `<leader>u` toggles are global: they change every window or buffer and the ones opened
-later. Neovim's own ftplugins for Lua, Markdown, help and query start treesitter after the
+later. A `:setlocal` (wrap, numbers, conceal, spell) stays with its buffer until the next
+global toggle. Values an ftplugin sets are replaced when the buffer first opens;
+`vim.b.keep_local_opts = true` (in an ftplugin or `.nvim.lua`) keeps a buffer's own values.
+Neovim's own ftplugins for Lua, Markdown, help and query start treesitter after the
 `FileType` autocmds, so while highlight is off the toggle's autocmd stops it again.
 
 ## Per-project settings
@@ -79,6 +86,11 @@ Dracula.
 - blink.cmp adds its completion capabilities to every server by itself; it is a dependency
   of nvim-lspconfig so it loads, and registers them, before the first server starts.
 - stylua, shfmt and prettier also come from the Brewfile; Mason does not install copies.
+- Mason installs nothing when Neovim starts: after adding a server or tool to the settings,
+  run `./install.sh` again (or `:MasonToolsInstall`).
+- Treesitter highlights every language with a parser but indents only the ones in
+  `settings.treesitter_indent`; elsewhere the ftplugin's indent stays, since treesitter
+  indentation is still unreliable in Python, YAML and Markdown.
 - conform formats on save (Lua, Python with ruff, shell, web/JSON/YAML, Markdown with rumdl;
   LaTeX only on demand with `<leader>lf`). `:FormatToggle` (`!` for one buffer) or
   `<leader>uf` turns it off.

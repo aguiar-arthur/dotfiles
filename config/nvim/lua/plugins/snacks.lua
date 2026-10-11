@@ -252,20 +252,18 @@ return {
     },
 
     {
-      "]]",
+      "]r",
       function()
         Snacks.words.jump(vim.v.count1)
       end,
       desc = "Next reference",
-      mode = { "n", "t" },
     },
     {
-      "[[",
+      "[r",
       function()
         Snacks.words.jump(-vim.v.count1)
       end,
       desc = "Previous reference",
-      mode = { "n", "t" },
     },
   },
   init = function()
