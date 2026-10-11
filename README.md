@@ -1,40 +1,60 @@
 # Dotfiles
 
-Personal environment for macOS: **Neovim** (a general-purpose editor with a complete LaTeX
-workflow), **Emacs** (Org mode and Clojure, with the same keys as Neovim), **Starship** (prompt)
-and **iTerm2** (Dracula profile).
+Personal macOS setup:
+
+- **Neovim**: the editor, for everything (code, LaTeX, Markdown, git).
+- **Starship** prompt and an **iTerm2** profile, both in Dracula colors.
 
 ## Install
 
 ```sh
 git clone <repo> ~/dotfiles && cd ~/dotfiles
 ./install.sh
-./link.sh
-exec zsh && dotfiles doctor
 ```
 
-`install.sh` installs everything the configuration needs: Homebrew, the programs in the
-Brewfile (`--with latex`, `--with clojure`… adds optional groups), Neovim plugins, servers and
-parsers, Emacs packages. `link.sh` only connects the repository to your home directory: links,
-one marked block in `~/.zshrc`, the git hook. `dotfiles doctor` says whether everything is in
-place. Details are in [docs/install.md](docs/install.md).
+No options: every machine gets everything. `install.sh` installs Homebrew, the programs in the
+`Brewfile` and the Neovim plugins, servers, parsers and spell files, then runs `link.sh`. It
+asks for your password when Homebrew and MacTeX install. Open a new terminal when it is done.
+Running it again only does what is missing; a failed step does not stop the others, and the
+script names it at the end.
 
-## Documentation
+`link.sh` (also run on its own after a `git pull`):
 
-| Page | Covers |
+- links `~/.config/nvim`, `~/.config/starship.toml`,
+  `~/.config/rumdl/rumdl.toml` and the iTerm2 Dynamic Profile to this repository, moving
+  whatever was there to `<name>.bak.<timestamp>` (three backups kept);
+- adds one marked block to `~/.zshrc` that sources `config/zsh/dotfiles.zsh`: Homebrew on
+  `PATH`, a valid `LANG` and the Starship prompt;
+- makes "Dotfiles (Dracula)" iTerm2's default profile and sets Skim's inverse search to
+  Neovim (if iTerm2 was running and the profile did not stick, run `./link.sh` again with
+  iTerm2 closed).
+
+## Update
+
+| What | How |
 |---|---|
-| [docs/install.md](docs/install.md) | installation, `install.sh`, `link.sh`, the Brewfile |
-| [docs/keymaps.md](docs/keymaps.md) | every leader and local-leader key, Neovim and Emacs side by side |
-| [docs/neovim.md](docs/neovim.md) | Neovim: plugins, LSP, formatting, LaTeX, Markdown, git diffs |
-| [docs/emacs.md](docs/emacs.md) | Emacs: startup, modules, Org, Clojure, git diffs |
-| [docs/terminal.md](docs/terminal.md) | Starship, iTerm2, zsh |
-| [docs/customizing.md](docs/customizing.md) | per-machine settings, languages, Brewfile groups |
-| [docs/testing.md](docs/testing.md) | `test/run.sh`: health checks for both editors and the docs |
-| [docs/maintenance.md](docs/maintenance.md) | updating, rollback, reset, diagnostics |
+| Programs | `brew update && brew upgrade` |
+| Neovim plugins | `:Lazy update`, then commit `config/nvim/lazy-lock.json` if all is well |
+| Neovim plugins, roll back | `git restore config/nvim/lazy-lock.json`, then `:Lazy restore` |
+| Mason servers and tools | `:Mason`, then `U` |
 
-The code carries no comments; the reasons behind each setting are in `docs/`. Changes are
-listed in [CHANGELOG.md](CHANGELOG.md).
+## Per-machine settings
 
-## License
+`config/nvim/lua/config/local.lua` (untracked, read when present) returns a table merged
+over `lua/config/settings.lua`, for example `return { wrap = false, spelllang = { "en_us" } }`.
+For a single project, a `.nvim.lua` at its root ([docs/neovim.md](docs/neovim.md)).
 
-MIT, see [LICENSE](LICENSE).
+## Layout
+
+```text
+config/nvim/      Neovim (lazy.nvim, native LSP)        → docs/neovim.md
+config/zsh/       dotfiles.zsh, sourced from ~/.zshrc
+config/starship/  starship.toml
+config/iterm2/    dracula.json (Dynamic Profile)
+config/rumdl/     Markdown lint rules
+Brewfile          every program
+install.sh        installs everything, then link.sh
+link.sh           links, the ~/.zshrc block, app preferences
+```
+
+Changes are listed in [CHANGELOG.md](CHANGELOG.md). MIT, see [LICENSE](LICENSE).

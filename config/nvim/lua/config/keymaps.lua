@@ -7,7 +7,6 @@ map("n", "<leader>q", "<cmd>q<CR>", o("Quit"))
 map("n", "<leader>s", "<cmd>w<CR>", o("Save"))
 map("n", "<Esc>", "<cmd>nohlsearch<CR>", o("Clear search highlight"))
 map("n", "<leader>?", "<cmd>WhichKey<CR>", o("Show key bindings"))
-map("n", "<leader>oh", "<cmd>checkhealth dotfiles<CR>", o("Health report"))
 
 map({ "n", "x" }, "j", "v:count == 0 ? 'gj' : 'j'", o("Down", { expr = true }))
 map({ "n", "x" }, "k", "v:count == 0 ? 'gk' : 'k'", o("Up", { expr = true }))

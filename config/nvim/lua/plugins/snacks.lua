@@ -29,7 +29,6 @@ return {
     },
     quickfile = { enabled = true },
     scope = { enabled = true },
-    statuscolumn = { enabled = false },
     terminal = { enabled = true },
     words = { enabled = true },
   },
@@ -273,29 +272,8 @@ return {
     vim.api.nvim_create_autocmd("User", {
       pattern = "VeryLazy",
       callback = function()
-        Snacks.toggle.option("spell", { name = "Spelling" }):map("<leader>us")
-        Snacks.toggle({
-          name = "Wrap (all windows)",
-          get = function()
-            return vim.go.wrap
-          end,
-          set = function(state)
-            vim.go.wrap = state
-            for _, win in ipairs(vim.api.nvim_list_wins()) do
-              vim.wo[win].wrap = state
-            end
-          end,
-        }):map("<leader>uw")
-        Snacks.toggle.option("relativenumber", { name = "Relative number" }):map("<leader>uL")
-        Snacks.toggle
-          .option(
-            "conceallevel",
-            { off = 0, on = vim.o.conceallevel > 0 and vim.o.conceallevel or 2, name = "Conceal" }
-          )
-          :map("<leader>uc")
+        require("dotfiles.toggles").map()
         Snacks.toggle.diagnostics():map("<leader>ud")
-        Snacks.toggle.inlay_hints():map("<leader>uh")
-        Snacks.toggle.treesitter():map("<leader>uT")
         Snacks.toggle.indent():map("<leader>ug")
         Snacks.toggle({
           name = "Auto-format (global)",

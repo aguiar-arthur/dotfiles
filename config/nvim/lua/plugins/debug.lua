@@ -93,8 +93,8 @@ return {
 
       require("nvim-dap-virtual-text").setup({ commented = true })
       require("mason-nvim-dap").setup({
-        ensure_installed = { "python" },
-        automatic_installation = true,
+        ensure_installed = {},
+        automatic_installation = false,
         handlers = {},
       })
 
@@ -113,6 +113,31 @@ return {
           { elements = { "repl", "console" }, size = 0.25, position = "bottom" },
         },
       })
+
+      dap.adapters["pwa-node"] = {
+        type = "server",
+        host = "localhost",
+        port = "${port}",
+        executable = { command = "js-debug-adapter", args = { "${port}" } },
+      }
+      for _, language in ipairs({ "javascript", "typescript" }) do
+        dap.configurations[language] = {
+          {
+            type = "pwa-node",
+            request = "launch",
+            name = "Launch this file (node)",
+            program = "${file}",
+            cwd = "${workspaceFolder}",
+          },
+          {
+            type = "pwa-node",
+            request = "attach",
+            name = "Attach to a node process",
+            processId = require("dap.utils").pick_process,
+            cwd = "${workspaceFolder}",
+          },
+        }
+      end
 
       dap.listeners.before.attach.dapui_config = dapui.open
       dap.listeners.before.launch.dapui_config = dapui.open

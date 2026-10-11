@@ -1,2 +1,0 @@
-cask "mactex"
-cask "skim"

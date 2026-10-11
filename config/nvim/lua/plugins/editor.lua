@@ -14,7 +14,6 @@ return {
       },
       current_line_blame = true,
       current_line_blame_opts = { virt_text_pos = "eol", delay = 500 },
-      preview_config = { border = "rounded" },
       on_attach = function(buf)
         local gs = require("gitsigns")
         local function m(mode, l, r, desc)
@@ -56,7 +55,7 @@ return {
   },
 
   {
-    "sindrets/diffview.nvim",
+    "dlyongemallo/diffview-plus.nvim",
     cmd = { "DiffviewOpen", "DiffviewClose", "DiffviewFileHistory" },
     init = function()
       vim.api.nvim_create_autocmd("BufFilePost", {
@@ -195,10 +194,41 @@ return {
     end,
   },
 
-  { "echasnovski/mini.ai", event = "VeryLazy", opts = { n_lines = 500 } },
+  {
+    "nvim-mini/mini.ai",
+    event = "VeryLazy",
+    dependencies = { { "nvim-treesitter/nvim-treesitter-textobjects", branch = "main" } },
+    opts = function()
+      local ai = require("mini.ai")
+      return {
+        n_lines = 500,
+        custom_textobjects = {
+          f = ai.gen_spec.treesitter({ a = "@function.outer", i = "@function.inner" }),
+          c = ai.gen_spec.treesitter({ a = "@class.outer", i = "@class.inner" }),
+          u = ai.gen_spec.function_call(),
+        },
+      }
+    end,
+  },
 
   {
-    "echasnovski/mini.surround",
+    "MagicDuck/grug-far.nvim",
+    cmd = "GrugFar",
+    opts = {},
+    keys = {
+      {
+        "<leader>r",
+        function()
+          require("grug-far").open({ prefills = { search = vim.fn.expand("<cword>") } })
+        end,
+        desc = "Replace in project",
+      },
+      { "<leader>r", ":GrugFar<CR>", mode = "x", desc = "Replace selection in project" },
+    },
+  },
+
+  {
+    "nvim-mini/mini.surround",
     event = "VeryLazy",
     opts = {
       mappings = {
@@ -214,7 +244,7 @@ return {
   },
 
   {
-    "echasnovski/mini.pairs",
+    "nvim-mini/mini.pairs",
     event = "VeryLazy",
     opts = {
       modes = { insert = true, command = true, terminal = false },

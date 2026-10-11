@@ -1,7 +1,5 @@
 local o = vim.opt_local
 
-o.spell = true
-o.conceallevel = 2
 o.textwidth = 0
 o.shiftwidth = 2
 o.tabstop = 2

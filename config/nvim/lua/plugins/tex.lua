@@ -1,7 +1,6 @@
 return {
   {
     "lervag/vimtex",
-    cond = require("config.settings").languages.tex,
     lazy = false,
     init = function()
       local g = vim.g

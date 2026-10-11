@@ -4,6 +4,64 @@ Notable changes, newest first. Each entry says what changed for the person using
 and, when it matters, why. Plugin and package version bumps are not listed: `lazy-lock.json`
 and `git log` have them.
 
+## 2026-10-11
+
+### Added
+
+- Clojure in Neovim: Conjure evaluates code in a REPL, nvim-paredit edits s-expressions, and
+  `,cj` starts an nREPL (deps.edn or Leiningen) and connects to it.
+- Debugging JavaScript/TypeScript (js-debug-adapter) and C/C++ (codelldb), next to Python.
+- Per-project settings: a trusted `.nvim.lua` at a project's root runs on startup (`exrc`).
+- Treesitter text objects for functions (`af`/`if`), classes (`ac`/`ic`) and calls
+  (`au`/`iu`) in every language, through mini.ai.
+- `<leader>r` searches and replaces across the project (grug-far).
+
+### Changed
+
+- Emacs is gone: the repository is Neovim, Starship and iTerm2 only. `install.sh` no longer
+  installs Emacs or its packages, `link.sh` no longer links `~/.config/emacs`, and the `e`
+  alias, `emacs-app` and `aspell` are removed. Clojure files are edited in Neovim with
+  clojure-lsp; the Clojure programs stay in the Brewfile.
+- Installation is one command with no options: `./install.sh` installs everything (one
+  Brewfile, including LaTeX as `mactex-no-gui`, Clojure, uv and ruby), downloads the
+  Portuguese spell file and ends with `link.sh`, which also makes "Dotfiles (Dracula)"
+  iTerm2's default profile and sets Skim's inverse search to Neovim.
+- Every `<Space>u…` toggle in Neovim is global: it changes every window or buffer and the ones
+  opened later. Conceal is on everywhere, not only in LaTeX.
+- diffview.nvim, unmaintained since 2024, is replaced by its maintained fork
+  diffview-plus.nvim (same commands and keys).
+- Mason no longer installs stylua, shfmt, prettier and rumdl: the Brewfile has them.
+  `:MasonUninstall stylua shfmt prettier rumdl` removes the old copies. debugpy is installed
+  by `install.sh`, never on the first debug key.
+- Neovim's settings list the servers, tools and parsers directly; the per-language switches
+  are gone.
+- The iTerm2 profile sets JetBrainsMono Nerd Font Mono 13 itself.
+- The mini.nvim plugins come from `nvim-mini/`; floating windows take their border from
+  `winborder`; the lazy.nvim update checker is off.
+
+### Fixed
+
+- Neovim enabled every language server installed in Mason, including old leftovers (a stylua
+  server ran in Lua files); now only the servers listed in the settings start.
+- `install.sh` hung forever when lazy.nvim could not be cloned (no network): Neovim waited
+  for a key in a headless run. It now exits with an error.
+- On a new Mac, Homebrew's programs were not on `PATH` in new terminals; the zsh block now
+  puts them there.
+- `config/zsh/dotfiles.zsh` replaces a `LANG` macOS has no locale for (`en_BR.UTF-8`) with
+  `en_US.UTF-8`, and leaves `C` and `POSIX` alone.
+
+### Removed
+
+- Tests, CI, the pre-commit hook, the health checks (`:checkhealth dotfiles`, the startup
+  warnings) and `bin/dotfiles` (doctor, update, rollback). The README lists the update
+  commands.
+- Every option of `install.sh` and `link.sh`, the `brew/` groups, and `gitleaks`, `fzf`,
+  `bat`, `jq`, `coreutils`, `findutils`, `curl`, `wget` and `git-lfs` from the Brewfile.
+- The docs pages for install, keymaps, customizing, maintenance, terminal and testing; the
+  README and `docs/neovim.md` cover what is left.
+- Dead entries: the `LazyVim` trigger in lazydev, `q`-to-close for file types that no longer
+  exist, and options set to their default values.
+
 ## 2026-10-10
 
 ### Added

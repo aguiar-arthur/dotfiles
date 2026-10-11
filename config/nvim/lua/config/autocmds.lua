@@ -45,7 +45,7 @@ au("VimResized", {
 
 au("FileType", {
   group = augroup("close_with_q"),
-  pattern = { "help", "qf", "man", "checkhealth", "lspinfo", "notify", "startuptime", "vimtex-toc" },
+  pattern = { "help", "qf", "man", "checkhealth", "vimtex-toc" },
   callback = function(ev)
     vim.bo[ev.buf].buflisted = false
     vim.keymap.set(
@@ -57,24 +57,7 @@ au("FileType", {
   end,
 })
 
-au("FileType", {
-  group = augroup("prose"),
-  pattern = { "tex", "markdown", "text", "gitcommit", "plaintex", "bib" },
-  callback = function(ev)
-    if ev.match ~= "bib" then
-      vim.wo.spell = true
-    end
-  end,
-})
-
-au("BufWinEnter", {
-  group = augroup("wrap"),
-  callback = function(ev)
-    if vim.bo[ev.buf].buftype == "" and not vim.wo.diff then
-      vim.wo.wrap = vim.go.wrap
-    end
-  end,
-})
+require("dotfiles.toggles").setup()
 
 au("BufWritePre", {
   group = augroup("auto_mkdir"),

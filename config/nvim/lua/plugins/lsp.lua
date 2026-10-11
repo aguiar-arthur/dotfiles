@@ -27,7 +27,6 @@ return {
       library = {
         { path = "${3rd}/luv/library", words = { "vim%.uv" } },
         { path = "snacks.nvim", words = { "Snacks" } },
-        { path = "lazy.nvim", words = { "LazyVim" } },
       },
     },
   },
@@ -39,7 +38,7 @@ return {
     cmd = { "Mason", "MasonInstall", "MasonUninstall", "MasonUpdate", "MasonLog" },
     build = ":MasonUpdate",
     keys = { { "<leader>lM", "<cmd>Mason<CR>", desc = "Mason" } },
-    opts = { ui = { border = "rounded" } },
+    opts = {},
   },
 
   {
@@ -53,11 +52,7 @@ return {
       "saghen/blink.cmp",
     },
     config = function()
-      vim.lsp.config("*", {
-        capabilities = require("blink.cmp").get_lsp_capabilities(),
-      })
-
-      require("mason-lspconfig").setup({ automatic_enable = true })
+      require("mason-lspconfig").setup({ automatic_enable = mason_servers })
       require("mason-tool-installer").setup({
         ensure_installed = vim.list_extend(vim.deepcopy(mason_tools), mason_servers),
         run_on_start = true,
@@ -75,7 +70,7 @@ return {
         update_in_insert = false,
         severity_sort = true,
         virtual_text = { spacing = 4, prefix = "●", source = "if_many" },
-        float = { border = "rounded", source = true },
+        float = { source = true },
         signs = {
           text = {
             [vim.diagnostic.severity.ERROR] = "✘",

@@ -15,20 +15,19 @@ if not vim.uv.fs_stat(lazypath) then
       { out, "WarningMsg" },
       { "\nPress any key to exit..." },
     }, true, {})
-    vim.fn.getchar()
+    if #vim.api.nvim_list_uis() > 0 then
+      vim.fn.getchar()
+    end
     os.exit(1)
   end
 end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
-  spec = {
-    { import = "plugins" },
-    { import = "plugins.lang" },
-  },
+  spec = { { import = "plugins" } },
   defaults = { lazy = false, version = false },
   install = { colorscheme = { "dracula", "habamax" } },
-  checker = { enabled = true, notify = false },
+  checker = { enabled = false },
   change_detection = { notify = false },
   ui = { border = "rounded" },
   rocks = { enabled = false },
