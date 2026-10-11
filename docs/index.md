@@ -27,7 +27,7 @@ AGENTS.md                     conventions for AI agents (CLAUDE.md points to it)
 README.md                     short entry point
 docs/                         this documentation
 test/                         run.sh and the checks it runs (docs/testing.md)
-.github/workflows/check.yml   CI: test/run.sh on Ubuntu and macOS for pushes and pull requests
+.github/workflows/check.yml   CI: test/run.sh on macOS for pushes and pull requests
 .editorconfig                 shell formatting (Lua rules: config/nvim/stylua.toml)
 .githooks/pre-commit          runs test/run.sh static before every commit
 config/

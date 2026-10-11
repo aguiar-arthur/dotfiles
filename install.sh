@@ -83,15 +83,11 @@ failed() {
 step_brew() {
   title "Homebrew and programs"
   if ! have brew; then
-    for candidate in /opt/homebrew/bin/brew /usr/local/bin/brew /home/linuxbrew/.linuxbrew/bin/brew; do
+    for candidate in /opt/homebrew/bin/brew /usr/local/bin/brew; do
       [ -x "$candidate" ] && eval "$("$candidate" shellenv)" && break
     done
   fi
   if ! have brew; then
-    if [[ "$OSTYPE" != darwin* ]]; then
-      failed "Homebrew is not installed; see https://brew.sh"
-      return
-    fi
     echo "Installing Homebrew (it asks for your password)"
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || {
       failed "Homebrew installation"

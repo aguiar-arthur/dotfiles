@@ -20,8 +20,8 @@ and `git log` have them.
 - `install.sh` now installs everything (Homebrew, Brewfile and groups, Neovim plugins, Mason
   servers and tools, treesitter parsers, Emacs packages); the old linking script is
   `link.sh`, with `--check` and `--uninstall`. Pre-commit hook running the static checks.
-- `test/run.sh` with five levels (static, install, smoke, keys, behavior) and CI on Ubuntu
-  and macOS for pushes and pull requests. Nothing runs on a schedule: updates happen with
+- `test/run.sh` with five levels (static, scripts, smoke, keys, behavior) and CI on macOS for
+  pushes and pull requests. Nothing runs on a schedule: updates happen with
   `dotfiles update` (`--test` also runs the tests on the new versions).
 - `gitleaks` secret scan, `stylua.toml` and `.editorconfig`.
 - Brewfile groups in `brew/` (latex, clojure, python, ruby); `uv` replaces `pyenv` and
@@ -54,4 +54,7 @@ and `git log` have them.
 
 ### Removed
 
+- Linux handling: the Linux CI job, the Linuxbrew path and Linux message in `install.sh`, the
+  macOS check around the iTerm2 link, the zathura / generic viewer fallback for LaTeX, the
+  Linux font folder in the health report and the X11 case for `exec-path-from-shell`.
 - Emacs `SPC h b`: it duplicated `SPC f k`.

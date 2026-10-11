@@ -130,7 +130,7 @@ Nothing runs on a schedule and nothing updates itself: updates happen when you r
 
 | File | Does |
 |---|---|
-| `.github/workflows/check.yml` | `test/run.sh all` on Ubuntu and macOS for every push and pull request, and on demand (*Run workflow* in the Actions tab) |
+| `.github/workflows/check.yml` | `test/run.sh all` on macOS (the only system this setup targets) for every push and pull request, and on demand (*Run workflow* in the Actions tab) |
 
 ## Adding a test
 

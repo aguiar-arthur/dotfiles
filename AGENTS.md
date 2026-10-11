@@ -20,7 +20,7 @@ bin/dotfiles        doctor, update, rollback, backups, install, link, test
 brew/               optional Brewfile groups (latex, clojure, python, ruby)
 .githooks/          pre-commit: test/run.sh static
 CHANGELOG.md        notable changes, newest first
-.github/workflows/  CI: test/run.sh on Ubuntu and macOS
+.github/workflows/  CI: test/run.sh on macOS
 .editorconfig       shell formatting (Lua: config/nvim/stylua.toml)
 install.sh          installs: Homebrew, Brewfiles, Neovim plugins/tools/parsers, Emacs packages
 link.sh             links, the ~/.zshrc block, the git hook; installs nothing
@@ -71,6 +71,8 @@ length 100, tables exempt).
 
 ## Conventions
 
+- **macOS only.** No code paths for Linux or other systems: no `OSTYPE` / `system-type` /
+  `has("mac")` branches, no Linux paths or tools. CI runs on macOS.
 - **English everywhere** in code, docs and commit messages, even when the user writes in
   Portuguese. Reply to the user in the language they used.
 - **Documentation only in `docs/`**, plus the short root `README.md`. No other README files.

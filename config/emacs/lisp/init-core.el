@@ -60,16 +60,15 @@
         ispell-extra-args '("--sug-mode=ultra"))
   (add-hook 'text-mode-hook #'flyspell-mode))
 
-(when (eq system-type 'darwin)
-  (setq ns-use-proxy-icon nil
-        ns-alternate-modifier 'meta
-        ns-right-alternate-modifier 'none
-        ns-command-modifier 'super)
-  (add-to-list 'default-frame-alist '(ns-appearance . dark))
-  (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t)))
+(setq ns-use-proxy-icon nil
+      ns-alternate-modifier 'meta
+      ns-right-alternate-modifier 'none
+      ns-command-modifier 'super)
+(add-to-list 'default-frame-alist '(ns-appearance . dark))
+(add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
 
 (use-package exec-path-from-shell
-  :if (memq window-system '(mac ns x))
+  :if (memq window-system '(mac ns))
   :config
   (setq exec-path-from-shell-variables '("PATH" "MANPATH" "LANG"))
   (exec-path-from-shell-initialize))

@@ -7,12 +7,8 @@ on:
 
 jobs:
   check:
-    name: ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest]
+    name: macOS
+    runs-on: macos-latest
     env:
       DOTFILES_TEST_STRICT: "1"
     steps:
@@ -28,7 +24,7 @@ jobs:
           version: "31.1"
 
       - name: Install tools
-        run: brew install stylua shfmt rumdl gitleaks tree-sitter-cli ripgrep fd zsh
+        run: brew install stylua shfmt rumdl gitleaks tree-sitter-cli ripgrep fd
 
       - name: Restore plugin and package cache
         uses: actions/cache@v4

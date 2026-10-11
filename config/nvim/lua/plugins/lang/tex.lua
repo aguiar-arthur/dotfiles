@@ -6,16 +6,10 @@ return {
     init = function()
       local g = vim.g
 
-      if vim.fn.has("mac") == 1 then
-        g.vimtex_view_method = "skim"
-        g.vimtex_view_skim_sync = 1
-        g.vimtex_view_skim_activate = 1
-        g.vimtex_view_skim_reading_bar = 1
-      elseif vim.fn.executable("zathura") == 1 then
-        g.vimtex_view_method = "zathura"
-      else
-        g.vimtex_view_method = "general"
-      end
+      g.vimtex_view_method = "skim"
+      g.vimtex_view_skim_sync = 1
+      g.vimtex_view_skim_activate = 1
+      g.vimtex_view_skim_reading_bar = 1
 
       g.vimtex_compiler_method = "latexmk"
 

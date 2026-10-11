@@ -128,7 +128,7 @@ end
 local function check_extras(settings)
   health.start("Extras")
   local fonts = {}
-  for _, dir in ipairs({ "~/Library/Fonts", "/Library/Fonts", "~/.local/share/fonts" }) do
+  for _, dir in ipairs({ "~/Library/Fonts", "/Library/Fonts" }) do
     vim.list_extend(fonts, vim.fn.glob(vim.fn.expand(dir) .. "/*Nerd*", false, true))
   end
   if #fonts > 0 then

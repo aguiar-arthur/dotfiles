@@ -40,10 +40,8 @@ links() {
     "config/nvim|$HOME/.config/nvim" \
     "config/emacs|$HOME/.config/emacs" \
     "config/starship/starship.toml|$HOME/.config/starship.toml" \
-    "config/rumdl/rumdl.toml|$HOME/.config/rumdl/rumdl.toml"
-  if [[ "$OSTYPE" == darwin* ]]; then
-    printf '%s\n' "config/iterm2/dracula.json|$HOME/Library/Application Support/iTerm2/DynamicProfiles/dotfiles-dracula.json"
-  fi
+    "config/rumdl/rumdl.toml|$HOME/.config/rumdl/rumdl.toml" \
+    "config/iterm2/dracula.json|$HOME/Library/Application Support/iTerm2/DynamicProfiles/dotfiles-dracula.json"
 }
 
 prune_backups() {

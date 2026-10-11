@@ -34,7 +34,7 @@ Then:
 
 | Step | What it installs |
 |---|---|
-| `brew` | Homebrew itself when it is missing (its official installer, which asks for your password; macOS only), then `brew bundle` on the `Brewfile` and on each group given with `--with` (`--all` for every group in `brew/`) |
+| `brew` | Homebrew itself when it is missing (its official installer, which asks for your password), then `brew bundle` on the `Brewfile` and on each group given with `--with` (`--all` for every group in `brew/`) |
 | `nvim` | the plugins at the versions in `lazy-lock.json` (`:Lazy! restore`), then the Mason servers and tools and the treesitter parsers of the enabled languages (`lua/dotfiles/install.lua`) |
 | `emacs` | every package the configuration uses, by loading it once in batch mode; fails if a module does not load |
 
@@ -70,7 +70,7 @@ programs, plugins or packages, and it is idempotent: running it again changes no
 | `~/.config/emacs` | → `config/emacs` |
 | `~/.config/starship.toml` | → `config/starship/starship.toml` |
 | `~/.config/rumdl/rumdl.toml` | → `config/rumdl/rumdl.toml` |
-| iTerm2 Dynamic Profile (macOS only) | → `config/iterm2/dracula.json` |
+| iTerm2 Dynamic Profile | → `config/iterm2/dracula.json` |
 | `~/.zshrc` | one block that sources `config/zsh/dotfiles.zsh` ([terminal.md](terminal.md#zsh)) |
 | `git config core.hooksPath .githooks` | the pre-commit hook runs `test/run.sh static` |
 | a warning when `~/.emacs`, `~/.emacs.el` or `~/.emacs.d` exist | move or delete them |

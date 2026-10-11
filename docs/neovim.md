@@ -242,7 +242,7 @@ navigation from it opens other files in new tabs (see LSP).
 ## LaTeX
 
 **vimtex** compiles with latexmk in continuous mode and shows the PDF in **Skim** with
-SyncTeX (zathura on Linux, the system viewer otherwise); **texlab** gives completion
+SyncTeX; **texlab** gives completion
 (`\cite`, `\ref`, commands), chktex diagnostics, rename and go-to-definition; **LuaSnip**
 expands the snippets; **latexindent** formats on demand. Requires MacTeX and Skim.
 
