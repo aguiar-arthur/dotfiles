@@ -124,23 +124,14 @@ return {
   {
     "Olical/conjure",
     ft = "clojure",
+    keys = {
+      { "<localleader>cj", jack_in, ft = "clojure", desc = "Start the REPL and connect (jack-in)" },
+    },
     init = function()
       vim.g["conjure#filetypes"] = { "clojure" }
       vim.g["conjure#mapping#doc_word"] = false
       vim.g["conjure#mapping#def_word"] = false
       vim.g["conjure#client#clojure#nrepl#connection#auto_repl#enabled"] = false
-      vim.api.nvim_create_autocmd("FileType", {
-        group = vim.api.nvim_create_augroup("user_clojure_repl", { clear = true }),
-        pattern = "clojure",
-        callback = function(ev)
-          vim.keymap.set(
-            "n",
-            "<localleader>cj",
-            jack_in,
-            { buffer = ev.buf, desc = "Start the REPL and connect (jack-in)" }
-          )
-        end,
-      })
     end,
   },
   { "julienvincent/nvim-paredit", ft = "clojure", opts = {} },

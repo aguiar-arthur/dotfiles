@@ -2,8 +2,14 @@
 
 Personal macOS setup:
 
-- **Neovim**: the editor, for everything (code, LaTeX, Markdown, git).
+- **Neovim**: the editor, for everything (code, LaTeX, Markdown and notes, git).
 - **Starship** prompt and an **iTerm2** profile, both in Dracula colors.
+
+This page is the hands-on guide: [install](#install), then how to use each part of
+[Neovim](#using-neovim) with its keys (finding, editing, code, run / test / debug, git,
+toggles, Clojure), [LaTeX](#latex), [Markdown and notes](#markdown-and-notes), the
+[shell and terminal](#shell-prompt-and-terminal), [update](#update), [check](#check) and
+[test](#test). How the editor works inside, and why, is in [docs/neovim.md](docs/neovim.md).
 
 ## Install
 
@@ -50,26 +56,401 @@ both scripts the `nvim` argument:
 cd ~/dotfiles && ./install.sh nvim
 ```
 
-It installs only the programs in `Brewfile.nvim` (Neovim, git, ripgrep, fd, tree-sitter,
-node, the formatters, pandoc, lazygit) and links only `~/.config/nvim` and
-`~/.config/rumdl/rumdl.toml`, then sets up the plugins, servers and parsers as usual.
+It installs only the programs in `Brewfile.nvim` (Neovim, git, ripgrep, ast-grep, fd,
+tree-sitter, node, python, the formatters, pandoc, lazygit) and links only
+`~/.config/nvim` and `~/.config/rumdl/rumdl.toml`, then sets up the plugins, servers and
+parsers as usual.
 `~/.zshrc`, Starship, iTerm2, fonts, LaTeX, Clojure and app preferences are left alone, so
 two things stay up to that machine: Homebrew on `PATH` (if Homebrew was just installed, it
 prints the line to add) and a Nerd Font in the terminal for the icons. `./link.sh nvim` does
 the linking part on its own. Running the full `./install.sh` later adds the rest.
 
-Optional: to debug C/C++ programs, turn on developer mode once with
-`sudo DevToolsSecurity -enable`; without it the debugger waits on a password dialog.
+### What `link.sh` does
 
-`link.sh` (also run on its own after a `git pull`):
+Run on its own after a `git pull`, it:
 
-- links `~/.config/nvim`, `~/.config/starship.toml`,
-  `~/.config/rumdl/rumdl.toml` and the iTerm2 Dynamic Profile to this repository, moving
-  whatever was there to `<name>.bak.<timestamp>` (three backups kept);
+- links `~/.config/nvim`, `~/.config/starship.toml`, `~/.config/rumdl/rumdl.toml`,
+  `~/.latexmkrc` and the iTerm2 Dynamic Profile to this repository, moving whatever was there
+  to `<name>.bak.<timestamp>` (three backups kept);
 - adds one marked block to `~/.zshrc` that sources `config/zsh/dotfiles.zsh`: Homebrew on
   `PATH`, a valid `LANG` and the Starship prompt;
-- makes "Dotfiles (Dracula)" iTerm2's default profile and sets Skim's inverse search to
-  Neovim.
+- makes "Dotfiles (Dracula)" iTerm2's default profile, sets Skim's inverse search to Neovim
+  and makes Skim reload a PDF when it changes.
+
+## Using Neovim
+
+`Space` is the leader key and `,` the local leader. `Space …` keys work in every file;
+`, …` keys depend on the file type (run, test, debug, LaTeX, Clojure). Press either one and
+wait: which-key lists every key that follows, so nothing below has to be memorised.
+`Space ?` lists the keys of the current buffer.
+
+Each part below is one module of the configuration: what it is for, how to use it and its
+keys. How it works inside, and why, is in [docs/neovim.md](docs/neovim.md).
+
+### First day
+
+| Key | Does |
+|---|---|
+| `Space f f` / `Space f g` | find a file / search text in the project |
+| `Space f r` / `Space b b` | recent files / open buffers |
+| `Space o p` | file tree |
+| `Space s` / `Space q` | save / quit |
+| `gd` / `gr` / `K` | go to definition / references / documentation |
+| `Space l a` / `Space l n` | code action / rename |
+| `Space g g` | lazygit |
+| `,r` | run the file (Python, Lua, shell) |
+
+### Completion and snippets (blink.cmp, LuaSnip)
+
+The menu opens by itself in insert mode, with suggestions from the language server, the
+buffer, file paths and snippets. On the `:` line the menu also opens: `Tab` completes (a single
+match at once) and `Enter` runs the line as typed.
+
+| Key (insert mode) | Does |
+|---|---|
+| `Tab` / `S-Tab` | next / previous field of a snippet; otherwise next / previous item |
+| `C-j` / `C-k` | next / previous item, always |
+| `Enter` | accept the item |
+| `C-e` | close the menu |
+| `C-Space` | open the menu, or show / hide the item's documentation |
+| `C-b` / `C-f` | scroll the documentation |
+| `C-s` | show / hide the function signature |
+
+### Finding things (Snacks picker, file tree, grug-far)
+
+Every list (files, text, buffers, symbols, git) opens in the same picker: type to filter,
+`C-j` / `C-k` move, `Enter` opens, `C-v` / `C-s` open in a vertical / horizontal split, `Esc`
+closes. `Space f R` reopens the last picker where you left it.
+
+| Key | Does |
+|---|---|
+| `Space f f` | files of the project (smart: recent and nearby first) |
+| `Space f F` | all files, including ignored ones |
+| `Space f g` / `Space f w` | search text / the word or selection under the cursor |
+| `Space f /` | search in this buffer |
+| `Space f r` / `Space f p` | recent files / projects |
+| `Space f s` / `Space f S` | symbols of this file / of the workspace |
+| `Space f d` | diagnostics |
+| `Space f m` | marks (`mA` sets mark A, `'A` jumps back to that file) |
+| `Space f u` | undo history |
+| `Space f h` / `Space f k` | help pages / keymaps |
+| `Space f c` / `Space f C` | the Neovim config files / colorschemes |
+| `Space o p` / `Space o f` | file tree / the current file in the tree |
+| `Space r` | search and replace in the whole project (grug-far), prefilled with the word or selection |
+
+In the file tree `a` creates, `d` deletes, `r` renames, `c` copies, `m` moves and `?` lists
+the rest.
+
+### Moving and editing (flash, mini.ai, mini.surround, mini.pairs)
+
+| Key | Does |
+|---|---|
+| `s` + characters | jump anywhere on screen: type what you see, then the label (flash) |
+| `S` | select a treesitter node (function, block, argument) with labels |
+| `r` after an operator | act at a distance: `yr`, a label, then `iw` copies a far-away word and the cursor stays |
+| `af` / `if`, `ac` / `ic` | around / inside a function, a class (`daf` deletes a function) |
+| `au` / `iu`, `aa` / `ia` | around / inside a function call, an argument (`ciu` rewrites a call's arguments) |
+| `gsa` / `gsd` / `gsr` | add / delete / replace a surrounding (`gsaiw"` quotes a word, `gsd(` removes parentheses) |
+| `gcc` / `gc` / `Space c c` | comment a line / a motion or selection |
+| `Alt-j` / `Alt-k` | move the line or selection down / up |
+| `<` / `>` in visual mode | indent, keeping the selection |
+| `]r` / `[r` | next / previous reference of the word under the cursor |
+| `]t` / `[t` | next / previous `TODO`, `FIXME`, `NOTE` comment |
+| `Esc` | clear the search highlight |
+
+Brackets and quotes close themselves as you type (mini.pairs).
+
+### Windows, buffers, terminals and sessions
+
+| Key | Does |
+|---|---|
+| `C-h` / `C-j` / `C-k` / `C-l` | go to the window on the left / below / above / right |
+| `Space w v` / `Space w s` | split vertically / horizontally |
+| `Space w c` / `Space w o` | close this window / the others |
+| `Space w =` | make the windows the same size |
+| `Space w H` / `L` / `J` / `K` | narrower / wider / shorter / taller |
+| `Space b n` / `Space b p` | next / previous buffer |
+| `Space b d` / `Space b k` | close the buffer (keeps the window) / force it |
+| `C-\` | show or hide a terminal at the bottom |
+| `Space t f` / `t h` / `t v` | a floating / bottom / right terminal, each its own shell |
+| `Space S r` / `Space S l` | restore the session of this folder / the last session |
+| `Space S s` / `Space S d` | pick a session / do not save this one |
+
+Inside a terminal every key goes to the program (shell, lazygit, a REPL). A quick double `Esc`
+or `C-\ C-n` gets back to Neovim, where `q` hides the terminal. Sessions are saved on quit, one
+per folder.
+
+### Code: language servers, diagnostics and formatting
+
+Servers start by themselves for Lua, Python, HTML, CSS, JSON, YAML, TOML, Bash, Markdown,
+LaTeX and Clojure.
+
+| Key | Does |
+|---|---|
+| `gd` / `gr` | go to the definition / list references |
+| `K` | documentation of the word under the cursor |
+| `Space l i` / `Space l t` / `Space l D` | implementation / type definition / declaration |
+| `Space l n` | rename everywhere |
+| `Space l a` | code action (fix, import, refactor), also on a selection |
+| `Space l s` | signature help |
+| `Space l f` | format the buffer or the selection |
+| `Space l R` / `Space l M` | restart the servers / open Mason |
+| `]d` / `[d`, `]e` / `[e` | next / previous diagnostic, error |
+| `Space c d` | the diagnostics of this line in a float |
+| `Space d x` / `Space d d` | all diagnostics / those of this file (Trouble) |
+| `Space d s` | symbols of the file in a side list |
+| `Space d t` | every `TODO` / `FIXME` of the project |
+| `Space d q` / `Space d l` | quickfix / location list |
+
+Saving formats the file only in projects that declare that formatter's style (a
+`stylua.toml`, a prettier config, `[tool.ruff]`, …), so other people's code is never
+restyled. `Space l f` formats anywhere; `Space u f` turns format-on-save off.
+
+### Run, test and debug (`,` keys)
+
+These keys exist only in the languages listed; in other files they are not mapped.
+
+| Key | Python | Lua | Shell |
+|---|---|---|---|
+| `,r` run the file in a bottom terminal | yes | `nvim -l` | `bash` |
+| `,t…` tests (Neotest) | pytest | | |
+| `,d…` debugger (nvim-dap) | debugpy | | |
+| `,o` organize imports | ruff | | |
+| `,s` source the file into Neovim | | yes | |
+
+`,r` saves the file and runs it; the next run replaces the same terminal. Python runs with
+the project's `.venv`, else `$VIRTUAL_ENV`, else `python3`.
+
+| Tests | Does |
+|---|---|
+| `,t t` / `,t f` / `,t p` | the nearest test / this file / the whole project |
+| `,t l` / `,t S` | run the last tests again / stop them |
+| `,t s` | summary tree of every test (`r` runs the one under the cursor, `i` jumps to it, `o` its output) |
+| `,t o` / `,t O` | output of the test under the cursor / the output panel |
+| `,t d` | debug the nearest test (Python) |
+
+Results appear as signs next to each test and as diagnostics on the failing line.
+
+| Debugger | Does |
+|---|---|
+| `,d b` / `,d B` | breakpoint / breakpoint with a condition |
+| `,d c` | start, or continue to the next breakpoint |
+| `,d i` / `,d o` / `,d O` | step into / over / out |
+| `,d e` | evaluate the expression under the cursor or the selection |
+| `,d r` / `,d l` | debug REPL / run the last session again |
+| `,d t` / `,d u` | stop / close the panels |
+
+A session opens panels with variables, the call stack, breakpoints and the program's output;
+they stay open after the program ends so its output can be read.
+
+### Git (gitsigns, Snacks, lazygit)
+
+Changed lines are marked in the left column and the line's last commit shows at its end.
+
+| Key | Does |
+|---|---|
+| `Space g g` | lazygit: stage, commit, push, branches, merge conflicts |
+| `]c` / `[c` | next / previous changed block (hunk) |
+| `Space g p` | preview the hunk |
+| `Space g s` / `Space g r` | stage / reset the hunk or the selected lines |
+| `Space g S` / `Space g R` | stage / reset the whole file |
+| `Space g b` / `Space g B` | blame the line / turn the end-of-line blame off |
+| `Space g d` | diff this file against the index |
+| `Space g c` / `Space g t` | changed hunks / changed files of the working tree (`Tab` stages) |
+| `Space g V` | everything this branch changes against origin's default branch |
+| `Space g h` / `Space g L` / `Space g l` | history of the file / of the line / of the repository |
+| `Space g O` | open the file in the browser (GitHub, GitLab, …) |
+| `ih` | the hunk as a text object (`dih` deletes it) |
+
+### Toggles (`Space u`)
+
+Each toggle changes every window and buffer, including the ones opened later, and shows its new
+state.
+
+| Key | Toggles |
+|---|---|
+| `Space u s` | spelling (prose files) |
+| `Space u w` | line wrap |
+| `Space u L` | relative line numbers |
+| `Space u c` | conceal (hidden Markdown and LaTeX markup) |
+| `Space u d` | diagnostics |
+| `Space u h` | inlay hints (types and parameter names inside the code) |
+| `Space u g` | indent guides |
+| `Space u x` | code context (the current function pinned on top) |
+| `Space u m` | Markdown rendering |
+| `Space u G` | grammar checking (LaTeX) |
+| `Space u T` | treesitter highlight |
+| `Space u f` | format on save |
+| `Space u n` | dismiss the notifications (`Space o n` shows their history) |
+
+### Clojure (Conjure, nvim-paredit, clojure-lsp)
+
+Open a file of a `deps.edn` or `project.clj` project and press `,cj`: it starts an nREPL in a
+terminal below and connects as soon as it is up (or only connects when a REPL already runs).
+Results show next to the code and in the log.
+
+| Key | Does |
+|---|---|
+| `,cj` | start the REPL and connect (jack-in) |
+| `,ee` / `,er` / `,ew` | evaluate the form under the cursor / the outermost form / the word |
+| `,eb` / `,ef` | evaluate the buffer / the file |
+| `,E` + motion or selection | evaluate that text |
+| `,tn` / `,tc` / `,ta` | run the namespace's tests / the test under the cursor / all tests |
+| `,rr` / `,ra` | reload the changed namespaces / all of them |
+| `,ls` / `,lv` / `,lq` | log in a split / a vertical split / close it |
+| `>)` / `<)` | slurp / barf forward (pull the next element in, push the last one out) |
+| `<(` / `>(` | slurp / barf backward |
+| `>e` / `<e`, `>f` / `<f` | drag an element, a form, right / left |
+| `,o` / `,O` | raise the form / the element (replace the parent with it) |
+| `af` / `if`, `ae` / `ie` | around / inside a form, an element |
+
+`gd`, `K` and rename come from clojure-lsp, as in any language.
+
+### Look
+
+Dracula everywhere. The status line shows the mode, git branch and changes, diagnostics, the
+file, the language servers and a running LaTeX build. The left column shows marks,
+diagnostics, git changes and folds. `Space o d` opens the start screen, `Space o n` the
+notification history.
+
+## LaTeX
+
+### Write and build
+
+1. Open the main file: `nvim main.tex`.
+2. `,ll` starts a continuous build (latexmk): every save rebuilds the PDF. `,ll` again stops it.
+3. `,lv` opens the PDF in Skim at the line under the cursor.
+4. In Skim, **Cmd+Shift+click** jumps back to that line in Neovim.
+5. `,le` lists errors and warnings; `Enter` on one goes to the line.
+
+The PDF, the bibliography and the auxiliary files go to `build/` next to the main file, so
+the project folder keeps only sources. A `.bib` next to it is picked up (BibTeX). For another
+engine, put `% !TEX program = lualatex` on the first line. A `latexmkrc` inside a project wins
+over the linked `~/.latexmkrc`.
+
+| Key | Does |
+|---|---|
+| `,ll` | start or stop the continuous build |
+| `,lv` | show the PDF at the cursor (forward search) |
+| `,le` | errors and warnings |
+| `,lt` | table of contents (jump to a section) |
+| `,lw` | count words |
+| `,lc` / `,lC` | clean auxiliary files / also the PDF |
+| `,lk` | stop the build |
+| `,lx` | reload vimtex after editing the preamble |
+| `za` / `zR` / `zM` | fold or unfold a section / open all / close all |
+
+### Snippets
+
+Snippets marked **auto** expand as you type. The others appear in the completion menu when
+you type their name: pick one with `Tab` and accept with `Enter`. Inside a snippet, `Tab` and
+`S-Tab` jump between its fields. Nothing expands right after a `\`, so `\sum` or `\begin`
+typed by hand stays as typed.
+
+#### Documents
+
+| Type | Inserts |
+|---|---|
+| `doc` | an article skeleton (fonts, babel, amsmath) |
+| `bdoc` | a beamer presentation skeleton |
+| `abnt` | a complete abnTeX2 thesis: cover, abstract in two languages, contents, bibliography |
+| `capa`, `resumo`, `abstract` | the abnTeX2 pieces, one by one |
+
+#### Text (outside math)
+
+| Type | Inserts |
+|---|---|
+| `mk` (auto) | inline math `$…$` |
+| `dm` (auto) | display math `\[ … \]` |
+| `beg` (auto, at the start of a line) | `\begin{…} … \end{…}`, the name typed once |
+| `sec`, `ssec`, `sssec` | section, subsection, subsubsection, each with a `\label` |
+| `fig` / `tab` | a figure / a table, centered, with caption and label |
+| `ite`, `enu`, `desc` | itemize, enumerate, description |
+| `eqn`, `ali`, `gat` | `equation*`, `align*`, `gather*` (`eqnn`, `alin`: numbered) |
+| `thm`, `lem`, `prf`, `def` | theorem, lemma, proof, definition |
+| `cit`, `citp`, `citt` | `\cite`, `\citep`, `\citet` |
+| `citeonline`, `apud`, `citacao` | the abnTeX2 citations |
+| `ref`, `eqr`, `lab` | `\ref`, `\eqref`, `\label` |
+| `tbf`, `tit`, `emp`, `foot` | bold, italic, emphasis, footnote |
+| `frm`, `col`, `blk` | a beamer frame, two columns, a block |
+
+#### Math (all auto, only inside math)
+
+| Type | Gives |
+|---|---|
+| `//` | `\frac{}{}`; `a//` and `(a+b)//` use what is before as the numerator |
+| `x12` | `x_{12}` |
+| `__` / `td` | subscript `_{}` / superscript `^{}` |
+| `sr` / `cb` | `^2` / `^3` |
+| `;a`, `;b`, `;l`, `;S`, … | Greek letters: `\alpha`, `\beta`, `\lambda`, `\Sigma` |
+| `<=`, `>=`, `!=`, `->`, `=>`, `~~` | `\leq`, `\geq`, `\neq`, `\to`, `\implies`, `\approx` |
+| `<=>`, `<->` | `\iff`, `\leftrightarrow` |
+| `RR`, `NN`, `ZZ`, `QQ`, `CC` | `\mathbb{R}`, `\mathbb{N}`, … |
+| `inn`, `sub`, `cap`, `cup`, `EE`, `AA` | `\in`, `\subset`, `\cap`, `\cup`, `\exists`, `\forall` |
+| `**`, `xx`, `...`, `ooo` | `\cdot`, `\times`, `\dots`, `\infty` |
+| `sum`, `prod`, `lim`, `int`, `dint` | with their limits filled in to edit |
+| `sq`, `bar`, `hat`, `vec`, `txt` | `\sqrt{}`, `\overline{}`, `\hat{}`, `\vec{}`, `\text{}` |
+| `part` | `\frac{\partial }{\partial }` |
+| `mbb`, `mcal`, `mbf` | `\mathbb{}`, `\mathcal{}`, `\mathbf{}` |
+
+### Spelling and grammar
+
+| Key | Does |
+|---|---|
+| `]s` / `[s` | next / previous misspelled word |
+| `z=` | suggestions for the word under the cursor |
+| `zg` | accept the word everywhere (saved in `config/nvim/spell/en.utf-8.add`) |
+| `Space u s` | spelling on or off |
+| `Space u G` | grammar (ltex-ls-plus) on or off |
+
+Grammar is checked in Portuguese (`pt-BR`). A comment `% LTeX: language=en-US` switches it
+from that line on.
+
+## Markdown and notes
+
+### Any Markdown file
+
+| Key | Does |
+|---|---|
+| `,p` | build an HTML preview with pandoc and open it in the browser; every save rebuilds it |
+| `Space u m` | rendered view (headings, tables, checkboxes) on or off |
+| `gd` | follow a link to another file |
+
+rumdl underlines problems as you type (rules in `config/rumdl/rumdl.toml`). It reformats on
+save only in projects with a `.rumdl.toml` or `.markdownlint.*`, so nobody else's files are
+restyled.
+
+### Notes
+
+Notes are plain `.md` files in `~/notes` (change it with `notes.dir` in
+[`local.lua`](#per-machine-settings)), handled by obsidian.nvim. No Obsidian app or account is
+needed. The folder is created the first time a note is opened.
+
+| Key | Does |
+|---|---|
+| `Space n n` | new note: asks for a title and creates `the-title.md` starting with `# The title` |
+| `Space n d` | today's note in `daily/` (`2026-10-13.md`) |
+| `Space n f` / `Space n g` | find a note by name / search the text of all notes |
+| `Space n b` | notes that link to this one (with the cursor off the title; on a `#` heading it lists links to that heading) |
+| `[[` | link to another note: completes their names as you type |
+| `Enter` or `gd` on a link | open the linked note |
+| `]o` / `[o` | next / previous link |
+| `Enter` on a checkbox | tick or untick it |
+
+## Shell, prompt and terminal
+
+- **zsh**: `~/.zshrc` gets one marked block (`# >>> dotfiles >>>`) that sources
+  `config/zsh/dotfiles.zsh`: Homebrew on `PATH`, a valid `LANG` and the Starship prompt.
+  Everything else in `~/.zshrc` stays yours.
+- **Starship** (`config/starship/starship.toml`): folder, git branch and status, the
+  language versions of the project, how long the last command took and the time, in Dracula
+  colors.
+- **iTerm2** (`config/iterm2/dracula.json`): the "Dotfiles (Dracula)" profile with JetBrains
+  Mono Nerd Font, which the icons in Neovim and the prompt need.
+- **latexmk** (`config/latex/latexmkrc`, linked to `~/.latexmkrc`): PDF output, BibTeX when a
+  `.bib` exists, and what `,lc` cleans.
+- **rumdl** (`config/rumdl/rumdl.toml`): the Markdown lint rules, used by Neovim and by
+  `rumdl check` in a shell.
 
 ## Update
 
@@ -100,10 +481,39 @@ Run `:checkhealth` in a real Neovim window: in `nvim --headless` the Snacks chec
 errors that are not real. When a check fails, `./install.sh` is the fix for anything
 missing (a program, a server, a parser): it installs only what is not there.
 
+## Test
+
+`tests/nvim.sh` checks the Neovim setup after a change. It is run by hand, never touches the
+real home and fails if `lazy-lock.json` changes. Checks whose program is missing are skipped.
+
+| Mode | Command | Takes | Checks |
+|---|---|---|---|
+| quick (default) | `~/dotfiles/tests/nvim.sh` | seconds | startup, every Lua module, the lockfile, Skim preferences, `zg` writing to the versioned word list, stylua, shell syntax, shfmt, rumdl, no comments |
+| full | `~/dotfiles/tests/nvim.sh full` | minutes | quick, plus a real Neovim driven in tmux: language servers, toggles, the look, Markdown and notes, the `,` keys, the debugger, tests, a LaTeX build |
+| fresh | `~/dotfiles/tests/nvim.sh fresh` | longer | full, in a throwaway directory deleted at the end, as on a new machine |
+
+`full` installs Neovim with `./install.sh nvim` into an isolated home under
+`~/.cache/dotfiles-nvim-test`; later runs reuse it. It drives Neovim through `tmux`, which the
+main `Brewfile` installs (not `./install.sh nvim`); without it those checks are skipped.
+
+When to run which:
+
+1. After any change: `quick`.
+2. After changing plugins, keys, language servers, Markdown or LaTeX: `full`.
+3. Before trusting the setup on a new machine, or after changing `install.sh`: `fresh`.
+
+Each check prints one line: `pass`, `skip` with the reason, or `FAIL` with what was wanted and
+what came back. The last line is the count, for example `65 passed, 0 failed, 0 skipped`.
+
 ## Per-machine settings
 
 `config/nvim/lua/config/local.lua` (untracked, read when present) returns a table merged
-over `lua/config/settings.lua`, for example `return { wrap = false, spelllang = { "en_us" } }`.
+over `lua/config/settings.lua`, for example:
+
+```lua
+return { wrap = false, spelllang = { "en_us" }, notes = { dir = "~/Documents/notes" } }
+```
+
 For a single project, a `.nvim.lua` at its root ([docs/neovim.md](docs/neovim.md)).
 
 ## Layout
@@ -114,10 +524,12 @@ config/zsh/       dotfiles.zsh, sourced from ~/.zshrc
 config/starship/  starship.toml
 config/iterm2/    dracula.json (Dynamic Profile)
 config/rumdl/     Markdown lint rules
+config/latex/     latexmkrc (linked to ~/.latexmkrc)
 Brewfile          every program (includes Brewfile.nvim)
 Brewfile.nvim     what Neovim needs, for ./install.sh nvim
 install.sh        installs everything (runs link.sh before Neovim); `nvim`: Neovim only
-link.sh           links, the ~/.zshrc block, app preferences
+link.sh           links, the ~/.zshrc block, app preferences; `nvim`: Neovim and rumdl links only
+tests/            the Neovim checks: nvim.sh runs them (quick, full, fresh), one file per area
 ```
 
 Changes are listed in [CHANGELOG.md](CHANGELOG.md). MIT, see [LICENSE](LICENSE).

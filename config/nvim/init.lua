@@ -1,6 +1,6 @@
-if vim.fn.has("nvim-0.11") == 0 then
+if vim.fn.has("nvim-0.12") == 0 then
   vim.notify(
-    "This configuration requires Neovim >= 0.11 (brew upgrade neovim)",
+    "This configuration requires Neovim >= 0.12 (brew upgrade neovim)",
     vim.log.levels.ERROR
   )
   return

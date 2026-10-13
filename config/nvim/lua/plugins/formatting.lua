@@ -49,13 +49,10 @@ local function either(...)
   end
 end
 
-local clang_format = any_file({ ".clang-format", "_clang-format" })
 local shfmt_editorconfig = file_matching(".editorconfig", "^%s*%[[^%]]*%f[%w]b?a?sh%f[%W]")
 local prettier_config = any_file(prettier)
 
 local style_markers = {
-  c = clang_format,
-  cpp = clang_format,
   lua = any_file({ "stylua.toml", ".stylua.toml" }),
   sh = shfmt_editorconfig,
   bash = shfmt_editorconfig,
@@ -78,10 +75,6 @@ local style_markers = {
   ),
 }
 for _, ft in ipairs({
-  "javascript",
-  "typescript",
-  "javascriptreact",
-  "typescriptreact",
   "css",
   "html",
   "json",
@@ -111,10 +104,6 @@ return {
       python = { "ruff_organize_imports", "ruff_format" },
       sh = { "shfmt" },
       bash = { "shfmt" },
-      javascript = { "prettier" },
-      typescript = { "prettier" },
-      javascriptreact = { "prettier" },
-      typescriptreact = { "prettier" },
       css = { "prettier" },
       html = { "prettier" },
       json = { "prettier" },

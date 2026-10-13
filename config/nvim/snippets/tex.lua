@@ -192,6 +192,95 @@ snip(
   )
 )
 
+snip(
+  "abnt",
+  fmta(
+    [[
+\documentclass[12pt, openright, oneside, a4paper, chapter=TITLE, section=TITLE, brazil]{abntex2}
+
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage[alf]{abntex2cite}
+
+\titulo{<>}
+\autor{<>}
+\local{<>}
+\data{<>}
+\orientador{<>}
+\instituicao{<>}
+\tipotrabalho{Trabalho de Conclusão de Curso}
+\preambulo{<>}
+
+\begin{document}
+
+\imprimircapa
+\imprimirfolhaderosto
+
+\begin{resumo}
+	<>
+	\textbf{Palavras-chave}: <>.
+\end{resumo}
+
+\begin{resumo}[Abstract]
+	\begin{otherlanguage*}{english}
+		<>
+		\noindent\textbf{Keywords}: <>.
+	\end{otherlanguage*}
+\end{resumo}
+
+\pdfbookmark[0]{\contentsname}{toc}
+\tableofcontents*
+\cleardoublepage
+
+\textual
+
+\chapter{Introdução}
+\label{cap:introducao}
+
+<>
+
+\bibliographystyle{abntex2-alf}
+\bibliography{referencias}
+
+\end{document}
+]],
+    {
+      i(1, "Título"),
+      i(2, "Autor"),
+      i(3, "Brasil"),
+      i(4, os.date("%Y")),
+      i(5, "Orientador"),
+      i(6, "Instituição"),
+      i(7, "Trabalho apresentado como requisito parcial para a obtenção do grau de ..."),
+      i(8),
+      i(9),
+      i(10),
+      i(11),
+      i(0),
+    }
+  )
+)
+snip("capa", fmta("\\imprimircapa\n\\imprimirfolhaderosto\n<>", { i(0) }))
+snip(
+  "resumo",
+  fmta(
+    "\\begin{resumo}\n\t<>\n\t\\textbf{Palavras-chave}: <>.\n\\end{resumo}<>",
+    { i(1), i(2), i(0) }
+  )
+)
+snip(
+  "abstract",
+  fmta(
+    "\\begin{resumo}[Abstract]\n\t\\begin{otherlanguage*}{english}\n\t\t<>\n\t\t\\noindent\\textbf{Keywords}: <>.\n\t\\end{otherlanguage*}\n\\end{resumo}<>",
+    { i(1), i(2), i(0) }
+  )
+)
+env("citacao", "citacao")
+snip("citeonline", fmta("\\citeonline{<>}<>", { i(1), i(0) }))
+snip("apud", fmta("\\apud{<>}{<>}<>", { i(1), i(2), i(0) }))
+
 snip("frm", fmta("\\begin{frame}{<>}\n\t<>\n\\end{frame}<>", { i(1), i(2), i(0) }))
 snip(
   "fimg",

@@ -55,68 +55,6 @@ return {
   },
 
   {
-    "dlyongemallo/diffview-plus.nvim",
-    cmd = { "DiffviewOpen", "DiffviewClose", "DiffviewFileHistory" },
-    init = function()
-      vim.api.nvim_create_autocmd("BufFilePost", {
-        group = vim.api.nvim_create_augroup("user_diffview_no_lsp", { clear = true }),
-        pattern = "diffview://*",
-        callback = function(ev)
-          if vim.bo[ev.buf].buftype == "" then
-            vim.bo[ev.buf].buftype = "acwrite"
-          end
-        end,
-      })
-    end,
-    keys = {
-      {
-        "<leader>gv",
-        function()
-          if next(require("diffview.lib").views) then
-            vim.cmd("DiffviewClose")
-          else
-            vim.cmd("DiffviewOpen")
-          end
-        end,
-        desc = "Diff view (toggle)",
-      },
-      {
-        "<leader>gV",
-        function()
-          local function git(...)
-            local result = vim.system({ "git", ... }, { text = true }):wait()
-            return result.code == 0 and vim.trim(result.stdout) or nil
-          end
-          local base = git("symbolic-ref", "--quiet", "--short", "refs/remotes/origin/HEAD")
-          for _, name in ipairs({ "origin/main", "origin/master" }) do
-            base = base or (git("rev-parse", "--verify", "--quiet", name) and name)
-          end
-          if not base then
-            vim.notify("No origin/HEAD, origin/main or origin/master", vim.log.levels.ERROR)
-            return
-          end
-          vim.cmd("DiffviewOpen " .. base .. "...HEAD --imply-local")
-        end,
-        desc = "Diff view: branch vs origin",
-      },
-      { "<leader>gh", "<cmd>DiffviewFileHistory %<CR>", desc = "File history" },
-      { "<leader>gh", ":DiffviewFileHistory<CR>", mode = "x", desc = "History of selection" },
-      { "<leader>gH", "<cmd>DiffviewFileHistory<CR>", desc = "Repo history" },
-    },
-    opts = {
-      enhanced_diff_hl = true,
-      view = { merge_tool = { layout = "diff3_mixed" } },
-      keymaps = {
-        view = { { "n", "q", "<cmd>DiffviewClose<CR>", { desc = "Close diff view" } } },
-        file_panel = { { "n", "q", "<cmd>DiffviewClose<CR>", { desc = "Close diff view" } } },
-        file_history_panel = {
-          { "n", "q", "<cmd>DiffviewClose<CR>", { desc = "Close diff view" } },
-        },
-      },
-    },
-  },
-
-  {
     "folke/flash.nvim",
     event = "VeryLazy",
     opts = {},
@@ -154,58 +92,6 @@ return {
         desc = "Toggle flash search",
       },
     },
-  },
-
-  {
-    "ThePrimeagen/harpoon",
-    branch = "harpoon2",
-    dependencies = { "nvim-lua/plenary.nvim" },
-    opts = {},
-    keys = function()
-      local function h()
-        return require("harpoon")
-      end
-      local keys = {
-        {
-          "<leader>ma",
-          function()
-            h():list():add()
-          end,
-          desc = "Add file (harpoon)",
-        },
-        {
-          "<leader>mm",
-          function()
-            h().ui:toggle_quick_menu(h():list())
-          end,
-          desc = "Harpoon menu",
-        },
-        {
-          "<leader>mn",
-          function()
-            h():list():next()
-          end,
-          desc = "Harpoon next",
-        },
-        {
-          "<leader>mp",
-          function()
-            h():list():prev()
-          end,
-          desc = "Harpoon previous",
-        },
-      }
-      for i = 1, 5 do
-        keys[#keys + 1] = {
-          "<leader>m" .. i,
-          function()
-            h():list():select(i)
-          end,
-          desc = "Harpoon file " .. i,
-        }
-      end
-      return keys
-    end,
   },
 
   {
@@ -265,27 +151,6 @@ return {
 
       mappings = { ["`"] = false },
     },
-    config = function(_, opts)
-      require("mini.pairs").setup(opts)
-      local function md_backtick(buf)
-        require("mini.pairs").map_buf(buf, "i", "`", {
-          action = "closeopen",
-          pair = "``",
-          neigh_pattern = "[^\\`].",
-          register = { cr = false },
-        })
-      end
-      vim.api.nvim_create_autocmd("FileType", {
-        group = vim.api.nvim_create_augroup("user_markdown_pairs", { clear = true }),
-        pattern = "markdown",
-        callback = function(ev)
-          md_backtick(ev.buf)
-        end,
-      })
-      if vim.bo.filetype == "markdown" then
-        md_backtick(0)
-      end
-    end,
   },
 
   {

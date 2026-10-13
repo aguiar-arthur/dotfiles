@@ -4,6 +4,84 @@ Notable changes, newest first. Each entry says what changed for the person using
 and, when it matters, why. Plugin and package version bumps are not listed: `lazy-lock.json`
 and `git log` have them.
 
+## 2026-10-13
+
+### Changed
+
+- Neovim 0.12 or newer is required: the grammar toggle (`<leader>uG`) uses its LSP API and
+  failed on 0.11.
+- The README explains each part of the editor with a table of its keys: completion, finding,
+  editing, windows and terminals, code, run / test / debug, git, toggles, Clojure, LaTeX and
+  Markdown, plus the shell, prompt and terminal files.
+- The debugger moved from `<leader>D…` to `,d…` and is available only in Python, JavaScript
+  and TypeScript buffers (same letters: `,db`, `,dc`, `,di`, `,do`, `,dO`, `,dr`, `,dl`, `,dt`,
+  `,du`, `,de`, `,dB`).
+- Git changes and history come from the Snacks picker (preview, `<Tab>` stages a hunk):
+  `<leader>gV` lists the branch's changes against origin's default branch, `<leader>gh` the
+  history of the file and the new `<leader>gL` that of the line. `<leader>gv` and `<leader>gH`
+  are gone: `<leader>gc` and `<leader>gl` already do the same. Merge conflicts go to lazygit.
+
+### Removed
+
+- JavaScript and TypeScript support: vtsls, ESLint, js-debug-adapter, neotest-jest, prettier
+  for JS/TS files, `,r` with node and the `typescript` / `tsx` parsers. HTML, CSS, JSON and
+  YAML stay, with prettier and node (Mason installs their servers with npm).
+  `:MasonUninstall vtsls eslint-lsp js-debug-adapter` and `:Lazy clean` remove the old copies.
+- `<leader>ld`, `<leader>lr`, `<leader>lh` and `<leader>wh` / `wj` / `wk` / `wl` / `ww`: they
+  repeated `gd`, `gr`, `K` and `C-h` / `C-j` / `C-k` / `C-l`.
+- diffview-plus.nvim, a small fork of an abandoned project, which does not meet the new plugin
+  rule (`AGENTS.md`).
+- harpoon and nvim-dap-virtual-text, which repeat what is already here: files to come back to
+  are uppercase marks (`mA`, then `'A`), listed with the new `<leader>fm`, and the dap-ui panels
+  show the variables while debugging.
+- C and C++ support: clangd, codelldb, the C/C++ parsers and `.clang-format` handling are gone,
+  along with the C/C++ `,` keys. Existing Mason installs of clangd and codelldb stay on disk
+  (`:MasonUninstall clangd codelldb` removes them). It comes back when it is needed, done
+  properly.
+
+### Added
+
+- A new look: treesitter-context keeps the current function on top (`<leader>ux`), a Snacks
+  status column groups signs, git and folds, and mini.statusline (Dracula colors) replaces
+  lualine with the same information. The `:` line and messages stay Neovim's own.
+- ESLint in JS/TS projects that have an ESLint config: its errors show next to vtsls's type
+  errors, and `:LspEslintFixAll` fixes what it can. Other projects do not start it.
+- `,` keys by file type: `,r` runs the file in one reused bottom terminal (Python, JS/TS, Lua,
+  shell), `,t…` runs tests through Neotest (pytest and jest: the nearest test, the file, the
+  project, a summary and the output; `,td` debugs a Python test), `,o` organizes imports
+  wherever the language server offers it (ruff, vtsls) and `,s` sources a Lua file. The
+  Conjure groups have which-key labels.
+- `tests/nvim.sh` checks the Neovim setup by hand: `quick` (seconds) for startup, modules,
+  lockfile, formatters and the no-comments rule; `full` also installs Neovim in an isolated
+  home and drives a real Neovim in tmux (language servers, toggles, notes, a LaTeX build).
+- LaTeX is set up for a thesis: builds go to `build/` (texlab follows), `link.sh` links a
+  versioned `latexmkrc`, Skim reloads the PDF on change, and the `abnt` snippet expands to a
+  full abnTeX2 skeleton with `capa`, `resumo`, `abstract`, `citacao`, `citeonline` and `apud`.
+  Folds follow sections. ltex-ls-plus checks grammar in `pt-BR` (`% LTeX: language=en-US`
+  switches it; `<leader>uG` toggles it). Spelling stays with vim spell (`zg`), so a typo is
+  underlined once and an accepted word is accepted everywhere.
+- Markdown is now a notes setup: render-markdown.nvim draws the buffer (`<leader>um` toggles
+  it), and obsidian.nvim (no Obsidian app or account) handles the notes in `~/notes`
+  (`notes.dir` in the settings): `<leader>n` finds, greps, creates and opens daily notes and
+  lists backlinks, `[[links]]` complete and `<CR>` follows them. marksman serves the rest of
+  Markdown. `<CR>` ticks a checkbox in a note and the pandoc preview (`,p`) stays.
+- `ast-grep` is installed with the Neovim programs, so grug-far (`<leader>r`) can search and
+  replace by code structure and `:checkhealth grug-far` no longer warns.
+- `tmux` is installed by the main `Brewfile`, so `tests/nvim.sh full` can drive Neovim; a
+  machine set up with `./install.sh nvim` skips those checks.
+- `python` (Homebrew) is installed with the Neovim programs, so Mason builds `debugpy` against
+  a current Python instead of Apple's 3.9, and the Python debugger falls back to it.
+
+### Fixed
+
+- Words added with `zg` are now versioned in `config/nvim/spell/en.utf-8.add`, as the docs
+  said; they used to land in `~/.local/share/nvim/site/spell/` and stay on one machine.
+- `rumdl` no longer reports `CLAUDE.md`, which only holds the `@AGENTS.md` import.
+- A first install checks out `lazy.nvim` at the commit in `lazy-lock.json` instead of the
+  latest `stable` tag, so it no longer leaves the lockfile modified.
+- In Clojure, `,o` is nvim-paredit's raise again: clojure-lsp's organize imports took it once
+  the server attached (it stays under `<leader>la`).
+
 ## 2026-10-11
 
 ### Fixed (sixth review)

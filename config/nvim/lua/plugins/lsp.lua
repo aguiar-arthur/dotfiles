@@ -3,21 +3,6 @@ local mason_servers = settings.mason_servers
 local system_servers = settings.system_servers
 local mason_tools = settings.mason_tools
 
-local function lsp_pick(source)
-  return function()
-    local opts = {}
-    if package.loaded["diffview.lib"] and require("diffview.lib").get_current_view() then
-      local here = vim.api.nvim_buf_get_name(0)
-      opts.confirm = function(picker, item)
-        local other = item and Snacks.picker.util.path(item) ~= here
-
-        require("snacks.picker.actions").jump(picker, item, { cmd = other and "tab" or nil })
-      end
-    end
-    Snacks.picker[source](opts)
-  end
-end
-
 return {
 
   {
@@ -90,19 +75,31 @@ return {
             vim.keymap.set(mode or "n", lhs, rhs, { buffer = buf, silent = true, desc = desc })
           end
 
-          map("gd", lsp_pick("lsp_definitions"), "Go to definition")
-          map("gr", lsp_pick("lsp_references"), "Go to references")
+          map("gd", Snacks.picker.lsp_definitions, "Go to definition")
+          map("gr", Snacks.picker.lsp_references, "Go to references")
 
-          map("<leader>ld", lsp_pick("lsp_definitions"), "Definition")
-          map("<leader>lr", lsp_pick("lsp_references"), "References")
-          map("<leader>li", lsp_pick("lsp_implementations"), "Implementation")
-          map("<leader>lt", lsp_pick("lsp_type_definitions"), "Type definition")
+          map("<leader>li", Snacks.picker.lsp_implementations, "Implementation")
+          map("<leader>lt", Snacks.picker.lsp_type_definitions, "Type definition")
           map("<leader>lD", vim.lsp.buf.declaration, "Declaration")
           map("<leader>ln", vim.lsp.buf.rename, "Rename symbol")
           map("<leader>la", vim.lsp.buf.code_action, "Code action", { "n", "v" })
-          map("<leader>lh", vim.lsp.buf.hover, "Hover documentation")
           map("<leader>ls", vim.lsp.buf.signature_help, "Signature help")
           map("<leader>lR", "<cmd>LspRestart<CR>", "Restart LSP")
+
+          local client = vim.lsp.get_client_by_id(ev.data.client_id)
+          local provider = client and client.server_capabilities.codeActionProvider
+          local kinds = type(provider) == "table" and provider.codeActionKinds or {}
+          if
+            vim.tbl_contains(kinds, "source.organizeImports")
+            and vim.fn.maparg("<localleader>o", "n") == ""
+          then
+            map("<localleader>o", function()
+              vim.lsp.buf.code_action({
+                context = { only = { "source.organizeImports" }, diagnostics = {} },
+                apply = true,
+              })
+            end, "Organize imports")
+          end
         end,
       })
     end,

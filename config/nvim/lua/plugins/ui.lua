@@ -13,9 +13,20 @@ return {
   },
 
   {
-    "nvim-lualine/lualine.nvim",
+    "nvim-mini/mini.statusline",
     event = "VeryLazy",
+    init = function()
+      vim.api.nvim_create_autocmd("FileType", {
+        group = vim.api.nvim_create_augroup("user_statusline_dashboard", { clear = true }),
+        pattern = "snacks_dashboard",
+        callback = function(ev)
+          vim.b[ev.buf].ministatusline_disable = true
+        end,
+      })
+    end,
     opts = function()
+      local statusline = require("mini.statusline")
+
       local function lsp_clients()
         local names = {}
         for _, c in ipairs(vim.lsp.get_clients({ bufnr = 0 })) do
@@ -34,24 +45,44 @@ return {
       end
 
       return {
-        options = {
-          theme = "auto",
-          globalstatus = true,
-          section_separators = { left = "", right = "" },
-          component_separators = { left = "│", right = "│" },
-          disabled_filetypes = { statusline = { "snacks_dashboard" } },
+        content = {
+          active = function()
+            local mode, mode_hl = statusline.section_mode({ trunc_width = 120 })
+            return statusline.combine_groups({
+              { hl = mode_hl, strings = { mode } },
+              {
+                hl = "MiniStatuslineDevinfo",
+                strings = {
+                  statusline.section_git({ trunc_width = 40 }),
+                  statusline.section_diff({ trunc_width = 75 }),
+                  statusline.section_diagnostics({ trunc_width = 75 }),
+                },
+              },
+              "%<",
+              { hl = "MiniStatuslineFilename", strings = { "%f%m%r", vimtex_status() } },
+              "%=",
+              {
+                hl = "MiniStatuslineFileinfo",
+                strings = { lsp_clients(), statusline.section_fileinfo({ trunc_width = 120 }) },
+              },
+              {
+                hl = mode_hl,
+                strings = {
+                  statusline.section_searchcount({ trunc_width = 75 }),
+                  statusline.section_location({ trunc_width = 75 }),
+                },
+              },
+            })
+          end,
         },
-        sections = {
-          lualine_a = { "mode" },
-          lualine_b = { "branch", "diff", "diagnostics" },
-          lualine_c = { { "filename", path = 1 }, vimtex_status },
-          lualine_x = { lsp_clients, "encoding", "fileformat", "filetype" },
-          lualine_y = { "progress" },
-          lualine_z = { "location" },
-        },
-        extensions = { "lazy", "mason", "trouble", "nvim-dap-ui" },
       }
     end,
+  },
+
+  {
+    "nvim-treesitter/nvim-treesitter-context",
+    event = { "BufReadPost", "BufNewFile" },
+    opts = { max_lines = 3, multiline_threshold = 1, mode = "cursor" },
   },
 
   {
@@ -64,16 +95,17 @@ return {
         { "<leader>b", group = "buffer" },
         { "<leader>c", group = "code", mode = { "n", "v" } },
         { "<leader>d", group = "diagnostics" },
-        { "<leader>D", group = "debug" },
         { "<leader>f", group = "file/find" },
         { "<leader>g", group = "git" },
         { "<leader>l", group = "lsp" },
-        { "<leader>m", group = "marks (harpoon)" },
+        { "<leader>n", group = "notes" },
         { "<leader>o", group = "open/toggle" },
         { "<leader>S", group = "session" },
         { "<leader>t", group = "terminal" },
         { "<leader>u", group = "ui toggles" },
         { "<leader>w", group = "window" },
+        { "<localleader>d", group = "debug" },
+        { "<localleader>t", group = "tests" },
       },
     },
   },

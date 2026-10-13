@@ -62,6 +62,12 @@ opt.foldtext = ""
 
 opt.spelllang = settings.spelllang
 opt.spelloptions = "camel"
+local spell_words = vim.fn.stdpath("config") .. "/spell/en.utf-8.add"
+opt.spellfile = spell_words
+local words_stat, compiled_stat = vim.uv.fs_stat(spell_words), vim.uv.fs_stat(spell_words .. ".spl")
+if words_stat and (not compiled_stat or compiled_stat.mtime.sec < words_stat.mtime.sec) then
+  pcall(vim.cmd, "silent mkspell! " .. vim.fn.fnameescape(spell_words))
+end
 
 vim.schedule(function()
   opt.clipboard = "unnamedplus"

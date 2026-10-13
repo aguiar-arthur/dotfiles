@@ -1,40 +1,49 @@
 # Neovim
 
-The editor for everything. Needs Neovim 0.11 or newer; plugins come from lazy.nvim, language servers
-from Neovim's native LSP.
+The editor for everything. Needs Neovim 0.12 or newer; plugins come from lazy.nvim, language servers
+from Neovim's native LSP. The grammar toggle needs 0.12: it reads `vim.lsp.is_enabled()` and relies
+on `vim.lsp.enable(name, false)` stopping the running servers.
 
 ```text
 config/nvim/
   init.lua                    options, keymaps, autocmds, then lazy.nvim
-  lua/config/settings.lua     colorscheme, wrap, format on save, spell languages, the servers,
+  lua/config/settings.lua     colorscheme, wrap, format on save, spell languages, the notes folder, the servers,
                               Mason tools and treesitter parsers to install
   lua/config/local.lua        per-machine overrides (untracked)
   lua/plugins/                one spec file per concern
   lua/dotfiles/install.lua    headless install of Mason packages, parsers and spell files
+  lua/dotfiles/mason.lua      which Mason packages the settings want and which are missing
   lua/dotfiles/toggles.lua    the global <leader>u toggles
+  lua/dotfiles/markdown_preview.lua   the pandoc preview behind `,p`
+  lua/dotfiles/runner.lua     what `,r` runs per language, in the one bottom terminal it reuses
+  lua/dotfiles/python.lua     the Python interpreter (.venv, $VIRTUAL_ENV, python3)
+  lua/dotfiles/git.lua        the base branch behind <leader>gV (origin/HEAD, main, master)
   after/lsp/<server>.lua      per-server settings
-  after/ftplugin/             tex (vimtex keys) and markdown (pandoc preview)
-  snippets/tex.lua            LaTeX snippets
+  after/ftplugin/             tex (vimtex keys), markdown (preview, backticks), lua (`,s`)
+                              and clojure (which-key names of Conjure's groups)
+  snippets/tex.lua            LaTeX snippets (math, ABNT)
+  templates/note.md           the `# title` that new and daily notes start with
+  spell/en.utf-8.add          words accepted with `zg` (the compiled .spl is ignored)
   lazy-lock.json              plugin versions (committed; `:Lazy restore` goes back to it)
 ```
 
 ## Keys
 
 `<Space>` is the leader, `,` the local leader; which-key shows every key after a short pause.
+The README has every key, one table per module; this page explains how they behave.
 
 | Group | For |
 |---|---|
-| `<leader>f` | find: files, grep, recent, buffers, help, symbols (snacks picker) |
-| `<leader>g` | git: lazygit, hunks, blame, diffview (`gv` changes, `gV` branch vs origin's default branch, `gh` history) |
+| `<leader>f` | find: files, grep, recent, buffers, help, symbols, marks (snacks picker) |
+| `<leader>g` | git: lazygit, hunks, blame, changes (`gc` working tree, `gV` branch vs origin's default branch), history (`gh` file, `gL` line, `gl` repo) |
 | `<leader>l` | LSP: definition, references, rename, code action, format |
 | `<leader>d` | diagnostics and lists (Trouble) |
-| `<leader>D` | debugger (nvim-dap): Python, JavaScript/TypeScript, C/C++ |
 | `<leader>b` / `w` / `t` | buffers / windows / terminals |
-| `<leader>m` | harpoon marks |
+| `<leader>n` | notes: find, grep, new, daily, backlinks |
 | `<leader>r` | search and replace in the whole project (grug-far), prefilled with the word or selection |
 | `<leader>S` | sessions |
 | `<leader>o` | file tree, notifications, dashboard |
-| `<leader>u` | toggles: spelling, wrap, relative numbers, conceal, diagnostics, inlay hints, indent guides, treesitter, format on save; `un` dismisses notifications |
+| `<leader>u` | toggles: spelling, wrap, relative numbers, conceal, grammar (`uG`), Markdown rendering, code context (`ux`), diagnostics, inlay hints, indent guides, treesitter, format on save; `un` dismisses notifications |
 
 `gd` / `gr` / `K` work as usual (implementation is `<leader>li`; `gi` keeps Vim's meaning);
 `]r` / `[r` jump between references of the word under the cursor; `s` / `S` jump with flash;
@@ -75,19 +84,32 @@ followed (built in).
 ## Plugins
 
 snacks.nvim (picker, file tree, terminal, lazygit, dashboard, notifications, indent guides,
-toggles), blink.cmp + LuaSnip (completion, snippets), nvim-lspconfig + Mason, conform.nvim
-(formatting), nvim-treesitter (`main` branch), gitsigns, diffview-plus.nvim (the maintained
-fork of diffview.nvim), flash, harpoon, mini.ai / surround / pairs / icons, todo-comments,
-Trouble, persistence, nvim-dap, lualine, which-key, vimtex, Conjure, nvim-paredit, grug-far,
-Dracula.
+the status column, toggles), blink.cmp + LuaSnip (completion, snippets), nvim-lspconfig +
+Mason, conform.nvim (formatting), nvim-treesitter (`main` branch) + treesitter-context,
+gitsigns, flash, mini.ai / surround / pairs / icons / statusline, todo-comments, Trouble,
+persistence, nvim-dap + dap-ui, Neotest (neotest-python), which-key, vimtex,
+Conjure, nvim-paredit, grug-far, render-markdown.nvim, obsidian.nvim, Dracula. Behind them:
+friendly-snippets, lazydev (Neovim's API in Lua completion), SchemaStore (JSON and YAML
+schemas), mason-lspconfig, mason-tool-installer, mason-nvim-dap, nvim-nio and plenary. Each one
+meets the plugin rule in `AGENTS.md`.
+
+The look: the `:` line and `/` search stay Neovim's own (blink completes them), notifications
+go to Snacks (`<leader>on`) and signature help to blink. treesitter-context keeps the enclosing
+function or class on top while scrolling (`<leader>ux` toggles it). The status column (Snacks)
+shows marks and diagnostics on the left and git and closed folds on the right; the statusline
+(mini.statusline, Dracula colors) shows mode, git, diagnostics, file, language servers and a
+running latexmk.
 
 ## Language servers and formatting
 
 - Mason installs the servers in `settings.mason_servers` and the tools in
-  `settings.mason_tools` (shellcheck and the debug adapters). Only the servers in that list
+  `settings.mason_tools` (shellcheck and debugpy). Only the servers in that list
   are enabled (`automatic_enable = mason_servers`): a server left over in Mason stays off.
   rumdl (`Brewfile.nvim`) and clojure-lsp (the full `Brewfile` only) are enabled when the
   binary exists.
+- JavaScript and TypeScript have no server, formatter, runner, tests or debugger: they were
+  removed as unused. Adding them back is a server in `settings.mason_servers` and a line in
+  conform. The `javascript` parser stays for `<script>` blocks in HTML.
 - blink.cmp adds its completion capabilities to every server by itself; it is a dependency
   of nvim-lspconfig so it loads, and registers them, before the first server starts.
 - stylua, shfmt and prettier come from `Brewfile.nvim`; Mason does not install copies.
@@ -97,8 +119,8 @@ Dracula.
   `settings.treesitter_indent`; elsewhere the ftplugin's indent stays, since treesitter
   indentation is still unreliable in Python, YAML and Markdown.
 - conform formats on save (Lua, Python with ruff, shell, web/JSON/YAML with prettier,
-  Markdown with rumdl; C/C++, TOML and Clojure through clangd, taplo and clojure-lsp), but
-  only in projects that declare that tool's style: C/C++ with a `.clang-format`, Lua with a
+  Markdown with rumdl; TOML and Clojure through taplo and clojure-lsp), but
+  only in projects that declare that tool's style: Lua with a
   `stylua.toml`, shell with an `.editorconfig` section for `.sh` or `.bash` files, Python with
   a `ruff.toml` or a `[tool.ruff]` table in `pyproject.toml`, web/JSON/YAML with a prettier
   config file, Markdown with a `.rumdl.toml` or `.markdownlint.*`, TOML with a `taplo.toml`,
@@ -111,9 +133,6 @@ Dracula.
   language server that formats ranges (rumdl, lua_ls), which does not wrap, so it is reset.
 - In Python, ruff is asked for UTF-16 positions like basedpyright (two encodings in one
   buffer make Neovim warn), and its hover is off so `K` shows basedpyright's.
-- Language servers never attach to `diffview://` buffers: they get `buftype=acwrite`, so
-  servers treat them as virtual, and `:w` on the index copy still stages it.
-- Inside a diff, `gd` / `gr` / `<leader>l…` open a result in another file in a new tab.
 
 ## Clojure
 
@@ -128,17 +147,41 @@ the namespace's tests, `,lv` opens the log. Conjure is limited to Clojure (its o
 would map keys in Lua and Python files), and `K` / `gd` stay with the language server. The
 nREPL and cider-nrepl versions are at the top of `lua/plugins/clojure.lua`.
 
+## Local leader
+
+`<leader>` keys work everywhere; `,` keys depend on the file type, and which-key lists them when
+you press `,`. Where a tool is missing the key says so instead of failing silently. Each `,` key
+sits in its plugin's spec with lazy.nvim's `ft`, so it exists only in those buffers and loads the
+plugin on first use; `,o` is mapped when the language server offers to organize imports and
+the file type has no `,o` of its own (in Clojure it stays nvim-paredit's raise).
+
+| Keys | Python | Lua | Shell |
+|---|---|---|---|
+| `,r` run the file | yes | `nvim -l` | `bash` |
+| `,t…` tests (Neotest) | pytest | | |
+| `,d…` debugger | yes | | |
+| `,o` organize imports | ruff | | |
+| `,s` source the file | | yes | |
+
+`,r` shows its output in one bottom terminal that the next run replaces.
+
+`,t` runs tests through Neotest: `,tt` the nearest test, `,tf` the file, `,tp` the project,
+`,tl` the last run, `,tS` stops, `,ts` toggles the summary, `,to` shows the output of the test
+under the cursor and `,tO` toggles the output panel; in Python `,td` debugs the nearest test.
+Results show as signs and diagnostics in the buffer. Python uses neotest-python (pytest, from
+the project's virtualenv).
+
+Clojure keeps Conjure's keys (`,e` evaluate, `,l` log, `,t` tests, `,r` refresh, `,s` sessions,
+`,cj` jack in), Markdown has `,p`, and LaTeX has vimtex's `,l…`.
+
 ## Debugging
 
-`<leader>D` drives nvim-dap with dap-ui, which stays open after the program ends so its
-output can be read (`<leader>Du` closes it). Breakpoints show as `●` (`◆` with a condition)
-and the stopped line is tinted green. Python uses debugpy and runs the file with the
+`,d` drives nvim-dap with dap-ui in Python buffers (`,db`
+breakpoint, `,dB` conditional, `,dc` continue or start, `,di` / `,do` / `,dO` step into, over,
+out, `,dr` REPL, `,dl` run last, `,dt` terminate, `,de` evaluate). dap-ui stays open after the
+program ends so its output can be read (`,du` closes it). Breakpoints show as `●` (`◆` with a
+condition) and the stopped line is tinted green. Python uses debugpy and runs the file with the
 project's `.venv` (uv's, found upward from the file), else `$VIRTUAL_ENV`, else `python3`.
-C/C++ use codelldb (it asks for the program to run); JavaScript and TypeScript use
-js-debug-adapter, which launches the current file with Node (recent Node runs `.ts` files
-directly) or attaches to a running Node process. macOS lets a debugger attach to native
-programs only with developer mode on: `sudo DevToolsSecurity -enable` once, or C debugging
-waits for a password dialog.
 
 ## LaTeX
 
@@ -149,18 +192,48 @@ line. `<=>` is typed as `<=` then `>`, `<->` as `<-` then `>`; in math `x12` giv
 `x_{12}`. Keys under `,l` in `.tex` files are vimtex's own, labelled in which-key: `,ll`
 compile, `,lv` view / forward search, `,le` errors, `,lt` table of contents, `,lc` clean,
 `,lx` reload, `,lw` count words. Cmd+Shift+click in Skim jumps back to the line (set up by
-`link.sh`).
+`link.sh`, which also makes Skim reload the PDF when it changes).
 Put `% !TEX program = lualatex` on the first line for another engine.
 
-## Markdown
+Builds go to `build/` next to the main file, so the project folder keeps only sources; texlab
+reads the same folder, which keeps citation and label completion working. `link.sh` links
+`config/latex/latexmkrc` to `~/.latexmkrc` (BibTeX runs when a `.bib` exists); a `latexmkrc`
+in a project still wins. Folds follow the preamble and sections.
 
-`,p` builds an HTML page with pandoc (math as MathML, images embedded) and opens it in the
-browser; every save rebuilds it. rumdl lints as you type, with the rules in
-`config/rumdl/rumdl.toml` (line length 100).
+For a Brazilian thesis, `abnt` expands to a complete abnTeX2 skeleton (cover, abstract in two
+languages, table of contents, `abntex2cite` with `abntex2-alf`), and `capa`, `resumo`,
+`abstract`, `citacao`, `citeonline` and `apud` insert the pieces. Only `abntex2` and
+`abntex2cite` ship with MacTeX; `biblatex-abnt` does not, so citations go through BibTeX.
+
+ltex-ls-plus checks grammar in Portuguese (`pt-BR`) by default. A comment such as
+`% LTeX: language=en-US` switches the language from that line on. Its spelling rules are off:
+vim spell already underlines typos, and one word list (`zg`) is simpler than two that disagree.
+`<leader>uG` turns grammar off and on; vim spell stays on as before.
+
+## Markdown and notes
+
+render-markdown.nvim draws headings, tables, code blocks and checkboxes in the buffer; the
+line under the cursor and insert mode show the raw text. `<leader>um` turns it off. LaTeX math
+is not rendered there: `,p` builds an HTML page with pandoc (math as MathML, images embedded),
+opens it in the browser and rebuilds it on every save.
+
+Notes are plain Markdown files in `settings.notes.dir` (`~/notes`, created by the first `<leader>n`
+key; change it in `local.lua`), handled by obsidian.nvim, which loads only there and needs no
+Obsidian app or account: the folder is only a folder of `.md` files. `<leader>nf` / `ng` find and
+grep them, `nn` asks for a title and creates `the-title.md`, `nd` opens today's note in `daily/`,
+and `nb` lists the notes that link to the current one (on a `#` heading, those that link to that
+heading). Links are `[[note]]`: obsidian.nvim completes them, `<CR>` or `gd` follows one and `gr`
+lists references; `<CR>` on a checkbox ticks it. No YAML frontmatter is written. marksman serves
+Markdown outside the notes folder only (`after/lsp/marksman.lua`), so the two never answer the
+same request twice. rumdl lints as you type, with the rules in `config/rumdl/rumdl.toml` (line
+length 100); it formats on save only under a `.rumdl.toml` or `.markdownlint.*`, so notes are
+never restyled.
 
 ## Notes
 
 - Diff colors are tinted backgrounds over Dracula, so the code stays readable.
 - Spell checking (`en_us`, `pt_br`) is on for prose files; `install.sh` downloads the
-  Portuguese spell file. Words added with `zg` go to `spell/<lang>.utf-8.add`, versioned.
+  Portuguese spell file. Words added with `zg` (in any of the two languages) go to the versioned
+  `spell/en.utf-8.add` (`spellfile`); Neovim compiles it at startup when it is newer, as after a
+  `git pull`. Without `spellfile`, `zg` would write outside the repository.
 - `.tex` files are LaTeX, not plain TeX (`g:tex_flavor`).

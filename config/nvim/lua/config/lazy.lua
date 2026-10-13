@@ -5,7 +5,6 @@ if not vim.uv.fs_stat(lazypath) then
     "git",
     "clone",
     "--filter=blob:none",
-    "--branch=stable",
     "https://github.com/folke/lazy.nvim.git",
     lazypath,
   })
@@ -19,6 +18,21 @@ if not vim.uv.fs_stat(lazypath) then
       vim.fn.getchar()
     end
     os.exit(1)
+  end
+  local ok, lock = pcall(function()
+    return vim.json.decode(
+      table.concat(vim.fn.readfile(vim.fn.stdpath("config") .. "/lazy-lock.json"))
+    )
+  end)
+  local commit = ok and lock["lazy.nvim"] and lock["lazy.nvim"].commit
+  if commit then
+    local res = vim.system({ "git", "-C", lazypath, "checkout", "--quiet", commit }):wait()
+    if res.code ~= 0 then
+      vim.notify(
+        "lazy.nvim stays on its default branch: " .. vim.trim(res.stderr),
+        vim.log.levels.WARN
+      )
+    end
   end
 end
 vim.opt.rtp:prepend(lazypath)

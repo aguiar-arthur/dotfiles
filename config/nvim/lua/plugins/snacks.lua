@@ -29,11 +29,19 @@ return {
     },
     quickfile = { enabled = true },
     scope = { enabled = true },
+    statuscolumn = { enabled = true },
     terminal = { enabled = true },
     words = { enabled = true },
   },
   keys = {
-
+    {
+      "<localleader>r",
+      function()
+        require("dotfiles.runner").run_file()
+      end,
+      ft = vim.tbl_keys(require("dotfiles.runner").commands),
+      desc = "Run file",
+    },
     {
       "<leader>op",
       function()
@@ -170,6 +178,13 @@ return {
       desc = "Search in buffer",
     },
     {
+      "<leader>fm",
+      function()
+        Snacks.picker.marks()
+      end,
+      desc = "Marks",
+    },
+    {
       "<leader>fp",
       function()
         Snacks.picker.projects()
@@ -211,6 +226,27 @@ return {
         Snacks.picker.git_diff()
       end,
       desc = "Changes (hunks)",
+    },
+    {
+      "<leader>gV",
+      function()
+        require("dotfiles.git").diff_vs_origin()
+      end,
+      desc = "Changes vs origin",
+    },
+    {
+      "<leader>gh",
+      function()
+        Snacks.picker.git_log_file()
+      end,
+      desc = "File history",
+    },
+    {
+      "<leader>gL",
+      function()
+        Snacks.picker.git_log_line()
+      end,
+      desc = "Line history",
     },
     {
       "<leader>gO",

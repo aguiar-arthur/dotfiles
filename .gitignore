@@ -6,3 +6,4 @@
 .rumdl_cache/
 /config/nvim/lua/config/local.lua
 /config/nvim/spell/*.spl
+.claude/settings.local.json

@@ -25,6 +25,7 @@ links() {
   if [ "$ONLY" != nvim ]; then
     printf '%s\n' \
       "config/starship/starship.toml|$HOME/.config/starship.toml" \
+      "config/latex/latexmkrc|$HOME/.latexmkrc" \
       "config/iterm2/dracula.json|$HOME/Library/Application Support/iTerm2/DynamicProfiles/dotfiles-dracula.json"
   fi
 }
@@ -65,6 +66,17 @@ pref() {
   fi
 }
 
+pref_bool() {
+  local domain="$1" key="$2"
+  local current
+  if current="$(defaults read "$domain" "$key" 2>/dev/null)" && [ "$current" = 1 ]; then
+    say ok "$domain $key"
+  else
+    defaults write "$domain" "$key" -bool true
+    say set "$domain $key"
+  fi
+}
+
 app_preferences() {
   local skim=net.sourceforge.skim-app.skim
   pref com.googlecode.iterm2 "Default Bookmark Guid" \
@@ -72,6 +84,8 @@ app_preferences() {
   pref "$skim" SKTeXEditorPreset ""
   pref "$skim" SKTeXEditorCommand "$(command -v nvim || echo nvim)"
   pref "$skim" SKTeXEditorArguments "--headless -c \"VimtexInverseSearch %line '%file'\""
+  pref_bool "$skim" SKAutoCheckFileUpdate
+  pref_bool "$skim" SKAutoReloadFileUpdate
 }
 
 zshrc() {

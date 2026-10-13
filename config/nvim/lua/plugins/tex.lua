@@ -11,6 +11,15 @@ return {
       g.vimtex_view_skim_reading_bar = 1
 
       g.vimtex_compiler_method = "latexmk"
+      g.vimtex_compiler_latexmk = { out_dir = "build" }
+
+      g.vimtex_fold_enabled = 1
+      g.vimtex_fold_types = {
+        items = { enabled = 0 },
+        envs = { enabled = 0 },
+        env_options = { enabled = 0 },
+        cmd_multi = { enabled = 0 },
+      }
 
       g.vimtex_quickfix_open_on_warning = 0
       g.vimtex_quickfix_ignore_filters = {
