@@ -55,10 +55,11 @@ Text objects (mini.ai) work in every language with a treesitter parser: `af` / `
 `ac` / `ic` class, `au` / `iu` function call, `aa` / `ia` argument, plus brackets, quotes and
 tags (`daf` deletes a function, `ciu` rewrites a call's arguments). The function and class
 queries come from nvim-treesitter-textobjects, which is installed only for them.
-`<A-j>` / `<A-k>` move lines; `C-h/j/k/l` move between windows; `C-\` toggles a terminal
-from normal mode. `<leader>tf` / `th` / `tv` are three separate terminals (float, bottom,
-right). Inside a terminal every key goes to the program (lazygit, the shell, a REPL); a quick
-double `Esc` or `C-\ C-n` returns to Neovim, where `q` hides the terminal.
+`<A-j>` / `<A-k>` move lines; `C-h/j/k/l` move between windows; `C-\` toggles the bottom
+terminal (the one of `<leader>th`) from normal mode. `<leader>tf` / `th` / `tv` are three
+separate terminals (float, bottom, right). Inside a terminal every key goes to the program
+(lazygit, the shell, a REPL); a quick double `Esc` or `C-\ C-n` returns to Neovim, where `q`
+hides the terminal.
 
 The `<leader>u` toggles are global: they change every window or buffer and the ones opened
 later. A `:setlocal` (wrap, numbers, conceal, spell) stays with its buffer until the next
@@ -145,7 +146,7 @@ by a dead REPL is removed and a new one starts, replacing the dead REPL's termin
 `,ee` evaluates the form under the cursor, `,er` the outer form, `,eb` the buffer, `,tn` runs
 the namespace's tests, `,lv` opens the log. Conjure is limited to Clojure (its other clients
 would map keys in Lua and Python files), and `K` / `gd` stay with the language server. The
-nREPL and cider-nrepl versions are at the top of `lua/plugins/clojure.lua`.
+nREPL and cider-nrepl versions are at the top of `lua/dotfiles/clojure.lua`.
 
 ## Local leader
 

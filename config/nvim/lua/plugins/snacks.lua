@@ -81,7 +81,7 @@ return {
     {
       "<leader>fF",
       function()
-        Snacks.picker.files()
+        Snacks.picker.files({ ignored = true })
       end,
       desc = "Find files (all)",
     },
@@ -260,7 +260,7 @@ return {
     {
       "<c-\\>",
       function()
-        Snacks.terminal(nil, { count = 1, win = { position = "float" } })
+        Snacks.terminal(nil, { count = 2, win = { position = "bottom", height = 15 } })
       end,
       desc = "Toggle terminal",
     },

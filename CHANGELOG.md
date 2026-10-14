@@ -74,6 +74,12 @@ and `git log` have them.
 
 ### Fixed
 
+- `C-\` toggles the bottom terminal, as the README says; it opened the same floating terminal
+  as `<leader>tf`.
+- Language server hovers no longer get the Markdown preview key `,p` and its save hook: the
+  Markdown ftplugin now skips buffers that are not files.
+- `<leader>fF` lists the files git ignores too, as the README says; it used to skip them like
+  `<leader>ff`.
 - Words added with `zg` are now versioned in `config/nvim/spell/en.utf-8.add`, as the docs
   said; they used to land in `~/.local/share/nvim/site/spell/` and stay on one machine.
 - `rumdl` no longer reports `CLAUDE.md`, which only holds the `@AGENTS.md` import.

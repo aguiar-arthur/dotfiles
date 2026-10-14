@@ -171,7 +171,7 @@ Brackets and quotes close themselves as you type (mini.pairs).
 | `Space w H` / `L` / `J` / `K` | narrower / wider / shorter / taller |
 | `Space b n` / `Space b p` | next / previous buffer |
 | `Space b d` / `Space b k` | close the buffer (keeps the window) / force it |
-| `C-\` | show or hide a terminal at the bottom |
+| `C-\` | show or hide the bottom terminal (the one of `Space t h`) |
 | `Space t f` / `t h` / `t v` | a floating / bottom / right terminal, each its own shell |
 | `Space S r` / `Space S l` | restore the session of this folder / the last session |
 | `Space S s` / `Space S d` | pick a session / do not save this one |

@@ -33,7 +33,6 @@ opt.shiftwidth = 2
 opt.tabstop = 2
 opt.softtabstop = 2
 opt.shiftround = true
-opt.smartindent = true
 opt.breakindent = true
 opt.breakindentopt = { "shift:2" }
 opt.ignorecase = true

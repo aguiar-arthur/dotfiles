@@ -47,11 +47,7 @@ map("n", "<leader>bn", "<cmd>bnext<CR>", o("Next buffer"))
 map("n", "<leader>bp", "<cmd>bprevious<CR>", o("Previous buffer"))
 map("n", "<leader>bk", "<cmd>bdelete!<CR>", o("Kill buffer (force)"))
 map("n", "<leader>bd", function()
-  if _G.Snacks then
-    Snacks.bufdelete()
-  else
-    vim.cmd("bdelete")
-  end
+  Snacks.bufdelete()
 end, o("Close buffer"))
 
 local function diagnostic_jump(count, severity)
