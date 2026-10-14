@@ -98,6 +98,8 @@ CHANGELOG.md        notable changes, newest first
   then stops wrapping prose and comments; the `LspAttach` callback clears it again.
 - Two servers on one filetype must agree on the position encoding (`:checkhealth vim.lsp`
   warns); the extra one is pinned in its `after/lsp/` file, as ruff is to UTF-16.
+- gitsigns attaches to a file a codediff review opens after codediff maps its keys, and its
+  buffer-local `]c` / `[c` replaced the review's; they now ask codediff first.
 - blink.cmp on the `:` line inserts the selected item already: mapping `<CR>` to `accept`
   there makes a completed command need a second `<CR>`.
 

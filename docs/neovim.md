@@ -55,11 +55,11 @@ Text objects (mini.ai) work in every language with a treesitter parser: `af` / `
 `ac` / `ic` class, `au` / `iu` function call, `aa` / `ia` argument, plus brackets, quotes and
 tags (`daf` deletes a function, `ciu` rewrites a call's arguments). The function and class
 queries come from nvim-treesitter-textobjects, which is installed only for them.
-`<A-j>` / `<A-k>` move lines; `C-h/j/k/l` move between windows; `C-\` toggles the bottom
-terminal (the one of `<leader>th`) from normal mode. `<leader>tf` / `th` / `tv` are three
-separate terminals (float, bottom, right). Inside a terminal every key goes to the program
-(lazygit, the shell, a REPL); a quick double `Esc` or `C-\ C-n` returns to Neovim, where `q`
-hides the terminal.
+`<A-j>` / `<A-k>` move lines; `C-h/j/k/l` (or `<leader>w h/j/k/l`) move between windows;
+`C-\` toggles the bottom terminal (the one of `<leader>th`) from normal mode. `<leader>tf` /
+`th` / `tv` are three separate terminals (float, bottom, right). Inside a terminal every key
+goes to the program (lazygit, the shell, a REPL); a quick double `Esc` or `C-\ C-n` returns to
+Neovim, where `q` hides the terminal.
 
 The `<leader>u` toggles are global: they change every window or buffer and the ones opened
 later. A `:setlocal` (wrap, numbers, conceal, spell) stays with its buffer until the next
@@ -94,7 +94,8 @@ Conjure, nvim-paredit, grug-far, render-markdown.nvim, obsidian.nvim, Dracula. B
 friendly-snippets, lazydev (Neovim's API in Lua completion), SchemaStore (JSON and YAML
 schemas), mason-lspconfig, mason-tool-installer, mason-nvim-dap, nvim-nio and plenary. Each one
 meets the plugin rule in `AGENTS.md`. codediff.nvim downloads its prebuilt diff library in its
-lazy.nvim `build` step, so `install.sh` fetches it with the plugins.
+lazy.nvim `build` step, so `install.sh` fetches it with the plugins. gitsigns attaches to a file
+the review opens after codediff maps `]c` / `[c`, so its own `]c` / `[c` ask codediff first.
 
 The look: the `:` line and `/` search stay Neovim's own (blink completes them), notifications
 go to Snacks (`<leader>on`) and signature help to blink. treesitter-context keeps the enclosing

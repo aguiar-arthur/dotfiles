@@ -3,7 +3,9 @@ if ok then
   wk.add({
     buffer = 0,
     { "<localleader>c", group = "connect" },
+    { "<localleader>ca", group = "auto-REPL" },
     { "<localleader>e", group = "evaluate" },
+    { "<localleader>ec", group = "evaluate into a comment" },
     { "<localleader>l", group = "log" },
     { "<localleader>r", group = "refresh" },
     { "<localleader>s", group = "nREPL session" },

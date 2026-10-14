@@ -27,10 +27,18 @@ if ok then
     li = "Project info",
     lx = "Reload vimtex",
     lq = "Log",
+    la = "Context menu (citation, label, file under the cursor)",
+    ls = "Toggle the main file",
+    lS = "Compile once",
+    lL = "Compile the selection",
+    lG = "Status of all projects",
+    lI = "Info of all projects",
+    lX = "Reload the project state",
   }
   local spec = { { "<localleader>l", group = "vimtex (LaTeX)", buffer = 0 } }
   for lhs, desc in pairs(labels) do
     spec[#spec + 1] = { "<localleader>" .. lhs, desc = desc, buffer = 0 }
   end
+  spec[#spec + 1] = { "<localleader>lL", desc = labels.lL, buffer = 0, mode = "x" }
   wk.add(spec)
 end

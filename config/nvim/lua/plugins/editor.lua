@@ -19,20 +19,19 @@ return {
         local function m(mode, l, r, desc)
           vim.keymap.set(mode, l, r, { buffer = buf, silent = true, desc = desc })
         end
-        m("n", "]c", function()
-          if vim.wo.diff then
-            vim.cmd.normal({ "]c", bang = true })
-          else
-            gs.nav_hunk("next")
+        local function hunk(lhs, direction)
+          return function()
+            if vim.wo.diff then
+              vim.cmd.normal({ lhs, bang = true })
+            elseif
+              not (package.loaded.codediff and require("codediff")[direction .. "_hunk"]())
+            then
+              gs.nav_hunk(direction)
+            end
           end
-        end, "Next git hunk")
-        m("n", "[c", function()
-          if vim.wo.diff then
-            vim.cmd.normal({ "[c", bang = true })
-          else
-            gs.nav_hunk("prev")
-          end
-        end, "Previous git hunk")
+        end
+        m("n", "]c", hunk("]c", "next"), "Next git hunk")
+        m("n", "[c", hunk("[c", "prev"), "Previous git hunk")
         m("n", "<leader>gs", gs.stage_hunk, "Stage/unstage hunk")
         m("v", "<leader>gs", function()
           gs.stage_hunk({ vim.fn.line("."), vim.fn.line("v") })
@@ -69,7 +68,9 @@ return {
       { "<leader>gD", "<cmd>CodeDiff<CR>", desc = "Review working tree" },
     },
     opts = {
-      keymaps = { view = { toggle_explorer = "<leader>ge" } },
+      keymaps = {
+        view = { toggle_explorer = "<leader>ge", open_in_prev_tab = { "gf", "<leader>gf" } },
+      },
     },
   },
 

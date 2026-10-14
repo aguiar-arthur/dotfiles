@@ -106,3 +106,21 @@ test_clojure() {
   fi
   stop_nvim
 }
+
+test_review() {
+  local repo="$PROJ/review" g=(git -c user.name=t -c user.email=t@t)
+  rm -rf "$repo" "$PROJ/review.git"
+  git init -q --bare "$PROJ/review.git" && git -C "$PROJ" clone -q review.git review 2>/dev/null
+  printf 'a = 1\n\nb = 2\n' >"$repo/r.lua"
+  "${g[@]}" -C "$repo" add r.lua && "${g[@]}" -C "$repo" commit -qm base && git -C "$repo" push -q origin HEAD 2>/dev/null
+  printf 'a = 1\n\nb = 3\n' >"$repo/r.lua"
+  "${g[@]}" -C "$repo" commit -qam change
+  start_nvim "$repo" other.txt
+  keys Space g V
+  wait_for 'vim.fn.tabpagenr("$")' 2 20
+  keys C-l C-l gg
+  wait_for 'vim.fn.expand("%:t")' r.lua 10
+  keys ]c
+  probe "Space g V: ]c goes to the branch's change" 'vim.fn.line(".")' 3 10
+  stop_nvim
+}

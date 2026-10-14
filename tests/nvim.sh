@@ -80,6 +80,7 @@ full() {
   test_run
   test_debug
   test_language_actions
+  test_review
   test_test_keys
   test_clojure
   test_tex

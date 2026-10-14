@@ -165,6 +165,7 @@ Brackets and quotes close themselves as you type (mini.pairs).
 | Key | Does |
 |---|---|
 | `C-h` / `C-j` / `C-k` / `C-l` | go to the window on the left / below / above / right |
+| `Space w h` / `j` / `k` / `l` | the same, through the window menu |
 | `Space w v` / `Space w s` | split vertically / horizontally |
 | `Space w c` / `Space w o` | close this window / the others |
 | `Space w =` | make the windows the same size |
@@ -272,7 +273,7 @@ side. The right side is the real file, so `gd`, `K` and edits work there.
 | `]c` / `[c` | next / previous change |
 | `-` | stage / unstage the file |
 | `Space h s` / `Space h u` / `Space h r` | stage / unstage / discard the change under the cursor |
-| `gf` | open the file in the previous tab |
+| `gf` / `Space g f` | open the file in the previous tab |
 | `t` / `gc` | inline or side by side / fold the unchanged lines |
 | `Space e` / `Space g e` | go to / hide the file list |
 | `g?` / `q` | every key / close the review |

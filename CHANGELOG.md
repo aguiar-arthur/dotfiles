@@ -44,6 +44,10 @@ and `git log` have them.
 
 ### Added
 
+- which-key names every menu: `<leader>h` (hunks, in a review), Conjure's `,ca` and `,ec`, and
+  the vimtex keys that had no label (`,la`, `,ls`, `,lS`, `,lL`, `,lG`, `,lI`, `,lX`).
+- `<leader>wh` / `wj` / `wk` / `wl` move between windows, as `C-h` / `C-j` / `C-k` / `C-l` do.
+- In a review, `<leader>gf` (as `gf`) opens the file in the previous tab.
 - `<leader>gD` reviews the working tree side by side, as `<leader>gV` does the branch.
 - A new look: treesitter-context keeps the current function on top (`<leader>ux`), a Snacks
   status column groups signs, git and folds, and mini.statusline (Dracula colors) replaces
@@ -78,6 +82,8 @@ and `git log` have them.
 
 ### Fixed
 
+- `]c` / `[c` in a review follow its changes also in files the review opened itself; gitsigns
+  took the keys there and jumped to the changes against the index.
 - `<leader>uc` turns conceal off in Markdown buffers too; render-markdown set it back to 2.
 - `,o` (organize imports) checks the buffer the server attached to, not the current one, before
   taking the key.
