@@ -89,10 +89,10 @@ return {
           local client = vim.lsp.get_client_by_id(ev.data.client_id)
           local provider = client and client.server_capabilities.codeActionProvider
           local kinds = type(provider) == "table" and provider.codeActionKinds or {}
-          if
-            vim.tbl_contains(kinds, "source.organizeImports")
-            and vim.fn.maparg("<localleader>o", "n") == ""
-          then
+          local taken = vim.api.nvim_buf_call(buf, function()
+            return vim.fn.maparg("<localleader>o", "n") ~= ""
+          end)
+          if vim.tbl_contains(kinds, "source.organizeImports") and not taken then
             map("<localleader>o", function()
               vim.lsp.buf.code_action({
                 context = { only = { "source.organizeImports" }, diagnostics = {} },

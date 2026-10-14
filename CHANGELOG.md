@@ -74,6 +74,9 @@ and `git log` have them.
 
 ### Fixed
 
+- `<leader>uc` turns conceal off in Markdown buffers too; render-markdown set it back to 2.
+- `,o` (organize imports) checks the buffer the server attached to, not the current one, before
+  taking the key.
 - `C-\` toggles the bottom terminal, as the README says; it opened the same floating terminal
   as `<leader>tf`.
 - Language server hovers no longer get the Markdown preview key `,p` and its save hook: the

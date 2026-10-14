@@ -214,7 +214,9 @@ vim spell already underlines typos, and one word list (`zg`) is simpler than two
 ## Markdown and notes
 
 render-markdown.nvim draws headings, tables, code blocks and checkboxes in the buffer; the
-line under the cursor and insert mode show the raw text. `<leader>um` turns it off. LaTeX math
+line under the cursor and insert mode show the raw text. `<leader>um` turns it off.
+render-markdown sets `conceallevel` on every redraw, so it is set up again with the global value
+whenever that changes (`<leader>uc`). LaTeX math
 is not rendered there: `,p` builds an HTML page with pandoc (math as MathML, images embedded),
 opens it in the browser and rebuilds it on every save.
 

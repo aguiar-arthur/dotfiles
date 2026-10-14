@@ -1,15 +1,34 @@
 local notes = require("config.settings").notes
 
+local function render_options()
+  local level = vim.go.conceallevel
+  return {
+    file_types = { "markdown" },
+    latex = { enabled = false },
+    win_options = { conceallevel = { default = level, rendered = level } },
+  }
+end
+
 return {
   {
     "MeanderingProgrammer/render-markdown.nvim",
     ft = "markdown",
     dependencies = { "nvim-treesitter/nvim-treesitter", "nvim-mini/mini.icons" },
-    opts = {
-      file_types = { "markdown" },
-      latex = { enabled = false },
-      win_options = { conceallevel = { default = 2, rendered = 2 } },
-    },
+    opts = render_options,
+    config = function(_, opts)
+      local render = require("render-markdown")
+      render.setup(opts)
+      vim.api.nvim_create_autocmd("OptionSet", {
+        group = vim.api.nvim_create_augroup("user_render_markdown_conceal", { clear = true }),
+        pattern = "conceallevel",
+        callback = function()
+          if vim.v.option_type == "global" then
+            render.setup(render_options())
+            render.set(render.get())
+          end
+        end,
+      })
+    end,
   },
 
   {
