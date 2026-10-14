@@ -22,7 +22,6 @@ tests/lib.sh        their helpers (pass/fail, the isolated home, tmux, probe)
 tests/<area>.sh     the full checks by area: look, markdown, code, tex
 tests/modules.lua   loads every Lua module of the config, for tests/nvim.sh
 link.sh             links, the ~/.zshrc block, iTerm2 and Skim preferences
-CHANGELOG.md        notable changes, newest first
 ```
 
 ## Rules
@@ -65,9 +64,9 @@ CHANGELOG.md        notable changes, newest first
   replaced our test runner.
 - **Docs.** The README is the user's guide: install, then one section per module with what
   it is for and a table of its keys. `docs/neovim.md` says how the editor works and why. A
-  key added, moved or removed changes its README table in the same change; a change the user
-  would notice also gets a line in `CHANGELOG.md`. Take the keys from the code, not from
-  memory (the `desc` of each mapping, or `nvim_get_keymap` after loading the plugins).
+  key added, moved or removed changes its README table in the same change. Take the keys from
+  the code, not from memory (the `desc` of each mapping, or `nvim_get_keymap` after loading the
+  plugins).
 
 ## Pitfalls that already cost time
 
@@ -100,6 +99,8 @@ CHANGELOG.md        notable changes, newest first
   warns); the extra one is pinned in its `after/lsp/` file, as ruff is to UTF-16.
 - gitsigns attaches to a file a codediff review opens after codediff maps its keys, and its
   buffer-local `]c` / `[c` replaced the review's; they now ask codediff first.
+- Homebrew loads a formula or cask from a third-party tap (`owner/tap/name` in a Brewfile)
+  only once it is trusted; `install.sh` runs `brew trust` for each before `brew bundle`.
 - blink.cmp on the `:` line inserts the selected item already: mapping `<CR>` to `accept`
   there makes a completed command need a second `<CR>`.
 

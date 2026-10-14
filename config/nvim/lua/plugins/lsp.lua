@@ -78,6 +78,8 @@ return {
           map("gd", Snacks.picker.lsp_definitions, "Go to definition")
           map("gr", Snacks.picker.lsp_references, "Go to references")
 
+          map("<leader>ld", Snacks.picker.lsp_definitions, "Definition")
+          map("<leader>lr", Snacks.picker.lsp_references, "References")
           map("<leader>li", Snacks.picker.lsp_implementations, "Implementation")
           map("<leader>lt", Snacks.picker.lsp_type_definitions, "Type definition")
           map("<leader>lD", vim.lsp.buf.declaration, "Declaration")

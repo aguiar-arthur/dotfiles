@@ -107,6 +107,7 @@ function M.jack_in()
     end
     local term = Snacks.terminal.open(cmd, opts)
     vim.cmd.wincmd("p")
+    vim.cmd.stopinsert()
     connect_when_ready(port_file, term.buf)
   end
   if not vim.uv.fs_stat(port_file) then

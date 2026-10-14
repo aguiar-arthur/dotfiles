@@ -32,7 +32,8 @@ On a Mac with macOS and an internet connection; nothing else is needed beforehan
    It goes through three steps, and a failed step does not stop the others:
 
    - **brew**: Homebrew, if missing, then every program in the `Brewfile` that is not
-     installed yet (already installed ones are not upgraded);
+     installed yet (already installed ones are not upgraded; formulae from other taps are
+     trusted first, as Homebrew requires);
    - **link**: `link.sh`, described below;
    - **nvim**: the plugins at the versions in `lazy-lock.json`, the Mason servers and tools,
      the treesitter parsers and the Portuguese spell file, through the linked
@@ -188,7 +189,7 @@ LaTeX and Clojure.
 
 | Key | Does |
 |---|---|
-| `gd` / `gr` | go to the definition / list references |
+| `gd` / `gr` (or `Space l d` / `Space l r`) | go to the definition / list references |
 | `K` | documentation of the word under the cursor |
 | `Space l i` / `Space l t` / `Space l D` | implementation / type definition / declaration |
 | `Space l n` | rename everywhere |
@@ -548,4 +549,4 @@ link.sh           links, the ~/.zshrc block, app preferences; `nvim`: Neovim and
 tests/            the Neovim checks: nvim.sh runs them (quick, full, fresh), one file per area
 ```
 
-Changes are listed in [CHANGELOG.md](CHANGELOG.md). MIT, see [LICENSE](LICENSE).
+MIT, see [LICENSE](LICENSE).

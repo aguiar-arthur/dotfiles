@@ -33,7 +33,16 @@ step_brew() {
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || return 1
     load_brew
   fi
+  trust_taps || return 1
   brew bundle --no-upgrade --file "$BREWFILE"
+}
+
+trust_taps() {
+  local kind name
+  while read -r kind name; do
+    brew trust "--$kind" "$name" >/dev/null || return 1
+  done < <(sed -nE 's#^(brew|cask) "([^"/]+/[^"/]+/[^"/]+)".*#\1 \2#p' "$BREWFILE" "$DOT/Brewfile.nvim" |
+    sed 's/^brew /formula /' | sort -u)
 }
 
 step_nvim() {
