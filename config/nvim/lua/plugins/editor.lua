@@ -55,6 +55,25 @@ return {
   },
 
   {
+    "esmuellert/codediff.nvim",
+    cmd = "CodeDiff",
+    build = ":CodeDiff install",
+    keys = {
+      {
+        "<leader>gV",
+        function()
+          require("dotfiles.git").review_vs_origin()
+        end,
+        desc = "Review branch vs origin",
+      },
+      { "<leader>gD", "<cmd>CodeDiff<CR>", desc = "Review working tree" },
+    },
+    opts = {
+      keymaps = { view = { toggle_explorer = "<leader>ge" } },
+    },
+  },
+
+  {
     "folke/flash.nvim",
     event = "VeryLazy",
     opts = {},

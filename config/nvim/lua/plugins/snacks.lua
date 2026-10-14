@@ -228,13 +228,6 @@ return {
       desc = "Changes (hunks)",
     },
     {
-      "<leader>gV",
-      function()
-        require("dotfiles.git").diff_vs_origin()
-      end,
-      desc = "Changes vs origin",
-    },
-    {
       "<leader>gh",
       function()
         Snacks.picker.git_log_file()

@@ -243,7 +243,7 @@ Results appear as signs next to each test and as diagnostics on the failing line
 A session opens panels with variables, the call stack, breakpoints and the program's output;
 they stay open after the program ends so its output can be read.
 
-### Git (gitsigns, Snacks, lazygit)
+### Git (gitsigns, Snacks, codediff, lazygit)
 
 Changed lines are marked in the left column and the line's last commit shows at its end.
 
@@ -257,10 +257,25 @@ Changed lines are marked in the left column and the line's last commit shows at 
 | `Space g b` / `Space g B` | blame the line / turn the end-of-line blame off |
 | `Space g d` | diff this file against the index |
 | `Space g c` / `Space g t` | changed hunks / changed files of the working tree (`Tab` stages) |
-| `Space g V` | everything this branch changes against origin's default branch |
+| `Space g D` / `Space g V` | review side by side: the working tree / everything this branch changes against origin's default branch |
 | `Space g h` / `Space g L` / `Space g l` | history of the file / of the line / of the repository |
 | `Space g O` | open the file in the browser (GitHub, GitLab, …) |
 | `ih` | the hunk as a text object (`dih` deletes it) |
+
+The review opens in a new tab: the changed files on the left, the old and new versions side by
+side. The right side is the real file, so `gd`, `K` and edits work there.
+
+| Key (in the review) | Does |
+|---|---|
+| `Enter` | show the file under the cursor (in the file list) |
+| `]f` / `[f` | next / previous file |
+| `]c` / `[c` | next / previous change |
+| `-` | stage / unstage the file |
+| `Space h s` / `Space h u` / `Space h r` | stage / unstage / discard the change under the cursor |
+| `gf` | open the file in the previous tab |
+| `t` / `gc` | inline or side by side / fold the unchanged lines |
+| `Space e` / `Space g e` | go to / hide the file list |
+| `g?` / `q` | every key / close the review |
 
 ### Toggles (`Space u`)
 

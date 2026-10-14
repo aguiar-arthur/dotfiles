@@ -35,7 +35,7 @@ The README has every key, one table per module; this page explains how they beha
 | Group | For |
 |---|---|
 | `<leader>f` | find: files, grep, recent, buffers, help, symbols, marks (snacks picker) |
-| `<leader>g` | git: lazygit, hunks, blame, changes (`gc` working tree, `gV` branch vs origin's default branch), history (`gh` file, `gL` line, `gl` repo) |
+| `<leader>g` | git: lazygit, hunks, blame, changes (`gc` working tree hunks; `gD` / `gV` side by side review of the working tree / the branch vs origin's default branch), history (`gh` file, `gL` line, `gl` repo) |
 | `<leader>l` | LSP: definition, references, rename, code action, format |
 | `<leader>d` | diagnostics and lists (Trouble) |
 | `<leader>b` / `w` / `t` | buffers / windows / terminals |
@@ -87,12 +87,14 @@ followed (built in).
 snacks.nvim (picker, file tree, terminal, lazygit, dashboard, notifications, indent guides,
 the status column, toggles), blink.cmp + LuaSnip (completion, snippets), nvim-lspconfig +
 Mason, conform.nvim (formatting), nvim-treesitter (`main` branch) + treesitter-context,
-gitsigns, flash, mini.ai / surround / pairs / icons / statusline, todo-comments, Trouble,
-persistence, nvim-dap + dap-ui, Neotest (neotest-python), which-key, vimtex,
+gitsigns, codediff.nvim (side by side review), flash, mini.ai / surround / pairs / icons /
+statusline, todo-comments, Trouble, persistence, nvim-dap + dap-ui, Neotest (neotest-python),
+which-key, vimtex,
 Conjure, nvim-paredit, grug-far, render-markdown.nvim, obsidian.nvim, Dracula. Behind them:
 friendly-snippets, lazydev (Neovim's API in Lua completion), SchemaStore (JSON and YAML
 schemas), mason-lspconfig, mason-tool-installer, mason-nvim-dap, nvim-nio and plenary. Each one
-meets the plugin rule in `AGENTS.md`.
+meets the plugin rule in `AGENTS.md`. codediff.nvim downloads its prebuilt diff library in its
+lazy.nvim `build` step, so `install.sh` fetches it with the plugins.
 
 The look: the `:` line and `/` search stay Neovim's own (blink completes them), notifications
 go to Snacks (`<leader>on`) and signature help to blink. treesitter-context keeps the enclosing

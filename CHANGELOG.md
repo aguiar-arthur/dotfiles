@@ -8,6 +8,9 @@ and `git log` have them.
 
 ### Changed
 
+- `<leader>gV` reviews the branch against origin's default branch side by side (codediff.nvim):
+  the changed files in a list, `]f` / `[f` between files, `]c` / `[c` between changes, and the
+  real file on the right for `gd` and edits. The Snacks picker listed hunks only.
 - Neovim 0.12 or newer is required: the grammar toggle (`<leader>uG`) uses its LSP API and
   failed on 0.11.
 - The README explains each part of the editor with a table of its keys: completion, finding,
@@ -41,6 +44,7 @@ and `git log` have them.
 
 ### Added
 
+- `<leader>gD` reviews the working tree side by side, as `<leader>gV` does the branch.
 - A new look: treesitter-context keeps the current function on top (`<leader>ux`), a Snacks
   status column groups signs, git and folds, and mini.statusline (Dracula colors) replaces
   lualine with the same information. The `:` line and messages stay Neovim's own.
