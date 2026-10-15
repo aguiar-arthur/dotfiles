@@ -4,6 +4,8 @@ M.prose = { "tex", "markdown", "text", "gitcommit", "plaintex" }
 
 M.generation = 0
 
+M.values = {}
+
 local function set_local(win, name, value)
   vim.api.nvim_set_option_value(name, value, { scope = "local", win = win })
 end
@@ -26,11 +28,13 @@ function M.apply(win)
     return
   end
   vim.b[buf].toggles_generation = M.generation
-  if not vim.wo[win].diff then
-    set_local(win, "wrap", vim.go.wrap)
+  if
+    not vim.wo[win].diff and not require("dotfiles.git").review(vim.api.nvim_win_get_tabpage(win))
+  then
+    set_local(win, "wrap", M.values.wrap)
   end
-  set_local(win, "relativenumber", vim.go.relativenumber)
-  set_local(win, "conceallevel", vim.go.conceallevel)
+  set_local(win, "relativenumber", M.values.relativenumber)
+  set_local(win, "conceallevel", M.values.conceallevel)
   set_spell(win, buf)
 end
 
@@ -41,45 +45,16 @@ function M.apply_all()
   end
 end
 
-local skip_highlight = { tex = true, plaintex = true, latex = true }
-
-function M.treesitter_enabled()
-  return vim.g.treesitter_highlight ~= false
-end
-
-function M.start_treesitter(buf)
-  if not M.treesitter_enabled() or skip_highlight[vim.bo[buf].filetype] then
-    return
-  end
-  local lang = vim.treesitter.language.get_lang(vim.bo[buf].filetype)
-  local indent = vim.tbl_contains(require("config.settings").treesitter_indent, lang)
-  if pcall(vim.treesitter.start, buf) and indent then
-    vim.bo[buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
-  end
-end
-
-function M.set_treesitter(state)
-  vim.g.treesitter_highlight = state
-  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-    if vim.api.nvim_buf_is_loaded(buf) and vim.bo[buf].filetype ~= "" then
-      if state then
-        M.start_treesitter(buf)
-      else
-        pcall(vim.treesitter.stop, buf)
-      end
-    end
-  end
-end
-
 local function global(name, get, set)
   return Snacks.toggle({ name = name, get = get, set = set })
 end
 
 function M.option(name, option, on, off)
   return global(name, function()
-    return vim.go[option] == on
+    return M.values[option] == on
   end, function(state)
-    vim.go[option] = state and on or off
+    M.values[option] = state and on or off
+    vim.go[option] = M.values[option]
     M.apply_all()
   end)
 end
@@ -114,12 +89,16 @@ function M.map()
   end, function(state)
     require("treesitter-context")[state and "enable" or "disable"]()
   end):map("<leader>ux")
-  global("Treesitter highlight (all buffers)", M.treesitter_enabled, M.set_treesitter):map(
-    "<leader>uT"
-  )
+  local treesitter = require("dotfiles.treesitter")
+  global("Treesitter highlight (all buffers)", treesitter.enabled, treesitter.set):map("<leader>uT")
 end
 
 function M.setup()
+  M.values = {
+    wrap = vim.go.wrap,
+    relativenumber = vim.go.relativenumber,
+    conceallevel = vim.go.conceallevel,
+  }
   local group = vim.api.nvim_create_augroup("user_global_toggles", { clear = true })
   vim.api.nvim_create_autocmd("BufWinEnter", {
     group = group,
@@ -135,13 +114,6 @@ function M.setup()
   vim.api.nvim_create_autocmd("FileType", {
     group = group,
     callback = function(ev)
-      if not M.treesitter_enabled() then
-        vim.schedule(function()
-          if vim.api.nvim_buf_is_valid(ev.buf) then
-            pcall(vim.treesitter.stop, ev.buf)
-          end
-        end)
-      end
       if managed(ev.buf) then
         for _, win in ipairs(vim.fn.win_findbuf(ev.buf)) do
           set_spell(win, ev.buf)

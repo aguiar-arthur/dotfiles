@@ -34,12 +34,21 @@ au("BufReadPost", {
   end,
 })
 
+au("BufUnload", {
+  group = augroup("last_loc_reset"),
+  callback = function(ev)
+    vim.b[ev.buf].last_loc_done = nil
+  end,
+})
+
 au("VimResized", {
   group = augroup("resize"),
   callback = function()
-    local tab = vim.fn.tabpagenr()
-    vim.cmd("tabdo wincmd =")
-    vim.cmd("tabnext " .. tab)
+    for _, tab in ipairs(vim.api.nvim_list_tabpages()) do
+      vim.api.nvim_win_call(vim.api.nvim_tabpage_get_win(tab), function()
+        vim.cmd("wincmd =")
+      end)
+    end
   end,
 })
 

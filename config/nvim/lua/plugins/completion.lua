@@ -38,8 +38,6 @@ return {
         ["<CR>"] = { "accept", "fallback" },
         ["<Tab>"] = { "snippet_forward", "select_next", "fallback" },
         ["<S-Tab>"] = { "snippet_backward", "select_prev", "fallback" },
-        ["<C-j>"] = { "select_next", "fallback" },
-        ["<C-k>"] = { "select_prev", "fallback" },
         ["<C-b>"] = { "scroll_documentation_up", "fallback" },
         ["<C-f>"] = { "scroll_documentation_down", "fallback" },
         ["<C-s>"] = { "show_signature", "hide_signature", "fallback" },
@@ -70,8 +68,6 @@ return {
           preset = "none",
           ["<Tab>"] = { "show_and_insert_or_accept_single", "select_next", "fallback" },
           ["<S-Tab>"] = { "select_prev", "fallback" },
-          ["<C-j>"] = { "select_next", "fallback" },
-          ["<C-k>"] = { "select_prev", "fallback" },
           ["<C-e>"] = { "cancel", "fallback" },
         },
         completion = {

@@ -20,7 +20,10 @@ install.sh          installs everything, running link.sh before Neovim
 tests/nvim.sh       the Neovim checks, run by hand: quick (default), full, fresh
 tests/lib.sh        their helpers (pass/fail, the isolated home, tmux, probe)
 tests/<area>.sh     the full checks by area: look, markdown, code, tex
-tests/modules.lua   loads every Lua module of the config, for tests/nvim.sh
+tests/<area>.lua    headless checks of our own code, with the real config: files, helpers,
+                    toggles, keys (share.lua and modules.lua run without it); snippets.lua is
+                    the LaTeX probe the full run types into a real Neovim
+tests/lib.lua       their helpers (eq, a temporary project, a config file, done)
 link.sh             links, the ~/.zshrc block, iTerm2 and Skim preferences
 ```
 
@@ -59,9 +62,13 @@ link.sh             links, the ~/.zshrc block, iTerm2 and Skim preferences
   `curl -s https://api.github.com/repos/<owner>/<repo>` (`stargazers_count`, `pushed_at`,
   `archived`, `fork`) before adding one, and drop a plugin that stops meeting the rule.
   Prefer a built-in feature or one of the plugins already here over a new one.
+- **Our code is tested.** Code we write (`lua/dotfiles/`, `after/ftplugin/`, `snippets/`, and
+  logic of our own in a plugin spec, keymap or autocmd) gets a check in `tests/` in the same
+  change, and a bug fixed in it gets a check that fails without the fix. Plugin defaults and
+  plain settings need none.
 - **Own code stays small.** A helper of our own (`lua/dotfiles/`) grows by a line, not a
   feature; when it would need one, replace it with a proven plugin instead, as Neotest
-  replaced our test runner.
+  replaced our test runner and code_runner.nvim our `,r`.
 - **Docs.** The README is the user's guide: install, then one section per module with what
   it is for and a table of its keys. `docs/neovim.md` says how the editor works and why. A
   key added, moved or removed changes its README table in the same change. Take the keys from
@@ -101,6 +108,8 @@ link.sh             links, the ~/.zshrc block, iTerm2 and Skim preferences
   buffer-local `]c` / `[c` replaced the review's; they now ask codediff first.
 - Homebrew loads a formula or cask from a third-party tap (`owner/tap/name` in a Brewfile)
   only once it is trusted; `install.sh` runs `brew trust` for each before `brew bundle`.
+- In a codediff tab `vim.go.wrap` is off (codediff sets it with `vim.wo`); global toggles keep
+  their own values instead of reading `vim.go`.
 - blink.cmp on the `:` line inserts the selected item already: mapping `<CR>` to `accept`
   there makes a completed command need a second `<CR>`.
 
@@ -108,13 +117,15 @@ link.sh             links, the ~/.zshrc block, iTerm2 and Skim preferences
 
 `tests/nvim.sh` is the one test command, run by hand and never from `install.sh`. `quick` (the
 default, seconds) runs the startup, module, lockfile, Skim, `zg`, stylua, shell syntax, shfmt,
-rumdl and no-comment checks. `full` also installs Neovim into an isolated home under `~/.cache/dotfiles-nvim-test`
-and drives a real Neovim in tmux (servers, toggles, the look, notes, a LaTeX build); `fresh`
-does the same in a throwaway directory. It skips what is not installed, never touches the real
-home and fails if `lazy-lock.json` changes. A check goes in the `tests/<area>.sh` of what it
-tests, a helper in `tests/lib.sh`. Keep it to bugs that already happened and the `.sh` files
-together under 520 lines: a new check replaces an old one or earns its lines. If it goes
-unused, delete `tests/`.
+rumdl and no-comment checks plus the headless `tests/<area>.lua` checks of our own code. `full`
+also installs Neovim into an isolated home under `~/.cache/dotfiles-nvim-test` and drives a
+real Neovim in tmux (servers, toggles, the look, notes, a LaTeX build and snippets, `,r`, a
+codediff review, `,cj`); `fresh` does the same in a throwaway directory. It skips what is not
+installed, never touches the real home or clipboard and fails if `lazy-lock.json` changes.
+What can run headless goes in a `tests/<area>.lua` (one `lua_check` line in `nvim.sh`, fakes
+for the clipboard, browser, Mason or codediff); what needs a UI, a server or typing goes in
+the `tests/<area>.sh` of what it tests, a helper in `tests/lib.sh`. Keep the `.sh` files
+together under 650 lines: a new check replaces an old one or earns its lines.
 
 By hand:
 

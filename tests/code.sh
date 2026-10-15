@@ -33,6 +33,15 @@ test_run() {
   sleep 2
   probe "Python: running again reuses the window" "$(terminal_windows)" 1 10
   stop_nvim
+  mkdir -p "$PROJ/run/sub"
+  [ -x "$PROJ/run/.venv/bin/python" ] || python3 -m venv "$PROJ/run/.venv"
+  printf 'import os, sys\nprint("VENV", sys.prefix.endswith(".venv"), os.path.basename(os.getcwd()))\n' >"$PROJ/run/sub/where.py"
+  start_nvim "$PROJ/run" sub/where.py
+  send ":call append('$', 'print(\"SAVED_OK\")')<CR>"
+  keys ,r
+  probe "Python: ,r uses the .venv from the file's folder" "$(term_has "VENV True sub")" 1 30
+  probe "Python: ,r saves the file first" "$(term_has SAVED_OK)" 1 10
+  stop_nvim
 }
 
 test_debug() {
@@ -104,7 +113,21 @@ test_clojure() {
     probe "Clojure: clojure-lsp attaches" "$(clients clojure_lsp)" 1 60
     probe "Clojure: ,o stays paredit's raise" 'vim.fn.maparg(",o", "n", false, true).desc or ""' "Raise form"
   fi
+  keys ,cj
+  probe "Clojure: ,cj without deps.edn says so" 'Snacks.notifier.get_history()[#Snacks.notifier.get_history()].msg' "No deps.edn or project.clj above this file"
   stop_nvim
+  if ! have clojure; then
+    skip "Clojure: ,cj starts the REPL and connects" "clojure not installed"
+    return
+  fi
+  printf '{:paths ["."]}\n' >"$PROJ/clj/deps.edn"
+  echo 1 >"$PROJ/clj/.nrepl-port"
+  start_nvim "$PROJ/clj" demo.clj
+  keys ,cj
+  probe "Clojure: ,cj replaces a dead .nrepl-port" '(vim.fn.readfile(".nrepl-port")[1] or "1") ~= "1" and 1 or 0' 1 240
+  probe "Clojure: ,cj connects Conjure" 'require("conjure.client.clojure.nrepl.state").get("conn") and 1 or 0' 1 30
+  stop_nvim
+  rm -f "$PROJ/clj/deps.edn" "$PROJ/clj/.nrepl-port"
 }
 
 test_review() {
@@ -122,5 +145,13 @@ test_review() {
   wait_for 'vim.fn.expand("%:t")' r.lua 10
   keys ]c
   probe "Space g V: ]c goes to the branch's change" 'vim.fn.line(".")' 3 10
+  probe "Space g V: the sides do not wrap" 'vim.wo.wrap and 1 or 0' 0 5
+  probe "Space g V: the wrap toggle stays on" 'require("dotfiles.toggles").values.wrap and 1 or 0' 1 5
+  keys Space f f
+  sleep 1
+  keys r.lua Enter
+  probe "Space g V: a picked file opens in a new tab" 'vim.fn.tabpagenr("$")' 3 10
+  probe "Space g V: that tab wraps" 'vim.wo.wrap and 1 or 0' 1 5
+  probe "Space g V: the review keeps its diff" '#vim.fn.tabpagebuflist(2)' 3 5
   stop_nvim
 }

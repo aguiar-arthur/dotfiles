@@ -36,6 +36,11 @@ check_silent() {
   fi
 }
 
+lua_check() {
+  check "$1" env DOT="$DOT" perl -e 'alarm 120; exec @ARGV' nvim --headless -n -i NONE \
+    -c "lua local ok, e = pcall(dofile, '$DOT/tests/$2') if not ok then io.stderr:write(tostring(e)) vim.cmd('cquit 1') end"
+}
+
 tool() {
   local name="$1" tool="$2"
   shift 2

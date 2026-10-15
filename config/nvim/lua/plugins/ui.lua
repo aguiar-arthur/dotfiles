@@ -97,7 +97,6 @@ return {
         { "<leader>d", group = "diagnostics" },
         { "<leader>f", group = "file/find" },
         { "<leader>g", group = "git" },
-        { "<leader>h", group = "hunk (review)" },
         { "<leader>l", group = "lsp" },
         { "<leader>n", group = "notes" },
         { "<leader>o", group = "open/toggle" },

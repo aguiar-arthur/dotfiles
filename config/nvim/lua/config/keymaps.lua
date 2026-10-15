@@ -22,6 +22,10 @@ map("i", ".", ".<c-g>u", o("Undo breakpoint"))
 
 map("n", "<leader>cc", "gcc", { remap = true, desc = "Comment line" })
 map("x", "<leader>cc", "gc", { remap = true, desc = "Comment selection" })
+map("x", "<leader>cs", function()
+  require("dotfiles.share").selection()
+end, o("Share selection (path and code block)"))
+map("n", "<leader>cs", "V<leader>cs", { remap = true, desc = "Share line (path and code block)" })
 
 for _, lhs in ipairs({ "grn", "grr", "gra", "gri", "grt", "grx" }) do
   for _, mode in ipairs({ "n", "x" }) do
@@ -49,7 +53,6 @@ map("n", "<leader>wK", "<cmd>resize +2<CR>", o("Taller"))
 
 map("n", "<leader>bn", "<cmd>bnext<CR>", o("Next buffer"))
 map("n", "<leader>bp", "<cmd>bprevious<CR>", o("Previous buffer"))
-map("n", "<leader>bk", "<cmd>bdelete!<CR>", o("Kill buffer (force)"))
 map("n", "<leader>bd", function()
   Snacks.bufdelete()
 end, o("Close buffer"))

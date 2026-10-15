@@ -99,7 +99,7 @@ keys. How it works inside, and why, is in [docs/neovim.md](docs/neovim.md).
 | `gd` / `gr` / `K` | go to definition / references / documentation |
 | `Space l a` / `Space l n` | code action / rename |
 | `Space g g` | lazygit |
-| `,r` | run the file (Python, Lua, shell) |
+| `,r` | run the file (Python, Lua, shell, JavaScript, C, C++, Java, Ruby, Rust) |
 
 ### Completion and snippets (blink.cmp, LuaSnip)
 
@@ -110,7 +110,6 @@ match at once) and `Enter` runs the line as typed.
 | Key (insert mode) | Does |
 |---|---|
 | `Tab` / `S-Tab` | next / previous field of a snippet; otherwise next / previous item |
-| `C-j` / `C-k` | next / previous item, always |
 | `Enter` | accept the item |
 | `C-e` | close the menu |
 | `C-Space` | open the menu, or show / hide the item's documentation |
@@ -120,7 +119,7 @@ match at once) and `Enter` runs the line as typed.
 ### Finding things (Snacks picker, file tree, grug-far)
 
 Every list (files, text, buffers, symbols, git) opens in the same picker: type to filter,
-`C-j` / `C-k` move, `Enter` opens, `C-v` / `C-s` open in a vertical / horizontal split, `Esc`
+`C-n` / `C-p` move, `Enter` opens, `C-v` / `C-s` open in a vertical / horizontal split, `Esc`
 closes. `Space f R` reopens the last picker where you left it.
 
 | Key | Does |
@@ -153,6 +152,7 @@ the rest.
 | `au` / `iu`, `aa` / `ia` | around / inside a function call, an argument (`ciu` rewrites a call's arguments) |
 | `gsa` / `gsd` / `gsr` | add / delete / replace a surrounding (`gsaiw"` quotes a word, `gsd(` removes parentheses) |
 | `gcc` / `gc` / `Space c c` | comment a line / a motion or selection |
+| `Space c s` | copy the line (the selection in visual mode) to paste anywhere: `path:line:col-line:col`, then a code block |
 | `Alt-j` / `Alt-k` | move the line or selection down / up |
 | `<` / `>` in visual mode | indent, keeping the selection |
 | `]r` / `[r` | next / previous reference of the word under the cursor |
@@ -172,9 +172,8 @@ Brackets and quotes close themselves as you type (mini.pairs).
 | `Space w =` | make the windows the same size |
 | `Space w H` / `L` / `J` / `K` | narrower / wider / shorter / taller |
 | `Space b n` / `Space b p` | next / previous buffer |
-| `Space b d` / `Space b k` | close the buffer (keeps the window) / force it |
-| `C-\` | show or hide the bottom terminal (the one of `Space t h`) |
-| `Space t f` / `t h` / `t v` | a floating / bottom / right terminal, each its own shell |
+| `Space b d` | close the buffer (keeps the window, asks about unsaved changes) |
+| `Space t f` / `t h` / `t v` | show or hide a floating / bottom / right terminal, each its own shell |
 | `Space S r` / `Space S l` | restore the session of this folder / the last session |
 | `Space S s` / `Space S d` | pick a session / do not save this one |
 
@@ -189,7 +188,7 @@ LaTeX and Clojure.
 
 | Key | Does |
 |---|---|
-| `gd` / `gr` (or `Space l d` / `Space l r`) | go to the definition / list references |
+| `gd` / `gr` (or `Space l d` / `Space l r`) | go to the definition / list references (the list opens even for one) |
 | `K` | documentation of the word under the cursor |
 | `Space l i` / `Space l t` / `Space l D` | implementation / type definition / declaration |
 | `Space l n` | rename everywhere |
@@ -220,7 +219,8 @@ These keys exist only in the languages listed; in other files they are not mappe
 | `,o` organize imports | ruff | | |
 | `,s` source the file into Neovim | | yes | |
 
-`,r` saves the file and runs it; the next run replaces the same terminal. Python runs with
+`,r` saves the file and runs it from its folder; running the same file again replaces its
+terminal. It also runs JavaScript, C, C++, Java, Ruby and Rust files. Python runs with
 the project's `.venv`, else `$VIRTUAL_ENV`, else `python3`.
 
 | Tests | Does |
@@ -265,7 +265,9 @@ Changed lines are marked in the left column and the line's last commit shows at 
 | `ih` | the hunk as a text object (`dih` deletes it) |
 
 The review opens in a new tab: the changed files on the left, the old and new versions side by
-side. The right side is the real file, so `gd`, `K` and edits work there.
+side. The right side is the real file, so `gd`, `K` and edits work there. A file you open from
+there with a picker (`gd`, `Space l r`, `Space f f`, …) opens in a new tab, so the review stays
+as it was. The two sides never wrap lines: codediff keeps them aligned that way.
 
 | Key (in the review) | Does |
 |---|---|
@@ -505,8 +507,8 @@ real home and fails if `lazy-lock.json` changes. Checks whose program is missing
 
 | Mode | Command | Takes | Checks |
 |---|---|---|---|
-| quick (default) | `~/dotfiles/tests/nvim.sh` | seconds | startup, every Lua module, the lockfile, Skim preferences, `zg` writing to the versioned word list, stylua, shell syntax, shfmt, rumdl, no comments |
-| full | `~/dotfiles/tests/nvim.sh full` | minutes | quick, plus a real Neovim driven in tmux: language servers, toggles, the look, Markdown and notes, the `,` keys, the debugger, tests, a LaTeX build |
+| quick (default) | `~/dotfiles/tests/nvim.sh` | seconds | startup, every Lua module, the lockfile, Skim preferences, `zg` writing to the versioned word list, stylua, shell syntax, shfmt, rumdl, no comments, and our own code headless: `Space c s`, filetypes, format on save, the `Space u` toggles, `]e`, the preview, the helpers |
+| full | `~/dotfiles/tests/nvim.sh full` | minutes | quick, plus a real Neovim driven in tmux: language servers, toggles, the look, Markdown and notes, the `,` keys, `,r`, the debugger, tests, a LaTeX build and its snippets, a `Space g V` review, `,cj` |
 | fresh | `~/dotfiles/tests/nvim.sh fresh` | longer | full, in a throwaway directory deleted at the end, as on a new machine |
 
 `full` installs Neovim with `./install.sh nvim` into an isolated home under

@@ -112,6 +112,13 @@ return {
       markdown = { "rumdl" },
       tex = { "latexindent" },
     },
+    formatters = {
+      prettier = {
+        append_args = function(_, ctx)
+          return ctx.filename:match("%.json%.[^/]+$") and { "--parser", "json" } or {}
+        end,
+      },
+    },
     default_format_opts = { lsp_format = "fallback" },
 
     format_on_save = function(buf)

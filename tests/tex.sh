@@ -72,3 +72,11 @@ LUA
   fi
   stop_nvim
 }
+
+test_snippets() {
+  printf '\\documentclass{article}\n\\begin{document}\nText.\n\\end{document}\n' >"$PROJ/snip.tex"
+  start_nvim "$PROJ" snip.tex
+  send ":3<CR>:luafile $DOT/tests/snippets.lua<CR>"
+  probe "LaTeX snippets expand as typed" 'vim.g.test_snippets or ""' ok 90
+  stop_nvim
+}

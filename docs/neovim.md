@@ -14,10 +14,11 @@ config/nvim/
   lua/dotfiles/install.lua    headless install of Mason packages, parsers and spell files
   lua/dotfiles/mason.lua      which Mason packages the settings want and which are missing
   lua/dotfiles/toggles.lua    the global <leader>u toggles
+  lua/dotfiles/treesitter.lua highlight and indent per buffer, the switch behind <leader>uT
   lua/dotfiles/markdown_preview.lua   the pandoc preview behind `,p`
-  lua/dotfiles/runner.lua     what `,r` runs per language, in the one bottom terminal it reuses
   lua/dotfiles/python.lua     the Python interpreter (.venv, $VIRTUAL_ENV, python3)
-  lua/dotfiles/git.lua        the base branch behind <leader>gV (origin/HEAD, main, master)
+  lua/dotfiles/git.lua        the base branch behind <leader>gV (origin/HEAD, main, master), the review check
+  lua/dotfiles/share.lua      what <leader>cs copies: the path from the git root, line:col, a fenced block
   after/lsp/<server>.lua      per-server settings
   after/ftplugin/             tex (vimtex keys), markdown (preview, backticks), lua (`,s`)
                               and clojure (which-key names of Conjure's groups)
@@ -26,6 +27,42 @@ config/nvim/
   spell/en.utf-8.add          words accepted with `zg` (the compiled .spl is ignored)
   lazy-lock.json              plugin versions (committed; `:Lazy restore` goes back to it)
 ```
+
+## Where things live
+
+Each feature, the code behind it, what changes it and the check that covers it. Paths are
+under `config/nvim/` unless they start with `tests/` or the repository root. In the Test
+column, a `.lua` file runs in the quick suite; `full:` names a function in `tests/<area>.sh`.
+`settings.lua` and `local.lua` are the ones in `lua/config/`.
+
+| Feature | Code | Settings | Test |
+|---|---|---|---|
+| Options, leader keys, `.mdc` and `*.json.*` filetypes | `lua/config/options.lua` | `settings.lua` (wrap, spelllang) | quick startup check, `tests/files.lua` |
+| Window `Space w`, buffer `Space b`, `]d` / `]e`, `Space c c` / `c d` | `lua/config/keymaps.lua` | | `tests/keys.lua` (`]d`, `]e`), full: `test_look` (`Space w`) |
+| `Space c s` share a line or selection | `lua/dotfiles/share.lua`, key in `lua/config/keymaps.lua` | | `tests/share.lua` |
+| Yank highlight, reload on focus, last position, `q` closes, missing folders | `lua/config/autocmds.lua` | | `tests/autocmds.lua` |
+| `Space u` toggles | `lua/dotfiles/toggles.lua`, keys in `lua/plugins/snacks.lua` (`init`) | `settings.lua` (wrap), `local.lua` | `tests/toggles.lua`, full: `test_markdown` (`u m`), `test_tex` (`u G`) |
+| Pickers `Space f`, file tree `Space o`, terminals `Space t`, lazygit, references list | `lua/plugins/snacks.lua` | | `tests/files.lua` (references) |
+| Jumps from a review open a new tab | `lua/plugins/snacks.lua` (`actions.confirm`), `lua/dotfiles/git.lua` (`review`) | | full: `test_review` |
+| Completion, snippets | `lua/plugins/completion.lua`, `snippets/tex.lua` | | full: `test_snippets` |
+| Language servers, `Space l`, `gd` / `gr`, `,o`, `gq` in prose | `lua/plugins/lsp.lua`, `after/lsp/<server>.lua` | `settings.lua` (mason_servers, system_servers, mason_tools) | `tests/keys.lua` (`gq`), full: `test_lua`, `test_language_actions`, `test_markdown`, `test_tex`, `test_clojure` |
+| Format on save, `Space l f` | `lua/plugins/formatting.lua` | `settings.lua` (format_on_save), a style file in the project | `tests/files.lua` |
+| Treesitter: parsers, indent, `Space u T`, code context | `lua/plugins/treesitter.lua`, `lua/dotfiles/treesitter.lua`, `lua/plugins/ui.lua` | `settings.lua` (parsers, treesitter_indent) | `tests/toggles.lua` (`u T`), full: `test_look` (context) |
+| Git hunks `Space g`, `]c` | `lua/plugins/editor.lua` (gitsigns) | | full: `test_review` (`]c`) |
+| Review `Space g V` / `g D` | `lua/plugins/editor.lua` (codediff), `lua/dotfiles/git.lua` | | `tests/helpers.lua` (base branch), `tests/toggles.lua` (wrap), full: `test_review` |
+| Flash, text objects, surround, pairs, `Space r` replace, todos, Trouble `Space d`, sessions `Space S` | `lua/plugins/editor.lua` | | plugin defaults; backtick pairs in `tests/keys.lua` |
+| Look: Dracula, statusline, status column, which-key | `lua/plugins/colorscheme.lua`, `lua/plugins/ui.lua`, `lua/plugins/snacks.lua` | `settings.lua` (colorscheme) | full: `test_look` |
+| `,r` run the file | `lua/plugins/run.lua`, interpreter from `lua/dotfiles/python.lua` | | `tests/helpers.lua` (interpreter), full: `test_run` |
+| `,t` tests | `lua/plugins/test.lua` | | full: `test_test_keys` |
+| `,d` debugger | `lua/plugins/debug.lua` | `settings.lua` (mason_tools: debugpy) | full: `test_debug` |
+| `,s` source a Lua file | `after/ftplugin/lua.lua` | | full: `test_language_actions` |
+| Clojure: Conjure, paredit, `,cj` | `lua/plugins/clojure.lua`, `lua/dotfiles/clojure.lua`, `after/ftplugin/clojure.lua` | | full: `test_clojure` |
+| LaTeX: vimtex `,l`, builds, `,lw` | `lua/plugins/tex.lua`, `after/ftplugin/tex.lua`, `config/latex/latexmkrc` (root) | | `tests/keys.lua` (`,lw`), full: `test_tex` |
+| Markdown: rendering, `,p` preview, backticks | `lua/plugins/markdown.lua`, `lua/dotfiles/markdown_preview.lua`, `after/ftplugin/markdown.lua` | `config/rumdl/rumdl.toml` (root) | `tests/keys.lua`, full: `test_markdown` |
+| Notes `Space n` | `lua/plugins/markdown.lua` (obsidian.nvim), `templates/note.md` | `settings.lua` (notes) | full: `test_notes` |
+| Installing Mason packages, parsers, spell files | `lua/dotfiles/install.lua`, `lua/dotfiles/mason.lua`, `install.sh` (root) | `settings.lua` (servers, tools, parsers, spelllang) | `tests/helpers.lua`, full: `install` |
+| `zg` word list | `spell/en.utf-8.add`, `lua/config/options.lua` (spellfile) | | quick `zg` check |
+| Per-machine and per-project overrides | `lua/config/settings.lua`, `lua/config/local.lua`, a trusted `.nvim.lua` | | none (plain settings) |
 
 ## Keys
 
@@ -49,24 +86,35 @@ The README has every key, one table per module; this page explains how they beha
 `]r` / `[r` jump between references of the word under the cursor; `s` / `S` jump with flash;
 `gs…` surrounds. `<Tab>` is left alone so `<C-i>` still walks the jump list forward; in
 insert mode it jumps to the next snippet field first, then moves in the completion menu
-(`<C-j>` / `<C-k>` always move in the menu). On the `:` command line `<Tab>` completes
-(a single match at once) and `<CR>` runs the line as it reads.
+(`<C-n>` / `<C-p>` always move in it; `<C-j>` / `<C-k>` only move between windows). On the
+`:` command line `<Tab>` completes (a single match at once) and `<CR>` runs the line as it
+reads.
+Neovim's own `grn` / `grr` / `gra` / `gri` / `grt` / `grx` keys are deleted so `gr` lists
+references at once instead of waiting for a second key. `LspAttach` clears `formatexpr`, so `gq`
+keeps wrapping prose and comments instead of handing the lines to the language server.
 Text objects (mini.ai) work in every language with a treesitter parser: `af` / `if` function,
 `ac` / `ic` class, `au` / `iu` function call, `aa` / `ia` argument, plus brackets, quotes and
 tags (`daf` deletes a function, `ciu` rewrites a call's arguments). The function and class
 queries come from nvim-treesitter-textobjects, which is installed only for them.
-`<A-j>` / `<A-k>` move lines; `C-h/j/k/l` (or `<leader>w h/j/k/l`) move between windows;
-`C-\` toggles the bottom terminal (the one of `<leader>th`) from normal mode. `<leader>tf` /
-`th` / `tv` are three separate terminals (float, bottom, right). Inside a terminal every key
-goes to the program (lazygit, the shell, a REPL); a quick double `Esc` or `C-\ C-n` returns to
-Neovim, where `q` hides the terminal.
+`<A-j>` / `<A-k>` move lines; `C-h/j/k/l` (or `<leader>w h/j/k/l`) move between windows.
+`<leader>tf` / `th` / `tv` toggle three separate terminals (float, bottom, right). Inside a
+terminal every key goes to the program (lazygit, the shell, a REPL); a quick double `Esc` or
+`C-\ C-n` returns to Neovim, where `q` hides the terminal.
+`<leader>cs` on a block selection (`C-v`) reports screen columns (`virtcol`), so tabs and wide
+characters give the columns you see, and it lengthens the fence when the code itself has one.
 
 The `<leader>u` toggles are global: they change every window or buffer and the ones opened
 later. A `:setlocal` (wrap, numbers, conceal, spell) stays with its buffer until the next
 global toggle. Values an ftplugin sets are replaced when the buffer first opens;
 `vim.b.keep_local_opts = true` (in an ftplugin or `.nvim.lua`) keeps a buffer's own values.
+Each global toggle bumps a generation number, so `BufWinEnter` re-applies the values only to
+buffers that have not seen the latest toggle, and a `:setlocal` survives switching buffers.
+The toggles take their values once at startup, right after `options.lua`, and keep them in
+`dotfiles/toggles.lua` rather than reading `vim.go`, which is the current window's: codediff
+turns `wrap` off with `vim.wo`, so in a review `vim.go.wrap` was off and leaked into other
+windows. Wrap is left alone in a review, where it would misalign the two sides.
 Neovim's own ftplugins for Lua, Markdown, help and query start treesitter after the
-`FileType` autocmds, so while highlight is off the toggle's autocmd stops it again.
+`FileType` autocmds, so while highlight is off the treesitter autocmd stops it again.
 
 ## Per-project settings
 
@@ -89,6 +137,7 @@ the status column, toggles), blink.cmp + LuaSnip (completion, snippets), nvim-ls
 Mason, conform.nvim (formatting), nvim-treesitter (`main` branch) + treesitter-context,
 gitsigns, codediff.nvim (side by side review), flash, mini.ai / surround / pairs / icons /
 statusline, todo-comments, Trouble, persistence, nvim-dap + dap-ui, Neotest (neotest-python),
+code_runner.nvim (`,r`),
 which-key, vimtex,
 Conjure, nvim-paredit, grug-far, render-markdown.nvim, obsidian.nvim, Dracula. Behind them:
 friendly-snippets, lazydev (Neovim's API in Lua completion), SchemaStore (JSON and YAML
@@ -96,6 +145,8 @@ schemas), mason-lspconfig, mason-tool-installer, mason-nvim-dap, nvim-nio and pl
 meets the plugin rule in `AGENTS.md`. codediff.nvim downloads its prebuilt diff library in its
 lazy.nvim `build` step, so `install.sh` fetches it with the plugins. gitsigns attaches to a file
 the review opens after codediff maps `]c` / `[c`, so its own `]c` / `[c` ask codediff first.
+Inside a review the pickers' `confirm` opens the file in a new tab, so a jump never replaces a
+side of the diff; references always show their list (`auto_confirm = false`).
 
 The look: the `:` line and `/` search stay Neovim's own (blink completes them), notifications
 go to Snacks (`<leader>on`) and signature help to blink. treesitter-context keeps the enclosing
@@ -117,6 +168,9 @@ running latexmk.
 - blink.cmp adds its completion capabilities to every server by itself; it is a dependency
   of nvim-lspconfig so it loads, and registers them, before the first server starts.
 - stylua, shfmt and prettier come from `Brewfile.nvim`; Mason does not install copies.
+- Files named `*.json.*` (`config.json.example`, `package.json.tmpl`) are JSON
+  (`config/options.lua`), so jsonls lints them; prettier gets `--parser json` for them, since
+  it picks its parser from the last extension.
 - Mason installs nothing when Neovim starts: after adding a server or tool to the settings,
   run `./install.sh` again (or `:MasonToolsInstall`).
 - Treesitter highlights every language with a parser but indents only the ones in
@@ -167,7 +221,10 @@ the file type has no `,o` of its own (in Clojure it stays nvim-paredit's raise).
 | `,o` organize imports | ruff | | |
 | `,s` source the file | | yes | |
 
-`,r` shows its output in one bottom terminal that the next run replaces.
+`,r` is code_runner.nvim (`lua/plugins/run.lua`): it saves the file and runs it in a bottom
+terminal from the file's folder; running the same file again replaces its terminal. Besides
+the table, it runs JavaScript, Java, C, C++, Ruby and Rust with the plugin's own commands; a
+language is one line in `commands` plus its name in the key's `ft`.
 
 `,t` runs tests through Neotest: `,tt` the nearest test, `,tf` the file, `,tp` the project,
 `,tl` the last run, `,tS` stops, `,ts` toggles the summary, `,to` shows the output of the test
@@ -218,6 +275,7 @@ vim spell already underlines typos, and one word list (`zg`) is simpler than two
 
 render-markdown.nvim draws headings, tables, code blocks and checkboxes in the buffer; the
 line under the cursor and insert mode show the raw text. `<leader>um` turns it off.
+Cursor's `.mdc` rule files are Markdown too (`config/options.lua`), so they get all of this.
 render-markdown sets `conceallevel` on every redraw, so it is set up again with the global value
 whenever that changes (`<leader>uc`). LaTeX math
 is not rendered there: `,p` builds an HTML page with pandoc (math as MathML, images embedded),

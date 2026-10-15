@@ -1,3 +1,30 @@
+local function snack(path, ...)
+  local args, count = { ... }, select("#", ...)
+  return function()
+    local target = Snacks
+    for part in path:gmatch("[^.]+") do
+      target = target[part]
+    end
+    target(unpack(args, 1, count))
+  end
+end
+
+local function picker(name, opts)
+  return snack("picker." .. name, opts)
+end
+
+local function key(lhs, rhs, desc, mode)
+  return { lhs, rhs, desc = desc, mode = mode }
+end
+
+local function words_jump(direction)
+  return function()
+    Snacks.words.jump(direction * vim.v.count1)
+  end
+end
+
+local bottom_terminal = { count = 2, win = { position = "bottom", height = 15 } }
+
 return {
   "folke/snacks.nvim",
   priority = 1000,
@@ -17,14 +44,25 @@ return {
         explorer = { hidden = true, ignored = false },
         files = { hidden = true },
         grep = { hidden = true },
+        lsp_references = { auto_confirm = false },
+      },
+      actions = {
+        confirm = function(picker, item, action)
+          local review = require("dotfiles.git").review()
+          if review then
+            action = vim.tbl_extend("force", action or {}, { cmd = "tab" })
+          end
+          require("snacks.picker.actions").jump(picker, item, action)
+          if review then
+            vim.schedule(function()
+              require("dotfiles.toggles").apply(vim.api.nvim_get_current_win())
+            end)
+          end
+        end,
       },
       win = {
-        input = {
-          keys = {
-            ["<C-j>"] = { "list_down", mode = { "i", "n" } },
-            ["<C-k>"] = { "list_up", mode = { "i", "n" } },
-          },
-        },
+        input = { keys = { ["<c-j>"] = false, ["<c-k>"] = false } },
+        list = { keys = { ["<c-j>"] = false, ["<c-k>"] = false } },
       },
     },
     quickfile = { enabled = true },
@@ -34,265 +72,52 @@ return {
     words = { enabled = true },
   },
   keys = {
-    {
-      "<localleader>r",
-      function()
-        require("dotfiles.runner").run_file()
-      end,
-      ft = vim.tbl_keys(require("dotfiles.runner").commands),
-      desc = "Run file",
-    },
-    {
-      "<leader>op",
-      function()
-        Snacks.explorer()
-      end,
-      desc = "Toggle file tree",
-    },
-    {
-      "<leader>of",
-      function()
-        Snacks.explorer.reveal()
-      end,
-      desc = "Find file in tree",
-    },
-    {
-      "<leader>on",
-      function()
-        Snacks.notifier.show_history()
-      end,
-      desc = "Notification history",
-    },
-    {
-      "<leader>od",
-      function()
-        Snacks.dashboard()
-      end,
-      desc = "Dashboard",
-    },
+    key("<leader>op", snack("explorer"), "Toggle file tree"),
+    key("<leader>of", snack("explorer.reveal"), "Find file in tree"),
+    key("<leader>on", snack("notifier.show_history"), "Notification history"),
+    key("<leader>od", snack("dashboard"), "Dashboard"),
 
-    {
-      "<leader>ff",
-      function()
-        Snacks.picker.smart()
-      end,
-      desc = "Find files (smart)",
-    },
-    {
-      "<leader>fF",
-      function()
-        Snacks.picker.files({ ignored = true })
-      end,
-      desc = "Find files (all)",
-    },
-    {
-      "<leader>fg",
-      function()
-        Snacks.picker.grep()
-      end,
-      desc = "Live grep",
-    },
-    {
-      "<leader>fw",
-      function()
-        Snacks.picker.grep_word()
-      end,
-      desc = "Grep word / selection",
-      mode = { "n", "x" },
-    },
-    {
-      "<leader>fr",
-      function()
-        Snacks.picker.recent()
-      end,
-      desc = "Recent files",
-    },
-    {
-      "<leader>fc",
-      function()
-        Snacks.picker.files({ cwd = vim.fn.stdpath("config") })
-      end,
-      desc = "Neovim config files",
-    },
-    {
-      "<leader>fh",
-      function()
-        Snacks.picker.help()
-      end,
-      desc = "Help pages",
-    },
-    {
-      "<leader>fk",
-      function()
-        Snacks.picker.keymaps()
-      end,
-      desc = "Keymaps",
-    },
-    {
-      "<leader>fd",
-      function()
-        Snacks.picker.diagnostics()
-      end,
-      desc = "Diagnostics",
-    },
-    {
-      "<leader>fs",
-      function()
-        Snacks.picker.lsp_symbols()
-      end,
-      desc = "LSP symbols",
-    },
-    {
-      "<leader>fS",
-      function()
-        Snacks.picker.lsp_workspace_symbols()
-      end,
-      desc = "LSP workspace symbols",
-    },
-    {
-      "<leader>fu",
-      function()
-        Snacks.picker.undo()
-      end,
-      desc = "Undo history",
-    },
-    {
-      "<leader>fC",
-      function()
-        Snacks.picker.colorschemes()
-      end,
-      desc = "Colorschemes",
-    },
-    {
-      "<leader>fR",
-      function()
-        Snacks.picker.resume()
-      end,
-      desc = "Resume last picker",
-    },
-    {
-      "<leader>f/",
-      function()
-        Snacks.picker.lines()
-      end,
-      desc = "Search in buffer",
-    },
-    {
-      "<leader>fm",
-      function()
-        Snacks.picker.marks()
-      end,
-      desc = "Marks",
-    },
-    {
-      "<leader>fp",
-      function()
-        Snacks.picker.projects()
-      end,
-      desc = "Projects",
-    },
-    {
-      "<leader>bb",
-      function()
-        Snacks.picker.buffers()
-      end,
-      desc = "List buffers",
-    },
+    key("<leader>ff", picker("smart"), "Find files (smart)"),
+    key("<leader>fF", picker("files", { ignored = true }), "Find files (all)"),
+    key("<leader>fg", picker("grep"), "Live grep"),
+    key("<leader>fw", picker("grep_word"), "Grep word / selection", { "n", "x" }),
+    key("<leader>fr", picker("recent"), "Recent files"),
+    key("<leader>fc", picker("files", { cwd = vim.fn.stdpath("config") }), "Neovim config files"),
+    key("<leader>fh", picker("help"), "Help pages"),
+    key("<leader>fk", picker("keymaps"), "Keymaps"),
+    key("<leader>fd", picker("diagnostics"), "Diagnostics"),
+    key("<leader>fs", picker("lsp_symbols"), "LSP symbols"),
+    key("<leader>fS", picker("lsp_workspace_symbols"), "LSP workspace symbols"),
+    key("<leader>fu", picker("undo"), "Undo history"),
+    key("<leader>fC", picker("colorschemes"), "Colorschemes"),
+    key("<leader>fR", picker("resume"), "Resume last picker"),
+    key("<leader>f/", picker("lines"), "Search in buffer"),
+    key("<leader>fm", picker("marks"), "Marks"),
+    key("<leader>fp", picker("projects"), "Projects"),
+    key("<leader>bb", picker("buffers"), "List buffers"),
 
-    {
-      "<leader>gg",
-      function()
-        Snacks.lazygit()
-      end,
-      desc = "Lazygit",
-    },
-    {
-      "<leader>gl",
-      function()
-        Snacks.picker.git_log()
-      end,
-      desc = "Git log",
-    },
-    {
-      "<leader>gt",
-      function()
-        Snacks.picker.git_status()
-      end,
-      desc = "Changed files",
-    },
-    {
-      "<leader>gc",
-      function()
-        Snacks.picker.git_diff()
-      end,
-      desc = "Changes (hunks)",
-    },
-    {
-      "<leader>gh",
-      function()
-        Snacks.picker.git_log_file()
-      end,
-      desc = "File history",
-    },
-    {
-      "<leader>gL",
-      function()
-        Snacks.picker.git_log_line()
-      end,
-      desc = "Line history",
-    },
-    {
-      "<leader>gO",
-      function()
-        Snacks.gitbrowse()
-      end,
-      desc = "Open in browser",
-      mode = { "n", "v" },
-    },
+    key("<leader>gg", snack("lazygit"), "Lazygit"),
+    key("<leader>gl", picker("git_log"), "Git log"),
+    key("<leader>gt", picker("git_status"), "Changed files"),
+    key("<leader>gc", picker("git_diff"), "Changes (hunks)"),
+    key("<leader>gh", picker("git_log_file"), "File history"),
+    key("<leader>gL", picker("git_log_line"), "Line history"),
+    key("<leader>gO", snack("gitbrowse"), "Open in browser", { "n", "v" }),
 
-    {
-      "<c-\\>",
-      function()
-        Snacks.terminal(nil, { count = 2, win = { position = "bottom", height = 15 } })
-      end,
-      desc = "Toggle terminal",
-    },
-    {
+    key(
       "<leader>tf",
-      function()
-        Snacks.terminal(nil, { count = 1, win = { position = "float" } })
-      end,
-      desc = "Float terminal",
-    },
-    {
-      "<leader>th",
-      function()
-        Snacks.terminal(nil, { count = 2, win = { position = "bottom", height = 15 } })
-      end,
-      desc = "Horizontal terminal",
-    },
-    {
+      snack("terminal", nil, { count = 1, win = { position = "float" } }),
+      "Float terminal"
+    ),
+    key("<leader>th", snack("terminal", nil, bottom_terminal), "Horizontal terminal"),
+    key(
       "<leader>tv",
-      function()
-        Snacks.terminal(nil, { count = 3, win = { position = "right", width = 60 } })
-      end,
-      desc = "Vertical terminal",
-    },
+      snack("terminal", nil, { count = 3, win = { position = "right", width = 60 } }),
+      "Vertical terminal"
+    ),
 
-    {
-      "]r",
-      function()
-        Snacks.words.jump(vim.v.count1)
-      end,
-      desc = "Next reference",
-    },
-    {
-      "[r",
-      function()
-        Snacks.words.jump(-vim.v.count1)
-      end,
-      desc = "Previous reference",
-    },
+    key("]r", words_jump(1), "Next reference"),
+    key("[r", words_jump(-1), "Previous reference"),
   },
   init = function()
     vim.api.nvim_create_autocmd("User", {

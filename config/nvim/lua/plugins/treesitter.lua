@@ -13,8 +13,12 @@ return {
       group = vim.api.nvim_create_augroup("user_treesitter_install", { clear = true }),
       once = true,
       callback = function()
+        local missing = require("dotfiles.treesitter").missing(parsers)
+        if #missing == 0 then
+          return
+        end
         if vim.fn.executable("tree-sitter") == 1 then
-          ts.install(parsers)
+          ts.install(missing)
         else
           vim.notify("tree-sitter CLI not found: brew install tree-sitter-cli", vim.log.levels.WARN)
         end
@@ -24,7 +28,7 @@ return {
     vim.api.nvim_create_autocmd("FileType", {
       group = vim.api.nvim_create_augroup("user_treesitter", { clear = true }),
       callback = function(ev)
-        require("dotfiles.toggles").start_treesitter(ev.buf)
+        require("dotfiles.treesitter").attach(ev.buf)
       end,
     })
   end,

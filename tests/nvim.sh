@@ -45,6 +45,12 @@ quick() {
   before="$(lock_hash)"
   check_silent "nvim starts without messages" nvim --headless "+qa"
   check "every Lua module loads" nvim --headless -l "$DOT/tests/modules.lua"
+  check "Space c s copies the path, line:col and the code" nvim --headless -l "$DOT/tests/share.lua"
+  lua_check "filetypes, format on save and the references list" files.lua
+  lua_check "python, mason, spell files and the review base branch" helpers.lua
+  lua_check "Space u toggles, also beside a codediff review" toggles.lua
+  lua_check "]e, the TeX and Markdown keys, the preview and gq" keys.lua
+  lua_check "yank highlight, focus reload, last line, q, new folders, resize" autocmds.lua
   if [ "$before" = "$(lock_hash)" ]; then
     pass "starting nvim leaves lazy-lock.json alone"
   else
@@ -56,7 +62,7 @@ quick() {
   else
     fail "zg writes to the versioned word list" "spellfile is not config/nvim/spell/en.utf-8.add"
   fi
-  tool "stylua" stylua bash -c "cd '$DOT/config/nvim' && stylua --check ."
+  tool "stylua" stylua bash -c "cd '$DOT/config/nvim' && stylua --check . ../../tests"
   tool "shell syntax" bash bash -n "$DOT/install.sh" "$DOT/link.sh" "$DOT"/tests/*.sh
   tool "shfmt" shfmt shfmt -d "$DOT/install.sh" "$DOT/link.sh" "$DOT"/tests/*.sh
   tool "rumdl" rumdl rumdl check "$DOT" --config "$DOT/config/rumdl/rumdl.toml"
@@ -84,6 +90,7 @@ full() {
   test_test_keys
   test_clojure
   test_tex
+  test_snippets
   if [ "$before" = "$(lock_hash)" ]; then
     pass "the whole run leaves lazy-lock.json alone"
   else

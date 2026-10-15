@@ -86,16 +86,7 @@ local function install_parsers(settings, failures)
     failures[#failures + 1] = "treesitter: " .. tostring(err)
     return
   end
-  local installed = {}
-  for _, lang in ipairs(ts.get_installed()) do
-    installed[lang] = true
-  end
-  local missing = {}
-  for _, lang in ipairs(settings.parsers) do
-    if not installed[lang] then
-      missing[#missing + 1] = lang
-    end
-  end
+  local missing = require("dotfiles.treesitter").missing(settings.parsers)
   if #missing > 0 then
     failures[#failures + 1] = "parsers not installed: " .. table.concat(missing, ", ")
   else

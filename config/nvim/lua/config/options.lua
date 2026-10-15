@@ -74,6 +74,11 @@ end)
 
 g.tex_flavor = "latex"
 
+vim.filetype.add({
+  extension = { mdc = "markdown" },
+  pattern = { [".*%.json%.[^/]+"] = "json" },
+})
+
 g.loaded_perl_provider = 0
 g.loaded_ruby_provider = 0
 g.loaded_node_provider = 0
