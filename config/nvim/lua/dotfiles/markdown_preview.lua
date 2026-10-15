@@ -33,7 +33,7 @@ function M.build(buf, open)
     {
       "pandoc",
       "-f",
-      "markdown+tex_math_single_backslash",
+      "markdown+tex_math_single_backslash-raw_html",
       "-t",
       "html5",
       "-s",

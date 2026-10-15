@@ -205,7 +205,9 @@ LaTeX and Clojure.
 
 Saving formats the file only in projects that declare that formatter's style (a
 `stylua.toml`, a prettier config, `[tool.ruff]`, …), so other people's code is never
-restyled. `Space l f` formats anywhere; `Space u f` turns format-on-save off.
+restyled. Prettier runs a project's JavaScript, so it also needs a `.nvim.lua` approved with
+`:trust` next to the prettier config (an empty one is enough). `Space l f` formats anywhere
+(prettier still only there); `Space u f` turns format-on-save off.
 
 ### Run, test and debug (`,` keys)
 

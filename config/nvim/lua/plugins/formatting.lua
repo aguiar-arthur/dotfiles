@@ -1,20 +1,3 @@
-local prettier = {
-  ".prettierrc",
-  ".prettierrc.json",
-  ".prettierrc.json5",
-  ".prettierrc.yaml",
-  ".prettierrc.yml",
-  ".prettierrc.toml",
-  ".prettierrc.js",
-  ".prettierrc.cjs",
-  ".prettierrc.mjs",
-  ".prettierrc.ts",
-  "prettier.config.js",
-  "prettier.config.cjs",
-  "prettier.config.mjs",
-  "prettier.config.ts",
-}
-
 local function any_file(names)
   return function(buf)
     return vim.fs.root(buf, names) ~= nil
@@ -49,8 +32,25 @@ local function either(...)
   end
 end
 
+local function trusted(path)
+  local real = vim.uv.fs_realpath(path)
+  local file = real and io.open(real, "rb")
+  if not file then
+    return false
+  end
+  local hash = vim.fn.sha256(file:read("*a"))
+  file:close()
+  local ok, lines = pcall(vim.fn.readfile, vim.fn.stdpath("state") .. "/trust")
+  return ok and vim.tbl_contains(lines, hash .. " " .. real)
+end
+
+local function prettier_trusted(buf)
+  local dirname = vim.fs.dirname(vim.api.nvim_buf_get_name(buf))
+  local root = require("conform.formatters.prettier").cwd(nil, { dirname = dirname })
+  return root ~= nil and trusted(root .. "/.nvim.lua")
+end
+
 local shfmt_editorconfig = file_matching(".editorconfig", "^%s*%[[^%]]*%f[%w]b?a?sh%f[%W]")
-local prettier_config = any_file(prettier)
 
 local style_markers = {
   lua = any_file({ "stylua.toml", ".stylua.toml" }),
@@ -81,7 +81,7 @@ for _, ft in ipairs({
   "jsonc",
   "yaml",
 }) do
-  style_markers[ft] = prettier_config
+  style_markers[ft] = prettier_trusted
 end
 
 return {
@@ -114,6 +114,10 @@ return {
     },
     formatters = {
       prettier = {
+        command = (vim.env.HOMEBREW_PREFIX or "/opt/homebrew") .. "/bin/prettier",
+        condition = function(_, ctx)
+          return prettier_trusted(ctx.buf)
+        end,
         append_args = function(_, ctx)
           return ctx.filename:match("%.json%.[^/]+$") and { "--parser", "json" } or {}
         end,

@@ -3,7 +3,17 @@ local T = dofile(vim.env.DOT .. "/tests/lib.lua")
 local root = T.dir({
   ["a.lua"] = { "local a = 1", "local b = 2", "local c = 3", "local d = 4", "local e = 5" },
   ["a.tex"] = { "\\documentclass{article}" },
-  ["a.md"] = { "# Title", "", "Math $x^2$.", "", "| a | b |", "|---|---|", "| 1 | 2 |" },
+  ["a.md"] = {
+    "# Title",
+    "",
+    "Math $x^2$.",
+    "",
+    "| a | b |",
+    "|---|---|",
+    "| 1 | 2 |",
+    "",
+    "<script>leak()</script>",
+  },
   [".rumdl.toml"] = {},
 })
 
@@ -73,6 +83,7 @@ if vim.fn.executable("pandoc") == 1 then
   local html = opened and table.concat(vim.fn.readfile(opened), "\n") or ""
   T.eq(",p opens an HTML page with MathML", html:find("<math", 1, true) ~= nil, true)
   T.eq(",p keeps tables", html:find("<table", 1, true) ~= nil, true)
+  T.eq(",p drops raw HTML such as <script>", html:find("<script>leak", 1, true) == nil, true)
   local before = opened and vim.uv.fs_stat(opened).mtime
   vim.cmd("silent write")
   vim.wait(15000, function()

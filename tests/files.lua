@@ -48,11 +48,42 @@ T.eq(
   false
 )
 T.eq("Markdown with .rumdl.toml formats on save", formats({ [".rumdl.toml"] = {} }, "a.md"), true)
+local state = T.dir()
+local stdpath = vim.fn.stdpath
+vim.fn.stdpath = function(what)
+  return what == "state" and state or stdpath(what)
+end
+local function trust(root)
+  local real = vim.uv.fs_realpath(root .. "/.nvim.lua")
+  local file = assert(io.open(real, "rb"))
+  vim.fn.writefile({ vim.fn.sha256(file:read("*a")) .. " " .. real }, state .. "/trust")
+  file:close()
+end
 T.eq(
-  "JSON with .prettierrc formats on save",
-  formats({ [".prettierrc"] = { "{}" } }, "a.json.example"),
+  "JSON with .prettierrc but no trusted .nvim.lua is left alone",
+  formats({ [".prettierrc"] = { "{}" }, [".nvim.lua"] = {} }, "a.json"),
+  false
+)
+local project = T.dir({ [".prettierrc"] = { "{}" }, [".nvim.lua"] = { "vim.o.wrap = false" } })
+trust(project)
+vim.cmd("edit " .. project .. "/a.json.example")
+local buf = vim.api.nvim_get_current_buf()
+local prettier = conform.formatters.prettier
+T.eq("JSON beside a trusted .nvim.lua formats on save", conform.format_on_save(buf) ~= nil, true)
+T.eq("prettier runs beside a trusted .nvim.lua", prettier.condition(nil, { buf = buf }), true)
+vim.fn.writefile({ "os.execute('x')" }, project .. "/.nvim.lua")
+T.eq(
+  "prettier stops when .nvim.lua changes after :trust",
+  prettier.condition(nil, { buf = buf }),
+  false
+)
+T.eq(
+  "prettier is Homebrew's, never node_modules'",
+  prettier.command:match("/bin/prettier$") ~= nil
+    and not prettier.command:find("node_modules", 1, true),
   true
 )
+vim.fn.stdpath = stdpath
 T.eq("LaTeX never formats on save", formats({ [".latexindent.yaml"] = {} }, "a.tex"), false)
 vim.g.disable_autoformat = true
 T.eq("Space u f turns format on save off", formats({ ["stylua.toml"] = {} }, "b.lua"), false)

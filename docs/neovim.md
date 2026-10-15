@@ -183,12 +183,18 @@ running latexmk.
   only in projects that declare that tool's style: Lua with a
   `stylua.toml`, shell with an `.editorconfig` section for `.sh` or `.bash` files, Python with
   a `ruff.toml` or a `[tool.ruff]` table in `pyproject.toml`, web/JSON/YAML with a prettier
-  config file, Markdown with a `.rumdl.toml` or `.markdownlint.*`, TOML with a `taplo.toml`,
+  config file and a trusted `.nvim.lua` beside it, Markdown with a `.rumdl.toml` or
+  `.markdownlint.*`, TOML with a `taplo.toml`,
   Clojure with a `cljfmt.edn` or `:cljfmt` in `.lsp/config.edn`. Without one each formatter
   falls back to its own defaults and a `:w` would restyle someone else's code; a bare
   `.editorconfig` or `pyproject.toml` is too common to count. `<leader>lf` still formats
   anywhere. LaTeX is formatted only on demand with `<leader>lf`. `:FormatToggle` (`!` for one
   buffer) or `<leader>uf` turns it off.
+- prettier runs a project's JavaScript (`.prettierrc.js`, plugins named in any config), so it
+  formats, on save or with `<leader>lf`, only where a `.nvim.lua` you approved with `:trust` sits
+  next to the prettier config and has not changed since; elsewhere `<leader>lf` falls back to
+  the language server. It is always Homebrew's prettier, never a repository's
+  `node_modules/.bin/prettier`.
 - `gq` wraps text to `textwidth` everywhere (prose, comments): Neovim would hand it to a
   language server that formats ranges (rumdl, lua_ls), which does not wrap, so it is reset.
 - In Python, ruff is asked for UTF-16 positions like basedpyright (two encodings in one
@@ -281,7 +287,8 @@ Cursor's `.mdc` rule files are Markdown too (`config/options.lua`), so they get 
 render-markdown sets `conceallevel` on every redraw, so it is set up again with the global value
 whenever that changes (`<leader>uc`). LaTeX math
 is not rendered there: `,p` builds an HTML page with pandoc (math as MathML, images embedded),
-opens it in the browser and rebuilds it on every save.
+opens it in the browser and rebuilds it on every save. Raw HTML in the Markdown is shown as
+text, so a `<script>` in someone else's file cannot read the embedded local files.
 
 Notes are plain Markdown files in `settings.notes.dir` (`~/notes`, created by the first `<leader>n`
 key; change it in `local.lua`), handled by obsidian.nvim, which loads only there and needs no
