@@ -66,6 +66,13 @@ return {
         desc = "Review branch vs origin",
       },
       { "<leader>gD", "<cmd>CodeDiff<CR>", desc = "Review working tree" },
+      {
+        "<leader>gq",
+        function()
+          require("dotfiles.git").back_to_review()
+        end,
+        desc = "Close this jump, back to the review",
+      },
     },
     opts = {
       keymaps = {

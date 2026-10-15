@@ -47,6 +47,41 @@ package.loaded["codediff.ui.lifecycle"] = {
 T.eq("git: the review tab is a review", git.review(2), true)
 T.eq("git: another tab is not", git.review(1), false)
 
+local first = vim.api.nvim_get_current_tabpage()
+vim.cmd("tabnew")
+local review_tab = vim.api.nvim_get_current_tabpage()
+vim.cmd("tabnew")
+git.mark_jump(review_tab)
+vim.cmd("tabfirst | tablast")
+git.back_to_review()
+T.eq("git: back from a jump closes its tab", #vim.api.nvim_list_tabpages(), 2)
+T.eq("git: and returns to the review", vim.api.nvim_get_current_tabpage(), review_tab)
+local warned
+local notify = vim.notify
+vim.notify = function(msg)
+  warned = msg
+end
+git.back_to_review()
+vim.notify = notify
+T.eq("git: back outside a jump keeps the tab", #vim.api.nvim_list_tabpages(), 2)
+T.eq("git: and says why", warned, "This tab was not opened from a review")
+vim.api.nvim_set_current_tabpage(first)
+vim.cmd("tabonly")
+
+local treesitter = require("dotfiles.treesitter")
+local ts = package.loaded["nvim-treesitter"]
+package.loaded["nvim-treesitter"] = {
+  get_installed = function()
+    return { "lua", "bash" }
+  end,
+}
+T.eq("treesitter: lists the parsers not installed", treesitter.missing({ "lua", "rust", "go" }), {
+  "rust",
+  "go",
+})
+T.eq("treesitter: none when all are there", treesitter.missing({ "bash" }), {})
+package.loaded["nvim-treesitter"] = ts
+
 local base
 rawset(vim.cmd, "CodeDiff", function(arg)
   base = arg

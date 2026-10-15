@@ -48,13 +48,15 @@ return {
       },
       actions = {
         confirm = function(picker, item, action)
-          local review = require("dotfiles.git").review()
+          local git = require("dotfiles.git")
+          local review = git.review() and vim.api.nvim_get_current_tabpage()
           if review then
             action = vim.tbl_extend("force", action or {}, { cmd = "tab" })
           end
           require("snacks.picker.actions").jump(picker, item, action)
           if review then
             vim.schedule(function()
+              git.mark_jump(review)
               require("dotfiles.toggles").apply(vim.api.nvim_get_current_win())
             end)
           end

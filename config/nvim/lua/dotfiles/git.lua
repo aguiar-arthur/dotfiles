@@ -10,6 +10,22 @@ function M.review(tab)
   return lifecycle and lifecycle.get_session(tab or vim.api.nvim_get_current_tabpage()) ~= nil
 end
 
+function M.mark_jump(review_tab)
+  vim.t.review_tab = review_tab
+end
+
+function M.back_to_review()
+  local review_tab = vim.t.review_tab
+  if not review_tab then
+    vim.notify("This tab was not opened from a review", vim.log.levels.WARN)
+    return
+  end
+  vim.cmd.tabclose()
+  if vim.api.nvim_tabpage_is_valid(review_tab) then
+    vim.api.nvim_set_current_tabpage(review_tab)
+  end
+end
+
 function M.review_vs_origin()
   local base = git("symbolic-ref", "--quiet", "--short", "refs/remotes/origin/HEAD")
   for _, name in ipairs({ "origin/main", "origin/master" }) do

@@ -147,6 +147,8 @@ lazy.nvim `build` step, so `install.sh` fetches it with the plugins. gitsigns at
 the review opens after codediff maps `]c` / `[c`, so its own `]c` / `[c` ask codediff first.
 Inside a review the pickers' `confirm` opens the file in a new tab, so a jump never replaces a
 side of the diff; references always show their list (`auto_confirm = false`).
+That tab remembers the review it came from, so `<leader>gq` closes it and returns there even
+after visiting other tabs; `tabclose = "uselast"` makes a plain `:q` return to the last tab.
 
 The look: the `:` line and `/` search stay Neovim's own (blink completes them), notifications
 go to Snacks (`<leader>on`) and signature help to blink. treesitter-context keeps the enclosing

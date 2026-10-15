@@ -27,6 +27,7 @@ opt.fillchars =
 opt.splitright = true
 opt.splitbelow = true
 opt.splitkeep = "screen"
+opt.tabclose = "uselast"
 
 opt.expandtab = true
 opt.shiftwidth = 2

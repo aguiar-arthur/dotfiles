@@ -260,6 +260,7 @@ Changed lines are marked in the left column and the line's last commit shows at 
 | `Space g d` | diff this file against the index |
 | `Space g c` / `Space g t` | changed hunks / changed files of the working tree (`Tab` stages) |
 | `Space g D` / `Space g V` | review side by side: the working tree / everything this branch changes against origin's default branch |
+| `Space g q` | close a tab opened from a review and go back to it |
 | `Space g h` / `Space g L` / `Space g l` | history of the file / of the line / of the repository |
 | `Space g O` | open the file in the browser (GitHub, GitLab, …) |
 | `ih` | the hunk as a text object (`dih` deletes it) |
@@ -267,7 +268,8 @@ Changed lines are marked in the left column and the line's last commit shows at 
 The review opens in a new tab: the changed files on the left, the old and new versions side by
 side. The right side is the real file, so `gd`, `K` and edits work there. A file you open from
 there with a picker (`gd`, `Space l r`, `Space f f`, …) opens in a new tab, so the review stays
-as it was. The two sides never wrap lines: codediff keeps them aligned that way.
+as it was; `Space g q` (or `:q`) closes that tab and brings you back to the review. The two
+sides never wrap lines: codediff keeps them aligned that way.
 
 | Key (in the review) | Does |
 |---|---|
