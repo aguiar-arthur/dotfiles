@@ -12,7 +12,7 @@ local root = T.dir({
     "|---|---|",
     "| 1 | 2 |",
     "",
-    "<script>leak()</script>",
+    "<kbd>Ctrl</kbd>",
   },
   [".rumdl.toml"] = {},
 })
@@ -83,7 +83,7 @@ if vim.fn.executable("pandoc") == 1 then
   local html = opened and table.concat(vim.fn.readfile(opened), "\n") or ""
   T.eq(",p opens an HTML page with MathML", html:find("<math", 1, true) ~= nil, true)
   T.eq(",p keeps tables", html:find("<table", 1, true) ~= nil, true)
-  T.eq(",p drops raw HTML such as <script>", html:find("<script>leak", 1, true) == nil, true)
+  T.eq(",p renders the HTML in the Markdown", html:find("<kbd>Ctrl</kbd>", 1, true) ~= nil, true)
   local before = opened and vim.uv.fs_stat(opened).mtime
   vim.cmd("silent write")
   vim.wait(15000, function()

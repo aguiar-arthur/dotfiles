@@ -287,8 +287,7 @@ Cursor's `.mdc` rule files are Markdown too (`config/options.lua`), so they get 
 render-markdown sets `conceallevel` on every redraw, so it is set up again with the global value
 whenever that changes (`<leader>uc`). LaTeX math
 is not rendered there: `,p` builds an HTML page with pandoc (math as MathML, images embedded),
-opens it in the browser and rebuilds it on every save. Raw HTML in the Markdown is shown as
-text, so a `<script>` in someone else's file cannot read the embedded local files.
+opens it in the browser and rebuilds it on every save. HTML in the Markdown is rendered too.
 
 Notes are plain Markdown files in `settings.notes.dir` (`~/notes`, created by the first `<leader>n`
 key; change it in `local.lua`), handled by obsidian.nvim, which loads only there and needs no
