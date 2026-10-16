@@ -18,6 +18,7 @@ and toggles; the pickers change behaviour inside a [git](git.md) review.
 | `config/nvim/lua/plugins/completion.lua` | blink.cmp, LuaSnip, friendly-snippets, the `:` line |
 | `config/nvim/lua/dotfiles/share.lua` | what `<leader>cs` copies; the key is in `lua/config/keymaps.lua` |
 | `config/nvim/lua/plugins/claude.lua` | claudecode.nvim, `<leader>a` |
+| `config/nvim/lua/dotfiles/claude.lua` | `<leader>aS` (visual) and `<leader>aB`: open the last session if none runs, then send the selection / add the file; notifications from a hidden Claude |
 | `config/nvim/lua/dotfiles/float.lua` | the one float style: Claude, the float terminal and lazygit |
 
 ## How it works
@@ -46,10 +47,20 @@ is relative to the git root, so the text pastes well into a chat with an AI or a
 
 claudecode.nvim speaks the protocol of Claude Code's VS Code extension. It loads only with a
 `<leader>a` key or a `:ClaudeCode` command, never at startup, so its server exists only while
-you use Claude; `<leader>aS` stops it. The server listens on `127.0.0.1` only and accepts the
-`claude` process that read the random token from `~/.claude/ide/<port>.lock` (mode 0600).
-What Claude sees in Neovim goes to Anthropic with the rest of the conversation, as Claude Code
-does on its own.
+you use Claude; `<leader>aS` stops it (in visual mode it sends the selection instead, and
+`<leader>aB` adds the file: the terminal opens without taking focus so the selection survives,
+and the mention is queued until Claude connects). The server listens on `127.0.0.1` only and
+accepts the `claude` process that read the random token from `~/.claude/ide/<port>.lock` (mode
+0600). What Claude sees in Neovim goes to Anthropic with the rest of the conversation, as Claude
+Code does on its own.
+
+With `focus_after_send` every send (`<leader>as`, `ab`, `aS`, `aB`) opens Claude, focuses it and
+enters terminal mode; without it the window opened but the cursor stayed in the code, in normal mode.
+
+A Claude that is out of sight (hidden, or another window focused) notifies through `TermRequest`:
+an OSC 9 message (the iTerm2 notification Claude Code sends) is shown as is, OSC 9;4 progress is
+ignored, and `TermClose` says it exited. Only the fake-program check proves this; whether the real
+Claude sends OSC 9 depends on its notification setting.
 
 Claude, the float terminal and lazygit share `dotfiles/float.lua`: a rounded Snacks float with a
 title, 92% by 90% of the editor, over a backdrop dimmed to 60 (the pickers get the same
@@ -71,7 +82,12 @@ backdrop). Hiding a float keeps its session, and Snacks refits it when the termi
 | `<leader>cs` in each mode, fences, block columns | `tests/share.lua`, `tests/keys.lua` |
 | References always open the list | `tests/files.lua` |
 | Completion and snippets typed for real | full: `test_snippets` in `tests/tex.sh` |
-| `Space w` keys, the look | full: `test_look` |
+| Claude helpers, notifications, the file tree keys | `tests/helpers.lua`, `tests/keys.lua` |
+| `Space t f` / `t h` / `t v`: modes, same terminal back, sizes, resize | full: `test_terminals` in `tests/workspace.sh` |
+| The tree, pickers (`Esc`, `C-v`), Trouble, the floating dashboard | full: `test_tree_and_pickers` |
+| Claude: `Space a s` / `a b` / `a B`, focus back to the window it came from, resize | full: `test_claude` |
+| A hidden Claude notifies (OSC 9, exit) | full: `test_claude_notices` |
+| Sessions: `Space S r` restores, `Space S d` keeps the old one | full: `test_sessions` |
 | Everything else here | plugin defaults, no check of our own |
 
 ## Changing it

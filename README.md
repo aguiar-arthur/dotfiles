@@ -125,7 +125,7 @@ match at once) and `Enter` runs the line as typed.
 
 Every list (files, text, buffers, symbols, git) opens in the same picker: type to filter,
 `C-n` / `C-p` move, `Enter` opens, `C-v` / `C-s` open in a vertical / horizontal split, `Esc`
-closes. `Space f R` reopens the last picker where you left it.
+leaves insert mode and a second `Esc` closes. `Space f R` reopens the last picker where you left it.
 
 | Key | Does |
 |---|---|
@@ -276,7 +276,7 @@ Changed lines are marked in the left column and the line's last commit shows at 
 | `Space g b` / `Space g B` | blame the line / turn the end-of-line blame off |
 | `Space g d` | diff this file against the index |
 | `Space g c` / `Space g t` | changed hunks / changed files of the working tree (`Tab` stages) |
-| `Space g D` / `Space g V` | review side by side: the working tree / everything this branch changes against origin's default branch |
+| `Space g D` / `Space g V` | review side by side: the working tree / everything this branch changes against origin's default branch; `Space g D` again inside a review closes it |
 | `Space g q` | close a tab opened from a review and go back to it |
 | `Space g h` / `Space g L` / `Space g l` | history of the file / of the line / of the repository |
 | `Space g O` | open the file in the browser (GitHub, GitLab, …) |
@@ -297,14 +297,17 @@ sides never wrap lines: codediff keeps them aligned that way.
 | `Space h s` / `Space h u` / `Space h r` | stage / unstage / discard the change under the cursor |
 | `gf` / `Space g f` | open the file in the previous tab |
 | `t` / `gc` | inline or side by side / fold the unchanged lines |
-| `Space e` / `Space g e` | go to / hide the file list |
+| `Space e` / `Space o p` | go to / show or hide the file list (`Space g e` does the same as `Space o p`) |
 | `g?` / `q` | every key / close the review |
 
 ### Claude Code (claudecode.nvim)
 
 Claude Code runs in a bordered window over the editor, with a margin on each side, and talks to
 this Neovim: it sees the open files, the selection and the diagnostics, and shows its edits as a
-diff to accept or reject. Log in once in the terminal first (`claude`, then `/login`). Nothing
+diff to accept or reject. Sending a selection or a file moves you into Claude, ready to type
+(`Esc Esc` or `C-\ C-n` comes back). When Claude is hidden and it sends a terminal notification
+or exits, a notification tells you; whether Claude Code sends one depends on its own
+notification setting. Log in once in the terminal first (`claude`, then `/login`). Nothing
 starts with Neovim: the connection opens with the first of these keys.
 
 | Key | Does |
@@ -312,10 +315,12 @@ starts with Neovim: the connection opens with the first of these keys.
 | `Space a c` / `Space a f` | open or close Claude / go to its window |
 | `Space a r` / `Space a C` | pick an earlier session to resume / continue the last one |
 | `Space a m` | choose the model |
-| `Space a b` | add this file to the conversation |
+| `Space a b` | add this file to the conversation; in the file tree, the item under the cursor |
+| `Space a B` | the same, to the last session: opens it (continue) when Claude is not running |
 | `Space a s` | send the selection (visual mode); in the file tree, add the file under the cursor |
+| `Space a S` (visual mode) | send the selection to the last session: opens it (continue) when Claude is not running |
 | `Space a a` / `Space a d` | accept / reject the diff Claude proposes |
-| `Space a S` | stop the connection |
+| `Space a S` (normal mode) | stop the connection |
 
 ### Toggles (`Space u`)
 
@@ -325,7 +330,7 @@ state.
 | Key | Toggles |
 |---|---|
 | `Space u s` | spelling (prose files) |
-| `Space u w` | line wrap |
+| `Space u w` | line wrap (not in a review: it only warns) |
 | `Space u L` | relative line numbers |
 | `Space u c` | conceal (hidden Markdown and LaTeX markup) |
 | `Space u d` | diagnostics |
@@ -366,8 +371,8 @@ Results show next to the code and in the log.
 
 Dracula everywhere. The status line shows the mode, git branch and changes, diagnostics, the
 file, the language servers and a running LaTeX build. The left column shows marks,
-diagnostics, git changes and folds. `Space o d` opens the start screen, `Space o n` the
-notification history.
+diagnostics, git changes and folds. `Space o d` opens the start screen (`q` closes it, or quits
+when it is the start screen itself), `Space o n` the notification history.
 
 ## LaTeX
 

@@ -125,4 +125,97 @@ T.eq("float: the same style everywhere", {
   float.backdrop,
 }, { "float", "rounded", " Claude ", 60 })
 
+local sent, opened = {}, {}
+local active = nil
+package.loaded["claudecode.terminal"] = {
+  get_active_terminal_bufnr = function()
+    return active
+  end,
+  toggle_open_no_focus = function(_, args)
+    opened[#opened + 1] = args
+    active = 1
+  end,
+}
+vim.api.nvim_create_user_command("ClaudeCodeSend", function()
+  sent[#sent + 1] = "send"
+end, {})
+vim.api.nvim_create_user_command("ClaudeCodeAdd", function(o)
+  sent[#sent + 1] = "add " .. o.args
+end, { nargs = "*" })
+require("dotfiles.claude").in_last_session("ClaudeCodeSend")
+T.eq(
+  "claude: no session opens the last one, then runs the command",
+  { opened, sent },
+  { { "--continue" }, { "send" } }
+)
+require("dotfiles.claude").in_last_session("ClaudeCodeAdd foo")
+T.eq(
+  "claude: a running session is only given the command",
+  { opened, sent },
+  { { "--continue" }, { "send", "add foo" } }
+)
+package.loaded["claudecode.terminal"] = nil
+
+local claude = require("dotfiles.claude")
+claude.watch()
+local term_buf = vim.api.nvim_create_buf(false, true)
+local chan = vim.api.nvim_open_term(term_buf, {})
+package.loaded["claudecode.terminal"] = {
+  get_active_terminal_bufnr = function()
+    return term_buf
+  end,
+}
+local notes = {}
+local real_notify = vim.notify
+vim.notify = function(msg, level, opts)
+  notes[#notes + 1] = { msg, level, opts.title }
+end
+vim.api.nvim_chan_send(chan, "\27]9;needs you\7")
+vim.wait(300)
+T.eq(
+  "claude: a message from the terminal that is out of sight is notified",
+  notes,
+  { { "needs you", vim.log.levels.INFO, "Claude" } }
+)
+vim.api.nvim_chan_send(chan, "\27]9;4;1;50\7")
+vim.wait(300)
+T.eq("claude: progress sequences are ignored", #notes, 1)
+vim.api.nvim_exec_autocmds("TermClose", { buffer = term_buf, data = { pos = 0 } })
+T.eq(
+  "claude: an exit out of sight is notified",
+  notes[2],
+  { "Claude exited", vim.log.levels.WARN, "Claude" }
+)
+vim.api.nvim_set_current_buf(term_buf)
+vim.api.nvim_chan_send(chan, "\27]9;seen\7")
+vim.api.nvim_exec_autocmds("TermClose", { buffer = term_buf, data = { pos = 0 } })
+vim.wait(300)
+T.eq("claude: nothing is notified while the terminal is in view", #notes, 2)
+vim.cmd("enew")
+vim.notify = real_notify
+package.loaded["claudecode.terminal"] = nil
+
+local function qmap(buf)
+  return vim.api.nvim_buf_call(buf, function()
+    return vim.fn.maparg("q", "n", false, true).rhs
+  end)
+end
+local dash = vim.api.nvim_create_buf(false, true)
+vim.bo[dash].filetype = "snacks_dashboard"
+local dash_win = vim.api.nvim_open_win(
+  dash,
+  false,
+  { relative = "editor", row = 1, col = 1, width = 20, height = 5 }
+)
+vim.keymap.set("n", "q", "<cmd>qa<CR>", { buffer = dash })
+vim.api.nvim_exec_autocmds("User", { pattern = "SnacksDashboardUpdatePost" })
+T.eq("dashboard: q closes a floating dashboard instead of quitting", qmap(dash), "<cmd>bd<CR>")
+vim.api.nvim_win_close(dash_win, true)
+local main = vim.api.nvim_create_buf(false, true)
+vim.bo[main].filetype = "snacks_dashboard"
+vim.api.nvim_set_current_buf(main)
+vim.keymap.set("n", "q", "<cmd>qa<CR>", { buffer = main })
+vim.api.nvim_exec_autocmds("User", { pattern = "SnacksDashboardUpdatePost" })
+T.eq("dashboard: q still quits the start dashboard", qmap(main), "<cmd>qa<CR>")
+
 T.done()

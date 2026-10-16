@@ -32,6 +32,8 @@ side of the diff; references always show their list. That tab remembers the revi
 from, so `<leader>gq` closes it and returns there even after visiting other tabs;
 `tabclose = "uselast"` makes a plain `:q` return to the last tab. The right side of the review
 is the real file, so `gd`, `K` and edits work there. The two sides never wrap.
+`<leader>op` inside a review toggles the file list (codediff's `toggle_explorer` is set to it and to
+`<leader>ge`; its keys are buffer-local, so everywhere else `<leader>op` is still the file tree).
 
 ## Pitfalls
 
@@ -48,7 +50,9 @@ is the real file, so `gd`, `K` and edits work there. The two sides never wrap.
 |---|---|
 | Base branch order, review detection, `Space g q` back from a jump | `tests/helpers.lua` |
 | Toggles beside a review | `tests/toggles.lua` |
-| A `Space g V` review: `]c`, unwrapped sides, a picked file opens in a tab | full: `test_review` in `tests/code.sh` |
+| A `Space g V` review: file list, `]c`, unwrapped sides and `Space u w`, an edit on the real side, `Space g e` / `Space o p`, a picked file opens in a tab and `Space g q` returns, `q` closes | full: `test_review` in `tests/git.sh` |
+| `Space g D` opens and closes a review; lazygit: `e`, stage, unstage, commit, back to the window it came from | full: `test_lazygit` |
+| Debugging from the real side of a review | full: `test_review_debug` |
 
 ## Changing it
 

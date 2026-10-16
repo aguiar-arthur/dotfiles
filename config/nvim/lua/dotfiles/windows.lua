@@ -5,6 +5,10 @@ local function plain(win)
     and vim.bo[vim.api.nvim_win_get_buf(win)].buftype == ""
 end
 
+local function floating(win)
+  return vim.api.nvim_win_get_config(win).relative ~= ""
+end
+
 function M.enter(win)
   if not plain(win) then
     return
@@ -51,6 +55,18 @@ function M.setup()
     group = group,
     callback = function()
       M.enter(vim.api.nvim_get_current_win())
+    end,
+  })
+  vim.api.nvim_create_autocmd("User", {
+    group = group,
+    pattern = "SnacksDashboardUpdatePost",
+    callback = function()
+      for _, win in ipairs(vim.api.nvim_list_wins()) do
+        local buf = vim.api.nvim_win_get_buf(win)
+        if vim.bo[buf].filetype == "snacks_dashboard" and floating(win) then
+          vim.keymap.set("n", "q", "<cmd>bd<CR>", { buffer = buf, silent = true, nowait = true })
+        end
+      end
     end,
   })
   vim.api.nvim_create_autocmd("BufDelete", {

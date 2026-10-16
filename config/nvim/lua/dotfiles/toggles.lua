@@ -49,14 +49,42 @@ local function global(name, get, set)
   return Snacks.toggle({ name = name, get = get, set = set })
 end
 
-function M.option(name, option, on, off)
-  return global(name, function()
-    return M.values[option] == on
-  end, function(state)
-    M.values[option] = state and on or off
-    vim.go[option] = M.values[option]
-    M.apply_all()
-  end)
+function M.option(name, option, on, off, blocked)
+  local notify
+  if blocked then
+    notify = function(state)
+      local reason = blocked()
+      if reason then
+        vim.notify(reason, vim.log.levels.WARN, { title = name })
+        return
+      end
+      Snacks.notify(
+        (state and "Enabled" or "Disabled") .. " **" .. name .. "**",
+        { title = name, level = state and vim.log.levels.INFO or vim.log.levels.WARN }
+      )
+    end
+  end
+  return Snacks.toggle({
+    name = name,
+    notify = notify,
+    get = function()
+      return M.values[option] == on
+    end,
+    set = function(state)
+      if blocked and blocked() then
+        return
+      end
+      M.values[option] = state and on or off
+      vim.go[option] = M.values[option]
+      M.apply_all()
+    end,
+  })
+end
+
+local function review_blocks_wrap()
+  if require("dotfiles.git").review() then
+    return "Wrap stays off in a review: it would misalign the two sides"
+  end
 end
 
 function M.map()
@@ -66,7 +94,7 @@ function M.map()
     vim.g.prose_spell = state
     M.apply_all()
   end):map("<leader>us")
-  M.option("Wrap (all windows)", "wrap", true, false):map("<leader>uw")
+  M.option("Wrap (all windows)", "wrap", true, false, review_blocks_wrap):map("<leader>uw")
   M.option("Relative number (all windows)", "relativenumber", true, false):map("<leader>uL")
   M.option("Conceal (all windows)", "conceallevel", 2, 0):map("<leader>uc")
   global("Inlay hints (all buffers)", function()

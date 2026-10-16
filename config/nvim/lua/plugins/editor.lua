@@ -76,7 +76,10 @@ return {
     },
     opts = {
       keymaps = {
-        view = { toggle_explorer = "<leader>ge", open_in_prev_tab = { "gf", "<leader>gf" } },
+        view = {
+          toggle_explorer = { "<leader>ge", "<leader>op" },
+          open_in_prev_tab = { "gf", "<leader>gf" },
+        },
       },
     },
   },

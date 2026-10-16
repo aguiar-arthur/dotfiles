@@ -106,4 +106,17 @@ if vim.fn.executable("rumdl") == 1 then
   T.eq("gq keeps wrapping: formatexpr is cleared", vim.bo.formatexpr, "")
 end
 
+vim.cmd("enew")
+vim.bo.filetype = "snacks_picker_list"
+T.eq(
+  "Claude: Space a b in the file tree adds the item under the cursor",
+  vim.fn.maparg("<leader>ab", "n", false, true).desc,
+  "Add the file under the cursor to Claude"
+)
+T.eq(
+  "Claude: Space a B in the file tree adds it to the last session",
+  vim.fn.maparg("<leader>aB", "n", false, true).desc,
+  "Add the file under the cursor to the last Claude session"
+)
+
 T.done()

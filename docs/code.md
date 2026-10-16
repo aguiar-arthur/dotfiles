@@ -145,7 +145,7 @@ tests, `,r` refresh, `,s` sessions). The nREPL and cider-nrepl versions are at t
 | Python interpreter, Mason lists | `tests/helpers.lua` |
 | Servers attach (Lua, Python, …), `,o`, `,s` | full: `test_lua`, `test_language_actions` |
 | `,r` per language | full: `test_run` in `tests/code.sh` |
-| `,t` keys, `,d` debugger | full: `test_test_keys`, `test_debug` |
+| `,t` keys, `,d` debugger (the six panels, `,du`) | full: `test_test_keys`, `test_debug` |
 | `,cj` jack-in | full: `test_clojure` |
 
 ## Changing it

@@ -23,7 +23,7 @@ reach into the git review (wrap) and Markdown (conceal).
 | `config/nvim/lua/config/keymaps.lua` | save, quit, windows `<leader>w`, buffers `<leader>b`, `]d` / `]e`, `<leader>c` |
 | `config/nvim/lua/config/autocmds.lua` | yank highlight, reload on focus, last position, `q` closes, missing folders, resize |
 | `config/nvim/lua/config/lazy.lua` | lazy.nvim bootstrap at the commit in `lazy-lock.json` |
-| `config/nvim/lua/dotfiles/windows.lua` | the cursorline only in the active window, the path in the winbar of file windows, the welcome screen when the last file closes |
+| `config/nvim/lua/dotfiles/windows.lua` | the cursorline only in the active window, the path in the winbar of file windows, the welcome screen when the last file closes, `q` closing a floating dashboard (`<leader>od`) instead of quitting |
 | `config/nvim/dashboard/clock.sh` | the welcome screen's logo: a seven-segment clock (HH:MM:SS, blinking colon, English date) drawn by awk; `clock.sh N` stops after N frames |
 | `config/nvim/lua/dotfiles/toggles.lua` | the global `<leader>u` toggles |
 | `config/nvim/lua/plugins/snacks.lua` (`init`) | where the toggles are mapped, on `VeryLazy` |
@@ -50,8 +50,8 @@ first opens; `vim.b.keep_local_opts = true` (in an ftplugin or `.nvim.lua`) keep
 own values. Each toggle bumps the generation, so `BufWinEnter` re-applies the values only to
 buffers that have not seen the latest one, and a `:setlocal` survives switching buffers. The
 toggles take their values once at startup, right after `options.lua`, and keep them in
-`toggles.lua` rather than reading `vim.go`, which is the current window's. Wrap is left alone
-in a review, where it would misalign the two sides.
+`toggles.lua` rather than reading `vim.go`, which is the current window's. In a review `<leader>uw`
+changes nothing and says why (wrap would misalign the two sides).
 
 Treesitter highlights every language with a parser except LaTeX, where vimtex's syntax is
 richer, and indents only the ones in `settings.treesitter_indent`: its indentation is still
@@ -66,7 +66,8 @@ file, language servers and a running latexmk. Inactive windows are a shade darke
 (`NormalNC`), the cursorline shows only in the active one, and each file window has its path
 in a winbar (a window whose winbar is already set, as in a review, keeps it; floats and
 terminals have none). Closing the last file (`<leader>bd`, `:bd`) shows the Snacks dashboard
-again, as at startup; its logo is `dashboard/clock.sh` in a Snacks `terminal` section with
+again, as at startup (`q` quits there; on the floating one from `<leader>od` it only closes it);
+its logo is `dashboard/clock.sh` in a Snacks `terminal` section with
 `ttl = 0` (a cached section would be static), so any script that redraws from the top-left
 corner can replace it. Smooth scrolling is Snacks' (`<leader>uS`). Diff colors are tinted
 backgrounds over Dracula, so the code stays readable.
@@ -113,7 +114,8 @@ approves it; after any edit it asks again. A trusted `.nvim.lua` also lets prett
 | The `<leader>u` toggles, beside a review, `keep_local_opts`, `uT` | `tests/toggles.lua` |
 | Filetypes (`.mdc`, `*.json.*`) | `tests/files.lua` |
 | `zg` writes to the versioned list | quick: `zg writes to the versioned word list` |
-| The look, code context, `Space w` | full: `test_look` in `tests/look.sh` |
+| The look, code context, `Space w` | full: `test_look` in `tests/core.sh` |
+| Windows (`Space w` split, move, resize, close), buffers (`Space b`), `Space u w`, `:help` | full: `test_windows` in `tests/core.sh` |
 
 ## Changing it
 

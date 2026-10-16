@@ -45,10 +45,20 @@ package.loaded["codediff.ui.lifecycle"] = {
   end,
 }
 vim.wo[review_win].wrap = false
+local warned
+local notify = vim.notify
+vim.notify = function(msg, level)
+  warned = { msg, level }
+end
 press("<leader>uw")
-press("<leader>uw")
+vim.notify = notify
 T.eq("a review keeps its sides unwrapped", vim.wo[review_win].wrap, false)
-T.eq("while other tabs follow the toggle", vim.wo[lua_win].wrap, wrap)
+T.eq("Space u w in a review leaves the toggle alone", vim.wo[lua_win].wrap, wrap)
+T.eq(
+  "Space u w in a review says why",
+  warned,
+  { "Wrap stays off in a review: it would misalign the two sides", vim.log.levels.WARN }
+)
 vim.cmd("tabclose")
 
 local relative = vim.wo[lua_win].relativenumber
