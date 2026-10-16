@@ -90,6 +90,13 @@ stop_nvim() {
   rm -f "$SOCK"
 }
 
+HOME_BACK='vim.api.nvim_get_current_win() == vim.g.home and vim.fn.mode() == "n" and 1 or 0'
+lua_do() { lua_eval "(function() $1 return 1 end)()" >/dev/null; }
+set_home() { send ':lua vim.g.home = vim.api.nvim_get_current_win()<CR>'; }
+tiles() { echo '#vim.tbl_filter(function(w) return vim.api.nvim_win_get_config(w).relative == "" end, vim.api.nvim_tabpage_list_wins(0))'; }
+notified() { echo "vim.inspect(Snacks.notifier.get_history()):find(\"$1\", 1, true) and 1 or 0"; }
+resize() { "${TMUX[@]}" resize-window -x "$1" -y "$2"; }
+
 clients() { echo "#vim.lsp.get_clients({name=\"$1\"})"; }
 mason() { [ -x "$XDG_DATA_HOME/nvim/mason/bin/$1" ]; }
 

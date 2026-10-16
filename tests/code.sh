@@ -1,3 +1,14 @@
+test_lua() {
+  printf 'local x = 1\nreturn x\n' >"$PROJ/sample.lua"
+  if ! mason lua-language-server; then
+    skip "lua_ls attaches to Lua" "not installed by Mason"
+    return
+  fi
+  start_nvim "$PROJ" sample.lua
+  probe "lua_ls attaches to Lua" "$(clients lua_ls)" 1 60
+  stop_nvim
+}
+
 term_has() {
   echo "(function() for _, b in ipairs(vim.api.nvim_list_bufs()) do if vim.bo[b].buftype == \"terminal\" and table.concat(vim.api.nvim_buf_get_lines(b, 0, -1, false), \" \"):find(\"$1\", 1, true) then return 1 end end return 0 end)()"
 }
@@ -54,8 +65,12 @@ test_debug() {
   probe "Python: ,db sets a breakpoint" 'vim.tbl_count(require("dap.breakpoints").get())' 1 20
   keys ,dc
   probe "Python: ,dc stops at the breakpoint" 'require("dap").session() and require("dap").session().stopped_thread_id and 1 or 0' 1 60
+  probe "Python: the six debug panels open" '#vim.tbl_filter(function(w) return vim.bo[vim.api.nvim_win_get_buf(w)].filetype:find("dap") end, vim.api.nvim_tabpage_list_wins(0))' 6 10
+  probe "Python: the cursor stays in the code" 'vim.bo.filetype' python 5
   keys ,dt
   probe "Python: ,dt ends the session" 'require("dap").session() and 1 or 0' 0 20
+  keys ,du
+  probe "Python: ,du closes the panels" '#vim.tbl_filter(function(w) return vim.bo[vim.api.nvim_win_get_buf(w)].filetype:find("dap") end, vim.api.nvim_tabpage_list_wins(0))' 0 10
   stop_nvim
 }
 
@@ -128,30 +143,4 @@ test_clojure() {
   probe "Clojure: ,cj connects Conjure" 'require("conjure.client.clojure.nrepl.state").get("conn") and 1 or 0' 1 30
   stop_nvim
   rm -f "$PROJ/clj/deps.edn" "$PROJ/clj/.nrepl-port"
-}
-
-test_review() {
-  local repo="$PROJ/review" g=(git -c user.name=t -c user.email=t@t)
-  rm -rf "$repo" "$PROJ/review.git"
-  git init -q --bare "$PROJ/review.git" && git -C "$PROJ" clone -q review.git review 2>/dev/null
-  printf 'a = 1\n\nb = 2\n' >"$repo/r.lua"
-  "${g[@]}" -C "$repo" add r.lua && "${g[@]}" -C "$repo" commit -qm base && git -C "$repo" push -q origin HEAD 2>/dev/null
-  printf 'a = 1\n\nb = 3\n' >"$repo/r.lua"
-  "${g[@]}" -C "$repo" commit -qam change
-  start_nvim "$repo" other.txt
-  keys Space g V
-  wait_for 'vim.fn.tabpagenr("$")' 2 20
-  keys C-l C-l gg
-  wait_for 'vim.fn.expand("%:t")' r.lua 10
-  keys ]c
-  probe "Space g V: ]c goes to the branch's change" 'vim.fn.line(".")' 3 10
-  probe "Space g V: the sides do not wrap" 'vim.wo.wrap and 1 or 0' 0 5
-  probe "Space g V: the wrap toggle stays on" 'require("dotfiles.toggles").values.wrap and 1 or 0' 1 5
-  keys Space f f
-  sleep 1
-  keys r.lua Enter
-  probe "Space g V: a picked file opens in a new tab" 'vim.fn.tabpagenr("$")' 3 10
-  probe "Space g V: that tab wraps" 'vim.wo.wrap and 1 or 0' 1 5
-  probe "Space g V: the review keeps its diff" '#vim.fn.tabpagebuflist(2)' 3 5
-  stop_nvim
 }

@@ -15,7 +15,7 @@ quick | full | fresh) ;;
   ;;
 esac
 
-for part in lib look markdown code tex; do
+for part in lib core workspace code git markdown tex; do
   . "$DOT/tests/$part.sh"
 done
 
@@ -88,16 +88,24 @@ full() {
   before="$(lock_hash)"
   setup
   install
-  test_lua
   test_look
-  test_markdown
-  test_notes
+  test_windows
+  test_terminals
+  test_tree_and_pickers
+  test_claude
+  test_claude_notices
+  test_sessions
+  test_lua
   test_run
   test_debug
   test_language_actions
-  test_review
   test_test_keys
   test_clojure
+  test_review
+  test_lazygit
+  test_review_debug
+  test_markdown
+  test_notes
   test_tex
   test_snippets
   if [ "$before" = "$(lock_hash)" ]; then

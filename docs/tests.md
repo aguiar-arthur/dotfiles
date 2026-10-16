@@ -18,7 +18,7 @@ how they are built.
 |---|---|
 | `tests/nvim.sh` | the one test command: `quick` (default), `full`, `fresh` |
 | `tests/lib.sh` | pass / fail / skip, the isolated home, tmux, `probe`, `menu_shows`, `install` |
-| `tests/look.sh`, `markdown.sh`, `code.sh`, `tex.sh` | the full checks by area, one `test_<name>` function each |
+| `tests/core.sh`, `workspace.sh`, `code.sh`, `git.sh`, `markdown.sh`, `tex.sh` | the full checks, one file per context (the same names as the docs), one `test_<name>` function per scenario |
 | `tests/lib.lua` | `T.eq`, `T.dir` (a temporary project), `T.config` (load a config file), `T.done` |
 | `tests/files.lua`, `helpers.lua`, `toggles.lua`, `keys.lua`, `autocmds.lua` | headless checks with the real config, run through `lua_check` |
 | `tests/share.lua`, `tests/modules.lua` | headless checks run without `lua_check` |
@@ -41,8 +41,10 @@ Where a new check goes:
   one `lua_check` line in `quick()`), with fakes for the clipboard, browser, Mason or codediff.
 - It needs a UI, a server or typing: a `probe` in the `test_<area>` function of the `.sh` file
   of what it tests; a new helper goes in `tests/lib.sh`.
-- Keep the `.sh` files together under 650 lines: a new check replaces an old one or earns its
-  lines.
+- There is no line limit: split a file by sub-context when it grows (`workspace.sh` could become
+  `terminals.sh` and `claude.sh`) and list it in the `for part in …` loop of `tests/nvim.sh`.
+- A key sent while a terminal has the cursor goes to the program, so set Lua state there with
+  `lua_do`, not with `send ':lua …'`.
 
 ## Checking by hand
 
