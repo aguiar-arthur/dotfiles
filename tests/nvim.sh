@@ -40,6 +40,14 @@ SKAutoReloadFileUpdate is off"
   fi
 }
 
+clock_frame() {
+  local frame
+  frame="$(bash "$DOT/config/nvim/dashboard/clock.sh" 1)" || return 1
+  case "$frame" in *█*) ;; *) echo "no digits in the frame" && return 1 ;; esac
+  case "$frame" in *"$(LC_ALL=C date +%Y)"*) ;; *) echo "no date under the digits" && return 1 ;; esac
+  [ "$(printf '%s' "$frame" | wc -l)" -eq 10 ] || { echo "a frame must not end in a newline: the screen would scroll" && return 1; }
+}
+
 quick() {
   local before
   before="$(lock_hash)"
@@ -63,11 +71,12 @@ quick() {
     fail "zg writes to the versioned word list" "spellfile is not config/nvim/spell/en.utf-8.add"
   fi
   tool "stylua" stylua bash -c "cd '$DOT/config/nvim' && stylua --check . ../../tests"
-  tool "shell syntax" bash bash -n "$DOT/install.sh" "$DOT/link.sh" "$DOT"/tests/*.sh
-  tool "shfmt" shfmt shfmt -d "$DOT/install.sh" "$DOT/link.sh" "$DOT"/tests/*.sh
+  tool "shell syntax" bash bash -n "$DOT/install.sh" "$DOT/link.sh" "$DOT"/tests/*.sh "$DOT/config/nvim/dashboard/clock.sh"
+  tool "shfmt" shfmt shfmt -d "$DOT/install.sh" "$DOT/link.sh" "$DOT"/tests/*.sh "$DOT/config/nvim/dashboard/clock.sh"
   tool "rumdl" rumdl rumdl check "$DOT" --config "$DOT/config/rumdl/rumdl.toml"
   check_silent "no comments in Lua" grep -rnE '^[[:space:]]*--' --include='*.lua' "$DOT/config/nvim" "$DOT/tests"
-  check_silent "no comments in shell" grep -nE '^[[:space:]]*#([^!]|$)' "$DOT/install.sh" "$DOT/link.sh" "$DOT"/tests/*.sh
+  check_silent "no comments in shell" grep -nE '^[[:space:]]*#([^!]|$)' "$DOT/install.sh" "$DOT/link.sh" "$DOT"/tests/*.sh "$DOT/config/nvim/dashboard/clock.sh"
+  check "the dashboard clock draws its digits and date" clock_frame
 }
 
 full() {

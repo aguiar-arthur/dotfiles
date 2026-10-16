@@ -33,7 +33,23 @@ return {
 
   opts = {
     bigfile = { enabled = true },
-    dashboard = { enabled = true },
+    dashboard = {
+      enabled = true,
+      width = 70,
+      sections = {
+        {
+          section = "terminal",
+          cmd = "bash " .. vim.fn.shellescape(vim.fn.stdpath("config") .. "/dashboard/clock.sh"),
+          ttl = 0,
+          height = 11,
+          width = 70,
+          align = "center",
+          padding = 1,
+        },
+        { section = "keys", gap = 1, padding = 1 },
+        { section = "startup" },
+      },
+    },
     explorer = { enabled = true },
     indent = { enabled = true },
     input = { enabled = true },

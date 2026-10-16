@@ -24,6 +24,7 @@ reach into the git review (wrap) and Markdown (conceal).
 | `config/nvim/lua/config/autocmds.lua` | yank highlight, reload on focus, last position, `q` closes, missing folders, resize |
 | `config/nvim/lua/config/lazy.lua` | lazy.nvim bootstrap at the commit in `lazy-lock.json` |
 | `config/nvim/lua/dotfiles/windows.lua` | the cursorline only in the active window, the path in the winbar of file windows, the welcome screen when the last file closes |
+| `config/nvim/dashboard/clock.sh` | the welcome screen's logo: a seven-segment clock (HH:MM:SS, blinking colon, English date) drawn by awk; `clock.sh N` stops after N frames |
 | `config/nvim/lua/dotfiles/toggles.lua` | the global `<leader>u` toggles |
 | `config/nvim/lua/plugins/snacks.lua` (`init`) | where the toggles are mapped, on `VeryLazy` |
 | `config/nvim/lua/dotfiles/treesitter.lua` | highlight and indent per buffer, the switch behind `<leader>uT` |
@@ -65,7 +66,9 @@ file, language servers and a running latexmk. Inactive windows are a shade darke
 (`NormalNC`), the cursorline shows only in the active one, and each file window has its path
 in a winbar (a window whose winbar is already set, as in a review, keeps it; floats and
 terminals have none). Closing the last file (`<leader>bd`, `:bd`) shows the Snacks dashboard
-again, as at startup. Smooth scrolling is Snacks' (`<leader>uS`). Diff colors are tinted
+again, as at startup; its logo is `dashboard/clock.sh` in a Snacks `terminal` section with
+`ttl = 0` (a cached section would be static), so any script that redraws from the top-left
+corner can replace it. Smooth scrolling is Snacks' (`<leader>uS`). Diff colors are tinted
 backgrounds over Dracula, so the code stays readable.
 
 Spell checking (`en_us`, `pt_br`) is on for prose filetypes. Words added with `zg` (in either
