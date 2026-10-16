@@ -1,10 +1,9 @@
 # Markdown
 
 Markdown files and notes: rendering in the buffer, the pandoc preview, linting with rumdl, and
-the notes folder with obsidian.nvim. Uses [code](code.md) for rumdl and marksman and the
-formatting rules; [core](core.md)'s conceal toggle drives the rendering.
+the notes folder with obsidian.nvim. Its relationships are in [map](map.md).
 
-## Terms
+## Language
 
 - **notes folder**: `settings.notes.dir` (`~/notes`), plain `.md` files; daily notes in
   `daily/`.
@@ -40,12 +39,22 @@ the same request twice.
 rumdl lints as you type; it formats on save only under a `.rumdl.toml` or `.markdownlint.*`, so
 notes are never restyled.
 
+## Contract
+
+Offers: nothing other contexts rely on.
+
+Consumes:
+
+- [core](core.md): `settings.notes.dir` and the global conceal toggle `<leader>uc`.
+  render-markdown sets `conceallevel` on every redraw, so it is set up again with the global
+  value whenever that changes (an `OptionSet` autocmd).
+- [code](code.md): rumdl and marksman as servers, and the formatting rules.
+- [workspace](workspace.md): mini.pairs leaves the backtick alone; the ftplugin adds a pair that
+  does not fire next to another backtick, so typing a code fence still works.
+
 ## Pitfalls
 
-- render-markdown sets `conceallevel` on every redraw, so it is set up again with the global
-  value whenever that changes (`<leader>uc`, an `OptionSet` autocmd).
-- mini.pairs leaves the backtick alone; the Markdown ftplugin adds a pair that does not fire
-  next to another backtick, so typing a code fence still works.
+- None of its own.
 
 ## Checks
 

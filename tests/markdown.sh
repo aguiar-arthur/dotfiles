@@ -9,6 +9,10 @@ test_markdown() {
   probe "<leader>um turns rendering off" 'require("render-markdown").get() and 1 or 0' 0
   keys Space u m
   probe "<leader>um turns rendering on" 'require("render-markdown").get() and 1 or 0' 1
+  keys Space u c
+  probe "<leader>uc re-applies the conceal level to render-markdown" 'require("render-markdown.state").config.win_options.conceallevel.rendered' 0
+  keys Space u c
+  probe "<leader>uc restores it" 'require("render-markdown.state").config.win_options.conceallevel.rendered' 2
   probe "a Markdown file leaves ~/notes alone" 'vim.fn.isdirectory(vim.fn.expand("~/notes"))' 0
   if have rumdl; then
     probe "rumdl attaches to Markdown" "$(clients rumdl)" 1 30

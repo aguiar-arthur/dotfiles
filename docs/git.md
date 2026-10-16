@@ -1,10 +1,9 @@
 # Git
 
 Hunks in the buffer, history pickers, lazygit, and the side by side review of the working
-tree or the branch. Uses [workspace](workspace.md) pickers; [core](core.md) toggles leave the
-review's wrap alone.
+tree or the branch. Its relationships are in [map](map.md).
 
-## Terms
+## Language
 
 - **hunk**: a changed block, marked by gitsigns in the status column.
 - **review**: a codediff tab, opened by `<leader>gD` (working tree) or `<leader>gV` (the
@@ -35,14 +34,23 @@ is the real file, so `gd`, `K` and edits work there. The two sides never wrap.
 `<leader>op` inside a review toggles the file list (codediff's `toggle_explorer` is set to it and to
 `<leader>ge`; its keys are buffer-local, so everywhere else `<leader>op` is still the file tree).
 
+## Contract
+
+Offers: nothing other contexts rely on.
+
+Consumes:
+
+- [core](core.md): in a review `vim.go.wrap` is off (codediff sets it with `vim.wo`), and
+  `<leader>uw` leaves it alone.
+- [workspace](workspace.md): Snacks pickers and lazygit; the custom `confirm` must call
+  `snacks.picker.actions.jump` directly.
+- [install](install.md): codediff's prebuilt diff library, fetched in its `build` step.
+
 ## Pitfalls
 
 - gitsigns attaches to a file a review opens after codediff maps its keys, and its buffer-local
   `]c` / `[c` replaced the review's; they now ask codediff first, and fall back to Vim's own
   `]c` in a `:diffthis` window.
-- Snacks pickers: the custom `confirm` must call `snacks.picker.actions.jump` directly (see
-  [workspace](workspace.md)).
-- In a review `vim.go.wrap` is off (codediff sets it with `vim.wo`); see [core](core.md).
 
 ## Checks
 

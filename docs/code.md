@@ -1,11 +1,9 @@
 # Code
 
 Language servers, formatting, and the `,` keys that run, test and debug a file; Python and
-Clojure in detail. Uses [core](core.md) for the settings (which servers, tools); Mason packages
-are installed by [install](install.md); [latex](latex.md) and [markdown](markdown.md) add their
-own servers on top.
+Clojure in detail. Its relationships are in [map](map.md).
 
-## Terms
+## Language
 
 - **Mason server**: a server in `settings.mason_servers`, installed by Mason and the only kind
   `mason-lspconfig` enables.
@@ -117,12 +115,25 @@ replacing the dead REPL's terminal. Conjure keeps its own keys (`,e` evaluate, `
 tests, `,r` refresh, `,s` sessions). The nREPL and cider-nrepl versions are at the top of
 `dotfiles/clojure.lua`.
 
+## Contract
+
+Offers:
+
+- To [latex](latex.md) and [markdown](markdown.md): the server lists in `settings.lua` they add
+  to (texlab, ltex_plus; rumdl, marksman), the `after/lsp/` files, `style_markers` and the
+  formatting rules.
+
+Consumes:
+
+- [core](core.md): `settings` (which servers and tools).
+- [workspace](workspace.md): blink.cmp registers its LSP capabilities when it loads, so it stays
+  a dependency of nvim-lspconfig; otherwise servers started before the first insert lack them.
+- [install](install.md): the Mason packages.
+
 ## Pitfalls
 
 - `mason-lspconfig` gets `automatic_enable = mason_servers`, never `true`: `true` enables any
   server left installed in Mason (a stale stylua server once ran in Lua files).
-- blink.cmp registers its LSP capabilities when it loads, so it stays a dependency of
-  nvim-lspconfig; otherwise servers started before the first insert lack them.
 - Formatters run on save only under a style marker. A formatter added to conform gets an
   entry in `style_markers`. The repository's `.rumdl.toml` links to `config/rumdl/rumdl.toml`
   so its own Markdown formats on save, and its `.editorconfig` has a `[*.{sh,bash}]` section so

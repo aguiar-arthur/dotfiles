@@ -1,10 +1,9 @@
 # Core
 
 How Neovim starts, the settings a user changes, the global keys and toggles, treesitter and the
-look. Every other context builds on this one: plugins read `settings.lua`, and the toggles
-reach into the git review (wrap) and Markdown (conceal).
+look. Every other context builds on this one (the shared kernel in [map](map.md)).
 
-## Terms
+## Language
 
 - **settings**: the table in `lua/config/settings.lua`, merged with the untracked `local.lua`.
 - **trusted `.nvim.lua`**: a project file Neovim runs (`exrc`) once approved with `:trust`.
@@ -90,15 +89,26 @@ Neovim runs it only after you trust it: the first time it asks, `v` shows the fi
 approves it; after any edit it asks again. A trusted `.nvim.lua` also lets prettier run (see
 [code](code.md)). Projects' `.editorconfig` files are followed (built in).
 
+## Contract
+
+Offers:
+
+- `settings.lua` keys (servers, Mason tools, parsers, notes, spell languages) to code, install,
+  Markdown and LaTeX.
+- The `<leader>` / `,` split and the global `<leader>u` toggles.
+- To [git](git.md): in a codediff tab `vim.go.wrap` is off (codediff sets it with `vim.wo`);
+  global toggles keep their own values instead of reading `vim.go`, and `<leader>uw` leaves a
+  review alone.
+- To [markdown](markdown.md): the conceal toggle is re-applied to render-markdown (it sets
+  `conceallevel` on every redraw).
+
+Consumes: nothing.
+
 ## Pitfalls
 
 - Neovim's own ftplugins for Lua, Markdown, help and query call `vim.treesitter.start()` after
   the `FileType` autocmds; anything that turns treesitter off must stop it again later (the
   treesitter autocmd does it in `vim.schedule`).
-- In a codediff tab `vim.go.wrap` is off (codediff sets it with `vim.wo`); global toggles keep
-  their own values instead of reading `vim.go`.
-- render-markdown sets `conceallevel` on every redraw, so the conceal toggle sets it up again
-  (see [markdown](markdown.md)).
 - Snacks installs `vim.ui.input` / `vim.ui.select` and the dashboard on `UIEnter`, which a
   headless Neovim never fires: `:checkhealth snacks` errors there are not real.
 - `:checkhealth snacks` reports errors under `Snacks.image` (kitty graphics, `magick`, `mmdc`)

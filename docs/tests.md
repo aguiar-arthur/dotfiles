@@ -2,9 +2,9 @@
 
 How a change is checked: `tests/nvim.sh` and its files, where a new check goes, and how to
 check by hand what the suite cannot. Every other context lists its own checks; this one says
-how they are built.
+how they are built. Its relationships are in [map](map.md).
 
-## Terms
+## Language
 
 - **quick**: the default mode, seconds; startup, lint and the headless `.lua` checks.
 - **full**: quick plus `install.sh nvim` into an isolated home and a real Neovim in tmux.
@@ -45,6 +45,13 @@ Where a new check goes:
   `terminals.sh` and `claude.sh`) and list it in the `for part in …` loop of `tests/nvim.sh`.
 - A key sent while a terminal has the cursor goes to the program, so set Lua state there with
   `lua_do`, not with `send ':lua …'`.
+
+## Contract
+
+Offers: `tests/nvim.sh` (quick, full, fresh) and `tests/lib.sh` / `lib.lua` to every context.
+
+Consumes: every context's code. A link in [map](map.md) gets a check in the downstream
+context's file; the map's last column says which.
 
 ## Checking by hand
 

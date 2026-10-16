@@ -1,10 +1,9 @@
 # LaTeX
 
 Writing and building LaTeX: vimtex with latexmk and Skim, texlab, grammar with ltex-ls-plus,
-and the snippets. Uses [code](code.md) for the servers and [workspace](workspace.md) for
-completion; Skim and `~/.latexmkrc` are set up by [install](install.md) (`link.sh`).
+and the snippets. Its relationships are in [map](map.md).
 
-## Terms
+## Language
 
 - **build folder**: `build/` next to the main file, where latexmk writes everything.
 - **autosnippet**: a snippet that expands as you type, without the completion menu.
@@ -68,10 +67,20 @@ ltex-ls-plus checks grammar in Portuguese (`pt-BR`) by default. A comment such a
 vim spell already underlines typos, and one word list (`zg`) is simpler than two that disagree.
 `<leader>uG` turns grammar off and on.
 
+## Contract
+
+Offers: nothing other contexts rely on.
+
+Consumes:
+
+- [code](code.md): texlab and ltex-ls-plus as servers. They share `.tex` buffers, so ltex is
+  pinned to UTF-16 in its `after/lsp` file (the position encoding rule).
+- [workspace](workspace.md): completion; LaTeX has its own snippets, not friendly-snippets.
+- [install](install.md): Skim and `~/.latexmkrc` (`link.sh`), and the Mason packages.
+- [core](core.md): `settings` (spell languages, servers).
+
 ## Pitfalls
 
-- ltex-ls-plus and texlab share `.tex` buffers, so ltex is pinned to UTF-16 in its `after/lsp`
-  file (see the position encoding pitfall in [code](code.md)).
 - An autosnippet that fires after `\` breaks typing commands by hand; add autosnippets through
   `auto()` in `snippets/tex.lua`, which refuses to expand after a backslash.
 - `VimtexCompile` toggles, so the live start first asks `b:vimtex.compiler.is_running()`;

@@ -1,10 +1,10 @@
 # Workspace
 
 Finding, moving and editing: pickers, the file tree, terminals, sessions, motions and text
-objects, completion and snippets, sharing code, and Claude Code. Uses [core](core.md) for keys
-and toggles; the pickers change behaviour inside a [git](git.md) review.
+objects, completion and snippets, sharing code, and Claude Code. Its relationships are in
+[map](map.md).
 
-## Terms
+## Language
 
 - **picker**: any Snacks list (files, grep, symbols, references, git); one set of keys for all.
 - **share**: `<leader>cs`, which copies `path:line:col-line:col` and a fenced code block.
@@ -66,14 +66,23 @@ Claude, the float terminal and lazygit share `dotfiles/float.lua`: a rounded Sna
 title, 92% by 90% of the editor, over a backdrop dimmed to 60 (the pickers get the same
 backdrop). Hiding a float keeps its session, and Snacks refits it when the terminal is resized.
 
+## Contract
+
+Offers:
+
+- To [git](git.md): the pickers' custom `confirm` opens a file from a review in a new tab; it
+  must call `require("snacks.picker.actions").jump` directly, because actions such as `tab`
+  route back through `confirm` and recurse.
+- To [code](code.md): blink.cmp, whose LSP capabilities servers need when they start.
+- To [latex](latex.md): completion; LaTeX keeps its own snippets in place of friendly-snippets.
+- To [markdown](markdown.md): mini.pairs leaves the backtick alone everywhere.
+
+Consumes: [core](core.md) keys and toggles.
+
 ## Pitfalls
 
-- Snacks pickers: a custom `confirm` must call `require("snacks.picker.actions").jump`
-  directly; actions such as `tab` route back through `confirm` and recurse.
 - blink.cmp on the `:` line inserts the selected item already: mapping `<CR>` to `accept`
   there makes a completed command need a second `<CR>`.
-- mini.pairs leaves the backtick alone everywhere; Markdown maps its own pair (see
-  [markdown](markdown.md)).
 
 ## Checks
 

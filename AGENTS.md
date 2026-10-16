@@ -21,8 +21,9 @@ two. The README is the user's guide (keys); it is not needed to change code.
 | Install | [docs/install.md](docs/install.md) | Brewfiles, `install.sh`, `link.sh`, Mason / parser / spell installs, lockfile, zsh, Starship, iTerm2 | core (settings) |
 | Tests | [docs/tests.md](docs/tests.md) | `tests/`, where a new check goes, checking by hand | all |
 
-Where a change crosses contexts, the docs say so in their first paragraph and pitfalls (the
-review touches core, workspace and git; the conceal toggle touches core and Markdown).
+How the contexts relate (upstream / downstream, the kind of link, the shared words) is in
+[docs/map.md](docs/map.md). A change inside one context needs only its doc; a change to
+something a doc lists under **Contract** (Offers) also needs the map and the downstream docs.
 
 ## Working on a task
 

@@ -2,10 +2,9 @@
 
 Getting a Mac from nothing to this setup, and keeping it there: Homebrew and the Brewfiles,
 `install.sh`, `link.sh`, the Mason packages, parsers and spell files Neovim needs, the plugin
-lockfile, and the shell, prompt and terminal. [core](core.md)'s settings say what to install;
-every other context relies on what this one puts in place.
+lockfile, and the shell, prompt and terminal. Its relationships are in [map](map.md).
 
-## Terms
+## Language
 
 - **nvim mode**: `install.sh nvim` / `link.sh nvim`, which touch only Neovim (`Brewfile.nvim`,
   `~/.config/nvim`, the rumdl rules) on a machine whose shell and terminal must stay as they are.
@@ -44,6 +43,14 @@ upgraded (`brew bundle --no-upgrade`).
 adds one marked block (`# >>> dotfiles >>>`) to `~/.zshrc` that sources `dotfiles.zsh`, and
 writes the iTerm2 and Skim preferences with `defaults`. Every line it prints starts with `ok`
 when nothing had to change.
+
+## Contract
+
+Offers: every program, link, Mason package, parser and spell file the other contexts assume is
+there ([code](code.md) servers, [git](git.md) codediff library, [latex](latex.md) Skim and
+`~/.latexmkrc`).
+
+Consumes: [core](core.md) `settings` (which servers, tools, parsers and spell languages).
 
 ## Pitfalls
 
