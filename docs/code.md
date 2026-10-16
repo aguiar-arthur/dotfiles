@@ -38,7 +38,7 @@ Clojure in detail. Its relationships are in [map](map.md).
   (`automatic_enable = mason_servers`): a server left over in Mason stays off.
 - Mason installs nothing when Neovim starts: after adding a server or tool, run
   `./install.sh` again (or `:MasonToolsInstall`).
-- rumdl (`Brewfile.nvim`) and clojure-lsp (the full `Brewfile` only) are enabled when the binary
+- rumdl and clojure-lsp (both `Brewfile.nvim`) are enabled when the binary
   exists. stylua, shfmt and prettier come from `Brewfile.nvim`; Mason does not install copies.
 - blink.cmp adds its completion capabilities to every server by itself; it is a dependency of
   nvim-lspconfig so it loads, and registers them, before the first server starts.

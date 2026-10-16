@@ -19,7 +19,7 @@ and the snippets. Its relationships are in [map](map.md).
 | `config/nvim/after/lsp/texlab.lua` | texlab reads `build/`, chktex on open and save, latexindent |
 | `config/nvim/after/lsp/ltex_plus.lua` | grammar in `pt-BR`, spelling rules off, UTF-16 |
 | `config/latex/latexmkrc` | PDF output, BibTeX when a `.bib` exists, one-second polling, what `,lc` cleans; linked to `~/.latexmkrc` |
-| `link.sh` (`app_preferences`) | Skim's inverse search to Neovim and reload on change |
+| `link.sh` (`skim_preferences`) | Skim's inverse search to Neovim and reload on change |
 
 ## How it works
 

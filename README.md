@@ -60,10 +60,11 @@ cd ~/dotfiles && ./install.sh nvim
 ```
 
 It installs only the programs in `Brewfile.nvim` (Neovim, git, ripgrep, ast-grep, fd,
-tree-sitter, node, python, the formatters, pandoc, lazygit, Claude Code) and links only
-`~/.config/nvim` and `~/.config/rumdl/rumdl.toml`, then sets up the plugins, servers and
-parsers as usual.
-`~/.zshrc`, Starship, iTerm2, fonts, LaTeX, Clojure and app preferences are left alone, so
+tree-sitter, node, python, the formatters, pandoc, lazygit, Clojure and its tools, LaTeX, Skim,
+Claude Code) and links only `~/.config/nvim`, `~/.config/rumdl/rumdl.toml` and
+`~/.latexmkrc`, sets Skim's preferences, then sets up the plugins, servers and parsers as
+usual. MacTeX is a large download and asks for your password.
+`~/.zshrc`, Starship, iTerm2 and fonts are left alone, so
 two things stay up to that machine: Homebrew on `PATH` (if Homebrew was just installed, it
 prints the line to add) and a Nerd Font in the terminal for the icons. `./link.sh nvim` does
 the linking part on its own. Running the full `./install.sh` later adds the rest.
@@ -72,13 +73,14 @@ the linking part on its own. Running the full `./install.sh` later adds the rest
 
 Run on its own after a `git pull`, it:
 
-- links `~/.config/nvim`, `~/.config/starship.toml`, `~/.config/rumdl/rumdl.toml`,
-  `~/.latexmkrc` and the iTerm2 Dynamic Profile to this repository, moving whatever was there
-  to `<name>.bak.<timestamp>` (three backups kept);
+- links `~/.config/nvim`, `~/.config/rumdl/rumdl.toml` and `~/.latexmkrc` (all of these with
+  `nvim`), `~/.config/starship.toml` and the iTerm2 Dynamic Profile to this repository, moving
+  whatever was there to `<name>.bak.<timestamp>` (three backups kept);
 - adds one marked block to `~/.zshrc` that sources `config/zsh/dotfiles.zsh`: Homebrew on
   `PATH`, a valid `LANG` and the Starship prompt;
-- makes "Dotfiles (Dracula)" iTerm2's default profile, sets Skim's inverse search to Neovim
-  and makes Skim reload a PDF when it changes.
+- sets Skim's inverse search to Neovim and makes Skim reload a PDF when it changes (also with
+  `nvim`);
+- makes "Dotfiles (Dracula)" iTerm2's default profile.
 
 ## Using Neovim
 

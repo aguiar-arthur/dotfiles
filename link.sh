@@ -21,11 +21,11 @@ say() { printf '%-8s %s\n' "$1" "$2"; }
 links() {
   printf '%s\n' \
     "config/nvim|$HOME/.config/nvim" \
-    "config/rumdl/rumdl.toml|$HOME/.config/rumdl/rumdl.toml"
+    "config/rumdl/rumdl.toml|$HOME/.config/rumdl/rumdl.toml" \
+    "config/latex/latexmkrc|$HOME/.latexmkrc"
   if [ "$ONLY" != nvim ]; then
     printf '%s\n' \
       "config/starship/starship.toml|$HOME/.config/starship.toml" \
-      "config/latex/latexmkrc|$HOME/.latexmkrc" \
       "config/iterm2/dracula.json|$HOME/Library/Application Support/iTerm2/DynamicProfiles/dotfiles-dracula.json"
   fi
 }
@@ -77,10 +77,13 @@ pref_bool() {
   fi
 }
 
-app_preferences() {
-  local skim=net.sourceforge.skim-app.skim
+iterm_preferences() {
   pref com.googlecode.iterm2 "Default Bookmark Guid" \
     "$(sed -n 's/.*"Guid": "\(.*\)".*/\1/p' "$DOT/config/iterm2/dracula.json" | head -n 1)"
+}
+
+skim_preferences() {
+  local skim=net.sourceforge.skim-app.skim
   pref "$skim" SKTeXEditorPreset ""
   pref "$skim" SKTeXEditorCommand "$(command -v nvim || echo nvim)"
   pref "$skim" SKTeXEditorArguments "--headless -c \"VimtexInverseSearch %line '%file'\""
@@ -104,8 +107,9 @@ zshrc() {
 }
 
 while IFS='|' read -r src dst; do link "$src" "$dst"; done < <(links)
+skim_preferences
 if [ "$ONLY" != nvim ]; then
   zshrc
-  app_preferences
+  iterm_preferences
 fi
 echo "Done."

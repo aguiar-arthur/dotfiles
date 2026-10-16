@@ -1,16 +1,10 @@
 instance_eval File.read(File.join(__dir__, "Brewfile.nvim"))
 
 brew "starship"
-brew "clojure"
-brew "leiningen"
-brew "clojure-lsp"
-brew "borkdude/brew/clj-kondo"
 brew "uv"
 brew "ruby"
 brew "mole"
 brew "tmux"
 cask "iterm2"
-cask "mactex-no-gui"
-cask "skim"
 cask "grandperspective"
 cask "font-jetbrains-mono-nerd-font"

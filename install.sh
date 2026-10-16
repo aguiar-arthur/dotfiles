@@ -65,7 +65,7 @@ step_link() {
 }
 
 if [ "$ONLY" = nvim ]; then
-  echo "Installing Neovim only: its programs, ~/.config/nvim and its plugins. Homebrew may ask for your password."
+  echo "Installing Neovim only: its programs (with MacTeX, a large download), ~/.config/nvim and its plugins. Homebrew and MacTeX may ask for your password."
 else
   echo "Installing everything. Homebrew and MacTeX may ask for your password."
 fi

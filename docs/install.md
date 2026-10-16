@@ -7,7 +7,8 @@ lockfile, and the shell, prompt and terminal. Its relationships are in [map](map
 ## Language
 
 - **nvim mode**: `install.sh nvim` / `link.sh nvim`, which touch only Neovim (`Brewfile.nvim`,
-  `~/.config/nvim`, the rumdl rules) on a machine whose shell and terminal must stay as they are.
+  `~/.config/nvim`, the rumdl rules, `~/.latexmkrc`, Skim's preferences) on a
+  machine whose shell and terminal must stay as they are.
 - **step**: one of `brew`, `link`, `nvim` in `install.sh`; a failed step does not stop the
   others.
 - **lockfile**: `config/nvim/lazy-lock.json`, the plugin commits; the way back after a bad
