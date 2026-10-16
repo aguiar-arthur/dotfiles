@@ -86,6 +86,51 @@ vim.fn.writefile({ "after" }, root .. "/b.txt")
 local later = os.time() + 10
 vim.uv.fs_utime(root .. "/b.txt", later, later)
 vim.api.nvim_exec_autocmds("FocusGained", {})
+local settings = require("config.settings")
+settings.latex_live = false
+local tex = root .. "/live.tex"
+vim.fn.writefile({ "\\documentclass{article}" }, tex)
+vim.cmd("edit " .. tex)
+local calls = { compile = 0, view = 0 }
+vim.api.nvim_buf_create_user_command(0, "VimtexCompile", function()
+  calls.compile = calls.compile + 1
+end, {})
+vim.api.nvim_buf_create_user_command(0, "VimtexView", function()
+  calls.view = calls.view + 1
+end, {})
+vim.api.nvim_exec_autocmds("User", { pattern = "VimtexEventInitPost" })
+vim.api.nvim_buf_set_lines(0, 1, 1, false, { "text" })
+vim.api.nvim_exec_autocmds("CursorHold", {})
+T.eq(
+  "TeX: live mode off neither compiles nor saves",
+  { calls.compile, vim.bo.modified },
+  { 0, true }
+)
+settings.latex_live = true
+vim.api.nvim_exec_autocmds("User", { pattern = "VimtexEventInitPost" })
+T.eq("TeX: opening a file starts the build", calls.compile, 1)
+vim.api.nvim_exec_autocmds("CursorHold", {})
+T.eq("TeX: idle saves the file", { vim.bo.modified, vim.fn.readfile(tex)[2] }, { false, "text" })
+vim.api.nvim_buf_set_lines(0, 1, 1, false, { "mine" })
+vim.fn.writefile({ "\\documentclass{article}", "theirs" }, tex)
+local later_tex = os.time() + 20
+vim.uv.fs_utime(tex, later_tex, later_tex)
+vim.api.nvim_exec_autocmds("CursorHold", {})
+T.eq("TeX: idle never overwrites a file changed on disk", vim.fn.readfile(tex)[2], "theirs")
+vim.cmd("edit! " .. tex)
+vim.fn.writefile({ "\\documentclass{article}", "external" }, tex)
+local later_ext = os.time() + 40
+vim.uv.fs_utime(tex, later_ext, later_ext)
+vim.api.nvim_exec_autocmds("CursorHold", {})
+vim.wait(200)
+T.eq("TeX: idle reloads an untouched buffer changed on disk", vim.fn.getline(2), "external")
+vim.api.nvim_exec_autocmds("User", { pattern = "VimtexEventCompileSuccess" })
+T.eq("TeX: a build before any view leaves the viewer alone", calls.view, 0)
+vim.api.nvim_exec_autocmds("User", { pattern = "VimtexEventView" })
+vim.api.nvim_exec_autocmds("User", { pattern = "VimtexEventCompileSuccess" })
+T.eq("TeX: a build after a view syncs it", calls.view, 1)
+vim.cmd("edit " .. root .. "/b.txt")
+
 vim.defer_fn(function()
   T.eq("focus reloads a file changed on disk", vim.fn.getline(1), "after")
   T.done()

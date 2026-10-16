@@ -7,7 +7,7 @@ return {
 
       g.vimtex_view_method = vim.uv.os_uname().sysname == "Darwin" and "skim" or "zathura"
       g.vimtex_view_skim_sync = 1
-      g.vimtex_view_skim_activate = 1
+      g.vimtex_view_skim_activate = 0
       g.vimtex_view_skim_reading_bar = 1
 
       g.vimtex_compiler_method = "latexmk"
@@ -59,11 +59,62 @@ return {
     end,
     config = function()
       local group = vim.api.nvim_create_augroup("user_vimtex", { clear = true })
+      local function live()
+        return require("config.settings").latex_live
+      end
+
+      vim.api.nvim_create_autocmd("User", {
+        group = group,
+        pattern = "VimtexEventInitPost",
+        callback = function()
+          local running = vim.fn.eval("b:vimtex.compiler.is_running()")
+          if live() and (not running or running == 0) then
+            vim.cmd("VimtexCompile")
+          end
+        end,
+      })
+      local function stamp(buf)
+        local st = vim.uv.fs_stat(vim.api.nvim_buf_get_name(buf))
+        return st and (st.mtime.sec .. ":" .. st.mtime.nsec) or ""
+      end
+      vim.api.nvim_create_autocmd({ "BufReadPost", "BufWritePost", "FileChangedShellPost" }, {
+        group = group,
+        pattern = "*.tex",
+        callback = function(ev)
+          vim.b[ev.buf].tex_stamp = stamp(ev.buf)
+        end,
+      })
+      vim.api.nvim_create_autocmd({ "CursorHold", "InsertLeave" }, {
+        group = group,
+        pattern = "*.tex",
+        callback = function(ev)
+          if not live() or vim.bo[ev.buf].buftype ~= "" then
+            return
+          end
+          if not vim.bo[ev.buf].modified then
+            vim.schedule(function()
+              vim.cmd("checktime")
+            end)
+          elseif stamp(ev.buf) == vim.b[ev.buf].tex_stamp then
+            vim.cmd("silent update")
+          end
+        end,
+      })
+      vim.api.nvim_create_autocmd("User", {
+        group = group,
+        pattern = "VimtexEventView",
+        callback = function()
+          vim.g.dotfiles_tex_viewed = true
+        end,
+      })
       vim.api.nvim_create_autocmd("User", {
         group = group,
         pattern = "VimtexEventCompileSuccess",
         callback = function()
           vim.notify("Compiled successfully", vim.log.levels.INFO, { title = "LaTeX" })
+          if live() and vim.g.dotfiles_tex_viewed then
+            vim.cmd("VimtexView")
+          end
         end,
       })
       vim.api.nvim_create_autocmd("User", {

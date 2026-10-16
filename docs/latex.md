@@ -14,12 +14,12 @@ completion; Skim and `~/.latexmkrc` are set up by [install](install.md) (`link.s
 
 | Path | Holds |
 |---|---|
-| `config/nvim/lua/plugins/tex.lua` | vimtex: Skim viewer (zathura off macOS), latexmk into `build/`, folds, quickfix filters, conceal, build notifications |
+| `config/nvim/lua/plugins/tex.lua` | vimtex: Skim viewer (zathura off macOS), latexmk into `build/`, folds, quickfix filters, conceal, build notifications, the live build (start on open, save on idle, view sync) |
 | `config/nvim/after/ftplugin/tex.lua` | no hard wrap, `,lw`, which-key labels of vimtex's `,l` keys |
 | `config/nvim/snippets/tex.lua` | the LaTeX snippets (documents, text, math, ABNT) |
 | `config/nvim/after/lsp/texlab.lua` | texlab reads `build/`, chktex on open and save, latexindent |
 | `config/nvim/after/lsp/ltex_plus.lua` | grammar in `pt-BR`, spelling rules off, UTF-16 |
-| `config/latex/latexmkrc` | PDF output, BibTeX when a `.bib` exists, what `,lc` cleans; linked to `~/.latexmkrc` |
+| `config/latex/latexmkrc` | PDF output, BibTeX when a `.bib` exists, one-second polling, what `,lc` cleans; linked to `~/.latexmkrc` |
 | `link.sh` (`app_preferences`) | Skim's inverse search to Neovim and reload on change |
 
 ## How it works
@@ -30,6 +30,22 @@ maps are off). Keys under `,l` are vimtex's own, labelled in which-key: `,ll` co
 view / forward search, `,le` errors, `,lt` contents, `,lc` clean, `,lx` reload, `,lw` count
 words. Cmd+Shift+click in Skim jumps back to the line. Put `% !TEX program = lualatex` on the
 first line for another engine.
+
+The build is live (`latex_live` in `settings.lua`, on by default): opening a `.tex` file
+starts latexmk's continuous mode, a `.tex` buffer is saved on `CursorHold` (`updatetime` is
+250 ms) and on `InsertLeave`, and after the first `,lv` every successful build calls
+`VimtexView` again, so Skim follows the cursor.
+
+Edits from outside (another program, an AI) rebuild the PDF too, since latexmk watches the
+disk. On idle, an unmodified buffer is reloaded (`checktime`, scheduled because it does nothing
+inside the autocmd itself), and a modified one is saved only when its file has not changed on
+disk since it was read or written (`b:tex_stamp`); otherwise the save is skipped, so Neovim never
+overwrites the other program's edit or stops at the "file changed" prompt.
+
+Skim is not activated (`vimtex_view_skim_activate = 0`), so it never takes focus from Neovim;
+`,lv` therefore does not bring it to the front. Skim opens by itself after the first successful
+build (vimtex's `view_automatic`). With `latex_live = false` nothing starts or saves by itself
+and `,ll` is the manual toggle.
 
 Builds go to `build/`, so the project folder keeps only sources; texlab reads the same folder,
 which keeps citation and label completion working. A `latexmkrc` in a project still wins over
@@ -58,14 +74,19 @@ vim spell already underlines typos, and one word list (`zg`) is simpler than two
   file (see the position encoding pitfall in [code](code.md)).
 - An autosnippet that fires after `\` breaks typing commands by hand; add autosnippets through
   `auto()` in `snippets/tex.lua`, which refuses to expand after a backslash.
+- `VimtexCompile` toggles, so the live start first asks `b:vimtex.compiler.is_running()`;
+  without it, reloading vimtex (`,lx`) would stop the build it started.
+- Full tests start Neovim with `view_automatic` off and the build and view events recorded in
+  `start_nvim`, so a test build never opens Skim.
 
 ## Checks
 
 | What | Where |
 |---|---|
 | `,lw`, no hard wrap | `tests/keys.lua` |
+| Live build, outside edits, view sync (stubs) | quick: `tests/autocmds.lua` |
 | Skim preferences | quick: `Skim is set up for Neovim` in `tests/nvim.sh` |
-| A real build into `build/`, ltex, `u G` | full: `test_tex` in `tests/tex.sh` |
+| A real live build into `build/`, save on idle, ltex, `u G` | full: `test_tex` in `tests/tex.sh` |
 | Snippets typed for real | full: `test_snippets`, driven by `tests/snippets.lua` |
 
 ## Changing it

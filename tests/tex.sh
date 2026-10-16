@@ -24,21 +24,6 @@ Texto.
 \end{document}
 TEX
   printf '@book{knuth84, author={Knuth, Donald E.}, title={The TeXbook}, publisher={Addison-Wesley}, year={1984}, address={Reading}}\n' >"$T/tcc/referencias.bib"
-  cat >"$T/compiled.lua" <<'LUA'
-vim.g.vimtex_view_automatic = 0
-vim.api.nvim_create_autocmd("User", {
-  pattern = "VimtexEventCompileSuccess",
-  callback = function()
-    vim.g.test_compiled = 1
-  end,
-})
-vim.api.nvim_create_autocmd("User", {
-  pattern = "VimtexEventView",
-  callback = function()
-    vim.g.test_viewed = 1
-  end,
-})
-LUA
   if ! have latexmk || ! mason texlab; then
     skip "LaTeX project" "latexmk or texlab missing"
     return
@@ -46,8 +31,9 @@ LUA
   start_nvim "$T/tcc" main.tex
   probe "texlab attaches to tex" "$(clients texlab)" 1 60
   probe "vimtex folds by section" 'vim.wo.foldexpr' 'vimtex#fold#level(v:lnum)' 10
-  send ":luafile $T/compiled.lua<CR>:VimtexCompileSS<CR>"
-  probe "VimtexCompileSS builds the thesis" 'vim.g.test_compiled or 0' 1 180
+  probe "opening the file starts the live build" 'vim.g.test_compiled or 0' 1 180
+  send ":call append(1, '% live')<CR>"
+  probe "idle saves the file for the live build" 'vim.bo.modified and 1 or 0' 0 10
   probe "compiling never opens the PDF viewer" 'vim.g.test_viewed or 0' 0 3
   if [ -f "$T/tcc/build/main.pdf" ] && [ -f "$T/tcc/build/main.bbl" ]; then
     pass "PDF and bibliography land in build/"

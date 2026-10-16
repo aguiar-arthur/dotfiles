@@ -374,19 +374,22 @@ notification history.
 ### Write and build
 
 1. Open the main file: `nvim main.tex`.
-2. `,ll` starts a continuous build (latexmk): every save rebuilds the PDF. `,ll` again stops it.
-3. `,lv` opens the PDF in Skim at the line under the cursor.
+2. The build starts by itself when the file opens (latexmk, continuous) and the file is saved
+   when you stop typing, so the PDF follows your edits. `,ll` stops and starts it again.
+3. `,lv` opens the PDF in Skim at the line under the cursor; after that, every rebuild moves
+   Skim to the cursor. Skim stays in the background.
 4. In Skim, **Cmd+Shift+click** jumps back to that line in Neovim.
 5. `,le` lists errors and warnings; `Enter` on one goes to the line.
 
 The PDF, the bibliography and the auxiliary files go to `build/` next to the main file, so
 the project folder keeps only sources. A `.bib` next to it is picked up (BibTeX). For another
-engine, put `% !TEX program = lualatex` on the first line. A `latexmkrc` inside a project wins
+engine, put `% !TEX program = lualatex` on the first line. To build and save by hand only, set
+`latex_live = false` in `lua/config/local.lua`. A `latexmkrc` inside a project wins
 over the linked `~/.latexmkrc`.
 
 | Key | Does |
 |---|---|
-| `,ll` | start or stop the continuous build |
+| `,ll` | stop or start the continuous build |
 | `,lv` | show the PDF at the cursor (forward search) |
 | `,le` | errors and warnings |
 | `,lt` | table of contents (jump to a section) |

@@ -2,6 +2,7 @@ local M = {
   colorscheme = "dracula",
   wrap = true,
   format_on_save = true,
+  latex_live = true,
   spelllang = { "en_us", "pt_br" },
   notes = { dir = "~/notes", daily = "daily" },
   mason_servers = {
