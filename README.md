@@ -9,7 +9,9 @@ This page is the hands-on guide: [install](#install), then how to use each part 
 [Neovim](#using-neovim) with its keys (finding, editing, code, run / test / debug, git,
 toggles, Clojure), [LaTeX](#latex), [Markdown and notes](#markdown-and-notes), the
 [shell and terminal](#shell-prompt-and-terminal), [update](#update), [check](#check) and
-[test](#test). How the editor works inside, and why, is in [docs/neovim.md](docs/neovim.md).
+[test](#test). How each part works inside, and why, is in [docs/](docs), one file per
+context (listed in [AGENTS.md](AGENTS.md#context-map)), which is also what an AI assistant
+reads before changing it.
 
 ## Install
 
@@ -58,7 +60,7 @@ cd ~/dotfiles && ./install.sh nvim
 ```
 
 It installs only the programs in `Brewfile.nvim` (Neovim, git, ripgrep, ast-grep, fd,
-tree-sitter, node, python, the formatters, pandoc, lazygit) and links only
+tree-sitter, node, python, the formatters, pandoc, lazygit, Claude Code) and links only
 `~/.config/nvim` and `~/.config/rumdl/rumdl.toml`, then sets up the plugins, servers and
 parsers as usual.
 `~/.zshrc`, Starship, iTerm2, fonts, LaTeX, Clojure and app preferences are left alone, so
@@ -86,7 +88,10 @@ wait: which-key lists every key that follows, so nothing below has to be memoris
 `Space ?` lists the keys of the current buffer.
 
 Each part below is one module of the configuration: what it is for, how to use it and its
-keys. How it works inside, and why, is in [docs/neovim.md](docs/neovim.md).
+keys. How it works inside, and why: [core](docs/core.md) (settings, toggles, look),
+[workspace](docs/workspace.md) (finding, editing, completion, Claude), [code](docs/code.md)
+(servers, formatting, run / test / debug, Clojure), [git](docs/git.md), [LaTeX](docs/latex.md)
+and [Markdown](docs/markdown.md).
 
 ### First day
 
@@ -146,6 +151,7 @@ the rest.
 | Key | Does |
 |---|---|
 | `s` + characters | jump anywhere on screen: type what you see, then the label (flash) |
+| `C-s` while searching with `/` | show flash labels on the matches, or hide them |
 | `S` | select a treesitter node (function, block, argument) with labels |
 | `r` after an operator | act at a distance: `yr`, a label, then `iw` copies a far-away word and the cursor stays |
 | `af` / `if`, `ac` / `ic` | around / inside a function, a class (`daf` deletes a function) |
@@ -177,9 +183,18 @@ Brackets and quotes close themselves as you type (mini.pairs).
 | `Space S r` / `Space S l` | restore the session of this folder / the last session |
 | `Space S s` / `Space S d` | pick a session / do not save this one |
 
-Inside a terminal every key goes to the program (shell, lazygit, a REPL). A quick double `Esc`
-or `C-\ C-n` gets back to Neovim, where `q` hides the terminal. Sessions are saved on quit, one
-per folder.
+Inside a terminal (a shell, lazygit, a REPL, Claude) every key goes to the program except these:
+
+| Key (in a terminal) | Does |
+|---|---|
+| `C-\ C-n` | back to Neovim; the program never sees it |
+| `Esc Esc` (quick) | back to Neovim too, but the first `Esc` reaches the program (it stops Claude while it works) |
+| `C-h` / `C-j` / `C-k` / `C-l` | once back in Neovim, go to the window on the left / below / above / right |
+| `q` | once back in Neovim, hide the terminal (it keeps running) |
+| `i` | type into the program again |
+| `Shift-Enter` | a new line in Claude's prompt instead of sending it |
+
+Sessions are saved on quit, one per folder.
 
 ### Code: language servers, diagnostics and formatting
 
@@ -284,6 +299,23 @@ sides never wrap lines: codediff keeps them aligned that way.
 | `t` / `gc` | inline or side by side / fold the unchanged lines |
 | `Space e` / `Space g e` | go to / hide the file list |
 | `g?` / `q` | every key / close the review |
+
+### Claude Code (claudecode.nvim)
+
+Claude Code runs in a split on the right and talks to this Neovim: it sees the open files, the
+selection and the diagnostics, and shows its edits as a diff to accept or reject. Log in once
+in the terminal first (`claude`, then `/login`). Nothing starts with Neovim: the connection
+opens with the first of these keys.
+
+| Key | Does |
+|---|---|
+| `Space a c` / `Space a f` | open or close Claude / go to its window |
+| `Space a r` / `Space a C` | pick an earlier session to resume / continue the last one |
+| `Space a m` | choose the model |
+| `Space a b` | add this file to the conversation |
+| `Space a s` | send the selection (visual mode); in the file tree, add the file under the cursor |
+| `Space a a` / `Space a d` | accept / reject the diff Claude proposes |
+| `Space a S` | stop the connection |
 
 ### Toggles (`Space u`)
 
@@ -537,12 +569,12 @@ over `lua/config/settings.lua`, for example:
 return { wrap = false, spelllang = { "en_us" }, notes = { dir = "~/Documents/notes" } }
 ```
 
-For a single project, a `.nvim.lua` at its root ([docs/neovim.md](docs/neovim.md)).
+For a single project, a `.nvim.lua` at its root ([docs/core.md](docs/core.md#per-project-settings)).
 
 ## Layout
 
 ```text
-config/nvim/      Neovim (lazy.nvim, native LSP)        → docs/neovim.md
+config/nvim/      Neovim (lazy.nvim, native LSP)
 config/zsh/       dotfiles.zsh, sourced from ~/.zshrc
 config/starship/  starship.toml
 config/iterm2/    dracula.json (Dynamic Profile)
@@ -553,6 +585,8 @@ Brewfile.nvim     what Neovim needs, for ./install.sh nvim
 install.sh        installs everything (runs link.sh before Neovim); `nvim`: Neovim only
 link.sh           links, the ~/.zshrc block, app preferences; `nvim`: Neovim and rumdl links only
 tests/            the Neovim checks: nvim.sh runs them (quick, full, fresh), one file per area
+docs/             how each context works and why, for you and for AI assistants
+AGENTS.md         rules and the context map for AI assistants (CLAUDE.md points to it)
 ```
 
 MIT, see [LICENSE](LICENSE).

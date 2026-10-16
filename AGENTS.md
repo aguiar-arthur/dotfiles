@@ -3,42 +3,65 @@
 Personal dotfiles for macOS: Neovim, Starship and an iTerm2 profile. Keep them small: this
 is one person's setup, not a product.
 
+## Context map
+
+The repository is split into contexts, each with one doc in `docs/` that holds its terms,
+files, how it works and why, pitfalls that already cost time, checks, and recipes for common
+changes. Read the doc of the context a task touches before the code; most tasks need one or
+two. The README is the user's guide (keys); it is not needed to change code.
+
+| Context | Doc | Owns | Depends on |
+|---|---|---|---|
+| Core | [docs/core.md](docs/core.md) | startup, `settings.lua` / `local.lua` / `.nvim.lua`, options, global keys, autocmds, `<leader>u` toggles, treesitter, look, spell | none |
+| Workspace | [docs/workspace.md](docs/workspace.md) | Snacks pickers, file tree, terminals, sessions, flash, mini.*, grug-far, Trouble, completion, `<leader>cs`, Claude Code | core |
+| Code | [docs/code.md](docs/code.md) | language servers, formatting and style markers, `,r` / `,t` / `,d`, Python, Clojure | core, install |
+| Git | [docs/git.md](docs/git.md) | gitsigns, codediff review, lazygit, git pickers, jumps from a review | core, workspace |
+| LaTeX | [docs/latex.md](docs/latex.md) | vimtex, texlab, ltex-ls-plus, snippets, latexmkrc, Skim | core, code, install |
+| Markdown | [docs/markdown.md](docs/markdown.md) | render-markdown, `,p` preview, rumdl rules, notes (obsidian.nvim), marksman | core, code |
+| Install | [docs/install.md](docs/install.md) | Brewfiles, `install.sh`, `link.sh`, Mason / parser / spell installs, lockfile, zsh, Starship, iTerm2 | core (settings) |
+| Tests | [docs/tests.md](docs/tests.md) | `tests/`, where a new check goes, checking by hand | all |
+
+Where a change crosses contexts, the docs say so in their first paragraph and pitfalls (the
+review touches core, workspace and git; the conceal toggle touches core and Markdown).
+
+## Working on a task
+
+1. Find the context above and read its doc; its "Changing it" section has the steps for the
+   usual changes (a server, a formatter, a key, a toggle, a snippet, a program, a link).
+2. Change the code, its check in `tests/` and its docs (README keys, context doc) together.
+3. Run `tests/nvim.sh` (quick); run `full` when the doc's checks name a `full:` test you
+   touched. Say plainly what you could not check (GUI, real language servers, LaTeX).
+
 ## Layout
 
 ```text
-config/nvim/        Neovim >= 0.12: lazy.nvim, one spec per concern in lua/plugins/, native
-                    LSP with per-server settings in after/lsp/, lazy-lock.json committed
+config/nvim/        Neovim >= 0.12: lazy.nvim, one spec per concern in lua/plugins/, our own
+                    helpers in lua/dotfiles/, per-server settings in after/lsp/
 config/zsh/         dotfiles.zsh, sourced by the one ~/.zshrc block
 config/starship/    starship.toml
 config/rumdl/       rumdl.toml (Markdown lint rules; the root .rumdl.toml links to it)
 config/iterm2/      dracula.json (Dynamic Profile)
 config/latex/       latexmkrc (linked to ~/.latexmkrc)
-docs/               neovim.md (everything about the editor)
+docs/               one doc per context (the map above)
 Brewfile            every program (includes Brewfile.nvim)
 Brewfile.nvim       what Neovim needs, alone
 install.sh          installs everything, running link.sh before Neovim
-tests/nvim.sh       the Neovim checks, run by hand: quick (default), full, fresh
-tests/lib.sh        their helpers (pass/fail, the isolated home, tmux, probe)
-tests/<area>.sh     the full checks by area: look, markdown, code, tex
-tests/<area>.lua    headless checks of our own code, with the real config: files, helpers,
-                    toggles, keys (share.lua and modules.lua run without it); snippets.lua is
-                    the LaTeX probe the full run types into a real Neovim
-tests/lib.lua       their helpers (eq, a temporary project, a config file, done)
 link.sh             links, the ~/.zshrc block, iTerm2 and Skim preferences
+tests/              nvim.sh (quick, full, fresh) and its checks, see docs/tests.md
 ```
 
 ## Rules
 
 - **Simple first.** No CI, no health checks, no doctor, no flags, and no tests beyond
-  `tests/nvim.sh` (below). `./install.sh` installs everything and runs `link.sh` before the
-  Neovim step (Neovim then uses the linked `~/.config/nvim`, as every day). The one exception
-  to "no flags": both scripts take an optional `nvim` argument that limits them to Neovim
-  (`Brewfile.nvim`, `~/.config/nvim` and the rumdl rules) for machines whose shell and
-  terminal must stay untouched. Both stay idempotent in both modes and only do what is
-  missing. Every network step in `install.sh` has a timeout or a failure path.
+  `tests/nvim.sh` ([docs/tests.md](docs/tests.md)). `./install.sh` installs everything and
+  runs `link.sh` before the Neovim step (Neovim then uses the linked `~/.config/nvim`, as
+  every day). The one exception to "no flags": both scripts take an optional `nvim` argument
+  that limits them to Neovim (`Brewfile.nvim`, `~/.config/nvim` and the rumdl rules) for
+  machines whose shell and terminal must stay untouched. Both stay idempotent in both modes
+  and only do what is missing. Every network step in `install.sh` has a timeout or a failure path.
 - **No comments in code**, in any file. Names and `desc` / `:wk` labels say what; a reason
-  worth keeping goes in one sentence in `docs/`. Exceptions: `#!` lines and text the code
-  writes or matches (the `# >>> dotfiles >>>` markers).
+  worth keeping goes in one sentence in its context's doc in `docs/`. Exceptions: `#!` lines
+  and text the code writes or matches (the `# >>> dotfiles >>>` markers).
 - **macOS only**, no branches for other systems.
 - **English** in code, docs and commit messages; reply to the user in their language.
 - **Every program goes in the Brewfile**; what Neovim needs goes in `Brewfile.nvim`, which
@@ -70,86 +93,12 @@ link.sh             links, the ~/.zshrc block, iTerm2 and Skim preferences
   feature; when it would need one, replace it with a proven plugin instead, as Neotest
   replaced our test runner and code_runner.nvim our `,r`.
 - **Docs.** The README is the user's guide: install, then one section per module with what
-  it is for and a table of its keys. `docs/neovim.md` says how the editor works and why. A
-  key added, moved or removed changes its README table in the same change. Take the keys from
-  the code, not from memory (the `desc` of each mapping, or `nvim_get_keymap` after loading the
-  plugins).
-
-## Pitfalls that already cost time
-
-- Neovim's own ftplugins for Lua, Markdown, help and query call `vim.treesitter.start()`
-  after the `FileType` autocmds; anything that turns treesitter off must stop it again later.
-- Snacks pickers: a custom `confirm` must call `require("snacks.picker.actions").jump`
-  directly; actions such as `tab` route back through `confirm` and recurse.
-- `mason-lspconfig` gets `automatic_enable = mason_servers`, never `true`: `true` enables any
-  server left installed in Mason (a stale stylua server once ran in Lua files).
-- blink.cmp registers its LSP capabilities when it loads, so it stays a dependency of
-  nvim-lspconfig; otherwise servers started before the first insert lack them.
-- Conjure is limited to Clojure (`conjure#filetypes`); its other clients would map keys in
-  Lua and Python. `K` and `gd` stay with the language server.
-- `:checkhealth snacks` reports errors under `Snacks.image` (kitty graphics, `magick`, `mmdc`)
-  although the module is off (`setup {disabled}`) and iTerm2 has no kitty protocol: not real.
-- Snacks installs `vim.ui.input` / `vim.ui.select` and the dashboard on `UIEnter`, which a
-  headless Neovim never fires: `:checkhealth snacks` errors there are not real.
-- Formatters run on save only under a project style file (`style_markers` in
-  `lua/plugins/formatting.lua`): their defaults (stylua's tabs,
-  prettier's, ruff's and rumdl's rewrites) would restyle someone else's code on a `:w`. A
-  formatter added to conform gets an entry there. The repository's `.rumdl.toml` is a link
-  to `config/rumdl/rumdl.toml` so its own Markdown still formats on save, and its
-  `.editorconfig` has a `[*.{sh,bash}]` section so its scripts do.
-- `LspAttach` keys must not replace a `,` key the file type already has: clojure-lsp offers
-  organize imports and once took `,o` from nvim-paredit's raise, so `,o` is mapped only where
-  it is free.
-- Neovim sets `formatexpr` to the language server's when it can format a range, and `gq`
-  then stops wrapping prose and comments; the `LspAttach` callback clears it again.
-- Two servers on one filetype must agree on the position encoding (`:checkhealth vim.lsp`
-  warns); the extra one is pinned in its `after/lsp/` file, as ruff is to UTF-16.
-- gitsigns attaches to a file a codediff review opens after codediff maps its keys, and its
-  buffer-local `]c` / `[c` replaced the review's; they now ask codediff first.
-- Homebrew loads a formula or cask from a third-party tap (`owner/tap/name` in a Brewfile)
-  only once it is trusted; `install.sh` runs `brew trust` for each before `brew bundle`.
-- In a codediff tab `vim.go.wrap` is off (codediff sets it with `vim.wo`); global toggles keep
-  their own values instead of reading `vim.go`.
-- blink.cmp on the `:` line inserts the selected item already: mapping `<CR>` to `accept`
-  there makes a completed command need a second `<CR>`.
-
-## Checking a change by hand
-
-`tests/nvim.sh` is the one test command, run by hand and never from `install.sh`. `quick` (the
-default, seconds) runs the startup, module, lockfile, Skim, `zg`, stylua, shell syntax, shfmt,
-rumdl and no-comment checks plus the headless `tests/<area>.lua` checks of our own code. `full`
-also installs Neovim into an isolated home under `~/.cache/dotfiles-nvim-test` and drives a
-real Neovim in tmux (servers, toggles, the look, notes, a LaTeX build and snippets, `,r`, a
-codediff review, `,cj`); `fresh` does the same in a throwaway directory. It skips what is not
-installed, never touches the real home or clipboard and fails if `lazy-lock.json` changes.
-What can run headless goes in a `tests/<area>.lua` (one `lua_check` line in `nvim.sh`, fakes
-for the clipboard, browser, Mason or codediff); what needs a UI, a server or typing goes in
-the `tests/<area>.sh` of what it tests, a helper in `tests/lib.sh`. Keep the `.sh` files
-together under 650 lines: a new check replaces an old one or earns its lines.
-
-By hand:
-
-- Neovim: `nvim --headless "+qa"` prints nothing, and opening a file of the language you
-  touched shows no error in `:messages`.
-- Anything that needs a UI (LSP attach, Snacks, which-key, Conjure, DAP) is checked in a real
-  terminal: write a Lua probe that waits with `vim.defer_fn`, writes what it sees to a file
-  and quits, then run `sleep 30 | script -q /dev/null nvim -c "luafile probe.lua"` (the
-  `sleep` keeps stdin open; without it Neovim gets EOF and quits). Work in a scratch
-  project, point `XDG_STATE_HOME` at a scratch directory for anything that writes state
-  (`:trust`), and stop only the processes you started, never with a broad `pkill`.
-- Typed behaviour (autosnippets, completion, the `:` line) is checked the same way: the probe
-  feeds keys with `nvim_feedkeys(keys, "t", false)` one step at a time, waits with
-  `vim.defer_fn` and records the line or the mode; text set with the API triggers nothing.
-  `E1568` (no answer to a DSR request) in a probe's `:messages` comes from `script`.
-- Health: `nvim --headless <file> -c 'checkhealth <names>' -c 'w! out.txt' -c 'qa!'`, then
-  look for `ERROR` and `WARNING`; load lazy plugins first (`require("lazy").load`) or their
-  checks are skipped.
-- Scripts: `bash -n install.sh link.sh` and `shfmt -d` on what you changed; Lua through
-  `stylua --check .` run from `config/nvim` (from a subdirectory it misses `stylua.toml` and
-  reports false diffs).
-- Markdown: `rumdl check <files> --config config/rumdl/rumdl.toml`; it lets some long prose
-  lines through, so also look for lines over 100 columns outside tables and code blocks.
-- Say plainly what you could not check (GUI, real language servers, LaTeX).
+  it is for and a table of its keys. `docs/<context>.md` says how that context works, why, its
+  pitfalls, its checks and how to change it. A key added, moved or removed changes its README
+  table in the same change; a file, setting, pitfall or check added changes its context doc.
+  Take the keys from the code, not from memory (the `desc` of each mapping, or
+  `nvim_get_keymap` after loading the plugins). A new context (a language that grows its own
+  files, say) gets its own doc and a row in the map, only when it would not fit an existing one.
 
 ## Git
 

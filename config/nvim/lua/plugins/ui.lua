@@ -92,6 +92,7 @@ return {
       preset = "modern",
       delay = 300,
       spec = {
+        { "<leader>a", group = "ai (Claude Code)", mode = { "n", "x" } },
         { "<leader>b", group = "buffer" },
         { "<leader>c", group = "code", mode = { "n", "v" } },
         { "<leader>d", group = "diagnostics" },
