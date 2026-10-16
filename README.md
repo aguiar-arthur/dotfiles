@@ -302,10 +302,10 @@ sides never wrap lines: codediff keeps them aligned that way.
 
 ### Claude Code (claudecode.nvim)
 
-Claude Code runs in a split on the right and talks to this Neovim: it sees the open files, the
-selection and the diagnostics, and shows its edits as a diff to accept or reject. Log in once
-in the terminal first (`claude`, then `/login`). Nothing starts with Neovim: the connection
-opens with the first of these keys.
+Claude Code runs in a bordered window over the editor, with a margin on each side, and talks to
+this Neovim: it sees the open files, the selection and the diagnostics, and shows its edits as a
+diff to accept or reject. Log in once in the terminal first (`claude`, then `/login`). Nothing
+starts with Neovim: the connection opens with the first of these keys.
 
 | Key | Does |
 |---|---|
@@ -331,6 +331,7 @@ state.
 | `Space u d` | diagnostics |
 | `Space u h` | inlay hints (types and parameter names inside the code) |
 | `Space u g` | indent guides |
+| `Space u S` | smooth scrolling (animated `C-d`, `C-u`, `zz`) |
 | `Space u x` | code context (the current function pinned on top) |
 | `Space u m` | Markdown rendering |
 | `Space u G` | grammar checking (LaTeX) |

@@ -90,8 +90,10 @@ tests/              nvim.sh (quick, full, fresh) and its checks, see docs/tests.
   change, and a bug fixed in it gets a check that fails without the fix. Plugin defaults and
   plain settings need none.
 - **Own code stays small.** A helper of our own (`lua/dotfiles/`) grows by a line, not a
-  feature; when it would need one, replace it with a proven plugin instead, as Neotest
-  replaced our test runner and code_runner.nvim our `,r`.
+  feature; when it would need one, replace it with a proven plugin instead. Two did:
+  Neotest (`,t`: runs tests, one adapter per language, pytest here) replaced our test runner,
+  and code_runner.nvim (`,r`: runs the current file, any file type) replaced our own `,r`.
+  They do different jobs and both stay.
 - **Docs.** The README is the user's guide: install, then one section per module with what
   it is for and a table of its keys. `docs/<context>.md` says how that context works, why, its
   pitfalls, its checks and how to change it. A key added, moved or removed changes its README

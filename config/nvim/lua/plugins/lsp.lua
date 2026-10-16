@@ -54,7 +54,7 @@ return {
         update_in_insert = false,
         severity_sort = true,
         virtual_text = { spacing = 4, prefix = "●", source = "if_many" },
-        float = { source = true },
+        float = { source = true, max_width = 80, header = "" },
         signs = {
           text = {
             [vim.diagnostic.severity.ERROR] = "✘",

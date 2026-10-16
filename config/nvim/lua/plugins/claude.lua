@@ -41,6 +41,10 @@ return {
       { "<leader>ad", "<cmd>ClaudeCodeDiffDeny<CR>", desc = "Reject Claude's diff" },
       { "<leader>aS", "<cmd>ClaudeCodeStop<CR>", desc = "Stop the Claude connection" },
     },
-    opts = {},
+    opts = {
+      terminal = {
+        snacks_win_opts = require("dotfiles.float").win("Claude"),
+      },
+    },
   },
 }

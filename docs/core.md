@@ -23,6 +23,7 @@ reach into the git review (wrap) and Markdown (conceal).
 | `config/nvim/lua/config/keymaps.lua` | save, quit, windows `<leader>w`, buffers `<leader>b`, `]d` / `]e`, `<leader>c` |
 | `config/nvim/lua/config/autocmds.lua` | yank highlight, reload on focus, last position, `q` closes, missing folders, resize |
 | `config/nvim/lua/config/lazy.lua` | lazy.nvim bootstrap at the commit in `lazy-lock.json` |
+| `config/nvim/lua/dotfiles/windows.lua` | the cursorline only in the active window, the path in the winbar of file windows, the welcome screen when the last file closes |
 | `config/nvim/lua/dotfiles/toggles.lua` | the global `<leader>u` toggles |
 | `config/nvim/lua/plugins/snacks.lua` (`init`) | where the toggles are mapped, on `VeryLazy` |
 | `config/nvim/lua/dotfiles/treesitter.lua` | highlight and indent per buffer, the switch behind `<leader>uT` |
@@ -60,8 +61,12 @@ The look: the `:` line and `/` search stay Neovim's own (blink completes them), 
 go to Snacks (`<leader>on`) and signature help to blink. treesitter-context keeps the enclosing
 function or class on top (`<leader>ux`). The status column (Snacks) shows marks and diagnostics
 on the left, git and closed folds on the right; mini.statusline shows mode, git, diagnostics,
-file, language servers and a running latexmk. Diff colors are tinted backgrounds over Dracula,
-so the code stays readable.
+file, language servers and a running latexmk. Inactive windows are a shade darker
+(`NormalNC`), the cursorline shows only in the active one, and each file window has its path
+in a winbar (a window whose winbar is already set, as in a review, keeps it; floats and
+terminals have none). Closing the last file (`<leader>bd`, `:bd`) shows the Snacks dashboard
+again, as at startup. Smooth scrolling is Snacks' (`<leader>uS`). Diff colors are tinted
+backgrounds over Dracula, so the code stays readable.
 
 Spell checking (`en_us`, `pt_br`) is on for prose filetypes. Words added with `zg` (in either
 language) go to the versioned `spell/en.utf-8.add`; Neovim compiles it at startup when it is
@@ -100,7 +105,7 @@ approves it; after any edit it asks again. A trusted `.nvim.lua` also lets prett
 | What | Where |
 |---|---|
 | Startup prints nothing, every module loads | quick: `nvim starts without messages`, `tests/modules.lua` |
-| Autocmds | `tests/autocmds.lua` |
+| Autocmds, the cursorline and winbar of `windows.lua` | `tests/autocmds.lua` |
 | `]d`, `]e` | `tests/keys.lua` |
 | The `<leader>u` toggles, beside a review, `keep_local_opts`, `uT` | `tests/toggles.lua` |
 | Filetypes (`.mdc`, `*.json.*`) | `tests/files.lua` |

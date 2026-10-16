@@ -77,3 +77,5 @@ au("BufWritePre", {
     vim.fn.mkdir(vim.fn.fnamemodify(file, ":p:h"), "p")
   end,
 })
+
+require("dotfiles.windows").setup()

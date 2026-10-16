@@ -18,6 +18,7 @@ and toggles; the pickers change behaviour inside a [git](git.md) review.
 | `config/nvim/lua/plugins/completion.lua` | blink.cmp, LuaSnip, friendly-snippets, the `:` line |
 | `config/nvim/lua/dotfiles/share.lua` | what `<leader>cs` copies; the key is in `lua/config/keymaps.lua` |
 | `config/nvim/lua/plugins/claude.lua` | claudecode.nvim, `<leader>a` |
+| `config/nvim/lua/dotfiles/float.lua` | the one float style: Claude, the float terminal and lazygit |
 
 ## How it works
 
@@ -37,7 +38,7 @@ friendly-snippets are loaded for every language but LaTeX, which has its own (se
 
 `<leader>tf` / `th` / `tv` toggle three separate terminals (float, bottom, right). Inside a
 terminal every key goes to the program; a quick double `Esc` or `C-\ C-n` returns to Neovim,
-where `q` hides the terminal.
+where `q` hides the terminal. The float terminal has the look of `float.lua`.
 
 `<leader>cs` on a block selection (`C-v`) reports screen columns (`virtcol`), so tabs and wide
 characters give the columns you see, and it lengthens the fence when the code has one. The path
@@ -49,6 +50,10 @@ you use Claude; `<leader>aS` stops it. The server listens on `127.0.0.1` only an
 `claude` process that read the random token from `~/.claude/ide/<port>.lock` (mode 0600).
 What Claude sees in Neovim goes to Anthropic with the rest of the conversation, as Claude Code
 does on its own.
+
+Claude, the float terminal and lazygit share `dotfiles/float.lua`: a rounded Snacks float with a
+title, 92% by 90% of the editor, over a backdrop dimmed to 60 (the pickers get the same
+backdrop). Hiding a float keeps its session, and Snacks refits it when the terminal is resized.
 
 ## Pitfalls
 

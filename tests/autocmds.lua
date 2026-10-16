@@ -41,6 +41,46 @@ vim.cmd("tabprevious")
 local widths = vim.tbl_map(vim.api.nvim_win_get_width, vim.api.nvim_tabpage_list_wins(0))
 T.eq("resizing evens out the windows of every tab", math.abs(widths[1] - widths[2]) <= 1, true)
 
+vim.cmd("only | edit " .. root .. "/a.txt")
+local first = vim.api.nvim_get_current_win()
+vim.cmd("vsplit")
+local second = vim.api.nvim_get_current_win()
+T.eq("the active window has the cursorline", vim.wo[second].cursorline, true)
+T.eq("an inactive window loses the cursorline", vim.wo[first].cursorline, false)
+T.eq("a file window shows its path in the winbar", vim.wo[second].winbar, " %f%m")
+local float = vim.api.nvim_open_win(vim.api.nvim_create_buf(false, true), true, {
+  relative = "editor",
+  row = 1,
+  col = 1,
+  width = 10,
+  height = 3,
+})
+T.eq("a float gets no winbar", vim.wo[float].winbar, "")
+vim.api.nvim_win_close(float, true)
+
+local opened = 0
+local dashboard = Snacks.dashboard
+Snacks.dashboard = function()
+  opened = opened + 1
+  vim.bo.filetype = "snacks_dashboard"
+end
+vim.cmd("only | silent! %bwipeout!")
+vim.wait(100)
+opened = 0
+vim.cmd("edit " .. root .. "/a.txt")
+vim.cmd("enew")
+vim.cmd("bdelete " .. vim.fn.bufnr(root .. "/a.txt"))
+vim.wait(200, function()
+  return opened > 0
+end)
+T.eq("closing the last file shows the welcome screen", opened, 1)
+vim.cmd("edit " .. root .. "/a.txt")
+vim.cmd("enew")
+vim.cmd("bdelete")
+vim.wait(100)
+T.eq("closing a buffer beside another file keeps it", opened, 1)
+Snacks.dashboard = dashboard
+
 vim.cmd("tabonly | only | edit " .. root .. "/b.txt")
 vim.fn.writefile({ "after" }, root .. "/b.txt")
 local later = os.time() + 10

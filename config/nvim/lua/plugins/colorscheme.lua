@@ -6,6 +6,9 @@ return {
     italic_comment = true,
 
     overrides = {
+      NormalNC = { bg = "#21222c" },
+      SnacksIndent = { fg = "#343746" },
+      SnacksIndentScope = { fg = "#bd93f9" },
       DiffAdd = { bg = "#2f4f42" },
       DiffDelete = { bg = "#4f323c", fg = "#6c4652" },
       DiffChange = { bg = "#34414e" },

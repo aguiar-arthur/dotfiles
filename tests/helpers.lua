@@ -117,4 +117,12 @@ T.eq(
   "No origin/HEAD, origin/main or origin/master"
 )
 
+local float = require("dotfiles.float").win("Claude")
+T.eq("float: the same style everywhere", {
+  float.position,
+  float.border,
+  float.title,
+  float.backdrop,
+}, { "float", "rounded", " Claude ", 60 })
+
 T.done()

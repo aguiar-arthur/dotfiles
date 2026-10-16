@@ -23,6 +23,7 @@ local function words_jump(direction)
   end
 end
 
+local float_terminal = { count = 1, win = require("dotfiles.float").win("Terminal") }
 local bottom_terminal = { count = 2, win = { position = "bottom", height = 15 } }
 
 return {
@@ -36,10 +37,11 @@ return {
     explorer = { enabled = true },
     indent = { enabled = true },
     input = { enabled = true },
-    lazygit = { enabled = true },
+    lazygit = { enabled = true, win = require("dotfiles.float").win("Lazygit") },
     notifier = { enabled = true, timeout = 3000 },
     picker = {
       enabled = true,
+      layout = { layout = { backdrop = 60 } },
       sources = {
         explorer = { hidden = true, ignored = false },
         files = { hidden = true },
@@ -68,6 +70,7 @@ return {
       },
     },
     quickfile = { enabled = true },
+    scroll = { enabled = true },
     scope = { enabled = true },
     statuscolumn = { enabled = true },
     terminal = { enabled = true },
@@ -106,11 +109,7 @@ return {
     key("<leader>gL", picker("git_log_line"), "Line history"),
     key("<leader>gO", snack("gitbrowse"), "Open in browser", { "n", "v" }),
 
-    key(
-      "<leader>tf",
-      snack("terminal", nil, { count = 1, win = { position = "float" } }),
-      "Float terminal"
-    ),
+    key("<leader>tf", snack("terminal", nil, float_terminal), "Float terminal"),
     key("<leader>th", snack("terminal", nil, bottom_terminal), "Horizontal terminal"),
     key(
       "<leader>tv",
@@ -128,6 +127,7 @@ return {
         require("dotfiles.toggles").map()
         Snacks.toggle.diagnostics():map("<leader>ud")
         Snacks.toggle.indent():map("<leader>ug")
+        Snacks.toggle.scroll():map("<leader>uS")
         Snacks.toggle({
           name = "Auto-format (global)",
           get = function()
