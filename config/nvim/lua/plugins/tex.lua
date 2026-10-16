@@ -5,7 +5,7 @@ return {
     init = function()
       local g = vim.g
 
-      g.vimtex_view_method = "skim"
+      g.vimtex_view_method = vim.uv.os_uname().sysname == "Darwin" and "skim" or "zathura"
       g.vimtex_view_skim_sync = 1
       g.vimtex_view_skim_activate = 1
       g.vimtex_view_skim_reading_bar = 1

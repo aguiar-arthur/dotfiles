@@ -77,8 +77,8 @@ formats anywhere. LaTeX formats only with `<leader>lf`. `:FormatToggle` (`!` for
 `<leader>uf` turns saving off. prettier runs a project's JavaScript (`.prettierrc.js`,
 plugins), so it runs, on save or with `<leader>lf`, only where a `.nvim.lua` approved with
 `:trust` sits next to the prettier config and has not changed since; elsewhere `<leader>lf`
-falls back to the language server. It is always Homebrew's prettier, never a repository's
-`node_modules/.bin/prettier`.
+falls back to the language server. It is always the prettier on `PATH` (Homebrew's), never a
+repository's `node_modules/.bin/prettier`.
 
 ### Run, test, debug
 

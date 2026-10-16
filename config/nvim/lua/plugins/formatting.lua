@@ -114,7 +114,10 @@ return {
     },
     formatters = {
       prettier = {
-        command = (vim.env.HOMEBREW_PREFIX or "/opt/homebrew") .. "/bin/prettier",
+        command = function()
+          local path = vim.fn.exepath("prettier")
+          return path ~= "" and path or "prettier"
+        end,
         condition = function(_, ctx)
           return prettier_trusted(ctx.buf)
         end,

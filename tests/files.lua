@@ -78,9 +78,9 @@ T.eq(
   false
 )
 T.eq(
-  "prettier is Homebrew's, never node_modules'",
-  prettier.command:match("/bin/prettier$") ~= nil
-    and not prettier.command:find("node_modules", 1, true),
+  "prettier comes from PATH, never node_modules'",
+  prettier.command():match("prettier$") ~= nil
+    and not prettier.command():find("node_modules", 1, true),
   true
 )
 vim.fn.stdpath = stdpath

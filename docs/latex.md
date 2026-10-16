@@ -14,7 +14,7 @@ completion; Skim and `~/.latexmkrc` are set up by [install](install.md) (`link.s
 
 | Path | Holds |
 |---|---|
-| `config/nvim/lua/plugins/tex.lua` | vimtex: Skim viewer, latexmk into `build/`, folds, quickfix filters, conceal, build notifications |
+| `config/nvim/lua/plugins/tex.lua` | vimtex: Skim viewer (zathura off macOS), latexmk into `build/`, folds, quickfix filters, conceal, build notifications |
 | `config/nvim/after/ftplugin/tex.lua` | no hard wrap, `,lw`, which-key labels of vimtex's `,l` keys |
 | `config/nvim/snippets/tex.lua` | the LaTeX snippets (documents, text, math, ABNT) |
 | `config/nvim/after/lsp/texlab.lua` | texlab reads `build/`, chktex on open and save, latexindent |
@@ -24,11 +24,12 @@ completion; Skim and `~/.latexmkrc` are set up by [install](install.md) (`link.s
 
 ## How it works
 
-vimtex compiles with latexmk and shows the PDF in Skim with SyncTeX; texlab gives completion
-and diagnostics (vimtex's own completion and insert maps are off). Keys under `,l` are vimtex's
-own, labelled in which-key: `,ll` compile, `,lv` view / forward search, `,le` errors, `,lt`
-contents, `,lc` clean, `,lx` reload, `,lw` count words. Cmd+Shift+click in Skim jumps back to
-the line. Put `% !TEX program = lualatex` on the first line for another engine.
+vimtex compiles with latexmk and shows the PDF in Skim with SyncTeX (zathura off macOS, to be
+installed by hand); texlab gives completion and diagnostics (vimtex's own completion and insert
+maps are off). Keys under `,l` are vimtex's own, labelled in which-key: `,ll` compile, `,lv`
+view / forward search, `,le` errors, `,lt` contents, `,lc` clean, `,lx` reload, `,lw` count
+words. Cmd+Shift+click in Skim jumps back to the line. Put `% !TEX program = lualatex` on the
+first line for another engine.
 
 Builds go to `build/`, so the project folder keeps only sources; texlab reads the same folder,
 which keeps citation and label completion working. A `latexmkrc` in a project still wins over
