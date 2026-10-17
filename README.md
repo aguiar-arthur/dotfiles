@@ -542,6 +542,7 @@ Nothing here changes anything; each command says what is missing or wrong.
 | Servers and tools from Mason | `:Mason` | all installed |
 | Treesitter parsers | `:checkhealth nvim-treesitter` | the `tree-sitter` CLI is found, parsers listed |
 | Formatters for this buffer | `:ConformInfo` | the formatter shows as ready |
+| Secrets in the history | `gitleaks detect` | `no leaks found` (GitHub runs it, ShellCheck and zizmor weekly and on every push) |
 
 Run `:checkhealth` in a real Neovim window: in `nvim --headless` the Snacks checks report
 errors that are not real. When a check fails, `./install.sh` is the fix for anything

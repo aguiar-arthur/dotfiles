@@ -53,6 +53,14 @@ Offers: `tests/nvim.sh` (quick, full, fresh) and `tests/lib.sh` / `lib.lua` to e
 Consumes: every context's code. A link in [map](map.md) gets a check in the downstream
 context's file; the map's last column says which.
 
+## Security workflow
+
+`.github/workflows/security.yml` runs on push, pull request and every Monday: ShellCheck on the
+shell scripts, gitleaks on the full history, and zizmor on the workflows. Actions are pinned to
+a commit SHA and the token is read-only; Dependabot (`.github/dependabot.yml`) bumps the pins.
+ShellCheck does not read zsh, so `config/zsh/` is left out. Run `gitleaks detect` locally for the
+same secret scan.
+
 ## Checking by hand
 
 - Neovim: `nvim --headless "+qa"` prints nothing, and opening a file of the language you
