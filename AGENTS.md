@@ -56,14 +56,14 @@ tests/              nvim.sh (quick, full, fresh) and its checks, see docs/tests.
 ## Rules
 
 - **Simple first.** No health checks, no doctor, no flags, no tests beyond `tests/nvim.sh`
-  ([docs/tests.md](docs/tests.md)), and no CI beyond the security workflows
-  (`.github/workflows/`: ShellCheck, gitleaks, zizmor, CodeQL, Scorecard). `./install.sh` installs
-  everything and runs `link.sh` before the Neovim step (Neovim then uses the linked
-  `~/.config/nvim`, as every day). The one exception to "no flags": both scripts take an
-  optional `nvim` argument that limits them to Neovim (`Brewfile.nvim`, `~/.config/nvim` and the
-  rumdl rules) for machines whose shell and terminal must stay untouched. Both stay idempotent
-  in both modes and only do what is missing. Every network step in `install.sh` has a timeout or
-  a failure path.
+  ([docs/tests.md](docs/tests.md)), and no CI beyond the security workflows and the quick tests
+  (`.github/workflows/`: ShellCheck, gitleaks, zizmor, CodeQL, Scorecard, `tests.yml`).
+  `./install.sh` installs everything and runs `link.sh` before the Neovim step (Neovim then uses
+  the linked `~/.config/nvim`, as every day). The one exception to "no flags": both scripts take
+  an optional `nvim` argument that limits them to Neovim (`Brewfile.nvim`, `~/.config/nvim` and
+  the rumdl rules) for machines whose shell and terminal must stay untouched. Both stay
+  idempotent in both modes and only do what is missing. Every network step in `install.sh` has a
+  timeout or a failure path.
 - **No comments in code**, in any file. Names and `desc` / `:wk` labels say what; a reason
   worth keeping goes in one sentence in its context's doc in `docs/`. Exceptions: `#!` lines
   and text the code writes or matches (the `# >>> dotfiles >>>` markers).
