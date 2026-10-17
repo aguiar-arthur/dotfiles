@@ -518,6 +518,24 @@ needed. The folder is created the first time a note is opened.
 - **rumdl** (`config/rumdl/rumdl.toml`): the Markdown lint rules, used by Neovim and by
   `rumdl check` in a shell.
 
+## On a machine that is not yours
+
+Install Neovim only (`./install.sh nvim`): it leaves the shell, the prompt and the terminal
+untouched. Then:
+
+- Do not put personal tokens or SSH keys there; log in with a short-lived, narrow token, or
+  none, and run `gh auth logout` or delete it when you leave.
+- Do not trust a `.nvim.lua` from a repository you did not write; `exrc` asks before running
+  one, so answer no.
+- Before running anything on a fresh clone, read `git log` for commits you do not recognise.
+- When you leave, remove `~/.config/nvim`, `~/.local/share/nvim`, `~/.local/state/nvim` and
+  `~/.cache/nvim`.
+
+GitHub checks this repository on every push and every Monday: ShellCheck on the scripts,
+gitleaks on the history, zizmor and CodeQL on the workflows, and OSSF Scorecard on the
+repository settings. To see the score, open
+`https://scorecard.dev/viewer/?uri=github.com/aguiar-arthur/dotfiles`.
+
 ## Update
 
 | What | How |
@@ -596,6 +614,8 @@ Brewfile          every program (includes Brewfile.nvim)
 Brewfile.nvim     what Neovim needs, for ./install.sh nvim
 install.sh        installs everything (runs link.sh before Neovim); `nvim`: Neovim only
 link.sh           links, the ~/.zshrc block, app preferences; `nvim`: Neovim and rumdl links only
+SECURITY.md       how to report a problem
+.github/          the security workflows and Dependabot
 tests/            the Neovim checks: nvim.sh runs them (quick, full, fresh), one file per area
 docs/             how each context works and why, for you and for AI assistants
 AGENTS.md         rules and the context map for AI assistants (CLAUDE.md points to it)

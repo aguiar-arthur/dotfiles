@@ -48,6 +48,8 @@ Brewfile            every program (includes Brewfile.nvim)
 Brewfile.nvim       what Neovim needs, alone
 install.sh          installs everything, running link.sh before Neovim
 link.sh             links, the ~/.zshrc block, iTerm2 and Skim preferences
+SECURITY.md         how to report a problem
+.github/            security workflows and Dependabot
 tests/              nvim.sh (quick, full, fresh) and its checks, see docs/tests.md
 ```
 
@@ -55,7 +57,7 @@ tests/              nvim.sh (quick, full, fresh) and its checks, see docs/tests.
 
 - **Simple first.** No health checks, no doctor, no flags, no tests beyond `tests/nvim.sh`
   ([docs/tests.md](docs/tests.md)), and no CI beyond the security workflows
-  (`.github/workflows/`: ShellCheck, gitleaks, zizmor, Scorecard). `./install.sh` installs
+  (`.github/workflows/`: ShellCheck, gitleaks, zizmor, CodeQL, Scorecard). `./install.sh` installs
   everything and runs `link.sh` before the Neovim step (Neovim then uses the linked
   `~/.config/nvim`, as every day). The one exception to "no flags": both scripts take an
   optional `nvim` argument that limits them to Neovim (`Brewfile.nvim`, `~/.config/nvim` and the
