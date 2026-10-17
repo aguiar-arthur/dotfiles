@@ -11,7 +11,7 @@ permissions:
 jobs:
   quick:
     runs-on: macos-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     env:
       HOMEBREW_NO_AUTO_UPDATE: "1"
       HOMEBREW_NO_INSTALL_CLEANUP: "1"
@@ -21,9 +21,16 @@ jobs:
           persist-credentials: false
       - name: Programs
         run: brew install neovim ripgrep fd tree-sitter-cli node stylua shfmt rumdl
+      - name: TeX
+        run: |
+          brew install --cask basictex
+          echo /Library/TeX/texbin >> "$GITHUB_PATH"
+          sudo /Library/TeX/texbin/tlmgr install latexmk
       - name: Link Neovim
         run: ./link.sh nvim
       - name: Plugins
         run: nvim --headless "+Lazy! restore" +qa
+      - name: Servers, parsers and spell files
+        run: nvim --headless "+lua require('dotfiles.install').run()"
       - name: Quick tests
         run: tests/nvim.sh

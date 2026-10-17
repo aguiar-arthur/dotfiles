@@ -56,10 +56,11 @@ context's file; the map's last column says which.
 ## Quick tests in CI
 
 `.github/workflows/tests.yml` runs `tests/nvim.sh` (quick) on a macOS runner on push and pull
-request: it installs the programs the checks use, runs `link.sh nvim`, restores the plugins
-from `lazy-lock.json` and then the suite. Checks for programs or apps the runner lacks (Skim,
-tmux) skip. `full` and `fresh` stay manual: they need real language servers and tmux and would
-fail for reasons that are not in a change.
+request: it installs the programs the checks use and BasicTeX with `latexmk`, runs `link.sh
+nvim`, restores the plugins from `lazy-lock.json`, runs `dotfiles.install` (servers, parsers,
+spell files, as `install.sh` does) and then the suite. Checks for programs or apps the runner
+lacks (Skim, tmux) skip. `full` and `fresh` stay manual: they need real language servers and
+tmux and would fail for reasons that are not in a change.
 
 ## Security workflow
 
