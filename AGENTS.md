@@ -54,8 +54,8 @@ tests/              nvim.sh (quick, full, fresh) and its checks, see docs/tests.
 ## Rules
 
 - **Simple first.** No health checks, no doctor, no flags, no tests beyond `tests/nvim.sh`
-  ([docs/tests.md](docs/tests.md)), and no CI beyond the one security workflow
-  (`.github/workflows/security.yml`: ShellCheck, gitleaks, zizmor). `./install.sh` installs
+  ([docs/tests.md](docs/tests.md)), and no CI beyond the security workflows
+  (`.github/workflows/`: ShellCheck, gitleaks, zizmor, Scorecard). `./install.sh` installs
   everything and runs `link.sh` before the Neovim step (Neovim then uses the linked
   `~/.config/nvim`, as every day). The one exception to "no flags": both scripts take an
   optional `nvim` argument that limits them to Neovim (`Brewfile.nvim`, `~/.config/nvim` and the

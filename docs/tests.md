@@ -61,6 +61,11 @@ a commit SHA and the token is read-only; Dependabot (`.github/dependabot.yml`) b
 ShellCheck does not read zsh, so `config/zsh/` is left out. Run `gitleaks detect` locally for the
 same secret scan.
 
+`.github/workflows/scorecard.yml` runs OSSF Scorecard weekly and on push and uploads the result to
+the repository's code scanning alerts (Security tab). It scores repository hygiene (branch
+protection, pinned actions, token permissions), not code. OSV-Scanner is not used: it does not
+read `lazy-lock.json`.
+
 ## Checking by hand
 
 - Neovim: `nvim --headless "+qa"` prints nothing, and opening a file of the language you
