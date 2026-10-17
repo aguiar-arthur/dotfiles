@@ -1,5 +1,7 @@
 # Dotfiles
 
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/aguiar-arthur/dotfiles/badge)](https://scorecard.dev/viewer/?uri=github.com/aguiar-arthur/dotfiles)
+
 Personal macOS setup:
 
 - **Neovim**: the editor, for everything (code, LaTeX, Markdown and notes, git).
