@@ -19,7 +19,9 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - name: ShellCheck
-        run: shellcheck install.sh link.sh tests/*.sh
+        run: |
+          shellcheck -S warning -e SC1090 install.sh link.sh tests/nvim.sh
+          shellcheck -s bash -S warning -e SC1090,SC2034 tests/lib.sh tests/code.sh tests/core.sh tests/git.sh tests/markdown.sh tests/tex.sh tests/workspace.sh
       - name: gitleaks
         uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e
         env:

@@ -108,7 +108,10 @@ setup() {
     T="${XDG_CACHE_HOME:-$real_home/.cache}/dotfiles-nvim-test"
     mkdir -p "$T"
   fi
-  have brew && export HOMEBREW_CACHE="$(brew --cache)"
+  if have brew; then
+    HOMEBREW_CACHE=$(brew --cache)
+    export HOMEBREW_CACHE
+  fi
   export HOME="$T/home" XDG_DATA_HOME="$T/data" XDG_STATE_HOME="$T/state" XDG_CACHE_HOME="$T/cache"
   export PATH="$PATH:/Library/TeX/texbin"
   mkdir -p "$HOME"
