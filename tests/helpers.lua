@@ -38,58 +38,87 @@ vim.fn.writefile({}, spell .. "/pt.utf-8.spl")
 T.eq("spell: a file already there is skipped", install.spell_files({ "pt_br" }, spell), {})
 
 local git = require("dotfiles.git")
-T.eq("git: no review without codediff", not git.review(), true)
-package.loaded["codediff.ui.lifecycle"] = {
-  get_session = function(tab)
-    return tab == 2 and {} or nil
-  end,
-}
-T.eq("git: the review tab is a review", git.review(2), true)
-T.eq("git: another tab is not", git.review(1), false)
+git.setup()
+local function event(pattern, tab)
+  vim.api.nvim_exec_autocmds("User", { pattern = pattern, data = { tabpage = tab } })
+end
+local function new_review()
+  vim.cmd("$tabnew")
+  local tab = vim.api.nvim_get_current_tabpage()
+  event("CodeDiffOpen", tab)
+  return tab
+end
+local warned
+local notify = vim.notify
+local function capture(fn)
+  warned = nil
+  vim.notify = function(msg)
+    warned = msg
+  end
+  fn()
+  vim.notify = notify
+end
 
 local first = vim.api.nvim_get_current_tabpage()
-vim.cmd("tabnew")
-local review_tab = vim.api.nvim_get_current_tabpage()
-local closed
-package.loaded["codediff.ui.lifecycle"] = {
-  get_session = function(tab)
-    return tab == review_tab and {} or nil
-  end,
-  close = function(tab)
-    closed = tab
-  end,
-}
-local picker = vim.api.nvim_get_current_win()
-local jump_win = git.jump_win(review_tab)
-local jump_tab = vim.api.nvim_win_get_tabpage(jump_win)
-T.eq("git: a jump tab opens just before its review", vim.api.nvim_tabpage_get_number(jump_tab), 2)
-T.eq("git: and focus stays where it was", vim.api.nvim_get_current_win(), picker)
-T.eq("git: the jump tab knows its review", git.jumps(review_tab), { jump_tab })
-vim.api.nvim_set_current_tabpage(jump_tab)
-vim.cmd.tabmove()
-vim.api.nvim_set_current_tabpage(review_tab)
-T.eq("git: a review has one jump tab", git.jump_win(review_tab), jump_win)
-T.eq("git: moved back just before the review", vim.api.nvim_tabpage_get_number(jump_tab), 2)
-T.eq("git: no tab is added", #vim.api.nvim_list_tabpages(), 3)
+T.eq("git: a tab is not a review", git.review(), false)
+local review_tab = new_review()
+T.eq("git: CodeDiffOpen marks its tab a review", git.review(review_tab), true)
+T.eq("git: other tabs are not", git.review(first), false)
+event("CodeDiffClose", review_tab)
+T.eq("git: CodeDiffClose unmarks it", git.review(review_tab), false)
+event("CodeDiffOpen", review_tab)
 
-vim.api.nvim_set_current_win(jump_win)
+vim.api.nvim_set_current_tabpage(first)
 vim.cmd("edit " .. root .. "/src/a.py")
-local file = vim.api.nvim_get_current_buf()
+local file, editing = vim.api.nvim_get_current_buf(), vim.api.nvim_get_current_win()
+vim.cmd("vsplit | enew")
+vim.bo.buftype = "nofile"
 vim.api.nvim_set_current_tabpage(review_tab)
+local picker = vim.api.nvim_get_current_win()
+T.eq("git: a file from a review opens in the tab before it", git.edit_win(review_tab), editing)
+T.eq("git: and focus stays in the review", vim.api.nvim_get_current_win(), picker)
+vim.cmd.tabmove(0)
+local made = git.edit_win(review_tab)
+T.eq(
+  "git: a review in the first tab gets a tab before it",
+  vim.api.nvim_tabpage_get_number(vim.api.nvim_win_get_tabpage(made)),
+  1
+)
+local second = new_review()
+made = git.edit_win(second)
+T.eq("git: never a review's window", git.review(vim.api.nvim_win_get_tabpage(made)), false)
+T.eq(
+  "git: but a new tab just before it",
+  vim.api.nvim_tabpage_get_number(vim.api.nvim_win_get_tabpage(made)) + 1,
+  vim.api.nvim_tabpage_get_number(second)
+)
+
+vim.api.nvim_set_current_tabpage(first)
+vim.cmd("tabonly")
+review_tab = new_review()
+vim.api.nvim_set_current_tabpage(first)
+git.close_review()
+T.eq("git: Space g q before a review closes it", #vim.api.nvim_list_tabpages(), 1)
+new_review()
+git.close_review()
+T.eq("git: Space g q in a review closes it", #vim.api.nvim_list_tabpages(), 1)
+capture(git.close_review)
+T.eq("git: Space g q without a review says so", warned, "No review is open")
+
+review_tab = new_review()
 vim.api.nvim_set_current_buf(file)
-vim.api.nvim_set_current_win(jump_win)
 git.close_buffer()
-T.eq("git: Space b d on a review's file closes the jump tab", #vim.api.nvim_list_tabpages(), 2)
-T.eq("git: and returns to the review", vim.api.nvim_get_current_tabpage(), review_tab)
-T.eq("git: the file stays loaded", vim.api.nvim_buf_is_loaded(file), true)
-
-git.back_to_review()
-T.eq("git: Space g q in a review closes it", closed, review_tab)
-closed = nil
-git.close_buffer()
-T.eq("git: so does Space b d on the review's file", closed, review_tab)
-
-vim.api.nvim_set_current_win(git.jump_win(review_tab))
+T.eq("git: Space b d in a review closes it", #vim.api.nvim_list_tabpages(), 1)
+review_tab = new_review()
+vim.api.nvim_set_current_buf(file)
+vim.api.nvim_set_current_tabpage(first)
+vim.api.nvim_set_current_win(editing)
+capture(git.close_buffer)
+T.eq(
+  "git: Space b d on a file a review shows keeps it",
+  { warned, vim.api.nvim_win_get_buf(editing) },
+  { "A review shows this file: close the review first (Space g q)", file }
+)
 vim.cmd("enew")
 local other = vim.api.nvim_get_current_buf()
 local deleted
@@ -99,82 +128,31 @@ Snacks.bufdelete = function()
 end
 git.close_buffer()
 Snacks.bufdelete = bufdelete
-T.eq("git: Space b d on another file in a jump tab deletes it", deleted, other)
-
-vim.api.nvim_set_current_tabpage(first)
-git.close_jumps(review_tab)
-T.eq("git: closing a review closes its jump tabs", #vim.api.nvim_list_tabpages(), 2)
-
-vim.cmd("$tabnew")
-git.mark_jump(review_tab)
-vim.cmd("tabfirst | tablast")
-git.back_to_review()
-T.eq("git: back from a jump closes its tab", #vim.api.nvim_list_tabpages(), 2)
-T.eq("git: and returns to the review", vim.api.nvim_get_current_tabpage(), review_tab)
-vim.api.nvim_set_current_tabpage(first)
-local warned
-local notify = vim.notify
-vim.notify = function(msg)
-  warned = msg
-end
-git.back_to_review()
-vim.notify = notify
-T.eq("git: back outside a jump keeps the tab", #vim.api.nvim_list_tabpages(), 2)
-T.eq("git: and says why", warned, "This tab was not opened from a review")
+T.eq("git: Space b d on another file deletes it", deleted, other)
 vim.cmd("tabonly")
 
-local repo = T.dir({ ["f.lua"] = { "one", "two" } })
-local function sh(...)
-  return vim.trim(vim.system({ "git", "-C", repo, ... }, { text = true }):wait().stdout)
+local closed, reviewed
+vim.cmd.CodeDiff = function(...)
+  reviewed = { ... }
 end
-sh("init", "-q")
-sh("add", ".")
-sh("-c", "user.name=t", "-c", "user.email=t@t", "commit", "-qm", "base")
-local old = vim.api.nvim_create_buf(true, true)
-vim.api.nvim_buf_set_lines(old, 0, -1, false, { "one", "two" })
-vim.api.nvim_set_current_buf(old)
-vim.api.nvim_win_set_cursor(0, { 2, 0 })
-local session =
-  { original_bufnr = old, original = { absolute = repo .. "/f.lua" }, original_revision = "HEAD" }
-package.loaded["codediff.ui.lifecycle"] = {
-  get_session = function()
-    return session
+git.review_commit({
+  close = function()
+    closed = true
   end,
-}
-local browsed
-local gitbrowse = Snacks.gitbrowse
-Snacks.gitbrowse = function(opts)
-  browsed = { opts = opts, file = vim.fs.basename(vim.api.nvim_buf_get_name(0)) }
-end
-git.browse()
-T.eq("git: Space g O on a review's old side opens its commit", browsed, {
-  opts = { what = "permalink", commit = sh("rev-parse", "HEAD"), line_start = 2, line_end = 2 },
-  file = "f.lua",
-})
-session.original_revision = ":0"
-git.browse()
-T.eq("git: the index has no page, so the usual one opens", browsed.opts, nil)
-session.original_revision = "HEAD"
-vim.cmd("enew")
-git.browse()
-T.eq("git: so does the real side", browsed.opts, nil)
-Snacks.gitbrowse = gitbrowse
-
-package.loaded["codediff.ui.view.actions.panes"] = {}
-vim.notify = function(msg)
-  warned = msg
-end
-git.setup()
-vim.notify = notify
+}, { commit = "abc123" })
+vim.cmd.CodeDiff = nil
 T.eq(
-  "git: a codediff without open_in_prev_tab is said, not ignored",
-  warned,
-  "codediff changed: gf in a review opens the previous tab, see docs/git.md"
+  "git: Enter in a log picker reviews the commit",
+  { closed, reviewed },
+  { true, { "abc123^", "abc123" } }
 )
-package.loaded["codediff.ui.view.actions.panes"] = nil
-package.loaded["codediff.ui.lifecycle"] = nil
-local real = require("codediff.ui.view.actions.panes")
-T.eq("git: codediff still has open_in_prev_tab", type(real.open_in_prev_tab), "function")
+for _, source in ipairs({ "git_log", "git_log_file", "git_log_line" }) do
+  T.eq(
+    "git: " .. source .. " never checks a commit out",
+    type(require("snacks.picker.config").get({ source = source }).confirm),
+    "function"
+  )
+end
 
 local treesitter = require("dotfiles.treesitter")
 local ts = package.loaded["nvim-treesitter"]

@@ -32,38 +32,55 @@ test_review() {
   probe "Space o p hides the file list in a review" 'vim.fn.winnr("$")' 2 5
   keys Space o p
   probe "Space o p shows the file list again" 'vim.fn.winnr("$")' 3 5
-  lua_do 'Snacks.gitbrowse = function(o) vim.g.browsed = o and o.commit or "plain" end'
-  keys C-h
-  keys Space g O
-  probe "Space g O on the old side opens the base commit" 'vim.g.browsed' "$(git -C "$repo" rev-parse HEAD~1)" 10
-  keys C-l
-  probe "gc stays the comment operator in a review" 'vim.fn.maparg("gc", "n", false, true).buffer or 0' 0 5
-  keys Space f f
+  probe "the review's tab is marked a review" 'require("dotfiles.git").review() and 1 or 0' 1 5
+  keys Space g i
   sleep 1
-  keys r.lua Enter
-  probe "Space g V: a picked file opens in a jump tab just before the review" 'vim.fn.tabpagenr("$") * 10 + vim.fn.tabpagenr()' 32 10
-  probe "Space g V: that tab wraps" 'vim.wo.wrap and 1 or 0' 1 5
-  probe "Space g V: the review keeps its diff" '#vim.fn.tabpagebuflist(3)' 3 5
-  keys Space g q
-  probe "Space g q closes that tab and returns to the review" 'vim.fn.tabpagenr("$") * 10 + vim.fn.tabpagenr()' 22 10
+  keys Space g i
+  probe "Space g i twice keeps it a review" 'require("dotfiles.git").review() and 1 or 0' 1 10
+  probe "gc stays the comment operator in a review" 'vim.fn.maparg("gc", "n", false, true).buffer or 0' 0 5
+  keys C-l C-l
   keys g f
-  probe "gf opens the file in a jump tab too" 'vim.fn.tabpagenr("$") * 10 + vim.fn.tabpagenr()' 32 10
-  probe "and leaves the first tab's file alone" 'vim.fn.fnamemodify(vim.fn.bufname(vim.fn.tabpagebuflist(1)[1]), ":t")' other.txt 5
+  probe "gf opens the file in the tab before the review" 'vim.fn.tabpagenr("$") * 10 + vim.fn.tabpagenr()' 21 10
+  probe "and shows it there" 'vim.fn.expand("%:t")' r.lua 5
+  send ':enew<CR>'
   keys g t
   keys Space f f
   sleep 1
   keys r.lua Enter
-  probe "a second pick reuses the jump tab" 'vim.fn.tabpagenr("$") * 10 + vim.fn.tabpagenr()' 32 10
+  probe "a picked file opens in the tab before the review too" 'vim.fn.tabpagenr("$") * 10 + vim.fn.tabpagenr()' 21 10
+  probe "and shows it there" 'vim.fn.expand("%:t")' r.lua 5
+  probe "that tab wraps" 'vim.wo.wrap and 1 or 0' 1 5
+  probe "the review keeps its diff" '#vim.fn.tabpagebuflist(2)' 3 5
   keys g t
   keys C-h C-h
-  probe "the cursor goes back to the file list" 'vim.bo.filetype' codediff-explorer 5
+  probe "gt goes back to the review's file list" 'vim.bo.filetype' codediff-explorer 5
+  keys g T
+  keys Space g q
+  probe "Space g q from the tab before closes the review" 'vim.fn.tabpagenr("$")' 1 10
+  keys Space g D
+  probe "Space g D reviews the edit" 'vim.fn.tabpagenr("$")' 2 20
+  keys C-h C-h
   keys q
-  probe "q closes the review and its jump tab" 'vim.fn.tabpagenr("$")' 1 10
+  probe "q in the file list closes the review" 'vim.fn.tabpagenr("$")' 1 10
   send ':edit r.lua<CR>'
   keys Space g d
   probe "Space g d reviews the file against HEAD" 'vim.fn.tabpagenr("$")' 2 20
   keys Space g q
   probe "Space g q in a review closes it" 'vim.fn.tabpagenr("$")' 1 10
+  keys Space g h
+  probe "Space g h opens the file's history as a review" 'require("dotfiles.git").review(vim.api.nvim_list_tabpages()[2]) and 1 or 0' 1 20
+  keys Space g q
+  probe "Space g q closes the history" 'vim.fn.tabpagenr("$")' 1 10
+  keys 3G Space g L
+  probe "Space g L opens the line's history as a review" 'require("dotfiles.git").review(vim.api.nvim_list_tabpages()[2]) and 1 or 0' 1 20
+  keys Space g q
+  wait_for 'vim.fn.tabpagenr("$")' 1 10
+  keys Space g l
+  sleep 1
+  keys Enter
+  probe "Enter in Space g l reviews the commit" 'vim.fn.tabpagenr("$")' 2 20
+  probe "and checks nothing out" 'vim.fn.system("git -C " .. vim.fn.getcwd() .. " symbolic-ref -q HEAD") ~= "" and 1 or 0' 1 5
+  probe "and leaves the edit alone" 'vim.fn.readfile(vim.fn.getcwd() .. "/r.lua")[1]' "x = 0" 5
   stop_nvim
 }
 

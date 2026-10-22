@@ -6,137 +6,81 @@ local function git(...)
 end
 
 function M.review(tab)
-  local lifecycle = package.loaded["codediff.ui.lifecycle"]
-  return lifecycle and lifecycle.get_session(tab or vim.api.nvim_get_current_tabpage()) ~= nil
+  local ok, value = pcall(vim.api.nvim_tabpage_get_var, tab or 0, "review")
+  return ok and value == true
 end
 
-function M.mark_jump(review_tab)
-  vim.t.review_tab = review_tab
+local function shows(tab, buf)
+  return vim.iter(vim.api.nvim_tabpage_list_wins(tab)):any(function(win)
+    return vim.api.nvim_win_get_buf(win) == buf
+  end)
 end
 
-function M.jumps(review_tab)
-  return vim.tbl_filter(function(tab)
-    local ok, value = pcall(vim.api.nvim_tabpage_get_var, tab, "review_tab")
-    return ok and value == review_tab
-  end, vim.api.nvim_list_tabpages())
-end
-
-function M.jump_win(review_tab)
-  local tab = M.jumps(review_tab)[1]
-  local from = vim.api.nvim_get_current_win()
-  if tab then
-    vim.api.nvim_set_current_tabpage(tab)
-    local here, review = vim.fn.tabpagenr(), vim.api.nvim_tabpage_get_number(review_tab)
-    vim.cmd.tabmove(here < review and review - 2 or review - 1)
-  else
-    vim.api.nvim_set_current_tabpage(review_tab)
-    vim.cmd("-tabnew")
-    vim.bo.bufhidden = "wipe"
-    M.mark_jump(review_tab)
+function M.edit_win(review_tab)
+  local before = vim.api.nvim_list_tabpages()[vim.api.nvim_tabpage_get_number(review_tab) - 1]
+  if before and not M.review(before) then
+    return vim.iter(vim.api.nvim_tabpage_list_wins(before)):find(function(win)
+      return vim.api.nvim_win_get_config(win).relative == ""
+        and vim.bo[vim.api.nvim_win_get_buf(win)].buftype == ""
+    end) or vim.api.nvim_tabpage_get_win(before)
   end
+  local from = vim.api.nvim_get_current_win()
+  vim.api.nvim_set_current_tabpage(review_tab)
+  vim.cmd("-tabnew")
   local win = vim.api.nvim_get_current_win()
   vim.api.nvim_set_current_win(from)
   return win
 end
 
-function M.close_jumps(review_tab)
-  for _, tab in ipairs(M.jumps(review_tab)) do
-    if #vim.api.nvim_list_tabpages() > 1 then
-      vim.cmd.tabclose(vim.api.nvim_tabpage_get_number(tab))
-    end
-  end
-end
-
-function M.back_to_review()
-  local tab = vim.api.nvim_get_current_tabpage()
-  if M.review(tab) then
-    require("codediff.ui.lifecycle").close(tab)
+function M.close_review()
+  local here = vim.fn.tabpagenr()
+  local reviews = vim.tbl_filter(M.review, vim.api.nvim_list_tabpages())
+  local tab = vim.iter(reviews):find(function(t)
+    return vim.api.nvim_tabpage_get_number(t) >= here
+  end) or reviews[#reviews]
+  if not tab then
+    vim.notify("No review is open", vim.log.levels.WARN)
     return
   end
-  local review_tab = vim.t.review_tab
-  if not review_tab then
-    vim.notify("This tab was not opened from a review", vim.log.levels.WARN)
-    return
-  end
-  vim.cmd.tabclose()
-  if vim.api.nvim_tabpage_is_valid(review_tab) then
-    vim.api.nvim_set_current_tabpage(review_tab)
-  end
+  vim.cmd.tabclose(vim.api.nvim_tabpage_get_number(tab))
 end
 
 function M.close_buffer()
   local buf = vim.api.nvim_get_current_buf()
-  local review_tab = M.review() and vim.api.nvim_get_current_tabpage() or vim.t.review_tab
-  local shown = review_tab
-    and vim.api.nvim_tabpage_is_valid(review_tab)
-    and vim.iter(vim.api.nvim_tabpage_list_wins(review_tab)):any(function(win)
-      return vim.api.nvim_win_get_buf(win) == buf
+  if M.review() then
+    M.close_review()
+  elseif
+    vim.iter(vim.api.nvim_list_tabpages()):any(function(tab)
+      return M.review(tab) and shows(tab, buf)
     end)
-  if shown then
-    M.back_to_review()
+  then
+    vim.notify("A review shows this file: close the review first (Space g q)", vim.log.levels.WARN)
   else
     Snacks.bufdelete()
   end
 end
 
-function M.browse()
-  local lifecycle = package.loaded["codediff.ui.lifecycle"]
-  local sess = M.review() and lifecycle.get_session(vim.api.nvim_get_current_tabpage())
-  local old_side = sess
-    and vim.api.nvim_get_current_buf() == sess.original_bufnr
-    and sess.original
-    and sess.original.absolute ~= ""
-  local commit = old_side
-    and sess.original_revision
-    and git(
-      "-C",
-      vim.fs.dirname(sess.original.absolute),
-      "rev-parse",
-      "--verify",
-      "--quiet",
-      sess.original_revision .. "^{commit}"
-    )
-  if not commit then
-    return Snacks.gitbrowse()
+function M.review_commit(picker, item)
+  picker:close()
+  if item and item.commit then
+    vim.cmd.CodeDiff(item.commit .. "^", item.commit)
   end
-  local first, last = vim.fn.line("v"), vim.fn.line(".")
-  if vim.fn.mode():find("[vV\22]") then
-    vim.cmd.normal({ "\27", bang = true })
-  end
-  local buf = vim.fn.bufadd(sess.original.absolute)
-  vim.fn.bufload(buf)
-  vim.api.nvim_buf_call(buf, function()
-    Snacks.gitbrowse({
-      what = "permalink",
-      commit = commit,
-      line_start = math.min(first, last),
-      line_end = math.max(first, last),
-    })
-  end)
 end
 
 function M.setup()
-  local ok, panes = pcall(require, "codediff.ui.view.actions.panes")
-  local open_in_prev_tab = ok and panes.open_in_prev_tab
-  if type(open_in_prev_tab) ~= "function" then
-    vim.notify(
-      "codediff changed: gf in a review opens the previous tab, see docs/git.md",
-      vim.log.levels.WARN
-    )
-  else
-    panes.open_in_prev_tab = function(ctx)
-      local win = M.jump_win(ctx.tabpage)
-      open_in_prev_tab(ctx)
-      require("dotfiles.toggles").apply(win)
-    end
-  end
+  local group = vim.api.nvim_create_augroup("user_review", { clear = true })
   vim.api.nvim_create_autocmd("User", {
-    group = vim.api.nvim_create_augroup("user_review", { clear = true }),
+    group = group,
+    pattern = "CodeDiffOpen",
+    callback = function(ev)
+      vim.api.nvim_tabpage_set_var(ev.data.tabpage, "review", true)
+    end,
+  })
+  vim.api.nvim_create_autocmd("User", {
+    group = group,
     pattern = "CodeDiffClose",
     callback = function(ev)
-      vim.schedule(function()
-        M.close_jumps(ev.data.tabpage)
-      end)
+      pcall(vim.api.nvim_tabpage_del_var, ev.data.tabpage, "review")
     end,
   })
 end

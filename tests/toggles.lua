@@ -39,11 +39,7 @@ press("<leader>uw")
 
 vim.cmd("tabnew " .. root .. "/a.lua")
 local review_win, review_tab = vim.api.nvim_get_current_win(), vim.api.nvim_get_current_tabpage()
-package.loaded["codediff.ui.lifecycle"] = {
-  get_session = function(tab)
-    return tab == review_tab and {} or nil
-  end,
-}
+vim.t.review = true
 vim.wo[review_win].wrap = false
 local warned
 local notify = vim.notify

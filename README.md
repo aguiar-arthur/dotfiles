@@ -182,7 +182,7 @@ Brackets and quotes close themselves as you type (mini.pairs).
 | `Space w =` | make the windows the same size |
 | `Space w H` / `L` / `J` / `K` | narrower / wider / shorter / taller |
 | `Space b n` / `Space b p` | next / previous buffer |
-| `Space b d` | close the buffer (keeps the window, asks about unsaved changes); on a file a review shows, go back to the review instead |
+| `Space b d` | close the buffer (keeps the window, asks about unsaved changes); in a review, close it; on a file a review shows, only warn |
 | `Space t f` / `t h` / `t v` | show or hide a floating / bottom / right terminal, each its own shell |
 | `Space S r` / `Space S l` | restore the session of this folder / the last session |
 | `Space S s` / `Space S d` | pick a session / do not save this one |
@@ -275,24 +275,30 @@ Changed lines are marked in the left column and the line's last commit shows at 
 | `Space g g` | lazygit: stage, commit, push, branches, merge conflicts |
 | `]c` / `[c` | next / previous changed block (hunk) |
 | `Space g p` | preview the hunk |
-| `Space g s` / `Space g r` | stage / reset the hunk or the selected lines |
+| `Space g s` / `Space g r` | stage (or unstage, if staged) / reset the hunk or the selected lines |
 | `Space g S` / `Space g R` | stage / reset the whole file |
 | `Space g b` / `Space g B` | blame the line / turn the end-of-line blame off |
-| `Space g d` | review this file against the last commit (HEAD): staged changes too |
-| `Space g c` / `Space g t` | changed hunks / changed files of the working tree (`Tab` stages) |
-| `Space g D` / `Space g V` | review side by side: the working tree (unstaged against staged, as the marks show; opens on the current file) / everything this branch changes against origin's default branch; `Space g D` again inside a review closes it |
-| `Space g q` | in a tab opened from a review: close it and go back; in a review: close it |
-| `Space g h` / `Space g L` / `Space g l` | history of the file / of the line / of the repository |
-| `Space g O` | open the file in the browser (GitHub, GitLab, …); on a review's old side, that version |
+| `Space g c` / `Space g t` | jump to a changed hunk / a changed file of the working tree (`Tab` stages) |
+| `Space g l` | search the log; `Enter` reviews that commit (it never checks it out) |
+| `Space g O` | open the file in the browser (GitHub, GitLab, …) |
 | `ih` | the hunk as a text object (`dih` deletes it) |
 
-The review opens in a new tab: the changed files on the left, the old and new versions side by
-side. The right side is the real file, so `gd`, `K` and edits work there. A file you open from
-there (`gf`, or a picker: `gd`, `Space l r`, `Space f f`, …) opens in the review's own tab, just
-before it, so the review stays as it was and the tab you came from too; every further file opens
-in that same tab. `Space g q`, `Space b d` or `:q` closes it and brings you back to the review;
-closing the review closes it too. The two sides never wrap lines: codediff keeps them aligned
-that way.
+Reviews show the old and new versions side by side in their own tab, with the changed files on
+the left when there are several:
+
+| Key | Reviews |
+|---|---|
+| `Space g D` | the working tree: what is not staged, as the marks show (opens on the current file); again inside a review closes it |
+| `Space g C` | what is staged, before you commit |
+| `Space g d` | this file against the last commit (HEAD), staged changes too |
+| `Space g V` | everything this branch changes against origin's default branch |
+| `Space g P` | a pull request: type its number (fetched, nothing is checked out) |
+| `Space g h` / `Space g L` | the history of the file / of the line or selected lines, commit by commit |
+
+The right side is the real file, so `gd`, `K` and edits work there. A file you open from the
+review (`gf`, or a picker: `gd`, `Space l r`, `Space f f`, …) opens in the tab just before it, so
+the review stays as it was; `gt` / `gT` switch between the two. `Space g q` closes the review from
+either tab. The two sides never wrap lines: codediff keeps them aligned that way.
 
 | Key (in the review) | Does |
 |---|---|
@@ -300,11 +306,22 @@ that way.
 | `]f` / `[f` | next / previous file |
 | `]c` / `[c` | next / previous change |
 | `Space g a` | stage / unstage the file |
-| `Space g s` / `Space g u` / `Space g r` | stage / unstage / discard the change under the cursor |
-| `gf` / `Space g f` | open the file in the review's tab (see above) |
+| `Space g s` / `Space g r` | stage or unstage / reset the change under the cursor (on the right side) |
+| `gf` / `Space g f` | open the file in the tab before the review |
 | `Space g i` / `Space g z` | inline or side by side / fold the unchanged lines |
 | `Space g E` / `Space o p` | go to / show or hide the file list (`Space g e` does the same as `Space o p`) |
+| `Space b d` | close the review |
 | `g?` / `q` / `Space g q` | every key / close the review |
+
+In a merge conflict, `Space g D` lists the conflicted files and shows theirs, ours and the result:
+
+| Key (in a conflict) | Does |
+|---|---|
+| `]x` / `[x` | next / previous conflict |
+| `Space g m t` / `o` / `b` / `x` | take theirs / ours / both / neither for this conflict |
+| `Space g m T` / `O` / `B` / `X` | the same for the whole file |
+
+lazygit (`Space g g`) does the rest of a merge: continue, abort, or pick a whole side per file.
 
 ### Claude Code (claudecode.nvim)
 

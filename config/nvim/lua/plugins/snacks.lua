@@ -23,6 +23,10 @@ local function words_jump(direction)
   end
 end
 
+local function review_commit(...)
+  require("dotfiles.git").review_commit(...)
+end
+
 local float_terminal = { count = 1, win = require("dotfiles.float").win("Terminal") }
 local bottom_terminal = { count = 2, win = { position = "bottom", height = 15 } }
 
@@ -63,18 +67,21 @@ return {
         files = { hidden = true },
         grep = { hidden = true },
         lsp_references = { auto_confirm = false },
+        git_log = { confirm = review_commit },
+        git_log_file = { confirm = review_commit },
+        git_log_line = { confirm = review_commit },
       },
       actions = {
         confirm = function(picker, item, action)
           local git = require("dotfiles.git")
-          local jump = git.review() and git.jump_win(vim.api.nvim_get_current_tabpage())
-          if jump then
-            picker.main = jump
+          local win = git.review() and git.edit_win(vim.api.nvim_get_current_tabpage())
+          if win then
+            picker.main = win
           end
           require("snacks.picker.actions").jump(picker, item, action)
-          if jump then
+          if win then
             vim.schedule(function()
-              require("dotfiles.toggles").apply(jump)
+              require("dotfiles.toggles").apply(win)
             end)
           end
         end,
@@ -117,14 +124,10 @@ return {
     key("<leader>bb", picker("buffers"), "List buffers"),
 
     key("<leader>gg", snack("lazygit"), "Lazygit"),
-    key("<leader>gl", picker("git_log"), "Git log"),
+    key("<leader>gl", picker("git_log"), "Git log (Enter reviews the commit)"),
     key("<leader>gt", picker("git_status"), "Changed files"),
     key("<leader>gc", picker("git_diff"), "Changes (hunks)"),
-    key("<leader>gh", picker("git_log_file"), "File history"),
-    key("<leader>gL", picker("git_log_line"), "Line history"),
-    key("<leader>gO", function()
-      require("dotfiles.git").browse()
-    end, "Open in browser", { "n", "v" }),
+    key("<leader>gO", snack("gitbrowse"), "Open in browser", { "n", "v" }),
 
     key("<leader>tf", snack("terminal", nil, float_terminal), "Float terminal"),
     key("<leader>th", snack("terminal", nil, bottom_terminal), "Horizontal terminal"),
