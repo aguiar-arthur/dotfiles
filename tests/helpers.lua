@@ -123,6 +123,59 @@ T.eq("git: back outside a jump keeps the tab", #vim.api.nvim_list_tabpages(), 2)
 T.eq("git: and says why", warned, "This tab was not opened from a review")
 vim.cmd("tabonly")
 
+local repo = T.dir({ ["f.lua"] = { "one", "two" } })
+local function sh(...)
+  return vim.trim(vim.system({ "git", "-C", repo, ... }, { text = true }):wait().stdout)
+end
+sh("init", "-q")
+sh("add", ".")
+sh("-c", "user.name=t", "-c", "user.email=t@t", "commit", "-qm", "base")
+local old = vim.api.nvim_create_buf(true, true)
+vim.api.nvim_buf_set_lines(old, 0, -1, false, { "one", "two" })
+vim.api.nvim_set_current_buf(old)
+vim.api.nvim_win_set_cursor(0, { 2, 0 })
+local session =
+  { original_bufnr = old, original = { absolute = repo .. "/f.lua" }, original_revision = "HEAD" }
+package.loaded["codediff.ui.lifecycle"] = {
+  get_session = function()
+    return session
+  end,
+}
+local browsed
+local gitbrowse = Snacks.gitbrowse
+Snacks.gitbrowse = function(opts)
+  browsed = { opts = opts, file = vim.fs.basename(vim.api.nvim_buf_get_name(0)) }
+end
+git.browse()
+T.eq("git: Space g O on a review's old side opens its commit", browsed, {
+  opts = { what = "permalink", commit = sh("rev-parse", "HEAD"), line_start = 2, line_end = 2 },
+  file = "f.lua",
+})
+session.original_revision = ":0"
+git.browse()
+T.eq("git: the index has no page, so the usual one opens", browsed.opts, nil)
+session.original_revision = "HEAD"
+vim.cmd("enew")
+git.browse()
+T.eq("git: so does the real side", browsed.opts, nil)
+Snacks.gitbrowse = gitbrowse
+
+package.loaded["codediff.ui.view.actions.panes"] = {}
+vim.notify = function(msg)
+  warned = msg
+end
+git.setup()
+vim.notify = notify
+T.eq(
+  "git: a codediff without open_in_prev_tab is said, not ignored",
+  warned,
+  "codediff changed: gf in a review opens the previous tab, see docs/git.md"
+)
+package.loaded["codediff.ui.view.actions.panes"] = nil
+package.loaded["codediff.ui.lifecycle"] = nil
+local real = require("codediff.ui.view.actions.panes")
+T.eq("git: codediff still has open_in_prev_tab", type(real.open_in_prev_tab), "function")
+
 local treesitter = require("dotfiles.treesitter")
 local ts = package.loaded["nvim-treesitter"]
 package.loaded["nvim-treesitter"] = {

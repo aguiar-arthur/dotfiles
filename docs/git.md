@@ -18,7 +18,7 @@ tree or the branch. Its relationships are in [map](map.md).
 |---|---|
 | `config/nvim/lua/plugins/editor.lua` (gitsigns) | signs, line blame, `]c` / `[c`, `<leader>g` hunk keys, `ih` |
 | `config/nvim/lua/plugins/editor.lua` (codediff) | `<leader>gD`, `<leader>gV`, `<leader>gd`, `<leader>gq`, the review's own keys, `git.setup()` |
-| `config/nvim/lua/dotfiles/git.lua` | the base branch, "is this tab a review", the jump tab, back to the review, `<leader>bd` beside a review |
+| `config/nvim/lua/dotfiles/git.lua` | the base branch, "is this tab a review", the jump tab, back to the review, `<leader>bd` beside a review, `<leader>gO` |
 | `config/nvim/lua/config/keymaps.lua` | `<leader>bd`, through `git.close_buffer` |
 | `config/nvim/lua/plugins/snacks.lua` | lazygit, git pickers (`gl`, `gt`, `gc`, `gh`, `gL`), `gO`, the `confirm` that opens jumps in a tab |
 
@@ -64,17 +64,23 @@ Consumes:
   `]c` in a `:diffthis` window. `<leader>gs` / `<leader>gr` meet the same way on the real side,
   where both do the same thing; codediff's own run on the old side.
 - `git.setup()` replaces `open_in_prev_tab` in `codediff.ui.view.actions.panes`, which codediff
-  looks up on each press; if a codediff update renames it, `gf` in a review falls back to the
-  previous tab and the full test catches it.
+  looks up on each press, because codediff's keymaps take only keys, not functions. If an update
+  renames it, `git.setup()` warns and `gf` in a review opens the previous tab again; the quick
+  tests check the function is still there. Drop the wrap once codediff takes a function there.
+- codediff cannot diff against the index (`:CodeDiff file` wants a revision `rev-parse` knows), so
+  `<leader>gd` is against HEAD; the index diff is `<leader>gD`, which opens on the current file.
+- A review's old side is a `codediff://` buffer gitbrowse cannot place, so `git.browse()` resolves
+  the side's revision to a commit and opens a permalink from the file's real buffer; the index
+  (`:0`) and the real side use the usual `Snacks.gitbrowse()`.
 
 ## Checks
 
 | What | Where |
 |---|---|
-| Base branch order, review detection, the jump tab (made before the review, reused, moved back), `Space g q` and `Space b d` from a jump or a review, closing jump tabs | `tests/helpers.lua` |
+| Base branch order, review detection, the jump tab (made before the review, reused, moved back), `Space g q` and `Space b d` from a jump or a review, closing jump tabs, `Space g O` on each side, the `gf` wrap warning and codediff still having `open_in_prev_tab` | `tests/helpers.lua` |
 | Toggles beside a review | `tests/toggles.lua` |
-| A `Space g V` review: file list, `]c`, unwrapped sides and `Space u w`, an edit on the real side, `Space g e` / `Space o p`, `gc` left alone, a picked file and `gf` open in the jump tab, which is reused, `Space g q` returns, `q` closes the review and its jump tab; `Space g d` | full: `test_review` in `tests/git.sh` |
-| `Space g D` opens and closes a review; lazygit: `e`, stage, unstage, commit, back to the window it came from | full: `test_lazygit` |
+| A `Space g V` review: file list, `]c`, unwrapped sides and `Space u w`, an edit on the real side, `Space g e` / `Space o p`, `gc` left alone, `Space g O` on the old side, a picked file and `gf` open in the jump tab, which is reused, `Space g q` returns, `q` closes the review and its jump tab; `Space g d` | full: `test_review` in `tests/git.sh` |
+| `Space g D` opens on the current file, and closes a review; lazygit: `e`, stage, unstage, commit, back to the window it came from | full: `test_lazygit` |
 | Debugging from the real side of a review | full: `test_review_debug` |
 
 ## Changing it

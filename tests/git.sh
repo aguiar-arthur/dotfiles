@@ -32,6 +32,11 @@ test_review() {
   probe "Space o p hides the file list in a review" 'vim.fn.winnr("$")' 2 5
   keys Space o p
   probe "Space o p shows the file list again" 'vim.fn.winnr("$")' 3 5
+  lua_do 'Snacks.gitbrowse = function(o) vim.g.browsed = o and o.commit or "plain" end'
+  keys C-h
+  keys Space g O
+  probe "Space g O on the old side opens the base commit" 'vim.g.browsed' "$(git -C "$repo" rev-parse HEAD~1)" 10
+  keys C-l
   probe "gc stays the comment operator in a review" 'vim.fn.maparg("gc", "n", false, true).buffer or 0' 0 5
   keys Space f f
   sleep 1
@@ -70,6 +75,12 @@ test_lazygit() {
   fi
   printf 'a = 1\n\nb = 4\n' >"$repo/r.lua"
   printf 'disableStartupPopups: true\n' >"$T/lazygit.yml"
+  printf 'z = 0\n' >"$repo/a.lua"
+  start_nvim "$repo" r.lua
+  keys Space g D
+  probe "Space g D from a file opens the review on that file" 'vim.fn.fnamemodify(vim.fn.bufname(vim.fn.tabpagebuflist()[3]), ":t")' r.lua 20
+  stop_nvim
+  rm -f "$repo/a.lua"
   LG_CONFIG_FILE="$T/lazygit.yml" start_nvim "$repo" other.txt
   keys Space g D
   probe "Space g D reviews the working tree" 'vim.fn.tabpagenr("$")' 2 20

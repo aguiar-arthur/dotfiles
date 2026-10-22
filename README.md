@@ -278,12 +278,12 @@ Changed lines are marked in the left column and the line's last commit shows at 
 | `Space g s` / `Space g r` | stage / reset the hunk or the selected lines |
 | `Space g S` / `Space g R` | stage / reset the whole file |
 | `Space g b` / `Space g B` | blame the line / turn the end-of-line blame off |
-| `Space g d` | review this file against HEAD (a review tab, as below) |
+| `Space g d` | review this file against the last commit (HEAD): staged changes too |
 | `Space g c` / `Space g t` | changed hunks / changed files of the working tree (`Tab` stages) |
-| `Space g D` / `Space g V` | review side by side: the working tree / everything this branch changes against origin's default branch; `Space g D` again inside a review closes it |
+| `Space g D` / `Space g V` | review side by side: the working tree (unstaged against staged, as the marks show; opens on the current file) / everything this branch changes against origin's default branch; `Space g D` again inside a review closes it |
 | `Space g q` | in a tab opened from a review: close it and go back; in a review: close it |
 | `Space g h` / `Space g L` / `Space g l` | history of the file / of the line / of the repository |
-| `Space g O` | open the file in the browser (GitHub, GitLab, …) |
+| `Space g O` | open the file in the browser (GitHub, GitLab, …); on a review's old side, that version |
 | `ih` | the hunk as a text object (`dih` deletes it) |
 
 The review opens in a new tab: the changed files on the left, the old and new versions side by

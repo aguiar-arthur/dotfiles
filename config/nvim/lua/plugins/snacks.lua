@@ -122,7 +122,9 @@ return {
     key("<leader>gc", picker("git_diff"), "Changes (hunks)"),
     key("<leader>gh", picker("git_log_file"), "File history"),
     key("<leader>gL", picker("git_log_line"), "Line history"),
-    key("<leader>gO", snack("gitbrowse"), "Open in browser", { "n", "v" }),
+    key("<leader>gO", function()
+      require("dotfiles.git").browse()
+    end, "Open in browser", { "n", "v" }),
 
     key("<leader>tf", snack("terminal", nil, float_terminal), "Float terminal"),
     key("<leader>th", snack("terminal", nil, bottom_terminal), "Horizontal terminal"),

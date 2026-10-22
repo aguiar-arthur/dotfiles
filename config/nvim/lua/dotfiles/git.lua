@@ -79,13 +79,56 @@ function M.close_buffer()
   end
 end
 
+function M.browse()
+  local lifecycle = package.loaded["codediff.ui.lifecycle"]
+  local sess = M.review() and lifecycle.get_session(vim.api.nvim_get_current_tabpage())
+  local old_side = sess
+    and vim.api.nvim_get_current_buf() == sess.original_bufnr
+    and sess.original
+    and sess.original.absolute ~= ""
+  local commit = old_side
+    and sess.original_revision
+    and git(
+      "-C",
+      vim.fs.dirname(sess.original.absolute),
+      "rev-parse",
+      "--verify",
+      "--quiet",
+      sess.original_revision .. "^{commit}"
+    )
+  if not commit then
+    return Snacks.gitbrowse()
+  end
+  local first, last = vim.fn.line("v"), vim.fn.line(".")
+  if vim.fn.mode():find("[vV\22]") then
+    vim.cmd.normal({ "\27", bang = true })
+  end
+  local buf = vim.fn.bufadd(sess.original.absolute)
+  vim.fn.bufload(buf)
+  vim.api.nvim_buf_call(buf, function()
+    Snacks.gitbrowse({
+      what = "permalink",
+      commit = commit,
+      line_start = math.min(first, last),
+      line_end = math.max(first, last),
+    })
+  end)
+end
+
 function M.setup()
-  local panes = require("codediff.ui.view.actions.panes")
-  local open_in_prev_tab = panes.open_in_prev_tab
-  panes.open_in_prev_tab = function(ctx)
-    local win = M.jump_win(ctx.tabpage)
-    open_in_prev_tab(ctx)
-    require("dotfiles.toggles").apply(win)
+  local ok, panes = pcall(require, "codediff.ui.view.actions.panes")
+  local open_in_prev_tab = ok and panes.open_in_prev_tab
+  if type(open_in_prev_tab) ~= "function" then
+    vim.notify(
+      "codediff changed: gf in a review opens the previous tab, see docs/git.md",
+      vim.log.levels.WARN
+    )
+  else
+    panes.open_in_prev_tab = function(ctx)
+      local win = M.jump_win(ctx.tabpage)
+      open_in_prev_tab(ctx)
+      require("dotfiles.toggles").apply(win)
+    end
   end
   vim.api.nvim_create_autocmd("User", {
     group = vim.api.nvim_create_augroup("user_review", { clear = true }),
