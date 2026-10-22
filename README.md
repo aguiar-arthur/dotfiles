@@ -279,7 +279,7 @@ Changed lines are marked in the left column and the line's last commit shows at 
 | `Space g S` / `Space g R` | stage / reset the whole file |
 | `Space g b` / `Space g B` | blame the line / turn the end-of-line blame off |
 | `Space g c` / `Space g t` | jump to a changed hunk / a changed file of the working tree (`Tab` stages) |
-| `Space g l` | search the log; `Enter` reviews that commit (it never checks it out) |
+| `Space g l` | search the log; `Enter` reviews that commit against its parent (it never checks it out) |
 | `Space g O` | open the file in the browser (GitHub, GitLab, …) |
 | `ih` | the hunk as a text object (`dih` deletes it) |
 
@@ -298,7 +298,8 @@ the left when there are several:
 The right side is the real file, so `gd`, `K` and edits work there. A file you open from the
 review (`gf`, or a picker: `gd`, `Space l r`, `Space f f`, …) opens in the tab just before it, so
 the review stays as it was; `gt` / `gT` switch between the two. `Space g q` closes the review from
-either tab. The two sides never wrap lines: codediff keeps them aligned that way.
+either tab, even when the review is the last tab. The two sides never wrap lines: codediff keeps
+them aligned that way.
 
 | Key (in the review) | Does |
 |---|---|
@@ -306,7 +307,8 @@ either tab. The two sides never wrap lines: codediff keeps them aligned that way
 | `]f` / `[f` | next / previous file |
 | `]c` / `[c` | next / previous change |
 | `Space g a` | stage / unstage the file |
-| `Space g s` / `Space g r` | stage or unstage / reset the change under the cursor (on the right side) |
+| `Space g s` / `Space g r` | stage or unstage / reset the change under the cursor (on the real file) |
+| `Space g u` | unstage the change under the cursor (in a review of staged changes) |
 | `gf` / `Space g f` | open the file in the tab before the review |
 | `Space g i` / `Space g z` | inline or side by side / fold the unchanged lines |
 | `Space g E` / `Space o p` | go to / show or hide the file list (`Space g e` does the same as `Space o p`) |

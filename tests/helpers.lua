@@ -94,6 +94,15 @@ T.eq(
 )
 
 vim.api.nvim_set_current_tabpage(first)
+vim.cmd("tabonly | only | enew")
+vim.bo.buftype = "nofile"
+review_tab = new_review()
+made = git.edit_win(review_tab)
+T.eq("git: a tab with no file window gets a new tab after it", {
+  vim.api.nvim_tabpage_get_number(vim.api.nvim_win_get_tabpage(made)),
+  #vim.api.nvim_list_tabpages(),
+}, { 2, 3 })
+vim.api.nvim_set_current_tabpage(first)
 vim.cmd("tabonly")
 review_tab = new_review()
 vim.api.nvim_set_current_tabpage(first)
@@ -104,6 +113,16 @@ git.close_review()
 T.eq("git: Space g q in a review closes it", #vim.api.nvim_list_tabpages(), 1)
 capture(git.close_review)
 T.eq("git: Space g q without a review says so", warned, "No review is open")
+event("CodeDiffOpen", vim.api.nvim_get_current_tabpage())
+git.close_review()
+T.eq(
+  "git: Space g q on a review alone leaves a new tab",
+  { #vim.api.nvim_list_tabpages(), git.review() },
+  { 1, false }
+)
+first = vim.api.nvim_get_current_tabpage()
+editing = vim.api.nvim_get_current_win()
+vim.api.nvim_set_current_buf(file)
 
 review_tab = new_review()
 vim.api.nvim_set_current_buf(file)
@@ -131,21 +150,37 @@ Snacks.bufdelete = bufdelete
 T.eq("git: Space b d on another file deletes it", deleted, other)
 vim.cmd("tabonly")
 
+local log = T.dir()
+local function lg(...)
+  return vim.trim(vim.system({ "git", "-C", log, ... }, { text = true }):wait().stdout)
+end
+lg("init", "-q")
+lg("-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "--allow-empty", "-m", "one")
+local root_commit = lg("rev-parse", "HEAD")
+lg("-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "--allow-empty", "-m", "two")
+local head = lg("rev-parse", "HEAD")
 local closed, reviewed
 vim.cmd.CodeDiff = function(...)
   reviewed = { ... }
 end
-git.review_commit({
+local log_picker = {
   close = function()
     closed = true
   end,
-}, { commit = "abc123" })
-vim.cmd.CodeDiff = nil
+}
+git.review_commit(log_picker, { commit = head, cwd = log })
 T.eq(
-  "git: Enter in a log picker reviews the commit",
+  "git: Enter in a log picker reviews the commit against its parent",
   { closed, reviewed },
-  { true, { "abc123^", "abc123" } }
+  { true, { root_commit, head } }
 )
+git.review_commit(log_picker, { commit = root_commit, cwd = log })
+T.eq(
+  "git: the first commit against the empty tree",
+  reviewed,
+  { "4b825dc642cb6eb9a060e54bf8d69288fbee4904", root_commit }
+)
+vim.cmd.CodeDiff = nil
 for _, source in ipairs({ "git_log", "git_log_file", "git_log_line" }) do
   T.eq(
     "git: " .. source .. " never checks a commit out",
@@ -168,6 +203,7 @@ T.eq("treesitter: lists the parsers not installed", treesitter.missing({ "lua", 
 T.eq("treesitter: none when all are there", treesitter.missing({ "bash" }), {})
 package.loaded["nvim-treesitter"] = ts
 
+vim.cmd("enew")
 local base
 rawset(vim.cmd, "CodeDiff", function(arg)
   base = arg
@@ -192,6 +228,13 @@ repo("main", false)
 T.eq("git: then origin/main", base, "origin/main...")
 repo("master", false)
 T.eq("git: then origin/master", base, "origin/master...")
+repo("main", false)
+vim.cmd("edit " .. vim.fn.getcwd() .. "/f.txt")
+vim.fn.chdir(T.dir())
+base = nil
+git.review_vs_origin()
+T.eq("git: the base comes from the file's repository", base, "origin/main...")
+vim.cmd("enew")
 local said
 vim.notify = function(msg)
   said = msg

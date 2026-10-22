@@ -37,24 +37,29 @@ pickers and `<leader>bd` know a review.
 
 A review keeps its own tab and files go to the tab before it, the way codediff's `gf` already
 works: the pickers' `confirm` points `picker.main` at a file window of that tab (made with
-`-tabnew` when the review is the first tab or follows another review), so a pick never replaces
-a side of the diff. `gt` / `gT` switch between the two. `<leader>gq` closes the review from
-either tab; `<leader>bd` in a review closes it, and on a file a review shows it only warns,
+`-tabnew` when there is no such tab, it is a review, or it has no file window), so a pick never
+replaces a side of the diff nor a terminal. `gt` / `gT` switch between the two. `<leader>gq`
+closes the review from either tab (opening a tab first when the review is the last one, as
+codediff's own `q` does); `<leader>bd` in a review closes it, and on a file a review shows it only warns,
 because `Snacks.bufdelete` would take the buffer out of the review's window.
 
 Snacks' log pickers check a commit out on Enter (`git checkout <commit> -- <file>` for a file's
 log, which drops its uncommitted changes); their `confirm` is `git.review_commit` instead, which
-reviews the commit against its parent. A file's and a line's history are codediff's own
-`:CodeDiff history`, so they look and behave like any other review.
+reviews the commit against its parent (git's empty tree for the first commit). A file's and a
+line's history are codediff's own `:CodeDiff history`, so they look and behave like any other
+review.
 
 Every codediff key is under `<leader>g`: `ga` stages the file, `gi` / `gz` switch the layout and
 fold, `gE` focuses the file list, and the merge conflict keys are `gm` plus codediff's own letters
 (`t` theirs, `o` ours, `b` both, `x` none; upper case for the whole file). So `gc`, `t` and `-`
 keep their Vim meaning on the real side, which is the file being edited, and `gd`, `K` and edits
-work there. Hunks are gitsigns' alone (codediff's hunk keys are off); its `<leader>gs` unstages a
-hunk already staged. The two sides never wrap. `<leader>op` inside a review toggles the file list
-(codediff's `toggle_explorer` is set to it and to `<leader>ge`; its keys are buffer-local, so
-everywhere else `<leader>op` is still the file tree).
+work there. On the real file hunks are gitsigns' (codediff's stage and discard keys are off); its
+`<leader>gs` unstages a hunk already staged. A review of staged changes shows two codediff
+buffers gitsigns does not attach to, so codediff's `<leader>gu` unstages a hunk there; no
+gitsigns key uses it. `ih` is both plugins' on the real file (they select the same hunk) and
+codediff's alone on the old side. The two sides never wrap. `<leader>op` inside a review toggles
+the file list (codediff's `toggle_explorer` is set to it and to `<leader>ge`; its keys are
+buffer-local, so everywhere else `<leader>op` is still the file tree).
 
 ## Contract
 
@@ -77,16 +82,17 @@ Consumes:
   `<leader>gd` is against HEAD; the index diff is `<leader>gD`, which opens on the current file.
 - `<leader>gO` on a review's old side opens the current branch: that side is a `codediff://`
   buffer, and placing it would mean reading codediff's internals again.
-- An earlier version patched codediff's internal `open_in_prev_tab` and read its sessions; any
-  codediff refactor could break it. Keep to the documented surface above.
+- `<leader>gV` reads the base branch in the current file's repository (else the working
+  directory), as codediff does; asking the working directory gave another repository's base.
+- `:tabclose` on the last tab fails (E784), so closing a review alone opens a tab first.
 
 ## Checks
 
 | What | Where |
 |---|---|
-| Base branch order, the `review` variable from codediff's events, the editing tab (before, made when missing, never a review), `Space g q` and `Space b d` around a review, Enter in the log pickers | `tests/helpers.lua` |
+| Base branch order and its repository, the `review` variable from codediff's events, the editing tab (before, made when missing, never a review nor a tab without a file window), `Space g q` and `Space b d` around a review and on a review alone, Enter in the log pickers (parent, first commit) | `tests/helpers.lua` |
 | Toggles beside a review | `tests/toggles.lua` |
-| A `Space g V` review: file list, `]c`, unwrapped sides and `Space u w`, an edit on the real side, `Space g e` / `Space o p`, `Space g i`, `gc` left alone, `gf` and a pick open in the tab before, `gt` back, `Space g q` and `q` close; `Space g D`, `Space g d`, `Space g h`, `Space g L`; Enter in `Space g l` reviews without a checkout | full: `test_review` in `tests/git.sh` |
+| A `Space g V` review: file list, `]c`, unwrapped sides and `Space u w`, an edit on the real side, `Space g e` / `Space o p`, `Space g i`, `gc` left alone, `gf` and a pick open in the tab before, `gt` back, `Space g q` and `q` close; `Space g D`, `Space g d`, `Space g h`, `Space g L`; Enter in `Space g l` reviews without a checkout; `Space g C` and `Space g u` unstaging there | full: `test_review` in `tests/git.sh` |
 | `Space g D` opens on the current file, and closes a review; lazygit: `e`, stage, unstage, commit, back to the window it came from | full: `test_lazygit` |
 | Debugging from the real side of a review | full: `test_review_debug` |
 

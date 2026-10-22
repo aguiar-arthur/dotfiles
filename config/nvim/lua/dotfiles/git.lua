@@ -1,5 +1,7 @@
 local M = {}
 
+local EMPTY_TREE = "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
+
 local function git(...)
   local result = vim.system({ "git", ... }, { text = true }):wait()
   return result.code == 0 and vim.trim(result.stdout) or nil
@@ -18,11 +20,14 @@ end
 
 function M.edit_win(review_tab)
   local before = vim.api.nvim_list_tabpages()[vim.api.nvim_tabpage_get_number(review_tab) - 1]
-  if before and not M.review(before) then
-    return vim.iter(vim.api.nvim_tabpage_list_wins(before)):find(function(win)
+  local found = before
+    and not M.review(before)
+    and vim.iter(vim.api.nvim_tabpage_list_wins(before)):find(function(win)
       return vim.api.nvim_win_get_config(win).relative == ""
         and vim.bo[vim.api.nvim_win_get_buf(win)].buftype == ""
-    end) or vim.api.nvim_tabpage_get_win(before)
+    end)
+  if found then
+    return found
   end
   local from = vim.api.nvim_get_current_win()
   vim.api.nvim_set_current_tabpage(review_tab)
@@ -41,6 +46,9 @@ function M.close_review()
   if not tab then
     vim.notify("No review is open", vim.log.levels.WARN)
     return
+  end
+  if #vim.api.nvim_list_tabpages() == 1 then
+    vim.cmd("tabnew")
   end
   vim.cmd.tabclose(vim.api.nvim_tabpage_get_number(tab))
 end
@@ -63,7 +71,9 @@ end
 function M.review_commit(picker, item)
   picker:close()
   if item and item.commit then
-    vim.cmd.CodeDiff(item.commit .. "^", item.commit)
+    local dir = item.cwd or vim.fn.getcwd()
+    local parent = git("-C", dir, "rev-parse", "--verify", "--quiet", item.commit .. "^")
+    vim.cmd.CodeDiff(parent or EMPTY_TREE, item.commit)
   end
 end
 
@@ -86,9 +96,12 @@ function M.setup()
 end
 
 function M.review_vs_origin()
-  local base = git("symbolic-ref", "--quiet", "--short", "refs/remotes/origin/HEAD")
+  local file = vim.bo.buftype == "" and vim.api.nvim_buf_get_name(0) or ""
+  local dir = file ~= "" and vim.fs.dirname(file) or ""
+  dir = vim.fn.isdirectory(dir) == 1 and dir or vim.fn.getcwd()
+  local base = git("-C", dir, "symbolic-ref", "--quiet", "--short", "refs/remotes/origin/HEAD")
   for _, name in ipairs({ "origin/main", "origin/master" }) do
-    base = base or (git("rev-parse", "--verify", "--quiet", name) and name)
+    base = base or (git("-C", dir, "rev-parse", "--verify", "--quiet", name) and name)
   end
   if not base then
     vim.notify("No origin/HEAD, origin/main or origin/master", vim.log.levels.ERROR)

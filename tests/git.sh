@@ -81,6 +81,13 @@ test_review() {
   probe "Enter in Space g l reviews the commit" 'vim.fn.tabpagenr("$")' 2 20
   probe "and checks nothing out" 'vim.fn.system("git -C " .. vim.fn.getcwd() .. " symbolic-ref -q HEAD") ~= "" and 1 or 0' 1 5
   probe "and leaves the edit alone" 'vim.fn.readfile(vim.fn.getcwd() .. "/r.lua")[1]' "x = 0" 5
+  keys Space g q
+  wait_for 'vim.fn.tabpagenr("$")' 1 10
+  send ':silent !git add r.lua<CR>'
+  keys Space g C
+  probe "Space g C reviews what is staged" 'vim.fn.tabpagenr("$")' 2 20
+  keys C-l C-l gg Space g u
+  probe "Space g u there unstages the change" 'vim.trim(vim.fn.system("git -C " .. vim.fn.getcwd() .. " diff --cached --name-only"))' "" 15
   stop_nvim
 }
 

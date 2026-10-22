@@ -87,7 +87,7 @@ return {
           open_in_prev_tab = { "gf", "<leader>gf" },
           toggle_stage = "<leader>ga",
           stage_hunk = false,
-          unstage_hunk = false,
+          unstage_hunk = "<leader>gu",
           discard_hunk = false,
           toggle_layout = "<leader>gi",
           toggle_compact = "<leader>gz",
