@@ -54,7 +54,7 @@ map("n", "<leader>wK", "<cmd>resize +2<CR>", o("Taller"))
 map("n", "<leader>bn", "<cmd>bnext<CR>", o("Next buffer"))
 map("n", "<leader>bp", "<cmd>bprevious<CR>", o("Previous buffer"))
 map("n", "<leader>bd", function()
-  Snacks.bufdelete()
+  require("dotfiles.git").close_buffer()
 end, o("Close buffer"))
 
 local function diagnostic_jump(count, severity)

@@ -22,7 +22,7 @@ Upstream offers, downstream consumes; a change upstream may break downstream.
 | Core | all | published language | `settings.lua` keys (servers, tools, parsers, notes, spell), `<leader>` / `,` split | `tests/files.lua`, `helpers.lua` |
 | Core | Markdown | customer / supplier | the global conceal toggle (`<leader>uc`) is re-applied to render-markdown | full: `test_markdown` |
 | Core | Git | customer / supplier | `<leader>uw` leaves a review's wrap alone | `tests/toggles.lua`, full: `test_review` |
-| Workspace | Git | customer / supplier | pickers' `confirm` opens a file from a review in a new tab | full: `test_review` |
+| Workspace | Git | customer / supplier | pickers' `confirm` opens a file from a review in its jump tab; `<leader>bd` beside a review goes back to it | `tests/helpers.lua`, full: `test_review` |
 | Workspace | Code | customer / supplier | blink.cmp's LSP capabilities reach servers started before the first insert | none (plugin wiring) |
 | Workspace | Markdown | conformist | mini.pairs leaves the backtick alone; Markdown adds its own pair | `tests/keys.lua` |
 | Workspace | LaTeX | customer / supplier | completion; LaTeX keeps its own snippets, not friendly-snippets | full: `test_snippets` |
@@ -39,7 +39,7 @@ A word that means something different per context is defined where it is owned.
 |---|---|---|
 | toggle | Core | a global `<leader>u` key |
 | review | Git | a codediff tab |
-| jump | Git | a tab a picker opens from a review |
+| jump tab | Git | the one tab, before a review, where files opened from it go |
 | picker | Workspace | any Snacks list |
 | preview | Markdown | the pandoc HTML page |
 | probe | Tests | a full-mode check that waits for a Lua value |

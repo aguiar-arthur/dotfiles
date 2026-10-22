@@ -6,9 +6,10 @@ tree or the branch. Its relationships are in [map](map.md).
 ## Language
 
 - **hunk**: a changed block, marked by gitsigns in the status column.
-- **review**: a codediff tab, opened by `<leader>gD` (working tree) or `<leader>gV` (the
-  branch against origin's default branch).
-- **jump**: a tab a picker opens from a review; it remembers its review in `vim.t.review_tab`.
+- **review**: a codediff tab, opened by `<leader>gD` (working tree), `<leader>gV` (the
+  branch against origin's default branch) or `<leader>gd` (this file against HEAD).
+- **jump tab**: the one tab, just before a review, where files opened from it go; it remembers
+  its review in `vim.t.review_tab`.
 - **base branch**: `origin/HEAD`, else `origin/main`, else `origin/master`.
 
 ## Files
@@ -16,8 +17,9 @@ tree or the branch. Its relationships are in [map](map.md).
 | Path | Holds |
 |---|---|
 | `config/nvim/lua/plugins/editor.lua` (gitsigns) | signs, line blame, `]c` / `[c`, `<leader>g` hunk keys, `ih` |
-| `config/nvim/lua/plugins/editor.lua` (codediff) | `<leader>gD`, `<leader>gV`, `<leader>gq`, the review's own keys |
-| `config/nvim/lua/dotfiles/git.lua` | the base branch, "is this tab a review", jump marks, back to the review |
+| `config/nvim/lua/plugins/editor.lua` (codediff) | `<leader>gD`, `<leader>gV`, `<leader>gd`, `<leader>gq`, the review's own keys, `git.setup()` |
+| `config/nvim/lua/dotfiles/git.lua` | the base branch, "is this tab a review", the jump tab, back to the review, `<leader>bd` beside a review |
+| `config/nvim/lua/config/keymaps.lua` | `<leader>bd`, through `git.close_buffer` |
 | `config/nvim/lua/plugins/snacks.lua` | lazygit, git pickers (`gl`, `gt`, `gc`, `gh`, `gL`), `gO`, the `confirm` that opens jumps in a tab |
 
 ## How it works
@@ -26,10 +28,19 @@ tree or the branch. Its relationships are in [map](map.md).
 history (`gh` file, `gL` line, `gl` repo). codediff.nvim downloads its prebuilt diff library in
 its lazy.nvim `build` step, so `install.sh` fetches it with the plugins.
 
-Inside a review the pickers' `confirm` opens the file in a new tab, so a jump never replaces a
-side of the diff; references always show their list. That tab remembers the review it came
-from, so `<leader>gq` closes it and returns there even after visiting other tabs;
-`tabclose = "uselast"` makes a plain `:q` return to the last tab. The right side of the review
+A file opened from a review never replaces a side of the diff nor the tab the review came from:
+it goes to the review's jump tab, made with `-tabnew` just before the review the first time and
+reused (moved back there if needed) after. The pickers' `confirm` points `picker.main` at that
+tab's window; `gf` / `<leader>gf` is codediff's `open_in_prev_tab`, which `git.setup()` wraps so
+the jump tab is the previous tab. References always show their list. `<leader>gq` closes the jump
+tab and returns to its review even after visiting other tabs, or closes the review when pressed
+in it; `<leader>bd` on a file the review shows does the same instead of deleting the buffer the
+review uses (codediff tears a review down when one of its buffers goes). Closing a review
+(`CodeDiffClose`) closes its jump tab, so none is left pointing nowhere; `tabclose = "uselast"`
+makes a plain `:q` return to the last tab.
+Every review key of codediff is under `<leader>g` (hunks as gitsigns has them, `<leader>ga`
+stages the file, `<leader>gi` / `<leader>gz` layout and folding), so `gc`, `t` and `-` keep their
+Vim meaning on the real side, which is the file being edited. The right side of the review
 is the real file, so `gd`, `K` and edits work there. The two sides never wrap.
 `<leader>op` inside a review toggles the file list (codediff's `toggle_explorer` is set to it and to
 `<leader>ge`; its keys are buffer-local, so everywhere else `<leader>op` is still the file tree).
@@ -50,15 +61,19 @@ Consumes:
 
 - gitsigns attaches to a file a review opens after codediff maps its keys, and its buffer-local
   `]c` / `[c` replaced the review's; they now ask codediff first, and fall back to Vim's own
-  `]c` in a `:diffthis` window.
+  `]c` in a `:diffthis` window. `<leader>gs` / `<leader>gr` meet the same way on the real side,
+  where both do the same thing; codediff's own run on the old side.
+- `git.setup()` replaces `open_in_prev_tab` in `codediff.ui.view.actions.panes`, which codediff
+  looks up on each press; if a codediff update renames it, `gf` in a review falls back to the
+  previous tab and the full test catches it.
 
 ## Checks
 
 | What | Where |
 |---|---|
-| Base branch order, review detection, `Space g q` back from a jump | `tests/helpers.lua` |
+| Base branch order, review detection, the jump tab (made before the review, reused, moved back), `Space g q` and `Space b d` from a jump or a review, closing jump tabs | `tests/helpers.lua` |
 | Toggles beside a review | `tests/toggles.lua` |
-| A `Space g V` review: file list, `]c`, unwrapped sides and `Space u w`, an edit on the real side, `Space g e` / `Space o p`, a picked file opens in a tab and `Space g q` returns, `q` closes | full: `test_review` in `tests/git.sh` |
+| A `Space g V` review: file list, `]c`, unwrapped sides and `Space u w`, an edit on the real side, `Space g e` / `Space o p`, `gc` left alone, a picked file and `gf` open in the jump tab, which is reused, `Space g q` returns, `q` closes the review and its jump tab; `Space g d` | full: `test_review` in `tests/git.sh` |
 | `Space g D` opens and closes a review; lazygit: `e`, stage, unstage, commit, back to the window it came from | full: `test_lazygit` |
 | Debugging from the real side of a review | full: `test_review_debug` |
 

@@ -70,9 +70,10 @@ backdrop). Hiding a float keeps its session, and Snacks refits it when the termi
 
 Offers:
 
-- To [git](git.md): the pickers' custom `confirm` opens a file from a review in a new tab; it
-  must call `require("snacks.picker.actions").jump` directly, because actions such as `tab`
-  route back through `confirm` and recurse.
+- To [git](git.md): the pickers' custom `confirm` opens a file from a review in the review's
+  jump tab, by pointing `picker.main` at its window; it must call
+  `require("snacks.picker.actions").jump` directly, because actions such as `tab` route back
+  through `confirm` and recurse.
 - To [code](code.md): blink.cmp, whose LSP capabilities servers need when they start.
 - To [latex](latex.md): completion; LaTeX keeps its own snippets in place of friendly-snippets.
 - To [markdown](markdown.md): mini.pairs leaves the backtick alone everywhere.

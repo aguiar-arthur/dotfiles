@@ -47,7 +47,6 @@ return {
           gs.blame_line({ full = true })
         end, "Blame line")
         m("n", "<leader>gB", gs.toggle_current_line_blame, "Toggle line blame")
-        m("n", "<leader>gd", gs.diffthis, "Diff this")
         m({ "o", "x" }, "ih", gs.select_hunk, "Select hunk")
       end,
     },
@@ -66,22 +65,34 @@ return {
         desc = "Review branch vs origin",
       },
       { "<leader>gD", "<cmd>CodeDiff<CR>", desc = "Review working tree" },
+      { "<leader>gd", "<cmd>CodeDiff file HEAD<CR>", desc = "Review this file against HEAD" },
       {
         "<leader>gq",
         function()
           require("dotfiles.git").back_to_review()
         end,
-        desc = "Close this jump, back to the review",
+        desc = "Back to the review, or close it",
       },
     },
     opts = {
       keymaps = {
         view = {
           toggle_explorer = { "<leader>ge", "<leader>op" },
+          focus_explorer = "<leader>gE",
           open_in_prev_tab = { "gf", "<leader>gf" },
+          toggle_stage = "<leader>ga",
+          stage_hunk = "<leader>gs",
+          unstage_hunk = "<leader>gu",
+          discard_hunk = "<leader>gr",
+          toggle_layout = "<leader>gi",
+          toggle_compact = "<leader>gz",
         },
       },
     },
+    config = function(_, opts)
+      require("codediff").setup(opts)
+      require("dotfiles.git").setup()
+    end,
   },
 
   {

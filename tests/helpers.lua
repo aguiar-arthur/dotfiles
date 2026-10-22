@@ -50,12 +50,68 @@ T.eq("git: another tab is not", git.review(1), false)
 local first = vim.api.nvim_get_current_tabpage()
 vim.cmd("tabnew")
 local review_tab = vim.api.nvim_get_current_tabpage()
-vim.cmd("tabnew")
+local closed
+package.loaded["codediff.ui.lifecycle"] = {
+  get_session = function(tab)
+    return tab == review_tab and {} or nil
+  end,
+  close = function(tab)
+    closed = tab
+  end,
+}
+local picker = vim.api.nvim_get_current_win()
+local jump_win = git.jump_win(review_tab)
+local jump_tab = vim.api.nvim_win_get_tabpage(jump_win)
+T.eq("git: a jump tab opens just before its review", vim.api.nvim_tabpage_get_number(jump_tab), 2)
+T.eq("git: and focus stays where it was", vim.api.nvim_get_current_win(), picker)
+T.eq("git: the jump tab knows its review", git.jumps(review_tab), { jump_tab })
+vim.api.nvim_set_current_tabpage(jump_tab)
+vim.cmd.tabmove()
+vim.api.nvim_set_current_tabpage(review_tab)
+T.eq("git: a review has one jump tab", git.jump_win(review_tab), jump_win)
+T.eq("git: moved back just before the review", vim.api.nvim_tabpage_get_number(jump_tab), 2)
+T.eq("git: no tab is added", #vim.api.nvim_list_tabpages(), 3)
+
+vim.api.nvim_set_current_win(jump_win)
+vim.cmd("edit " .. root .. "/src/a.py")
+local file = vim.api.nvim_get_current_buf()
+vim.api.nvim_set_current_tabpage(review_tab)
+vim.api.nvim_set_current_buf(file)
+vim.api.nvim_set_current_win(jump_win)
+git.close_buffer()
+T.eq("git: Space b d on a review's file closes the jump tab", #vim.api.nvim_list_tabpages(), 2)
+T.eq("git: and returns to the review", vim.api.nvim_get_current_tabpage(), review_tab)
+T.eq("git: the file stays loaded", vim.api.nvim_buf_is_loaded(file), true)
+
+git.back_to_review()
+T.eq("git: Space g q in a review closes it", closed, review_tab)
+closed = nil
+git.close_buffer()
+T.eq("git: so does Space b d on the review's file", closed, review_tab)
+
+vim.api.nvim_set_current_win(git.jump_win(review_tab))
+vim.cmd("enew")
+local other = vim.api.nvim_get_current_buf()
+local deleted
+local bufdelete = Snacks.bufdelete
+Snacks.bufdelete = function()
+  deleted = vim.api.nvim_get_current_buf()
+end
+git.close_buffer()
+Snacks.bufdelete = bufdelete
+T.eq("git: Space b d on another file in a jump tab deletes it", deleted, other)
+
+vim.api.nvim_set_current_tabpage(first)
+git.close_jumps(review_tab)
+T.eq("git: closing a review closes its jump tabs", #vim.api.nvim_list_tabpages(), 2)
+
+vim.cmd("$tabnew")
 git.mark_jump(review_tab)
 vim.cmd("tabfirst | tablast")
 git.back_to_review()
 T.eq("git: back from a jump closes its tab", #vim.api.nvim_list_tabpages(), 2)
 T.eq("git: and returns to the review", vim.api.nvim_get_current_tabpage(), review_tab)
+vim.api.nvim_set_current_tabpage(first)
 local warned
 local notify = vim.notify
 vim.notify = function(msg)
@@ -65,7 +121,6 @@ git.back_to_review()
 vim.notify = notify
 T.eq("git: back outside a jump keeps the tab", #vim.api.nvim_list_tabpages(), 2)
 T.eq("git: and says why", warned, "This tab was not opened from a review")
-vim.api.nvim_set_current_tabpage(first)
 vim.cmd("tabonly")
 
 local treesitter = require("dotfiles.treesitter")

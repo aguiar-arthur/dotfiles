@@ -32,18 +32,33 @@ test_review() {
   probe "Space o p hides the file list in a review" 'vim.fn.winnr("$")' 2 5
   keys Space o p
   probe "Space o p shows the file list again" 'vim.fn.winnr("$")' 3 5
+  probe "gc stays the comment operator in a review" 'vim.fn.maparg("gc", "n", false, true).buffer or 0' 0 5
   keys Space f f
   sleep 1
   keys r.lua Enter
-  probe "Space g V: a picked file opens in a new tab" 'vim.fn.tabpagenr("$")' 3 10
+  probe "Space g V: a picked file opens in a jump tab just before the review" 'vim.fn.tabpagenr("$") * 10 + vim.fn.tabpagenr()' 32 10
   probe "Space g V: that tab wraps" 'vim.wo.wrap and 1 or 0' 1 5
-  probe "Space g V: the review keeps its diff" '#vim.fn.tabpagebuflist(2)' 3 5
+  probe "Space g V: the review keeps its diff" '#vim.fn.tabpagebuflist(3)' 3 5
   keys Space g q
   probe "Space g q closes that tab and returns to the review" 'vim.fn.tabpagenr("$") * 10 + vim.fn.tabpagenr()' 22 10
+  keys g f
+  probe "gf opens the file in a jump tab too" 'vim.fn.tabpagenr("$") * 10 + vim.fn.tabpagenr()' 32 10
+  probe "and leaves the first tab's file alone" 'vim.fn.fnamemodify(vim.fn.bufname(vim.fn.tabpagebuflist(1)[1]), ":t")' other.txt 5
+  keys g t
+  keys Space f f
+  sleep 1
+  keys r.lua Enter
+  probe "a second pick reuses the jump tab" 'vim.fn.tabpagenr("$") * 10 + vim.fn.tabpagenr()' 32 10
+  keys g t
   keys C-h C-h
   probe "the cursor goes back to the file list" 'vim.bo.filetype' codediff-explorer 5
   keys q
-  probe "q in the file list closes the review" 'vim.fn.tabpagenr("$")' 1 10
+  probe "q closes the review and its jump tab" 'vim.fn.tabpagenr("$")' 1 10
+  send ':edit r.lua<CR>'
+  keys Space g d
+  probe "Space g d reviews the file against HEAD" 'vim.fn.tabpagenr("$")' 2 20
+  keys Space g q
+  probe "Space g q in a review closes it" 'vim.fn.tabpagenr("$")' 1 10
   stop_nvim
 }
 

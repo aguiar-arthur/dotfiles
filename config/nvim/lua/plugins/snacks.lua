@@ -67,15 +67,14 @@ return {
       actions = {
         confirm = function(picker, item, action)
           local git = require("dotfiles.git")
-          local review = git.review() and vim.api.nvim_get_current_tabpage()
-          if review then
-            action = vim.tbl_extend("force", action or {}, { cmd = "tab" })
+          local jump = git.review() and git.jump_win(vim.api.nvim_get_current_tabpage())
+          if jump then
+            picker.main = jump
           end
           require("snacks.picker.actions").jump(picker, item, action)
-          if review then
+          if jump then
             vim.schedule(function()
-              git.mark_jump(review)
-              require("dotfiles.toggles").apply(vim.api.nvim_get_current_win())
+              require("dotfiles.toggles").apply(jump)
             end)
           end
         end,

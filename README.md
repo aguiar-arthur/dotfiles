@@ -182,7 +182,7 @@ Brackets and quotes close themselves as you type (mini.pairs).
 | `Space w =` | make the windows the same size |
 | `Space w H` / `L` / `J` / `K` | narrower / wider / shorter / taller |
 | `Space b n` / `Space b p` | next / previous buffer |
-| `Space b d` | close the buffer (keeps the window, asks about unsaved changes) |
+| `Space b d` | close the buffer (keeps the window, asks about unsaved changes); on a file a review shows, go back to the review instead |
 | `Space t f` / `t h` / `t v` | show or hide a floating / bottom / right terminal, each its own shell |
 | `Space S r` / `Space S l` | restore the session of this folder / the last session |
 | `Space S s` / `Space S d` | pick a session / do not save this one |
@@ -278,31 +278,33 @@ Changed lines are marked in the left column and the line's last commit shows at 
 | `Space g s` / `Space g r` | stage / reset the hunk or the selected lines |
 | `Space g S` / `Space g R` | stage / reset the whole file |
 | `Space g b` / `Space g B` | blame the line / turn the end-of-line blame off |
-| `Space g d` | diff this file against the index |
+| `Space g d` | review this file against HEAD (a review tab, as below) |
 | `Space g c` / `Space g t` | changed hunks / changed files of the working tree (`Tab` stages) |
 | `Space g D` / `Space g V` | review side by side: the working tree / everything this branch changes against origin's default branch; `Space g D` again inside a review closes it |
-| `Space g q` | close a tab opened from a review and go back to it |
+| `Space g q` | in a tab opened from a review: close it and go back; in a review: close it |
 | `Space g h` / `Space g L` / `Space g l` | history of the file / of the line / of the repository |
 | `Space g O` | open the file in the browser (GitHub, GitLab, …) |
 | `ih` | the hunk as a text object (`dih` deletes it) |
 
 The review opens in a new tab: the changed files on the left, the old and new versions side by
 side. The right side is the real file, so `gd`, `K` and edits work there. A file you open from
-there with a picker (`gd`, `Space l r`, `Space f f`, …) opens in a new tab, so the review stays
-as it was; `Space g q` (or `:q`) closes that tab and brings you back to the review. The two
-sides never wrap lines: codediff keeps them aligned that way.
+there (`gf`, or a picker: `gd`, `Space l r`, `Space f f`, …) opens in the review's own tab, just
+before it, so the review stays as it was and the tab you came from too; every further file opens
+in that same tab. `Space g q`, `Space b d` or `:q` closes it and brings you back to the review;
+closing the review closes it too. The two sides never wrap lines: codediff keeps them aligned
+that way.
 
 | Key (in the review) | Does |
 |---|---|
 | `Enter` | show the file under the cursor (in the file list) |
 | `]f` / `[f` | next / previous file |
 | `]c` / `[c` | next / previous change |
-| `-` | stage / unstage the file |
-| `Space h s` / `Space h u` / `Space h r` | stage / unstage / discard the change under the cursor |
-| `gf` / `Space g f` | open the file in the previous tab |
-| `t` / `gc` | inline or side by side / fold the unchanged lines |
-| `Space e` / `Space o p` | go to / show or hide the file list (`Space g e` does the same as `Space o p`) |
-| `g?` / `q` | every key / close the review |
+| `Space g a` | stage / unstage the file |
+| `Space g s` / `Space g u` / `Space g r` | stage / unstage / discard the change under the cursor |
+| `gf` / `Space g f` | open the file in the review's tab (see above) |
+| `Space g i` / `Space g z` | inline or side by side / fold the unchanged lines |
+| `Space g E` / `Space o p` | go to / show or hide the file list (`Space g e` does the same as `Space o p`) |
+| `g?` / `q` / `Space g q` | every key / close the review |
 
 ### Claude Code (claudecode.nvim)
 
