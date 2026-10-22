@@ -19,7 +19,6 @@ return {
       "rcarriga/nvim-dap-ui",
       "nvim-neotest/nvim-nio",
       "mason-org/mason.nvim",
-      "jay-babu/mason-nvim-dap.nvim",
     },
     keys = {
       key("db", dap("toggle_breakpoint"), "Toggle breakpoint"),
@@ -49,11 +48,7 @@ return {
     config = function()
       local dap, dapui = require("dap"), require("dapui")
 
-      require("mason-nvim-dap").setup({
-        ensure_installed = {},
-        automatic_installation = false,
-        handlers = {},
-      })
+      dap.adapters.python = { type = "executable", command = vim.fn.exepath("debugpy-adapter") }
 
       dapui.setup({
         layouts = {

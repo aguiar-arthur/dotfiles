@@ -60,6 +60,7 @@ test_review() {
   keys Space g D
   probe "Space g D reviews the edit" 'vim.fn.tabpagenr("$")' 2 20
   keys C-h C-h
+  probe "Space g D: the file list has the cursor" 'vim.bo.filetype' codediff-explorer 10
   keys q
   probe "q in the file list closes the review" 'vim.fn.tabpagenr("$")' 1 10
   send ':edit r.lua<CR>'
@@ -118,7 +119,7 @@ test_lazygit() {
   probe "lazygit: and that tab is in normal mode" 'vim.fn.mode()' n 5
   stop_nvim
   LG_CONFIG_FILE="$T/lazygit.yml" start_nvim "$repo" r.lua
-  keys Space w v
+  keys C-w v
   send ':lua vim.g.home = vim.api.nvim_get_current_win()<CR>'
   keys Space g g
   probe "lazygit opens in terminal mode" 'vim.fn.mode()' t 20

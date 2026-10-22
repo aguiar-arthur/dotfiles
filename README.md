@@ -139,7 +139,6 @@ leaves insert mode and a second `Esc` closes. `Space f R` reopens the last picke
 | `Space f /` | search in this buffer |
 | `Space f r` / `Space f p` | recent files / projects |
 | `Space f s` / `Space f S` | symbols of this file / of the workspace |
-| `Space f d` | diagnostics |
 | `Space f m` | marks (`mA` sets mark A, `'A` jumps back to that file) |
 | `Space f u` | undo history |
 | `Space f h` / `Space f k` | help pages / keymaps |
@@ -161,7 +160,7 @@ the rest.
 | `af` / `if`, `ac` / `ic` | around / inside a function, a class (`daf` deletes a function) |
 | `au` / `iu`, `aa` / `ia` | around / inside a function call, an argument (`ciu` rewrites a call's arguments) |
 | `gsa` / `gsd` / `gsr` | add / delete / replace a surrounding (`gsaiw"` quotes a word, `gsd(` removes parentheses) |
-| `gcc` / `gc` / `Space c c` | comment a line / a motion or selection |
+| `gcc` / `gc` | comment a line / a motion or selection |
 | `Space c s` | copy the line (the selection in visual mode) to paste anywhere: `path:line:col-line:col`, then a code block |
 | `Alt-j` / `Alt-k` | move the line or selection down / up |
 | `<` / `>` in visual mode | indent, keeping the selection |
@@ -176,12 +175,11 @@ Brackets and quotes close themselves as you type (mini.pairs).
 | Key | Does |
 |---|---|
 | `C-h` / `C-j` / `C-k` / `C-l` | go to the window on the left / below / above / right |
-| `Space w h` / `j` / `k` / `l` | the same, through the window menu |
-| `Space w v` / `Space w s` | split vertically / horizontally |
-| `Space w c` / `Space w o` | close this window / the others |
-| `Space w =` | make the windows the same size |
-| `Space w H` / `L` / `J` / `K` | narrower / wider / shorter / taller |
-| `Space b n` / `Space b p` | next / previous buffer |
+| `C-w v` / `C-w s` | split vertically / horizontally (Neovim's own `C-w` keys; which-key lists them all) |
+| `C-w c` / `C-w o` | close this window / the others |
+| `C-w =` | make the windows the same size |
+| `C-w <` / `>` / `-` / `+` | narrower / wider / shorter / taller (a count first, as in `5 C-w >`, for more) |
+| `]b` / `[b` | next / previous buffer (Neovim's own) |
 | `Space b d` | close the buffer (keeps the window, asks about unsaved changes); in a review, close it; on a file a review shows, only warn |
 | `Space t f` / `t h` / `t v` | show or hide a floating / bottom / right terminal, each its own shell |
 | `Space S r` / `Space S l` | restore the session of this folder / the last session |
@@ -207,7 +205,7 @@ LaTeX and Clojure.
 
 | Key | Does |
 |---|---|
-| `gd` / `gr` (or `Space l d` / `Space l r`) | go to the definition / list references (the list opens even for one) |
+| `gd` / `gr` | go to the definition / list references (the list opens even for one) |
 | `K` | documentation of the word under the cursor |
 | `Space l i` / `Space l t` / `Space l D` | implementation / type definition / declaration |
 | `Space l n` | rename everywhere |
@@ -216,11 +214,10 @@ LaTeX and Clojure.
 | `Space l f` | format the buffer or the selection |
 | `Space l R` / `Space l M` | restart the servers / open Mason |
 | `]d` / `[d`, `]e` / `[e` | next / previous diagnostic, error |
-| `Space c d` | the diagnostics of this line in a float |
-| `Space d x` / `Space d d` | all diagnostics / those of this file (Trouble) |
-| `Space d s` | symbols of the file in a side list |
+| `C-w d` | the diagnostics of this line in a float (Neovim's own) |
+| `Space d x` / `Space d d` | all diagnostics / those of this file, in a picker |
 | `Space d t` | every `TODO` / `FIXME` of the project |
-| `Space d q` / `Space d l` | quickfix / location list |
+| `Space d q` / `Space d l` | quickfix / location list, in a picker |
 
 Saving formats the file only in projects that declare that formatter's style (a
 `stylua.toml`, a prettier config, `[tool.ruff]`, …), so other people's code is never
@@ -296,7 +293,7 @@ the left when there are several:
 | `Space g h` / `Space g L` | the history of the file / of the line or selected lines, commit by commit |
 
 The right side is the real file, so `gd`, `K` and edits work there. A file you open from the
-review (`gf`, or a picker: `gd`, `Space l r`, `Space f f`, …) opens in the tab just before it, so
+review (`gf`, or a picker: `gd`, `gr`, `Space f f`, …) opens in the tab just before it, so
 the review stays as it was; `gt` / `gT` switch between the two. `Space g q` closes the review from
 either tab, even when the review is the last tab. The two sides never wrap lines: codediff keeps
 them aligned that way.
@@ -342,10 +339,10 @@ starts with Neovim: the connection opens with the first of these keys.
 | `Space a m` | choose the model |
 | `Space a b` | add this file to the conversation; in the file tree, the item under the cursor |
 | `Space a B` | the same, to the last session: opens it (continue) when Claude is not running |
-| `Space a s` | send the selection (visual mode); in the file tree, add the file under the cursor |
-| `Space a S` (visual mode) | send the selection to the last session: opens it (continue) when Claude is not running |
+| `Space a s` | send the selection (visual mode) |
+| `Space a S` | send the selection to the last session: opens it (continue) when Claude is not running |
 | `Space a a` / `Space a d` | accept / reject the diff Claude proposes |
-| `Space a S` (normal mode) | stop the connection |
+| `Space a q` | stop the connection |
 
 ### Toggles (`Space u`)
 

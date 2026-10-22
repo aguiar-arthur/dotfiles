@@ -104,6 +104,18 @@ if vim.fn.executable("rumdl") == 1 then
   end)
   T.eq("rumdl attaches to Markdown", #vim.lsp.get_clients({ bufnr = 0, name = "rumdl" }), 1)
   T.eq("gq keeps wrapping: formatexpr is cleared", vim.bo.formatexpr, "")
+  local unknown = {}
+  for _, mode in ipairs({ "n", "x" }) do
+    local maps =
+      vim.list_extend(vim.api.nvim_get_keymap(mode), vim.api.nvim_buf_get_keymap(0, mode))
+    for _, m in ipairs(maps) do
+      local command = (m.rhs or ""):match("^<[Cc][Mm][Dd]>[%s%.%%']*(%a+)")
+      if command and vim.fn.exists(":" .. command) == 0 then
+        unknown[#unknown + 1] = m.lhs:gsub(" ", "<Space>") .. " runs :" .. command
+      end
+    end
+  end
+  T.eq("every <Cmd> key runs a command that exists (LSP keys included)", unknown, {})
 end
 
 vim.cmd("enew")

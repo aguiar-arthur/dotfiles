@@ -229,24 +229,6 @@ return {
         end,
         desc = "Previous todo",
       },
-      { "<leader>dt", "<cmd>Trouble todo toggle<CR>", desc = "Todos (project)" },
-    },
-  },
-
-  {
-    "folke/trouble.nvim",
-    cmd = "Trouble",
-    opts = {},
-    keys = {
-      { "<leader>dx", "<cmd>Trouble diagnostics toggle<CR>", desc = "Diagnostics (Trouble)" },
-      {
-        "<leader>dd",
-        "<cmd>Trouble diagnostics toggle filter.buf=0<CR>",
-        desc = "Document diagnostics",
-      },
-      { "<leader>ds", "<cmd>Trouble symbols toggle focus=false<CR>", desc = "Symbols (Trouble)" },
-      { "<leader>dl", "<cmd>Trouble loclist toggle<CR>", desc = "Location list" },
-      { "<leader>dq", "<cmd>Trouble qflist toggle<CR>", desc = "Quickfix list" },
     },
   },
 

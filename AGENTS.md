@@ -13,7 +13,7 @@ two. The README is the user's guide (keys); it is not needed to change code.
 | Context | Doc | Owns | Depends on |
 |---|---|---|---|
 | Core | [docs/core.md](docs/core.md) | startup, `settings.lua` / `local.lua` / `.nvim.lua`, options, global keys, autocmds, `<leader>u` toggles, treesitter, look, spell | none |
-| Workspace | [docs/workspace.md](docs/workspace.md) | Snacks pickers, file tree, terminals, sessions, flash, mini.*, grug-far, Trouble, completion, `<leader>cs`, Claude Code | core |
+| Workspace | [docs/workspace.md](docs/workspace.md) | Snacks pickers, file tree, terminals, sessions, flash, mini.*, grug-far, completion, `<leader>cs`, Claude Code | core |
 | Code | [docs/code.md](docs/code.md) | language servers, formatting and style markers, `,r` / `,t` / `,d`, Python, Clojure | core, install |
 | Git | [docs/git.md](docs/git.md) | gitsigns, codediff review, lazygit, git pickers, jumps from a review | core, workspace |
 | LaTeX | [docs/latex.md](docs/latex.md) | vimtex, texlab, ltex-ls-plus, snippets, latexmkrc, Skim | core, code, install |
@@ -21,7 +21,7 @@ two. The README is the user's guide (keys); it is not needed to change code.
 | Install | [docs/install.md](docs/install.md) | Brewfiles, `install.sh`, `link.sh`, Mason / parser / spell installs, lockfile, zsh, Starship, iTerm2 | core (settings) |
 | Tests | [docs/tests.md](docs/tests.md) | `tests/`, where a new check goes, checking by hand | all |
 
-How the contexts relate (upstream / downstream, the kind of link, the shared words) is in
+How the contexts relate (upstream / downstream, the contract, the shared words) is in
 [docs/map.md](docs/map.md). A change inside one context needs only its doc; a change to
 something a doc lists under **Contract** (Offers) also needs the map and the downstream docs.
 

@@ -57,6 +57,12 @@ local float = vim.api.nvim_open_win(vim.api.nvim_create_buf(false, true), true, 
 })
 T.eq("a float gets no winbar", vim.wo[float].winbar, "")
 vim.api.nvim_win_close(float, true)
+vim.cmd("split | terminal")
+T.eq("a terminal split from a file window has no winbar", vim.wo.winbar, "")
+vim.cmd("bwipeout!")
+vim.cmd("terminal")
+T.eq("a terminal opened in a file window drops its winbar", vim.wo.winbar, "")
+vim.cmd("bwipeout!")
 
 local opened = 0
 local dashboard = Snacks.dashboard
@@ -129,6 +135,15 @@ T.eq("TeX: a build before any view leaves the viewer alone", calls.view, 0)
 vim.api.nvim_exec_autocmds("User", { pattern = "VimtexEventView" })
 vim.api.nvim_exec_autocmds("User", { pattern = "VimtexEventCompileSuccess" })
 T.eq("TeX: a build after a view syncs it", calls.view, 1)
+vim.cmd("unlet b:vimtex.compiler")
+local started = calls.compile
+vim.v.errmsg = ""
+pcall(vim.api.nvim_exec_autocmds, "User", { pattern = "VimtexEventInitPost" })
+T.eq(
+  "TeX: a buffer without a vimtex compiler opens quietly",
+  { vim.v.errmsg, calls.compile },
+  { "", started }
+)
 vim.cmd("edit " .. root .. "/b.txt")
 
 vim.defer_fn(function()

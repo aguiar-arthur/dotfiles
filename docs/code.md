@@ -22,7 +22,7 @@ Clojure in detail. Its relationships are in [map](map.md).
 | `config/nvim/lua/plugins/formatting.lua` | conform, `style_markers`, the prettier trust check, `:FormatToggle`, `<leader>lf` |
 | `config/nvim/lua/plugins/run.lua` | code_runner.nvim, `,r` and its `commands` |
 | `config/nvim/lua/plugins/test.lua` | Neotest, neotest-python, `,t` |
-| `config/nvim/lua/plugins/debug.lua` | nvim-dap, dap-ui, mason-nvim-dap, `,d`, the Python launch |
+| `config/nvim/lua/plugins/debug.lua` | nvim-dap, dap-ui, the debugpy adapter, `,d`, the Python launch |
 | `config/nvim/lua/dotfiles/python.lua` | the interpreter: `.venv` upward, else `$VIRTUAL_ENV`, else `python3` |
 | `config/nvim/after/ftplugin/lua.lua` | `,s` sources the file |
 | `config/nvim/lua/plugins/clojure.lua` | Conjure (Clojure only), nvim-paredit, `,cj` |
@@ -37,7 +37,7 @@ Clojure in detail. Its relationships are in [map](map.md).
   `settings.mason_tools` (shellcheck, debugpy). Only those servers are enabled
   (`automatic_enable = mason_servers`): a server left over in Mason stays off.
 - Mason installs nothing when Neovim starts: after adding a server or tool, run
-  `./install.sh` again (or `:MasonToolsInstall`).
+  `./install.sh nvim` again (`dotfiles/install.lua` installs what is missing).
 - rumdl and clojure-lsp (both `Brewfile.nvim`) are enabled when the binary
   exists. stylua, shfmt and prettier come from `Brewfile.nvim`; Mason does not install copies.
 - blink.cmp adds its completion capabilities to every server by itself; it is a dependency of
@@ -102,7 +102,8 @@ and diagnostics. neotest-python runs pytest from the project's virtualenv.
 `,d` drives nvim-dap with dap-ui in Python buffers. dap-ui opens on launch and stays open after
 the program ends so its output can be read (`,du` closes it). Breakpoints show as `●` (`◆` with
 a condition) and the stopped line is tinted green. debugpy runs the file with the interpreter
-from `python.lua`.
+from `python.lua`; its adapter is Mason's `debugpy-adapter`, set in one line (mason-nvim-dap did
+only that and was dropped).
 
 ### Clojure
 
@@ -154,7 +155,8 @@ Consumes:
 | Format on save per style marker, prettier trust, `*.json.*` parser | `tests/files.lua` |
 | `gq` keeps wrapping (`formatexpr` cleared) | `tests/keys.lua` |
 | Python interpreter, Mason lists | `tests/helpers.lua` |
-| Servers attach (Lua, Python, …), `,o`, `,s` | full: `test_lua`, `test_language_actions` |
+| Every `<Cmd>` key names a command that exists (`Space l R` once ran a removed `:LspRestart`) | `tests/keys.lua` |
+| Servers attach (Lua, Python, …), `Space l R` restarts one, `,o`, `,s` | full: `test_lua`, `test_language_actions` |
 | `,r` per language | full: `test_run` in `tests/code.sh` |
 | `,t` keys, `,d` debugger (the six panels, `,du`) | full: `test_test_keys`, `test_debug` |
 | `,cj` jack-in | full: `test_clojure` |

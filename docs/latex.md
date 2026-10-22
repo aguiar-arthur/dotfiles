@@ -13,8 +13,8 @@ and the snippets. Its relationships are in [map](map.md).
 
 | Path | Holds |
 |---|---|
-| `config/nvim/lua/plugins/tex.lua` | vimtex: Skim viewer (zathura off macOS), latexmk into `build/`, folds, quickfix filters, conceal, build notifications, the live build (start on open, save on idle, view sync) |
-| `config/nvim/after/ftplugin/tex.lua` | no hard wrap, `,lw`, which-key labels of vimtex's `,l` keys |
+| `config/nvim/lua/plugins/tex.lua` | vimtex: Skim viewer, latexmk into `build/`, folds, quickfix filters, conceal, build notifications, the live build (start on open, save on idle, view sync) |
+| `config/nvim/after/ftplugin/tex.lua` | no hard wrap, `,lw`, which-key labels of the daily `,l` keys |
 | `config/nvim/snippets/tex.lua` | the LaTeX snippets (documents, text, math, ABNT) |
 | `config/nvim/after/lsp/texlab.lua` | texlab reads `build/`, chktex on open and save, latexindent |
 | `config/nvim/after/lsp/ltex_plus.lua` | grammar in `pt-BR`, spelling rules off, UTF-16 |
@@ -23,12 +23,12 @@ and the snippets. Its relationships are in [map](map.md).
 
 ## How it works
 
-vimtex compiles with latexmk and shows the PDF in Skim with SyncTeX (zathura off macOS, to be
-installed by hand); texlab gives completion and diagnostics (vimtex's own completion and insert
-maps are off). Keys under `,l` are vimtex's own, labelled in which-key: `,ll` compile, `,lv`
-view / forward search, `,le` errors, `,lt` contents, `,lc` clean, `,lx` reload, `,lw` count
-words. Cmd+Shift+click in Skim jumps back to the line. Put `% !TEX program = lualatex` on the
-first line for another engine.
+vimtex compiles with latexmk and shows the PDF in Skim with SyncTeX; texlab gives completion
+and diagnostics (vimtex's own completion and insert maps are off). Keys under `,l` are vimtex's
+own; which-key names the ones in daily use: `,ll` compile, `,lk` stop, `,lv` view / forward
+search, `,le` errors, `,lt` contents, `,lc` / `,lC` clean, `,lx` reload, `,lw` count words (the
+others show vimtex's `<Plug>` names). Cmd+Shift+click in Skim jumps back to the line. Put
+`% !TEX program = lualatex` on the first line for another engine.
 
 The build is live (`latex_live` in `settings.lua`, on by default): opening a `.tex` file
 starts latexmk's continuous mode, a `.tex` buffer is saved on `CursorHold` (`updatetime` is
@@ -84,7 +84,9 @@ Consumes:
 - An autosnippet that fires after `\` breaks typing commands by hand; add autosnippets through
   `auto()` in `snippets/tex.lua`, which refuses to expand after a backslash.
 - `VimtexCompile` toggles, so the live start first asks `b:vimtex.compiler.is_running()`;
-  without it, reloading vimtex (`,lx`) would stop the build it started.
+  without it, reloading vimtex (`,lx`) would stop the build it started. It checks that
+  `b:vimtex.compiler` exists first: with vimtex's compiler off there is none, and opening a file
+  raised `E716`.
 - Full tests start Neovim with `view_automatic` off and the build and view events recorded in
   `start_nvim`, so a test build never opens Skim.
 

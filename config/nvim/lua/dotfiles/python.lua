@@ -9,7 +9,8 @@ function M.path()
   if vim.env.VIRTUAL_ENV then
     return vim.env.VIRTUAL_ENV .. "/bin/python"
   end
-  return vim.fn.exepath("python3")
+  local found = vim.fn.exepath("python3")
+  return found ~= "" and found or "python3"
 end
 
 return M

@@ -30,7 +30,6 @@ return {
     },
 
     opts = {
-
       keymap = {
         preset = "none",
         ["<C-Space>"] = { "show", "show_documentation", "hide_documentation" },
@@ -42,15 +41,12 @@ return {
         ["<C-f>"] = { "scroll_documentation_down", "fallback" },
         ["<C-s>"] = { "show_signature", "hide_signature", "fallback" },
       },
-      appearance = { nerd_font_variant = "mono" },
       completion = {
-
         list = { selection = { preselect = false, auto_insert = true } },
         documentation = {
           auto_show = true,
           auto_show_delay_ms = 250,
         },
-        ghost_text = { enabled = false },
       },
       signature = { enabled = true },
       snippets = { preset = "luasnip" },
@@ -81,6 +77,5 @@ return {
       },
       fuzzy = { implementation = "prefer_rust_with_warning" },
     },
-    opts_extend = { "sources.default" },
   },
 }

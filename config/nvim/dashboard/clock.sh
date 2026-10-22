@@ -53,7 +53,7 @@ BEGIN {
       last = p[3]
       since = f
     }
-    on = (f - since) % 10 < 5
+    on = (f - since) % 2 == 0
     delete kind
     delete glyph
     x = int((cols - 66) / 2)
@@ -93,7 +93,7 @@ BEGIN {
     }
     printf "%s", out
     fflush()
-    system("sleep 0.1")
+    system("sleep 0.5")
   }
 }
 '

@@ -59,8 +59,8 @@ Consumes: [core](core.md) `settings` (which servers, tools, parsers and spell la
   once it is trusted; `install.sh` runs `brew trust` for each before `brew bundle`.
 - `:Lazy update` and `:Lazy sync` rewrite `lazy-lock.json`; never run them just to check
   something. The tests fail if the lockfile changes.
-- Mason installs nothing when Neovim starts (`run_on_start = false`): a new server needs
-  `./install.sh` again or `:MasonToolsInstall`.
+- Mason installs nothing when Neovim starts: a new server needs `./install.sh nvim` again
+  (`dotfiles/install.lua`; mason-tool-installer was dropped, it only duplicated that).
 - Every network step needs a timeout or a failure path: the Mason registry waits a minute, its
   installs 15 minutes, a spell file two; a failed Homebrew or plugin step fails its step.
 

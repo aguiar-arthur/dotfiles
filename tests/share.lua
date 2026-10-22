@@ -37,6 +37,7 @@ case("2GV3G", "src/a.lua:2:1-3:12\n\n```lua\n  if x then\n    return x\n```\n")
 case("2G06lv1G06l", "src/a.lua:1:7-2:7\n\n```lua\nx = 1\n  if x \n```\n")
 case("4G04l<C-v>2G02l", "src/a.lua:2:3-4:5\n\n```lua\nif \n  r\nend\n```\n")
 case("2G02l<C-v>3G08l4G", "src/a.lua:2:3-4:9\n\n```lua\nif x th\n  retur\nend\n```\n")
+case("2G02l<C-v>4G$", "src/a.lua:2:3-4:12\n\n```lua\nif x then\n  return x\nend\n```\n")
 case("4GV5G", "src/a.lua:4:1-5:3\n\n````lua\n  end\n```\n````\n")
 
 vim.fn.delete(root, "rf")

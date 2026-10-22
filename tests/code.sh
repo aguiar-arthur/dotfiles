@@ -6,6 +6,9 @@ test_lua() {
   fi
   start_nvim "$PROJ" sample.lua
   probe "lua_ls attaches to Lua" "$(clients lua_ls)" 1 60
+  lua_do 'vim.g.lsp_id = vim.lsp.get_clients({ name = "lua_ls" })[1].id'
+  keys Space l R
+  probe "Space l R restarts lua_ls" '(function() local c = vim.lsp.get_clients({ name = "lua_ls" })[1] return c and c.id ~= vim.g.lsp_id and 1 or 0 end)()' 1 60
   stop_nvim
 }
 

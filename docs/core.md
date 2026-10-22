@@ -1,7 +1,7 @@
 # Core
 
 How Neovim starts, the settings a user changes, the global keys and toggles, treesitter and the
-look. Every other context builds on this one (the shared kernel in [map](map.md)).
+look. Every other context builds on this one (see [map](map.md)).
 
 ## Language
 
@@ -19,7 +19,7 @@ look. Every other context builds on this one (the shared kernel in [map](map.md)
 | `config/nvim/lua/config/settings.lua` | colorscheme, wrap, format on save, spell languages, notes folder, servers, Mason tools, parsers |
 | `config/nvim/lua/config/local.lua` | per-machine overrides (untracked, merged over the settings) |
 | `config/nvim/lua/config/options.lua` | options, leader keys, `.mdc` and `*.json.*` filetypes, the spell file |
-| `config/nvim/lua/config/keymaps.lua` | save, quit, windows `<leader>w`, buffers `<leader>b`, `]d` / `]e`, `<leader>c` |
+| `config/nvim/lua/config/keymaps.lua` | save, quit, `C-h/j/k/l`, `<leader>bd`, `]d` / `]e`, `<leader>cs` |
 | `config/nvim/lua/config/autocmds.lua` | yank highlight, reload on focus, last position, `q` closes, missing folders, resize |
 | `config/nvim/lua/config/lazy.lua` | lazy.nvim bootstrap at the commit in `lazy-lock.json` |
 | `config/nvim/lua/dotfiles/windows.lua` | the cursorline only in the active window, the path in the winbar of file windows, the welcome screen when the last file closes, `q` closing a floating dashboard (`<leader>od`) instead of quitting |
@@ -39,7 +39,8 @@ Neovim 0.12 or newer: the grammar toggle reads `vim.lsp.is_enabled()` and relies
 
 `<Space>` is the leader, `,` the local leader; which-key shows every key after a short pause.
 `<leader>` keys work everywhere, `,` keys depend on the file type (see [code](code.md)).
-`<A-j>` / `<A-k>` move lines; `C-h/j/k/l` (or `<leader>w h/j/k/l`) move between windows.
+`<A-j>` / `<A-k>` move lines; `C-h/j/k/l` move between windows. Splits, resizing, `]b` / `[b`,
+`gcc` and `C-w d` (the line's diagnostics) are Neovim's own keys, not repeated under `<leader>`.
 Neovim's own `grn` / `grr` / `gra` / `gri` / `grt` / `grx` are deleted so `gr` lists
 references at once instead of waiting for a second key.
 
@@ -57,19 +58,21 @@ richer, and indents only the ones in `settings.treesitter_indent`: its indentati
 unreliable in Python, YAML and Markdown, so the ftplugin's stays there. Folds come from
 treesitter everywhere (`foldexpr`).
 
-The look: the `:` line and `/` search stay Neovim's own (blink completes them), notifications
-go to Snacks (`<leader>on`) and signature help to blink. treesitter-context keeps the enclosing
-function or class on top (`<leader>ux`). The status column (Snacks) shows marks and diagnostics
-on the left, git and closed folds on the right; mini.statusline shows mode, git, diagnostics,
-file, language servers and a running latexmk. Inactive windows are a shade darker
-(`NormalNC`), the cursorline shows only in the active one, and each file window has its path
-in a winbar (a window whose winbar is already set, as in a review, keeps it; floats and
-terminals have none). Closing the last file (`<leader>bd`, `:bd`) shows the Snacks dashboard
-again, as at startup (`q` quits there; on the floating one from `<leader>od` it only closes it);
-its logo is `dashboard/clock.sh` in a Snacks `terminal` section with
-`ttl = 0` (a cached section would be static), so any script that redraws from the top-left
-corner can replace it. Smooth scrolling is Snacks' (`<leader>uS`). Diff colors are tinted
-backgrounds over Dracula, so the code stays readable.
+The look: the `:` line and `/` search stay Neovim's own (blink completes them), notifications go to
+Snacks (`<leader>on`) and signature help to blink. treesitter-context keeps the enclosing function
+or class on top (`<leader>ux`). The status column (Snacks) shows marks and diagnostics on the left,
+git and closed folds on the right; mini.statusline shows mode, git, diagnostics, language servers
+and a running latexmk (the path is in each window's winbar, not repeated there). Inactive windows
+are a shade darker (`NormalNC`), the cursorline shows only in the active one, and each file window
+has its path in a winbar (a window whose winbar is already set, as in a review, keeps it; floats and
+terminals have none, and a file window that turns into a terminal drops it, because a split inherits
+the winbar of the window it came from). Closing the last file (`<leader>bd`, `:bd`) shows the Snacks
+dashboard again, as at startup (`q` quits there; on the floating one from `<leader>od` it only
+closes it); its logo is `dashboard/clock.sh` in a Snacks `terminal` section with `ttl = 0` (a cached
+section would be static), so any script that redraws from the top-left corner can replace it. The
+clock draws two frames a second (each frame runs `date`), which is enough for the blinking colon;
+ten cost about 15% of a core while the dashboard was visible. Smooth scrolling is Snacks'
+(`<leader>uS`). Diff colors are tinted backgrounds over Dracula, so the code stays readable.
 
 Spell checking (`en_us`, `pt_br`) is on for prose filetypes. Words added with `zg` (in either
 language) go to the versioned `spell/en.utf-8.add`; Neovim compiles it at startup when it is
@@ -124,8 +127,8 @@ Consumes: nothing.
 | The `<leader>u` toggles, beside a review, `keep_local_opts`, `uT` | `tests/toggles.lua` |
 | Filetypes (`.mdc`, `*.json.*`) | `tests/files.lua` |
 | `zg` writes to the versioned list | quick: `zg writes to the versioned word list` |
-| The look, code context, `Space w` | full: `test_look` in `tests/core.sh` |
-| Windows (`Space w` split, move, resize, close), buffers (`Space b`), `Space u w`, `:help` | full: `test_windows` in `tests/core.sh` |
+| The look, code context, `C-w` splits | full: `test_look` in `tests/core.sh` |
+| Windows (`C-w` split, move, resize, close), buffers (`]b`, `Space b d`), `Space u w`, `:help` | full: `test_windows` in `tests/core.sh` |
 
 ## Changing it
 

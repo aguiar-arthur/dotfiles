@@ -7,7 +7,6 @@ g.maplocalleader = ","
 
 opt.number = true
 opt.relativenumber = true
-opt.termguicolors = true
 opt.cursorline = true
 opt.signcolumn = "yes"
 opt.scrolloff = 8
@@ -18,7 +17,6 @@ opt.conceallevel = 2
 opt.smoothscroll = true
 opt.showmode = false
 opt.laststatus = 3
-opt.pumheight = 12
 opt.winborder = "rounded"
 opt.list = true
 opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
@@ -42,9 +40,7 @@ opt.inccommand = "split"
 opt.virtualedit = "block"
 opt.confirm = true
 opt.exrc = true
-opt.completeopt = { "menu", "menuone", "noselect" }
 opt.jumpoptions:append("view")
-opt.mouse = "a"
 opt.grepprg = "rg --vimgrep --smart-case"
 opt.grepformat = "%f:%l:%c:%m"
 

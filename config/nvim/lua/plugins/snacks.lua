@@ -112,7 +112,6 @@ return {
     key("<leader>fc", picker("files", { cwd = vim.fn.stdpath("config") }), "Neovim config files"),
     key("<leader>fh", picker("help"), "Help pages"),
     key("<leader>fk", picker("keymaps"), "Keymaps"),
-    key("<leader>fd", picker("diagnostics"), "Diagnostics"),
     key("<leader>fs", picker("lsp_symbols"), "LSP symbols"),
     key("<leader>fS", picker("lsp_workspace_symbols"), "LSP workspace symbols"),
     key("<leader>fu", picker("undo"), "Undo history"),
@@ -122,6 +121,12 @@ return {
     key("<leader>fm", picker("marks"), "Marks"),
     key("<leader>fp", picker("projects"), "Projects"),
     key("<leader>bb", picker("buffers"), "List buffers"),
+
+    key("<leader>dx", picker("diagnostics"), "Diagnostics (project)"),
+    key("<leader>dd", picker("diagnostics_buffer"), "Diagnostics (this file)"),
+    key("<leader>dt", picker("todo_comments"), "Todos (project)"),
+    key("<leader>dq", picker("qflist"), "Quickfix list"),
+    key("<leader>dl", picker("loclist"), "Location list"),
 
     key("<leader>gg", snack("lazygit"), "Lazygit"),
     key("<leader>gl", picker("git_log"), "Git log (Enter reviews the commit)"),

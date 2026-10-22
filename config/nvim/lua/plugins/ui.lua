@@ -59,7 +59,7 @@ return {
                 },
               },
               "%<",
-              { hl = "MiniStatuslineFilename", strings = { "%f%m%r", vimtex_status() } },
+              { hl = "MiniStatuslineFilename", strings = { vimtex_status() } },
               "%=",
               {
                 hl = "MiniStatuslineFileinfo",
@@ -105,7 +105,6 @@ return {
         { "<leader>S", group = "session" },
         { "<leader>t", group = "terminal" },
         { "<leader>u", group = "ui toggles" },
-        { "<leader>w", group = "window" },
         { "<localleader>d", group = "debug" },
         { "<localleader>t", group = "tests" },
       },

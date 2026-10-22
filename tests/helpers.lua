@@ -10,6 +10,14 @@ vim.cmd("edit " .. T.dir({ ["b.py"] = {} }) .. "/b.py")
 T.eq("python: then $VIRTUAL_ENV", python.path(), "/elsewhere/bin/python")
 vim.env.VIRTUAL_ENV = nil
 T.eq("python: then python3", python.path(), vim.fn.exepath("python3"))
+local path = vim.env.PATH
+vim.env.PATH = "/nonexistent"
+T.eq(
+  "python: without python3 on PATH, the bare name (never an empty command)",
+  python.path(),
+  "python3"
+)
+vim.env.PATH = path
 
 local mason = require("dotfiles.mason")
 local settings = { mason_tools = { "shellcheck" }, mason_servers = { "lua_ls" } }

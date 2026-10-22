@@ -12,6 +12,12 @@ function M.selection()
     first, last = 1, math.max(1, #vim.fn.getline(to[2]))
   elseif mode == "\22" then
     local corners = { vim.fn.virtcol("v"), vim.fn.getcurpos()[5] }
+    if corners[2] >= vim.v.maxcol then
+      corners[2] = 1
+      for lnum = from[2], to[2] do
+        corners[2] = math.max(corners[2], vim.fn.virtcol({ lnum, "$" }) - 1)
+      end
+    end
     first, last = math.min(unpack(corners)), math.max(unpack(corners))
   end
   local lines = vim.fn.getregion(region[1], region[2], {

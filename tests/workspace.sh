@@ -17,11 +17,11 @@ test_claude() {
   keys C-\\ C-n
   keys q
   probe "q hides Claude and returns to the code in normal mode" 'vim.fn.mode() .. vim.bo.buftype' n 5
-  keys Space w v
+  keys C-w v
   set_home
   roundtrip "Space t f" "t f" "C-\\ C-n q"
   roundtrip "Space a c" "a c" "C-\\ C-n q"
-  keys Space w l
+  keys C-w l
   set_home
   roundtrip "Space t f (other window)" "t f" "C-\\ C-n q"
   roundtrip "Space a c (other window)" "a c" "C-\\ C-n q"
@@ -119,7 +119,7 @@ test_tree_and_pickers() {
   sleep 1
   keys look.lua C-v
   probe "C-v in a picker opens a vertical split" "$(tiles)" 2 10
-  keys Space w o
+  keys C-w o
   keys Space o d
   probe "Space o d: the dashboard opens over the code" 'vim.bo.filetype' snacks_dashboard 10
   keys q
@@ -128,11 +128,12 @@ test_tree_and_pickers() {
   start_nvim "$PROJ" look.lua
   lua_do 'vim.diagnostic.set(vim.api.nvim_create_namespace("test"), 0, { { lnum = 0, col = 0, message = "x" } })'
   keys Space d x
-  probe "Space d x opens Trouble without taking the cursor" '#vim.tbl_filter(function(w) return vim.bo[vim.api.nvim_win_get_buf(w)].filetype == "trouble" end, vim.api.nvim_list_wins()) .. vim.bo.filetype' 1lua 15
-  keys C-j
-  probe "C-j reaches Trouble" 'vim.bo.filetype' trouble 5
-  keys q
-  probe "q closes Trouble and returns to the code" 'vim.bo.filetype' lua 5
+  probe "Space d x lists the diagnostics in a picker" 'vim.bo.filetype' snacks_picker_input 15
+  probe "and the picker has the diagnostic" '(function() local p = Snacks.picker.get()[1] return p and p:count() or 0 end)()' 1 10
+  keys Escape
+  sleep 0.5
+  keys Escape
+  probe "Escape twice closes it and returns to the code" 'vim.bo.filetype' lua 5
   stop_nvim
 }
 

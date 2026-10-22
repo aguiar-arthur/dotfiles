@@ -5,7 +5,7 @@ return {
     init = function()
       local g = vim.g
 
-      g.vimtex_view_method = vim.uv.os_uname().sysname == "Darwin" and "skim" or "zathura"
+      g.vimtex_view_method = "skim"
       g.vimtex_view_skim_sync = 1
       g.vimtex_view_skim_activate = 0
       g.vimtex_view_skim_reading_bar = 1
@@ -67,8 +67,8 @@ return {
         group = group,
         pattern = "VimtexEventInitPost",
         callback = function()
-          local running = vim.fn.eval("b:vimtex.compiler.is_running()")
-          if live() and (not running or running == 0) then
+          local idle = vim.fn.eval("exists('b:vimtex.compiler') && !b:vimtex.compiler.is_running()")
+          if live() and idle == 1 then
             vim.cmd("VimtexCompile")
           end
         end,

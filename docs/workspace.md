@@ -13,8 +13,8 @@ objects, completion and snippets, sharing code, and Claude Code. Its relationshi
 
 | Path | Holds |
 |---|---|
-| `config/nvim/lua/plugins/snacks.lua` | pickers `<leader>f`, file tree `<leader>o`, terminals `<leader>t`, lazygit, `]r`, the picker `confirm` |
-| `config/nvim/lua/plugins/editor.lua` | flash, mini.ai, mini.surround, mini.pairs, grug-far, todo-comments, Trouble, persistence (and gitsigns, codediff: see [git](git.md)) |
+| `config/nvim/lua/plugins/snacks.lua` | pickers `<leader>f` and `<leader>d` (diagnostics, todos, quickfix), file tree `<leader>o`, terminals `<leader>t`, lazygit, `]r`, the picker `confirm` |
+| `config/nvim/lua/plugins/editor.lua` | flash, mini.ai, mini.surround, mini.pairs, grug-far, todo-comments, persistence (and gitsigns, codediff: see [git](git.md)) |
 | `config/nvim/lua/plugins/completion.lua` | blink.cmp, LuaSnip, friendly-snippets, the `:` line |
 | `config/nvim/lua/dotfiles/share.lua` | what `<leader>cs` copies; the key is in `lua/config/keymaps.lua` |
 | `config/nvim/lua/plugins/claude.lua` | claudecode.nvim, `<leader>a` |
@@ -46,13 +46,13 @@ characters give the columns you see, and it lengthens the fence when the code ha
 is relative to the git root, so the text pastes well into a chat with an AI or a review.
 
 claudecode.nvim speaks the protocol of Claude Code's VS Code extension. It loads only with a
-`<leader>a` key or a `:ClaudeCode` command, never at startup, so its server exists only while
-you use Claude; `<leader>aS` stops it (in visual mode it sends the selection instead, and
-`<leader>aB` adds the file: the terminal opens without taking focus so the selection survives,
-and the mention is queued until Claude connects). The server listens on `127.0.0.1` only and
-accepts the `claude` process that read the random token from `~/.claude/ide/<port>.lock` (mode
-0600). What Claude sees in Neovim goes to Anthropic with the rest of the conversation, as Claude
-Code does on its own.
+`<leader>a` key or a `:ClaudeCode` command, never at startup, so its server exists only while you
+use Claude; `<leader>aq` stops it. `<leader>aS` (visual) sends the selection and `<leader>aB` adds
+the file to the last session: the terminal opens without taking focus so the selection survives, and
+the mention is queued until Claude connects. The server listens on `127.0.0.1` only and accepts the
+`claude` process that read the random token from `~/.claude/ide/<port>.lock` (mode 0600). What
+Claude sees in Neovim goes to Anthropic with the rest of the conversation, as Claude Code does on
+its own.
 
 With `focus_after_send` every send (`<leader>as`, `ab`, `aS`, `aB`) opens Claude, focuses it and
 enters terminal mode; without it the window opened but the cursor stayed in the code, in normal mode.
@@ -84,6 +84,11 @@ Consumes: [core](core.md) keys and toggles.
 
 - blink.cmp on the `:` line inserts the selected item already: mapping `<CR>` to `accept`
   there makes a completed command need a second `<CR>`.
+- `dotfiles/claude.lua` calls two functions claudecode.nvim does not document,
+  `claudecode.terminal.get_active_terminal_bufnr` and `toggle_open_no_focus`: its commands
+  cannot ask whether a Claude terminal runs nor open one without focus. The plugin uses both
+  itself; if an update renames them, `tests/helpers.lua` (fakes) still passes but full
+  `test_claude` (`Space a B`) fails.
 
 ## Checks
 
@@ -94,7 +99,7 @@ Consumes: [core](core.md) keys and toggles.
 | Completion and snippets typed for real | full: `test_snippets` in `tests/tex.sh` |
 | Claude helpers, notifications, the file tree keys | `tests/helpers.lua`, `tests/keys.lua` |
 | `Space t f` / `t h` / `t v`: modes, same terminal back, sizes, resize | full: `test_terminals` in `tests/workspace.sh` |
-| The tree, pickers (`Esc`, `C-v`), Trouble, the floating dashboard | full: `test_tree_and_pickers` |
+| The tree, pickers (`Esc`, `C-v`), `Space d x`, the floating dashboard | full: `test_tree_and_pickers` |
 | Claude: `Space a s` / `a b` / `a B`, focus back to the window it came from, resize | full: `test_claude` |
 | A hidden Claude notifies (OSC 9, exit) | full: `test_claude_notices` |
 | Sessions: `Space S r` restores, `Space S d` keeps the old one | full: `test_sessions` |

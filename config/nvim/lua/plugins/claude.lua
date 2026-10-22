@@ -2,22 +2,7 @@ return {
   {
     "coder/claudecode.nvim",
     dependencies = { "folke/snacks.nvim" },
-    cmd = {
-      "ClaudeCode",
-      "ClaudeCodeFocus",
-      "ClaudeCodeSelectModel",
-      "ClaudeCodeAdd",
-      "ClaudeCodeSend",
-      "ClaudeCodeTreeAdd",
-      "ClaudeCodeStatus",
-      "ClaudeCodeStart",
-      "ClaudeCodeStop",
-      "ClaudeCodeOpen",
-      "ClaudeCodeClose",
-      "ClaudeCodeDiffAccept",
-      "ClaudeCodeDiffDeny",
-      "ClaudeCodeCloseAllDiffs",
-    },
+    cmd = { "ClaudeCode", "ClaudeCodeAdd", "ClaudeCodeSend", "ClaudeCodeStatus" },
     keys = {
       { "<leader>ac", "<cmd>ClaudeCode<CR>", desc = "Toggle Claude" },
       { "<leader>af", "<cmd>ClaudeCodeFocus<CR>", desc = "Focus Claude" },
@@ -60,15 +45,9 @@ return {
         desc = "Add the file under the cursor to the last Claude session",
         ft = "snacks_picker_list",
       },
-      {
-        "<leader>as",
-        "<cmd>ClaudeCodeTreeAdd<CR>",
-        desc = "Add the file under the cursor to Claude",
-        ft = "snacks_picker_list",
-      },
       { "<leader>aa", "<cmd>ClaudeCodeDiffAccept<CR>", desc = "Accept Claude's diff" },
       { "<leader>ad", "<cmd>ClaudeCodeDiffDeny<CR>", desc = "Reject Claude's diff" },
-      { "<leader>aS", "<cmd>ClaudeCodeStop<CR>", desc = "Stop the Claude connection" },
+      { "<leader>aq", "<cmd>ClaudeCodeStop<CR>", desc = "Stop the Claude connection" },
     },
     config = function(_, opts)
       require("claudecode").setup(opts)
