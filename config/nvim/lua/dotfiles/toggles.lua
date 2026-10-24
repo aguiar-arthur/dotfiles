@@ -117,6 +117,16 @@ function M.map()
   end, function(state)
     require("treesitter-context")[state and "enable" or "disable"]()
   end):map("<leader>ux")
+  global("Format on save (global)", function()
+    return not vim.g.disable_autoformat
+  end, function(state)
+    vim.g.disable_autoformat = not state
+  end):map("<leader>uf")
+  global("Format on save (this buffer)", function()
+    return not vim.b.disable_autoformat
+  end, function(state)
+    vim.b.disable_autoformat = not state
+  end):map("<leader>uF")
   local treesitter = require("dotfiles.treesitter")
   global("Treesitter highlight (all buffers)", treesitter.enabled, treesitter.set):map("<leader>uT")
 end

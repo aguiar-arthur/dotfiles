@@ -19,7 +19,7 @@ Clojure in detail. Its relationships are in [map](map.md).
 |---|---|
 | `config/nvim/lua/plugins/lsp.lua` | Mason, mason-lspconfig, system servers, diagnostics, the `LspAttach` keys (`gd`, `gr`, `<leader>l`, `,o`) |
 | `config/nvim/after/lsp/<server>.lua` | per-server settings (basedpyright, jsonls, ltex_plus, lua_ls, marksman, ruff, texlab, yamlls) |
-| `config/nvim/lua/plugins/formatting.lua` | conform, `style_markers`, the prettier trust check, `:FormatToggle`, `<leader>lf` |
+| `config/nvim/lua/plugins/formatting.lua` | conform, `style_markers`, the prettier trust check, `<leader>lf` |
 | `config/nvim/lua/plugins/run.lua` | code_runner.nvim, `,r` and its `commands` |
 | `config/nvim/lua/plugins/test.lua` | Neotest, neotest-python, `,t` |
 | `config/nvim/lua/plugins/debug.lua` | nvim-dap, dap-ui, the debugpy adapter, `,d`, the Python launch |
@@ -71,12 +71,12 @@ fallback), but only in projects that declare that tool's style:
 
 Without one each formatter falls back to its own defaults and a `:w` would restyle someone
 else's code; a bare `.editorconfig` or `pyproject.toml` is too common to count. `<leader>lf`
-formats anywhere. LaTeX formats only with `<leader>lf`. `:FormatToggle` (`!` for one buffer) or
-`<leader>uf` turns saving off. prettier runs a project's JavaScript (`.prettierrc.js`,
-plugins), so it runs, on save or with `<leader>lf`, only where a `.nvim.lua` approved with
-`:trust` sits next to the prettier config and has not changed since; elsewhere `<leader>lf`
-falls back to the language server. It is always the prettier on `PATH` (Homebrew's), never a
-repository's `node_modules/.bin/prettier`.
+formats anywhere. LaTeX formats only with `<leader>lf`. `<leader>uf` turns saving off
+everywhere, `<leader>uF` in this buffer only (both in `dotfiles/toggles.lua`). prettier runs a
+project's JavaScript (`.prettierrc.js`, plugins), so it runs, on save or with `<leader>lf`,
+only where a `.nvim.lua` approved with `:trust` sits next to the prettier config and has not
+changed since; elsewhere `<leader>lf` falls back to the language server. It is always the
+prettier on `PATH` (Homebrew's), never a repository's `node_modules/.bin/prettier`.
 
 ### Run, test, debug
 

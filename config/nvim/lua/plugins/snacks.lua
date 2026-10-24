@@ -153,15 +153,6 @@ return {
         Snacks.toggle.diagnostics():map("<leader>ud")
         Snacks.toggle.indent():map("<leader>ug")
         Snacks.toggle.scroll():map("<leader>uS")
-        Snacks.toggle({
-          name = "Auto-format (global)",
-          get = function()
-            return not vim.g.disable_autoformat
-          end,
-          set = function(state)
-            vim.g.disable_autoformat = not state
-          end,
-        }):map("<leader>uf")
         vim.keymap.set("n", "<leader>un", function()
           Snacks.notifier.hide()
         end, { desc = "Dismiss notifications" })

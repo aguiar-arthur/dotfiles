@@ -72,10 +72,11 @@ quick() {
   fi
   tool "stylua" stylua bash -c "cd '$DOT/config/nvim' && stylua --check . ../../tests"
   tool "shell syntax" bash bash -n "$DOT/install.sh" "$DOT/link.sh" "$DOT"/tests/*.sh "$DOT/config/nvim/dashboard/clock.sh"
+  check "zsh: Neovim is the editor" zsh -f -c "source '$DOT/config/zsh/dotfiles.zsh' && [[ \$EDITOR == nvim && \$VISUAL == nvim ]]"
   tool "shfmt" shfmt shfmt -d "$DOT/install.sh" "$DOT/link.sh" "$DOT"/tests/*.sh "$DOT/config/nvim/dashboard/clock.sh"
   tool "rumdl" rumdl rumdl check "$DOT" --config "$DOT/config/rumdl/rumdl.toml"
   check_silent "no comments in Lua" grep -rnE '^[[:space:]]*--' --include='*.lua' "$DOT/config/nvim" "$DOT/tests"
-  check_silent "no comments in shell" grep -nE '^[[:space:]]*#([^!]|$)' "$DOT/install.sh" "$DOT/link.sh" "$DOT"/tests/*.sh "$DOT/config/nvim/dashboard/clock.sh"
+  check_silent "no comments in shell" grep -nE '^[[:space:]]*#([^!]|$)' "$DOT/install.sh" "$DOT/link.sh" "$DOT"/tests/*.sh "$DOT/config/nvim/dashboard/clock.sh" "$DOT/config/zsh/dotfiles.zsh"
   check "the dashboard clock draws its digits and date" clock_frame
 }
 

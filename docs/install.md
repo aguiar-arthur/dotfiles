@@ -26,7 +26,7 @@ lockfile, and the shell, prompt and terminal. Its relationships are in [map](map
 | `config/nvim/lua/dotfiles/mason.lua` | which Mason packages the settings want and which are missing |
 | `config/nvim/lua/config/lazy.lua` | lazy.nvim cloned at the lockfile's commit |
 | `config/nvim/lazy-lock.json` | plugin versions (committed) |
-| `config/zsh/dotfiles.zsh` | Homebrew on `PATH`, a valid `LANG`, Starship |
+| `config/zsh/dotfiles.zsh` | Homebrew on `PATH`, a valid `LANG`, `JAVA_HOME`, `EDITOR` / `VISUAL`, history, `path_report`, `command_origin`, Starship |
 | `config/starship/starship.toml` | the prompt, Dracula colors |
 | `config/iterm2/dracula.json` | the "Dotfiles (Dracula)" Dynamic Profile |
 
@@ -71,6 +71,7 @@ Consumes: [core](core.md) `settings` (which servers, tools, parsers and spell la
 | Mason wanted and missing lists, spell files to fetch | `tests/helpers.lua` |
 | Starting Neovim leaves the lockfile alone | quick: `starting nvim leaves lazy-lock.json alone` |
 | Shell syntax and format of the scripts | quick: `shell syntax`, `shfmt` |
+| `dotfiles.zsh` makes Neovim the editor, without comments | quick: `zsh: Neovim is the editor`, `no comments in shell` |
 | `install.sh nvim` in an empty home | full: `install` in `tests/lib.sh`; `fresh` in a throwaway folder |
 
 ## Changing it

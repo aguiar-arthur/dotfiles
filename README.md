@@ -79,7 +79,8 @@ Run on its own after a `git pull`, it:
   `nvim`), `~/.config/starship.toml` and the iTerm2 Dynamic Profile to this repository, moving
   whatever was there to `<name>.bak.<timestamp>` (three backups kept);
 - adds one marked block to `~/.zshrc` that sources `config/zsh/dotfiles.zsh`: Homebrew on
-  `PATH`, a valid `LANG` and the Starship prompt;
+  `PATH`, a valid `LANG`, Java, Neovim as `EDITOR`, a long shared history and the Starship
+  prompt;
 - sets Skim's inverse search to Neovim and makes Skim reload a PDF when it changes (also with
   `nvim`);
 - makes "Dotfiles (Dracula)" iTerm2's default profile.
@@ -223,7 +224,8 @@ Saving formats the file only in projects that declare that formatter's style (a
 `stylua.toml`, a prettier config, `[tool.ruff]`, …), so other people's code is never
 restyled. Prettier runs a project's JavaScript, so it also needs a `.nvim.lua` approved with
 `:trust` next to the prettier config (an empty one is enough). `Space l f` formats anywhere
-(prettier still only there); `Space u f` turns format-on-save off.
+(prettier still only there); `Space u f` turns format-on-save off, `Space u F` only for this
+file.
 
 ### Run, test and debug (`,` keys)
 
@@ -364,6 +366,7 @@ state.
 | `Space u G` | grammar checking (LaTeX) |
 | `Space u T` | treesitter highlight |
 | `Space u f` | format on save |
+| `Space u F` | format on save, this file only |
 | `Space u n` | dismiss the notifications (`Space o n` shows their history) |
 
 ### Clojure (Conjure, nvim-paredit, clojure-lsp)
@@ -526,7 +529,10 @@ needed. The folder is created the first time a note is opened.
 ## Shell, prompt and terminal
 
 - **zsh**: `~/.zshrc` gets one marked block (`# >>> dotfiles >>>`) that sources
-  `config/zsh/dotfiles.zsh`: Homebrew on `PATH`, a valid `LANG` and the Starship prompt.
+  `config/zsh/dotfiles.zsh`: Homebrew on `PATH`, a valid `LANG`, Homebrew's Java as
+  `JAVA_HOME` (Clojure needs it), Neovim as `EDITOR` and `VISUAL`, a 50,000-line history shared
+  by every open shell, the Starship prompt, and two helpers: `path_report` lists `PATH` in order
+  and `command_origin <name>…` says which program runs and whether Homebrew installed it.
   Everything else in `~/.zshrc` stays yours.
 - **Starship** (`config/starship/starship.toml`): folder, git branch and status, the
   language versions of the project, how long the last command took and the time, in Dracula
@@ -593,7 +599,7 @@ real home and fails if `lazy-lock.json` changes. Checks whose program is missing
 
 | Mode | Command | Takes | Checks |
 |---|---|---|---|
-| quick (default) | `~/dotfiles/tests/nvim.sh` | seconds | startup, every Lua module, the lockfile, Skim preferences, `zg` writing to the versioned word list, stylua, shell syntax, shfmt, rumdl, no comments, and our own code headless: `Space c s`, filetypes, format on save, the `Space u` toggles, `]e`, the preview, the helpers |
+| quick (default) | `~/dotfiles/tests/nvim.sh` | seconds | startup, every Lua module, the lockfile, Skim preferences, `zg` writing to the versioned word list, stylua, shell syntax, `EDITOR` in zsh, shfmt, rumdl, no comments, and our own code headless: `Space c s`, filetypes, format on save, the `Space u` toggles, `]e`, the preview, the helpers |
 | full | `~/dotfiles/tests/nvim.sh full` | minutes | quick, plus a real Neovim driven in tmux: language servers, toggles, the look, Markdown and notes, the `,` keys, `,r`, the debugger, tests, a LaTeX build and its snippets, a `Space g V` review, `,cj` |
 | fresh | `~/dotfiles/tests/nvim.sh fresh` | longer | full, in a throwaway directory deleted at the end, as on a new machine |
 

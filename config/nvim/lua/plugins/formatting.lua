@@ -146,18 +146,5 @@ return {
     if vim.g.disable_autoformat == nil then
       vim.g.disable_autoformat = not require("config.settings").format_on_save
     end
-    vim.api.nvim_create_user_command("FormatToggle", function(args)
-      if args.bang then
-        vim.b.disable_autoformat = not vim.b.disable_autoformat
-      else
-        vim.g.disable_autoformat = not vim.g.disable_autoformat
-      end
-      vim.notify(
-        ("Auto-format %s%s"):format(
-          (args.bang and vim.b.disable_autoformat or vim.g.disable_autoformat) and "OFF" or "ON",
-          args.bang and " (buffer)" or ""
-        )
-      )
-    end, { bang = true, desc = "Toggle auto-format (! = this buffer only)" })
   end,
 }

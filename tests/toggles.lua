@@ -88,6 +88,19 @@ T.eq("Space u T stops treesitter", vim.treesitter.highlighter.active[buf] == nil
 press("<leader>uT")
 T.eq("Space u T starts it again", vim.treesitter.highlighter.active[buf] ~= nil, true)
 
+press("<leader>uf")
+T.eq("Space u f turns format on save off everywhere", vim.g.disable_autoformat, true)
+press("<leader>uf")
+T.eq("Space u f again turns it back on", vim.g.disable_autoformat, false)
+press("<leader>uF")
+T.eq(
+  "Space u F turns it off in this buffer only",
+  { vim.b[buf].disable_autoformat, vim.g.disable_autoformat },
+  { true, false }
+)
+press("<leader>uF")
+T.eq("Space u F again turns it back on", vim.b[buf].disable_autoformat, false)
+
 vim.b[buf].keep_local_opts = nil
 package.loaded["dotfiles.toggles"] = nil
 local fresh = require("dotfiles.toggles")

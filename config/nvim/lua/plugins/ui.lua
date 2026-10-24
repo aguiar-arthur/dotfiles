@@ -94,7 +94,6 @@ return {
       spec = {
         { "<leader>a", group = "ai (Claude Code)", mode = { "n", "x" } },
         { "<leader>b", group = "buffer" },
-        { "<leader>c", group = "code", mode = { "n", "v" } },
         { "<leader>d", group = "diagnostics" },
         { "<leader>f", group = "file/find" },
         { "<leader>g", group = "git" },

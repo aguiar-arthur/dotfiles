@@ -124,7 +124,7 @@ Consumes: nothing.
 | Startup prints nothing, every module loads | quick: `nvim starts without messages`, `tests/modules.lua` |
 | Autocmds, the cursorline and winbar of `windows.lua` | `tests/autocmds.lua` |
 | `]d`, `]e` | `tests/keys.lua` |
-| The `<leader>u` toggles, beside a review, `keep_local_opts`, `uT` | `tests/toggles.lua` |
+| The `<leader>u` toggles, beside a review, `keep_local_opts`, `uT`, `uf` / `uF` | `tests/toggles.lua` |
 | Filetypes (`.mdc`, `*.json.*`) | `tests/files.lua` |
 | `zg` writes to the versioned list | quick: `zg writes to the versioned word list` |
 | The look, code context, `C-w` splits | full: `test_look` in `tests/core.sh` |

@@ -54,10 +54,7 @@ vim.fn.stdpath = function(what)
   return what == "state" and state or stdpath(what)
 end
 local function trust(root)
-  local real = vim.uv.fs_realpath(root .. "/.nvim.lua")
-  local file = assert(io.open(real, "rb"))
-  vim.fn.writefile({ vim.fn.sha256(file:read("*a")) .. " " .. real }, state .. "/trust")
-  file:close()
+  assert(vim.secure.trust({ action = "allow", path = root .. "/.nvim.lua" }))
 end
 T.eq(
   "JSON with .prettierrc but no trusted .nvim.lua is left alone",
