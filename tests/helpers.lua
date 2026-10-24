@@ -31,7 +31,43 @@ package.loaded["mason-registry"] = {
     return { "shellcheck" }
   end,
 }
-T.eq("mason: lists what is not installed", mason.missing(settings), { "lua-language-server" })
+local packages = T.dir({
+  ["shellcheck/venv/bin/activate"] = {},
+  ["ruff/venv/bin/python"] = {},
+  ["taplo/bin/taplo"] = {},
+})
+vim.fn.setfperm(packages .. "/ruff/venv/bin/python", "rwxr-xr-x")
+T.eq(
+  "mason: lists what is not installed",
+  mason.missing(settings, T.dir()),
+  { "lua-language-server" }
+)
+T.eq("mason: a venv without its Python is broken", mason.broken(packages), { shellcheck = true })
+T.eq(
+  "mason: a broken package counts as missing, so install reinstalls it",
+  mason.missing(settings, packages),
+  { "shellcheck", "lua-language-server" }
+)
+
+local clojure_lsp = dofile(vim.fn.stdpath("config") .. "/after/lsp/clojure_lsp.lua")
+local clojure = T.dir({ ["deps.edn"] = {}, ["src/a.clj"] = { "(ns a)" } })
+local function clojure_root(file)
+  local root = "not started"
+  vim.cmd("edit " .. file)
+  clojure_lsp.root_dir(vim.api.nvim_get_current_buf(), function(dir)
+    root = dir
+  end)
+  return root
+end
+T.eq(
+  "clojure-lsp: a Clojure file gets its project root",
+  vim.uv.fs_realpath(clojure_root(clojure .. "/src/a.clj")),
+  vim.uv.fs_realpath(clojure)
+)
+T.eq("clojure-lsp: Conjure's log buffers start no server", {
+  clojure_root(clojure .. "/conjure-log-123.cljc"),
+  clojure_root(clojure .. "/conjure-log-dev.cljc"),
+}, { "not started", "not started" })
 
 local install = require("dotfiles.install")
 local spell = T.dir()

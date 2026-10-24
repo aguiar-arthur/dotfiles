@@ -40,6 +40,16 @@ SKAutoReloadFileUpdate is off"
   fi
 }
 
+mason_python() {
+  local broken
+  broken="$(nvim --headless -c "lua local m = require('dotfiles.mason') local b = m.broken() io.write(table.concat(vim.tbl_filter(function(n) return b[n] end, m.wanted(require('config.settings'))), ' '))" +qa 2>&1)"
+  if [ -z "$broken" ]; then
+    pass "Mason's Python tools still have their Python"
+  else
+    fail "Mason's Python tools still have their Python" "run ./install.sh nvim to reinstall: $broken"
+  fi
+}
+
 clock_frame() {
   local frame
   frame="$(bash "$DOT/config/nvim/dashboard/clock.sh" 1)" || return 1
@@ -65,6 +75,7 @@ quick() {
     fail "starting nvim leaves lazy-lock.json alone" "the lockfile changed"
   fi
   skim_setup
+  mason_python
   if [ "$(nvim --headless -c 'lua io.write(vim.o.spellfile)' +qa 2>&1)" -ef "$DOT/config/nvim/spell/en.utf-8.add" ]; then
     pass "zg writes to the versioned word list"
   else

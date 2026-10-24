@@ -13,7 +13,23 @@ function M.wanted(settings)
   return wanted
 end
 
-function M.missing(settings)
+function M.broken(root)
+  root = root or vim.fn.stdpath("data") .. "/mason/packages"
+  local found = {}
+  for name, kind in vim.fs.dir(root) do
+    local venv = root .. "/" .. name .. "/venv"
+    if
+      kind == "directory"
+      and vim.uv.fs_stat(venv)
+      and vim.fn.executable(venv .. "/bin/python") == 0
+    then
+      found[name] = true
+    end
+  end
+  return found
+end
+
+function M.missing(settings, root)
   local ok, registry = pcall(require, "mason-registry")
   if not ok then
     return nil
@@ -22,9 +38,10 @@ function M.missing(settings)
   for _, name in ipairs(registry.get_installed_package_names()) do
     installed[name] = true
   end
+  local broken = M.broken(root)
   local absent = {}
   for _, name in ipairs(M.wanted(settings)) do
-    if not installed[name] then
+    if not installed[name] or broken[name] then
       absent[#absent + 1] = name
     end
   end

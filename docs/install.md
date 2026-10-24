@@ -23,7 +23,7 @@ lockfile, and the shell, prompt and terminal. Its relationships are in [map](map
 | `install.sh` | the three steps: brew (trusting third-party taps first), link, nvim |
 | `link.sh` | links with backups, the `~/.zshrc` block, iTerm2 and Skim preferences |
 | `config/nvim/lua/dotfiles/install.lua` | headless install of Mason packages, parsers and spell files, with time limits |
-| `config/nvim/lua/dotfiles/mason.lua` | which Mason packages the settings want and which are missing |
+| `config/nvim/lua/dotfiles/mason.lua` | which Mason packages the settings want and which are missing or broken |
 | `config/nvim/lua/config/lazy.lua` | lazy.nvim cloned at the lockfile's commit |
 | `config/nvim/lazy-lock.json` | plugin versions (committed) |
 | `config/zsh/dotfiles.zsh` | Homebrew on `PATH`, a valid `LANG`, `JAVA_HOME`, `EDITOR` / `VISUAL`, history, `path_report`, `command_origin`, Starship |
@@ -61,6 +61,10 @@ Consumes: [core](core.md) `settings` (which servers, tools, parsers and spell la
   something. The tests fail if the lockfile changes.
 - Mason installs nothing when Neovim starts: a new server needs `./install.sh nvim` again
   (`dotfiles/install.lua`; mason-tool-installer was dropped, it only duplicated that).
+- Mason's Python tools (basedpyright, debugpy) run from a venv tied to Homebrew's Python minor
+  version; a `brew upgrade` to a new one leaves them unable to start while Mason still calls
+  them installed. `dotfiles.mason` counts such a package as missing, so `./install.sh nvim`
+  reinstalls it, and the quick tests say when one is broken.
 - Every network step needs a timeout or a failure path: the Mason registry waits a minute, its
   installs 15 minutes, a spell file two; a failed Homebrew or plugin step fails its step.
 
@@ -68,7 +72,8 @@ Consumes: [core](core.md) `settings` (which servers, tools, parsers and spell la
 
 | What | Where |
 |---|---|
-| Mason wanted and missing lists, spell files to fetch | `tests/helpers.lua` |
+| Mason wanted, missing and broken lists, spell files to fetch | `tests/helpers.lua` |
+| Mason's Python tools on this machine can start | quick: `Mason's Python tools still have their Python` |
 | Starting Neovim leaves the lockfile alone | quick: `starting nvim leaves lazy-lock.json alone` |
 | Shell syntax and format of the scripts | quick: `shell syntax`, `shfmt` |
 | `dotfiles.zsh` makes Neovim the editor, without comments | quick: `zsh: Neovim is the editor`, `no comments in shell` |

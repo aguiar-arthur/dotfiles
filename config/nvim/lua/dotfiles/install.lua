@@ -25,12 +25,16 @@ local function install_tools(settings, failures)
 
   local mason = require("dotfiles.mason")
   local wanted = mason.wanted(settings)
+  local absent = {}
+  for _, name in ipairs(mason.missing(settings) or {}) do
+    absent[name] = true
+  end
   local pending, problems = 0, {}
   for _, name in ipairs(wanted) do
     local ok, pkg = pcall(registry.get_package, name)
     if not ok then
       problems[#problems + 1] = name .. " is not in the Mason registry"
-    elseif not pkg:is_installed() and not pkg:is_installing() then
+    elseif absent[name] and not pkg:is_installing() then
       pending = pending + 1
       say("...    installing " .. name)
       pkg:install({}, function(success, result)

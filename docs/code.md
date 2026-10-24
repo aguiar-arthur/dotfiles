@@ -18,7 +18,7 @@ Clojure in detail. Its relationships are in [map](map.md).
 | Path | Holds |
 |---|---|
 | `config/nvim/lua/plugins/lsp.lua` | Mason, mason-lspconfig, system servers, diagnostics, the `LspAttach` keys (`gd`, `gr`, `<leader>l`, `,o`) |
-| `config/nvim/after/lsp/<server>.lua` | per-server settings (basedpyright, jsonls, ltex_plus, lua_ls, marksman, ruff, texlab, yamlls) |
+| `config/nvim/after/lsp/<server>.lua` | per-server settings (basedpyright, clojure_lsp, jsonls, ltex_plus, lua_ls, marksman, ruff, texlab, yamlls) |
 | `config/nvim/lua/plugins/formatting.lua` | conform, `style_markers`, the prettier trust check, `<leader>lf` |
 | `config/nvim/lua/plugins/run.lua` | code_runner.nvim, `,r` and its `commands` |
 | `config/nvim/lua/plugins/test.lua` | Neotest, neotest-python, `,t` |
@@ -148,6 +148,9 @@ Consumes:
   warns); the extra one is pinned in its `after/lsp/` file, as ruff is to UTF-16.
 - Conjure is limited to Clojure (`conjure#filetypes`); its other clients would map keys in Lua
   and Python. `K` and `gd` stay with the language server.
+- Conjure's log buffer (`conjure-log-<pid or state>.cljc`) is a Clojure file until Conjure marks it
+  `nofile`, so clojure-lsp started a second server for it, rooted wherever Neovim was opened;
+  `after/lsp/clojure_lsp.lua` skips it by name and keeps lspconfig's root markers otherwise.
 
 ## Checks
 
@@ -155,7 +158,7 @@ Consumes:
 |---|---|
 | Format on save per style marker (none without one), prettier trust, `*.json.*` parser | `tests/files.lua` |
 | `gq` keeps wrapping (`formatexpr` cleared) | `tests/keys.lua` |
-| Python interpreter, Mason lists | `tests/helpers.lua` |
+| Python interpreter, Mason lists, clojure-lsp skips Conjure's log | `tests/helpers.lua` |
 | Every `<Cmd>` key names a command that exists (`Space l R` once ran a removed `:LspRestart`) | `tests/keys.lua` |
 | Servers attach (Lua, Python, …), `Space l R` restarts one, `,o`, `,s` | full: `test_lua`, `test_language_actions` |
 | `,r` per language | full: `test_run` in `tests/code.sh` |

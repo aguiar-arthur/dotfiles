@@ -599,7 +599,7 @@ real home and fails if `lazy-lock.json` changes. Checks whose program is missing
 
 | Mode | Command | Takes | Checks |
 |---|---|---|---|
-| quick (default) | `~/dotfiles/tests/nvim.sh` | seconds | startup, every Lua module, the lockfile, Skim preferences, `zg` writing to the versioned word list, stylua, shell syntax, `EDITOR` in zsh, shfmt, rumdl, no comments, and our own code headless: `Space c s`, filetypes, format on save, the `Space u` toggles, `]e`, the preview, the helpers |
+| quick (default) | `~/dotfiles/tests/nvim.sh` | seconds | startup, every Lua module, the lockfile, Skim preferences, Mason's Python tools (broken by a Homebrew Python upgrade), `zg` writing to the versioned word list, stylua, shell syntax, `EDITOR` in zsh, shfmt, rumdl, no comments, and our own code headless: `Space c s`, filetypes, format on save, the `Space u` toggles, `]e`, the preview, the helpers |
 | full | `~/dotfiles/tests/nvim.sh full` | minutes | quick, plus a real Neovim driven in tmux: language servers, toggles, the look, Markdown and notes, the `,` keys, `,r`, the debugger, tests, a LaTeX build and its snippets, a `Space g V` review, `,cj` |
 | fresh | `~/dotfiles/tests/nvim.sh fresh` | longer | full, in a throwaway directory deleted at the end, as on a new machine |
 
