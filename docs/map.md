@@ -13,6 +13,7 @@ Upstream offers, downstream consumes; a change upstream may break downstream.
 | Core | Markdown | the global conceal toggle (`<leader>uc`) is re-applied to render-markdown | full: `test_markdown` |
 | Core | Git | `<leader>uw` leaves a review's wrap alone | `tests/toggles.lua`, full: `test_review` |
 | Workspace | Git | pickers' `confirm` opens a file from a review in the tab before it; the log pickers' Enter reviews a commit; `<leader>bd` beside a review keeps it whole | `tests/helpers.lua`, full: `test_review` |
+| Workspace | Git | persistence closes every review (`close_reviews`) before it saves a session | `tests/helpers.lua` |
 | Workspace | Code | blink.cmp's LSP capabilities reach servers started before the first insert | none (plugin wiring) |
 | Workspace | Markdown | mini.pairs leaves the backtick alone; Markdown adds its own pair | `tests/keys.lua` |
 | Workspace | LaTeX | completion; LaTeX keeps its own snippets, not friendly-snippets | full: `test_snippets` |

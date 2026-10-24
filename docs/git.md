@@ -17,7 +17,7 @@ branch, a pull request, a file's or a line's history. Its relationships are in [
 |---|---|
 | `config/nvim/lua/plugins/editor.lua` (gitsigns) | signs, line blame, `]c` / `[c`, `<leader>g` hunk keys, `ih` |
 | `config/nvim/lua/plugins/editor.lua` (codediff) | the review keys (`gD`, `gC`, `gV`, `gd`, `gh`, `gL`, `gP`, `gq`), the keys inside a review and a merge conflict, `git.setup()` |
-| `config/nvim/lua/dotfiles/git.lua` | the base branch, the `review` tab variable, the editing tab, closing a review, `<leader>bd` beside a review, Enter in the log pickers |
+| `config/nvim/lua/dotfiles/git.lua` | the base branch, the `review` tab variable, the editing tab, closing a review (and every review before a session is saved), `<leader>bd` beside a review, Enter in the log pickers |
 | `config/nvim/lua/config/keymaps.lua` | `<leader>bd`, through `git.close_buffer` |
 | `config/nvim/lua/plugins/snacks.lua` | lazygit, the git pickers (`gl`, `gt`, `gc`) and their Enter, `gO`, the `confirm` that sends a file from a review to the editing tab |
 | `config/nvim/lua/plugins/ui.lua` | the which-key groups `<leader>g` and `<leader>gm` |
@@ -72,6 +72,7 @@ Consumes:
 - [workspace](workspace.md): Snacks pickers and lazygit; the custom `confirm` must call
   `snacks.picker.actions.jump` directly.
 - [install](install.md): codediff's prebuilt diff library, fetched in its `build` step.
+- [workspace](workspace.md): persistence closes every review before it saves a session.
 
 ## Pitfalls
 

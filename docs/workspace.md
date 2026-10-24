@@ -77,6 +77,9 @@ Offers:
 - To [code](code.md): blink.cmp, whose LSP capabilities servers need when they start.
 - To [latex](latex.md): completion; LaTeX keeps its own snippets in place of friendly-snippets.
 - To [markdown](markdown.md): mini.pairs leaves the backtick alone everywhere.
+- To [git](git.md): a session is saved without its reviews: persistence's `PersistenceSavePre`
+  calls `dotfiles.git.close_reviews()`, since a restored review comes back as plain buffers
+  named `codediff://…` and `CodeDiff Explorer`.
 
 Consumes: [core](core.md) keys and toggles.
 
@@ -106,6 +109,7 @@ Consumes: [core](core.md) keys and toggles.
 | Claude: `Space a s` / `a b` / `a B`, focus back to the window it came from, resize | full: `test_claude` |
 | A hidden Claude notifies (OSC 9, exit) | full: `test_claude_notices` |
 | Sessions: `Space S r` restores, `Space S d` keeps the old one | full: `test_sessions` |
+| A session is saved without its reviews | `tests/helpers.lua` |
 | Everything else here | plugin defaults, no check of our own |
 
 ## Changing it

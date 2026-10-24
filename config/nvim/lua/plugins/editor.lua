@@ -242,6 +242,16 @@ return {
     "folke/persistence.nvim",
     event = "BufReadPre",
     opts = {},
+    config = function(_, opts)
+      require("persistence").setup(opts)
+      vim.api.nvim_create_autocmd("User", {
+        group = vim.api.nvim_create_augroup("user_persistence", { clear = true }),
+        pattern = "PersistenceSavePre",
+        callback = function()
+          require("dotfiles.git").close_reviews()
+        end,
+      })
+    end,
     keys = {
       {
         "<leader>Sr",

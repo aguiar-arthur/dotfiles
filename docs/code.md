@@ -134,6 +134,9 @@ Consumes:
 
 ## Pitfalls
 
+- taplo 0.10.0 (the newest in Mason) cannot read SchemaStore's current catalog (`failed to
+  fetch catalog` in `lsp.log`), so TOML files get no schema completion or validation; formatting
+  and syntax checks still work. Nothing to change here until taplo updates.
 - `mason-lspconfig` gets `automatic_enable = mason_servers`, never `true`: `true` enables any
   server left installed in Mason (a stale stylua server once ran in Lua files).
 - Formatters run on save only under a style marker. A formatter added to conform gets an

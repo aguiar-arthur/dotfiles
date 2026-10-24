@@ -595,7 +595,8 @@ missing (a program, a server, a parser): it installs only what is not there.
 ## Test
 
 `tests/nvim.sh` checks the Neovim setup after a change. It is run by hand, never touches the
-real home and fails if `lazy-lock.json` changes. Checks whose program is missing are skipped.
+real home (not even your sessions) and fails if `lazy-lock.json` changes. Checks whose program
+is missing are skipped.
 
 | Mode | Command | Takes | Checks |
 |---|---|---|---|

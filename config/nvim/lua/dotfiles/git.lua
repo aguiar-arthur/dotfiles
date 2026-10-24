@@ -53,6 +53,15 @@ function M.close_review()
   vim.cmd.tabclose(vim.api.nvim_tabpage_get_number(tab))
 end
 
+function M.close_reviews()
+  for _, tab in ipairs(vim.tbl_filter(M.review, vim.api.nvim_list_tabpages())) do
+    if #vim.api.nvim_list_tabpages() == 1 then
+      vim.cmd("tabnew")
+    end
+    vim.cmd.tabclose(vim.api.nvim_tabpage_get_number(tab))
+  end
+end
+
 function M.close_buffer()
   local buf = vim.api.nvim_get_current_buf()
   if M.review() then

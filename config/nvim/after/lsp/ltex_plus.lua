@@ -13,6 +13,7 @@ return {
         ["en-US"] = { "MORFOLOGIK_RULE_EN_US" },
       },
       additionalRules = { enablePickyRules = false },
+      ["ltex-ls"] = { logLevel = "warning" },
       latex = {
         commands = {
           ["\\citeonline{}"] = "dummy",

@@ -29,6 +29,9 @@ how they are built. Its relationships are in [map](map.md).
 Run by hand, never from `install.sh`: `tests/nvim.sh` after any change, `full` after changing
 plugins, keys, servers, Markdown or LaTeX, `fresh` after changing `install.sh`. It skips what is
 not installed, never touches the real home or clipboard, and fails if `lazy-lock.json` changes.
+The quick checks run headless Neovim with the real config, so `quick` points `XDG_STATE_HOME`
+at a temporary folder: persistence saves a session on exit, and it once replaced the real
+session of `~/dotfiles` with test files. `the quick tests leave your sessions alone` checks it.
 Each check prints `pass`, `skip` with the reason, or `FAIL` with what was wanted and what came
 back; the last line is the count.
 

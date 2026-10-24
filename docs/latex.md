@@ -17,7 +17,7 @@ and the snippets. Its relationships are in [map](map.md).
 | `config/nvim/after/ftplugin/tex.lua` | no hard wrap, `,lw`, which-key labels of the daily `,l` keys |
 | `config/nvim/snippets/tex.lua` | the LaTeX snippets (documents, text, math, ABNT) |
 | `config/nvim/after/lsp/texlab.lua` | texlab reads `build/`, chktex on open and save, latexindent |
-| `config/nvim/after/lsp/ltex_plus.lua` | grammar in `pt-BR`, spelling rules off, UTF-16 |
+| `config/nvim/after/lsp/ltex_plus.lua` | grammar in `pt-BR`, spelling rules off, UTF-16, quiet log |
 | `config/latex/latexmkrc` | PDF output, BibTeX when a `.bib` exists, one-second polling, what `,lc` cleans; linked to `~/.latexmkrc` |
 | `link.sh` (`skim_preferences`) | Skim's inverse search to Neovim and reload on change |
 
@@ -87,6 +87,8 @@ Consumes:
   without it, reloading vimtex (`,lx`) would stop the build it started. It checks that
   `b:vimtex.compiler` exists first: with vimtex's compiler off there is none, and opening a file
   raised `E716`.
+- ltex-ls-plus logs at `warning` (`ltex-ls.logLevel`): its default, `fine`, wrote the text of
+  every check into `~/.local/state/nvim/lsp.log`.
 - Full tests start Neovim with `view_automatic` off and the build and view events recorded in
   `start_nvim`, so a test build never opens Skim.
 

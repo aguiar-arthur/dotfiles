@@ -2,6 +2,9 @@
 set -uo pipefail
 
 DOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+REAL_STATE="${XDG_STATE_HOME:-$HOME/.local/state}"
+QUICK_STATE="$(mktemp -d)"
+trap 'rm -rf "$QUICK_STATE"' EXIT
 MODE="${1:-quick}"
 PASSED=0
 FAILED=0
@@ -59,8 +62,11 @@ clock_frame() {
 }
 
 quick() {
-  local before
+  local before marker
   before="$(lock_hash)"
+  marker="$QUICK_STATE/started"
+  touch "$marker"
+  export XDG_STATE_HOME="$QUICK_STATE"
   check_silent "nvim starts without messages" nvim --headless "+qa"
   check "every Lua module loads" nvim --headless -l "$DOT/tests/modules.lua"
   check "Space c s copies the path, line:col and the code" nvim --headless -l "$DOT/tests/share.lua"
@@ -89,6 +95,11 @@ quick() {
   check_silent "no comments in Lua" grep -rnE '^[[:space:]]*--' --include='*.lua' "$DOT/config/nvim" "$DOT/tests"
   check_silent "no comments in shell" grep -nE '^[[:space:]]*#([^!]|$)' "$DOT/install.sh" "$DOT/link.sh" "$DOT"/tests/*.sh "$DOT/config/nvim/dashboard/clock.sh" "$DOT/config/zsh/dotfiles.zsh"
   check "the dashboard clock draws its digits and date" clock_frame
+  if [ -z "$(find "$REAL_STATE/nvim/sessions" -newer "$marker" 2>/dev/null)" ]; then
+    pass "the quick tests leave your sessions alone"
+  else
+    fail "the quick tests leave your sessions alone" "a session was written to $REAL_STATE/nvim/sessions"
+  fi
 }
 
 full() {
