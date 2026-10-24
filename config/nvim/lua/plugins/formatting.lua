@@ -132,11 +132,8 @@ return {
       if vim.g.disable_autoformat or vim.b[buf].disable_autoformat then
         return
       end
-      if vim.tbl_contains({ "tex", "plaintex", "bib" }, vim.bo[buf].filetype) then
-        return
-      end
       local has_style = style_markers[vim.bo[buf].filetype]
-      if has_style and not has_style(buf) then
+      if not has_style or not has_style(buf) then
         return
       end
       return { timeout_ms = 1500 }

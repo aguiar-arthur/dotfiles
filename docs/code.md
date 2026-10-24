@@ -69,7 +69,8 @@ fallback), but only in projects that declare that tool's style:
 | TOML | `taplo.toml` or `.taplo.toml` |
 | Clojure | `cljfmt.edn` (or `.clj`) or `:cljfmt` in `.lsp/config.edn` |
 
-Without one each formatter falls back to its own defaults and a `:w` would restyle someone
+A filetype with no row here (SCSS, Less, LaTeX) never formats on save, even when its server
+could. Without one each formatter falls back to its own defaults and a `:w` would restyle someone
 else's code; a bare `.editorconfig` or `pyproject.toml` is too common to count. `<leader>lf`
 formats anywhere. LaTeX formats only with `<leader>lf`. `<leader>uf` turns saving off
 everywhere, `<leader>uF` in this buffer only (both in `dotfiles/toggles.lua`). prettier runs a
@@ -152,7 +153,7 @@ Consumes:
 
 | What | Where |
 |---|---|
-| Format on save per style marker, prettier trust, `*.json.*` parser | `tests/files.lua` |
+| Format on save per style marker (none without one), prettier trust, `*.json.*` parser | `tests/files.lua` |
 | `gq` keeps wrapping (`formatexpr` cleared) | `tests/keys.lua` |
 | Python interpreter, Mason lists | `tests/helpers.lua` |
 | Every `<Cmd>` key names a command that exists (`Space l R` once ran a removed `:LspRestart`) | `tests/keys.lua` |

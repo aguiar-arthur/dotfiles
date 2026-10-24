@@ -82,6 +82,9 @@ Consumes: [core](core.md) keys and toggles.
 
 ## Pitfalls
 
+- A picker another plugin adds (todo-comments' `todo_comments`) exists only once that plugin
+  loads, so its key lives in that plugin's `keys` (`<leader>dt`), not in `snacks.lua`: from the
+  dashboard it would fail before the first file is read.
 - blink.cmp on the `:` line inserts the selected item already: mapping `<CR>` to `accept`
   there makes a completed command need a second `<CR>`.
 - `dotfiles/claude.lua` calls two functions claudecode.nvim does not document,

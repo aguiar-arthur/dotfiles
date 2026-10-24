@@ -131,4 +131,15 @@ T.eq(
   "Add the file under the cursor to the last Claude session"
 )
 
+local todo = vim.iter(T.config("plugins/editor.lua")):find(function(spec)
+  return spec[1] == "folke/todo-comments.nvim"
+end)
+T.eq(
+  "Space d t loads todo-comments, which adds the picker",
+  vim.iter(todo.keys):any(function(key)
+    return key[1] == "<leader>dt"
+  end),
+  true
+)
+
 T.done()

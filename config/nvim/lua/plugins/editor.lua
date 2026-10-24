@@ -229,6 +229,13 @@ return {
         end,
         desc = "Previous todo",
       },
+      {
+        "<leader>dt",
+        function()
+          Snacks.picker.todo_comments()
+        end,
+        desc = "Todos (project)",
+      },
     },
   },
 

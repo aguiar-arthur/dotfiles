@@ -124,7 +124,6 @@ return {
 
     key("<leader>dx", picker("diagnostics"), "Diagnostics (project)"),
     key("<leader>dd", picker("diagnostics_buffer"), "Diagnostics (this file)"),
-    key("<leader>dt", picker("todo_comments"), "Todos (project)"),
     key("<leader>dq", picker("qflist"), "Quickfix list"),
     key("<leader>dl", picker("loclist"), "Location list"),
 

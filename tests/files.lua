@@ -81,6 +81,7 @@ T.eq(
   true
 )
 vim.fn.stdpath = stdpath
+T.eq("SCSS has no style marker, so it never formats on save", formats({}, "a.scss"), false)
 T.eq("LaTeX never formats on save", formats({ [".latexindent.yaml"] = {} }, "a.tex"), false)
 vim.g.disable_autoformat = true
 T.eq("Space u f turns format on save off", formats({ ["stylua.toml"] = {} }, "b.lua"), false)
