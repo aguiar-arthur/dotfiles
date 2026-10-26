@@ -7,7 +7,7 @@ how they are built. Its relationships are in [map](map.md).
 ## Language
 
 - **quick**: the default mode, seconds; startup, lint and the headless `.lua` checks.
-- **full**: quick plus `install.sh nvim` into an isolated home and a real Neovim in tmux.
+- **full**: quick plus `macos/nvim/install.sh` into an isolated home and a real Neovim in tmux.
 - **fresh**: full in a throwaway folder, as on a new machine.
 - **probe**: a full-mode check that evaluates Lua in the running Neovim until it returns the
   wanted value or times out.
@@ -26,8 +26,8 @@ how they are built. Its relationships are in [map](map.md).
 
 ## How it works
 
-Run by hand, never from `install.sh`: `tests/nvim.sh` after any change, `full` after changing
-plugins, keys, servers, Markdown or LaTeX, `fresh` after changing `install.sh`. It skips what is
+Run by hand, never from an installer: `tests/nvim.sh` after any change, `full` after changing
+plugins, keys, servers, Markdown or LaTeX, `fresh` after changing `macos/`. It skips what is
 not installed, never touches the real home or clipboard, and fails if `lazy-lock.json` changes.
 The quick checks run headless Neovim with the real config, so `quick` points `XDG_STATE_HOME`
 at a temporary folder: persistence saves a session on exit, and it once replaced the real
@@ -59,11 +59,11 @@ context's file; the map's last column says which.
 ## Quick tests in CI
 
 `.github/workflows/tests.yml` runs `tests/nvim.sh` (quick) on a macOS runner on push and pull
-request: it installs the programs the checks use and BasicTeX with `latexmk`, runs `link.sh
-nvim`, restores the plugins from `lazy-lock.json`, runs `dotfiles.install` (servers, parsers,
-spell files, as `install.sh` does) and then the suite. Checks for programs or apps the runner
-lacks (Skim, tmux) skip. `full` and `fresh` stay manual: they need real language servers and
-tmux and would fail for reasons that are not in a change.
+request: it installs the programs the checks use and BasicTeX with `latexmk`, runs
+`macos/nvim/link.sh`, restores the plugins from `lazy-lock.json`, runs `dotfiles.install`
+(servers, parsers, spell files, as `macos/nvim/install.sh` does) and then the suite. Checks for
+programs or apps the runner lacks (Skim, tmux) skip. `full` and `fresh` stay manual: they need
+real language servers and tmux and would fail for reasons that are not in a change.
 
 ## Security workflow
 
@@ -96,8 +96,8 @@ OSV-Scanner is not used: it does not read `lazy-lock.json`.
 - Health: `nvim --headless <file> -c 'checkhealth <names>' -c 'w! out.txt' -c 'qa!'`, then look
   for `ERROR` and `WARNING`; load lazy plugins first (`require("lazy").load`) or their checks
   are skipped. Snacks errors there are not real (see [core](core.md)).
-- Scripts: `bash -n install.sh link.sh` and `shfmt -d` on what you changed; Lua through
-  `stylua --check .` run from `config/nvim` (from a subfolder it misses `stylua.toml` and
-  reports false diffs).
+- Scripts: `bash -n macos/install.sh macos/lib.sh macos/*/*.sh` and `shfmt -d` on what you
+  changed; Lua through `stylua --check .` run from `config/nvim` (from a subfolder it misses
+  `stylua.toml` and reports false diffs).
 - Markdown: `rumdl check <files> --config config/rumdl/rumdl.toml`; it lets some long prose
   lines through, so also look for lines over 100 columns outside tables and code blocks.

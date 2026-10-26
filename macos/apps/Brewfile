@@ -1,0 +1,4 @@
+brew "uv"
+brew "ruby"
+brew "mole"
+cask "grandperspective"

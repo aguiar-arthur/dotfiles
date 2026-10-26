@@ -30,60 +30,57 @@ On a Mac with macOS and an internet connection; nothing else is needed beforehan
    asks for your password when Homebrew and MacTeX install.
 
    ```sh
-   cd ~/dotfiles && ./install.sh
+   cd ~/dotfiles && macos/install.sh
    ```
 
-   It goes through three steps, and a failed step does not stop the others:
+   It runs the three parts below one after the other, and a failed part does not stop the
+   others. Each part goes through its steps (a failed step does not stop the next):
 
-   - **brew**: Homebrew, if missing, then every program in the `Brewfile` that is not
+   - **brew**: Homebrew, if missing, then every program in the part's `Brewfile` that is not
      installed yet (already installed ones are not upgraded; formulae from other taps are
      trusted first, as Homebrew requires);
-   - **link**: `link.sh`, described below;
-   - **nvim**: the plugins at the versions in `lazy-lock.json`, the Mason servers and tools,
-     the treesitter parsers and the Portuguese spell file, through the linked
-     `~/.config/nvim`.
+   - **link**: the part's `link.sh`, described below;
+   - **nvim** (Neovim part only): the plugins at the versions in `lazy-lock.json`, the Mason
+     servers and tools, the treesitter parsers and the Portuguese spell file, through the
+     linked `~/.config/nvim`.
 
-   It ends with `Done.` or with `Failed: <steps>`; fix the errors printed above and run it
-   again. Running it again only does what is missing.
+   It ends with `Done.` or with `Failed: <parts>`; fix the errors printed above and run it (or
+   just that part) again. Running it again only does what is missing.
 
 3. **Quit iTerm2 (Cmd+Q) and open it again.** The new window uses the "Dotfiles (Dracula)"
    profile with JetBrains Mono Nerd Font, Homebrew on `PATH` and the Starship prompt. If the
-   profile did not become the default, run `./link.sh` with iTerm2 closed.
+   profile did not become the default, run `macos/terminal/link.sh` with iTerm2 closed.
 
 4. **Open Neovim** (`nvim`) and run `:checkhealth` (see [Check](#check)).
 
-### Neovim only
+### One part at a time
 
-On a machine whose shell and terminal are already set up and must stay as they are, give
-both scripts the `nvim` argument:
+Each part installs on its own, so a machine gets only what you want on it:
 
-```sh
-cd ~/dotfiles && ./install.sh nvim
-```
+| Part | Command | Installs and links |
+|---|---|---|
+| Neovim | `macos/nvim/install.sh` | Neovim, git, ripgrep, ast-grep, fd, tree-sitter, node, python, the formatters, pandoc, lazygit, Clojure and its tools, LaTeX, Skim, Claude Code; `~/.config/nvim`, `~/.config/rumdl/rumdl.toml`, `~/.latexmkrc`, Skim's preferences; then the plugins, servers and parsers |
+| Terminal | `macos/terminal/install.sh` | Starship, tmux, iTerm2, JetBrains Mono Nerd Font; `~/.config/starship.toml`, the iTerm2 profile, the `~/.zshrc` block |
+| Apps | `macos/apps/install.sh` | uv, ruby, mole, GrandPerspective |
 
-It installs only the programs in `Brewfile.nvim` (Neovim, git, ripgrep, ast-grep, fd,
-tree-sitter, node, python, the formatters, pandoc, lazygit, Clojure and its tools, LaTeX, Skim,
-Claude Code) and links only `~/.config/nvim`, `~/.config/rumdl/rumdl.toml` and
-`~/.latexmkrc`, sets Skim's preferences, then sets up the plugins, servers and parsers as
-usual. MacTeX is a large download and asks for your password.
-`~/.zshrc`, Starship, iTerm2 and fonts are left alone, so
-two things stay up to that machine: Homebrew on `PATH` (if Homebrew was just installed, it
-prints the line to add) and a Nerd Font in the terminal for the icons. `./link.sh nvim` does
-the linking part on its own. Running the full `./install.sh` later adds the rest.
+On a machine whose shell and terminal are already set up and must stay as they are, run only
+`macos/nvim/install.sh`. MacTeX is a large download and asks for your password. Two things then
+stay up to that machine: Homebrew on `PATH` (if Homebrew was just installed, it prints the line
+to add) and a Nerd Font in the terminal for the icons. Running another part later adds it.
 
-### What `link.sh` does
+### What the `link.sh` files do
 
-Run on its own after a `git pull`, it:
+Each part's `link.sh` (`macos/nvim/link.sh`, `macos/terminal/link.sh`) also runs on its own
+after a `git pull`. Together they:
 
-- links `~/.config/nvim`, `~/.config/rumdl/rumdl.toml` and `~/.latexmkrc` (all of these with
-  `nvim`), `~/.config/starship.toml` and the iTerm2 Dynamic Profile to this repository, moving
-  whatever was there to `<name>.bak.<timestamp>` (three backups kept);
-- adds one marked block to `~/.zshrc` that sources `config/zsh/dotfiles.zsh`: Homebrew on
-  `PATH`, a valid `LANG`, Java, Neovim as `EDITOR`, a long shared history and the Starship
-  prompt;
-- sets Skim's inverse search to Neovim and makes Skim reload a PDF when it changes (also with
-  `nvim`);
-- makes "Dotfiles (Dracula)" iTerm2's default profile.
+- link `~/.config/nvim`, `~/.config/rumdl/rumdl.toml` and `~/.latexmkrc` (nvim),
+  `~/.config/starship.toml` and the iTerm2 Dynamic Profile (terminal) to this repository,
+  moving whatever was there to `<name>.bak.<timestamp>` (three backups kept);
+- add one marked block to `~/.zshrc` that sources `config/zsh/dotfiles.zsh` (terminal):
+  Homebrew on `PATH`, a valid `LANG`, Java, Neovim as `EDITOR`, a long shared history and the
+  Starship prompt;
+- set Skim's inverse search to Neovim and make Skim reload a PDF when it changes (nvim);
+- make "Dotfiles (Dracula)" iTerm2's default profile (terminal).
 
 ## Using Neovim
 
@@ -546,7 +543,7 @@ needed. The folder is created the first time a note is opened.
 
 ## On a machine that is not yours
 
-Install Neovim only (`./install.sh nvim`): it leaves the shell, the prompt and the terminal
+Install the Neovim part only (`macos/nvim/install.sh`): it leaves the shell, the prompt and the terminal
 untouched. Then:
 
 - Do not put personal tokens or SSH keys there; log in with a short-lived, narrow token, or
@@ -577,8 +574,8 @@ Nothing here changes anything; each command says what is missing or wrong.
 
 | What | How | All good when |
 |---|---|---|
-| Programs | `brew bundle check --verbose --file ~/dotfiles/Brewfile` (`Brewfile.nvim` for Neovim only) | `The Brewfile's dependencies are satisfied.` |
-| Links, `~/.zshrc`, app preferences | `~/dotfiles/link.sh` (or `link.sh nvim`; fixes what differs) | every line starts with `ok` |
+| Programs | `brew bundle check --verbose --file ~/dotfiles/macos/<part>/Brewfile` (`nvim`, `terminal`, `apps`) | `The Brewfile's dependencies are satisfied.` |
+| Links, `~/.zshrc`, app preferences | `~/dotfiles/macos/nvim/link.sh` and `~/dotfiles/macos/terminal/link.sh` (fix what differs) | every line starts with `ok` |
 | Neovim starts cleanly | `nvim --headless "+qa"` | it prints nothing |
 | Everything inside Neovim | `:checkhealth` | no `ERROR` |
 | Language servers in this buffer | `:checkhealth vim.lsp` | the server is under "Active Clients" |
@@ -589,7 +586,7 @@ Nothing here changes anything; each command says what is missing or wrong.
 | Secrets in the history | `gitleaks detect` | `no leaks found` (GitHub runs it, ShellCheck and zizmor weekly and on every push) |
 
 Run `:checkhealth` in a real Neovim window: in `nvim --headless` the Snacks checks report
-errors that are not real. When a check fails, `./install.sh` is the fix for anything
+errors that are not real. When a check fails, `macos/install.sh` (or the part's) is the fix for anything
 missing (a program, a server, a parser): it installs only what is not there.
 
 ## Test
@@ -604,15 +601,15 @@ is missing are skipped.
 | full | `~/dotfiles/tests/nvim.sh full` | minutes | quick, plus a real Neovim driven in tmux: language servers, toggles, the look, Markdown and notes, the `,` keys, `,r`, the debugger, tests, a LaTeX build and its snippets, a `Space g V` review, `,cj` |
 | fresh | `~/dotfiles/tests/nvim.sh fresh` | longer | full, in a throwaway directory deleted at the end, as on a new machine |
 
-`full` installs Neovim with `./install.sh nvim` into an isolated home under
+`full` installs Neovim with `macos/nvim/install.sh` into an isolated home under
 `~/.cache/dotfiles-nvim-test`; later runs reuse it. It drives Neovim through `tmux`, which the
-main `Brewfile` installs (not `./install.sh nvim`); without it those checks are skipped.
+terminal part installs (`macos/terminal/install.sh`); without it those checks are skipped.
 
 When to run which:
 
 1. After any change: `quick`.
 2. After changing plugins, keys, language servers, Markdown or LaTeX: `full`.
-3. Before trusting the setup on a new machine, or after changing `install.sh`: `fresh`.
+3. Before trusting the setup on a new machine, or after changing `macos/`: `fresh`.
 
 Each check prints one line: `pass`, `skip` with the reason, or `FAIL` with what was wanted and
 what came back. The last line is the count, for example `65 passed, 0 failed, 0 skipped`.
@@ -649,10 +646,12 @@ config/starship/  starship.toml
 config/iterm2/    dracula.json (Dynamic Profile)
 config/rumdl/     Markdown lint rules
 config/latex/     latexmkrc (linked to ~/.latexmkrc)
-Brewfile          every program (includes Brewfile.nvim)
-Brewfile.nvim     what Neovim needs, for ./install.sh nvim
-install.sh        installs everything (runs link.sh before Neovim); `nvim`: Neovim only
-link.sh           links, the ~/.zshrc block, app preferences; `nvim`: Neovim and rumdl links only
+macos/            the macOS install:
+  install.sh      runs every part
+  lib.sh          what the parts share
+  nvim/           Brewfile, install.sh, link.sh: Neovim and what it needs
+  terminal/       Brewfile, install.sh, link.sh: Starship, tmux, iTerm2, ~/.zshrc
+  apps/           Brewfile, install.sh: the other programs
 SECURITY.md       how to report a problem
 .github/          the security workflows and Dependabot
 tests/            the Neovim checks: nvim.sh runs them (quick, full, fresh), one file per area

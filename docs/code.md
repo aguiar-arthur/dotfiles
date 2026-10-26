@@ -37,9 +37,9 @@ Clojure in detail. Its relationships are in [map](map.md).
   `settings.mason_tools` (shellcheck, debugpy). Only those servers are enabled
   (`automatic_enable = mason_servers`): a server left over in Mason stays off.
 - Mason installs nothing when Neovim starts: after adding a server or tool, run
-  `./install.sh nvim` again (`dotfiles/install.lua` installs what is missing).
-- rumdl and clojure-lsp (both `Brewfile.nvim`) are enabled when the binary
-  exists. stylua, shfmt and prettier come from `Brewfile.nvim`; Mason does not install copies.
+  `macos/nvim/install.sh` again (`dotfiles/install.lua` installs what is missing).
+- rumdl and clojure-lsp (both `macos/nvim/Brewfile`) are enabled when the binary
+  exists. stylua, shfmt and prettier come from `macos/nvim/Brewfile`; Mason does not install copies.
 - blink.cmp adds its completion capabilities to every server by itself; it is a dependency of
   nvim-lspconfig so it loads, and registers them, before the first server starts.
 - JavaScript and TypeScript have no server, formatter, runner, tests or debugger: they were
@@ -172,10 +172,10 @@ Consumes:
 
 - **A language server**: its lspconfig name in `settings.mason_servers` (or
   `system_servers` with its binary), settings in `after/lsp/<name>.lua` if any, run
-  `./install.sh nvim`, list the language in the README's "Code" section, and a
+  `macos/nvim/install.sh`, list the language in the README's "Code" section, and a
   `clients("<name>")` check in a full test.
 - **A formatter**: a line in `formatters_by_ft`, a `style_markers` entry, its program in
-  `Brewfile.nvim` (or Mason tools), a case in `tests/files.lua`, the table above.
+  `macos/nvim/Brewfile` (or Mason tools), a case in `tests/files.lua`, the table above.
 - **A language for `,r`**: one line in `commands` in `run.lua` (or its name in the key's `ft`
   when the plugin knows it), a row in the README table, a `run_case` in `tests/code.sh`.
 - **A test adapter or debugger**: its plugin in `test.lua` / `debug.lua` with the new `ft`;

@@ -31,7 +31,7 @@ jobs:
             sudo tlmgr install latexmk
           }
       - name: Link Neovim
-        run: ./link.sh nvim
+        run: macos/nvim/link.sh
       - name: Plugins
         run: nvim --headless "+Lazy! restore" +qa
       - name: Servers, parsers and spell files

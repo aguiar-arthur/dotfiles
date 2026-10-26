@@ -20,7 +20,7 @@ Upstream offers, downstream consumes; a change upstream may break downstream.
 | Code | LaTeX, Markdown | each adds its servers (texlab, ltex_plus; rumdl, marksman) and uses the formatting rules | full: `test_tex`, `test_markdown` |
 | Code | LaTeX | ltex is pinned to the position encoding texlab uses | none (`:checkhealth vim.lsp` warns) |
 | Core settings | Install | Install installs whatever the settings list | `tests/helpers.lua`, `fresh` |
-| Install | Code, Git, LaTeX | Mason packages, codediff's library; Skim and `~/.latexmkrc` by `link.sh` | `fresh`, quick: Skim |
+| Install | Code, Git, LaTeX | Mason packages, codediff's library; Skim and `~/.latexmkrc` by `macos/nvim/link.sh` | `fresh`, quick: Skim |
 
 ## Shared words
 

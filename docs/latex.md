@@ -19,7 +19,7 @@ and the snippets. Its relationships are in [map](map.md).
 | `config/nvim/after/lsp/texlab.lua` | texlab reads `build/`, chktex on open and save, latexindent |
 | `config/nvim/after/lsp/ltex_plus.lua` | grammar in `pt-BR`, spelling rules off, UTF-16, quiet log |
 | `config/latex/latexmkrc` | PDF output, BibTeX when a `.bib` exists, one-second polling, what `,lc` cleans; linked to `~/.latexmkrc` |
-| `link.sh` (`skim_preferences`) | Skim's inverse search to Neovim and reload on change |
+| `macos/nvim/link.sh` (`skim_preferences`) | Skim's inverse search to Neovim and reload on change |
 
 ## How it works
 
@@ -76,7 +76,7 @@ Consumes:
 - [code](code.md): texlab and ltex-ls-plus as servers. They share `.tex` buffers, so ltex is
   pinned to UTF-16 in its `after/lsp` file (the position encoding rule).
 - [workspace](workspace.md): completion; LaTeX has its own snippets, not friendly-snippets.
-- [install](install.md): Skim and `~/.latexmkrc` (`link.sh`), and the Mason packages.
+- [install](install.md): Skim and `~/.latexmkrc` (`macos/nvim/link.sh`), and the Mason packages.
 - [core](core.md): `settings` (spell languages, servers).
 
 ## Pitfalls

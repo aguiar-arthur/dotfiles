@@ -27,8 +27,8 @@ branch, a pull request, a file's or a line's history. Its relationships are in [
 Everything git is under `<leader>g`: gitsigns for the hunks and blame of the file you edit,
 lazygit (`gg`) to commit, push and switch branches, pickers to jump (`gt` changed files, `gc`
 changed hunks, `gl` the log) and codediff for every side by side view. codediff.nvim downloads
-its prebuilt diff library in its lazy.nvim `build` step, so `install.sh` fetches it with the
-plugins.
+its prebuilt diff library in its lazy.nvim `build` step, so `macos/nvim/install.sh` fetches it
+with the plugins.
 
 We use codediff only through what it documents: its options, its `:CodeDiff` command, its
 `User` events and `:tabclose` (it cleans up on `TabClosed`). `git.setup()` sets the tab variable

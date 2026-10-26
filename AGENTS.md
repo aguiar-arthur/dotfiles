@@ -19,7 +19,7 @@ two. The README is the user's guide (keys); it is not needed to change code.
 | Git | [docs/git.md](docs/git.md) | gitsigns, codediff review, lazygit, git pickers, jumps from a review | core, workspace |
 | LaTeX | [docs/latex.md](docs/latex.md) | vimtex, texlab, ltex-ls-plus, snippets, latexmkrc, Skim | core, code, install |
 | Markdown | [docs/markdown.md](docs/markdown.md) | render-markdown, `,p` preview, rumdl rules, notes (obsidian.nvim), marksman | core, code |
-| Install | [docs/install.md](docs/install.md) | Brewfiles, `install.sh`, `link.sh`, Mason / parser / spell installs, lockfile, zsh, Starship, iTerm2 | core (settings) |
+| Install | [docs/install.md](docs/install.md) | `macos/` (one part each for nvim, terminal, apps), Mason / parser / spell installs, lockfile, zsh, Starship, iTerm2 | core (settings) |
 | Tests | [docs/tests.md](docs/tests.md) | `tests/`, where a new check goes, checking by hand | all |
 | Windows | [docs/windows.md](docs/windows.md) | `windows/collect-diagnostics.ps1`: a Windows 11 health report (events, dumps, drivers, disks, temperatures) and an optional DISM / SFC repair | none |
 
@@ -46,10 +46,12 @@ config/rumdl/       rumdl.toml (Markdown lint rules; the root .rumdl.toml links 
 config/iterm2/      dracula.json (Dynamic Profile)
 config/latex/       latexmkrc (linked to ~/.latexmkrc)
 docs/               one doc per context (the map above)
-Brewfile            every program (includes Brewfile.nvim)
-Brewfile.nvim       what Neovim needs, alone
-install.sh          installs everything, running link.sh before Neovim
-link.sh             links, the ~/.zshrc block, iTerm2 and Skim preferences
+macos/              the macOS install, see docs/install.md:
+  install.sh        runs every part: terminal, apps, nvim
+  lib.sh            what the parts share: Homebrew, links with backups, preferences, steps
+  nvim/             Brewfile, install.sh (brew, link, plugins and Mason), link.sh (incl. Skim)
+  terminal/         Brewfile, install.sh (brew, link), link.sh (Starship, iTerm2, ~/.zshrc)
+  apps/             Brewfile, install.sh (brew): programs that are neither of the others
 SECURITY.md         how to report a problem
 .github/            security workflows and Dependabot
 tests/              nvim.sh (quick, full, fresh) and its checks, see docs/tests.md
@@ -61,20 +63,19 @@ windows/            collect-diagnostics.ps1, a standalone Windows health report,
 - **Simple first.** No health checks, no doctor, no flags, no tests beyond `tests/nvim.sh`
   ([docs/tests.md](docs/tests.md)), and no CI beyond the security workflows and the quick tests
   (`.github/workflows/`: ShellCheck, gitleaks, zizmor, CodeQL, Scorecard, `tests.yml`).
-  `./install.sh` installs everything and runs `link.sh` before the Neovim step (Neovim then uses
-  the linked `~/.config/nvim`, as every day). The one exception to "no flags": both scripts take
-  an optional `nvim` argument that limits them to Neovim (`Brewfile.nvim`, `~/.config/nvim` and
-  the rumdl rules) for machines whose shell and terminal must stay untouched. Both stay
-  idempotent in both modes and only do what is missing. Every network step in `install.sh` has a
-  timeout or a failure path.
+  `macos/install.sh` runs every part (`macos/<part>/install.sh`: terminal, apps, nvim); a part
+  runs on its own on a machine where the rest must stay untouched, so no script takes an
+  argument. Each part installs its own `Brewfile`, runs its `link.sh`, and (nvim) sets up
+  Neovim through the linked `~/.config/nvim`, as every day. Every script stays idempotent and
+  only does what is missing. Every network step has a timeout or a failure path.
 - **No comments in code**, in any file. Names and `desc` / `:wk` labels say what; a reason
   worth keeping goes in one sentence in its context's doc in `docs/`. Exceptions: `#!` lines
   and text the code writes or matches (the `# >>> dotfiles >>>` markers).
 - **macOS only**, no branches for other systems. The one exception is `windows/`: standalone
   PowerShell for debugging a Windows PC, never installed, linked or tested by the rest.
 - **English** in code, docs and commit messages; reply to the user in their language.
-- **Every program goes in the Brewfile**; what Neovim needs goes in `Brewfile.nvim`, which
-  the Brewfile includes.
+- **Every program goes in a Brewfile**: the one of the part that needs it (`macos/nvim/`,
+  `macos/terminal/`), or `macos/apps/` when it is neither.
 - **Keys.** `<leader>` is for what works everywhere, `,` (the local leader) for what depends on
   the file type. A `,` key goes in its plugin's `keys` with lazy.nvim's `ft`, in `LspAttach`
   when it depends on the server, or in `after/ftplugin/`; never in an autocmd of our own.

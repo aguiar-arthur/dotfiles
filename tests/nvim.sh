@@ -39,7 +39,7 @@ SKAutoReloadFileUpdate is off"
   if [ -z "$out" ]; then
     pass "Skim is set up for Neovim"
   else
-    fail "Skim is set up for Neovim" "run ./link.sh:$out"
+    fail "Skim is set up for Neovim" "run macos/nvim/link.sh:$out"
   fi
 }
 
@@ -49,7 +49,7 @@ mason_python() {
   if [ -z "$broken" ]; then
     pass "Mason's Python tools still have their Python"
   else
-    fail "Mason's Python tools still have their Python" "run ./install.sh nvim to reinstall: $broken"
+    fail "Mason's Python tools still have their Python" "run macos/nvim/install.sh to reinstall: $broken"
   fi
 }
 
@@ -88,12 +88,12 @@ quick() {
     fail "zg writes to the versioned word list" "spellfile is not config/nvim/spell/en.utf-8.add"
   fi
   tool "stylua" stylua bash -c "cd '$DOT/config/nvim' && stylua --check . ../../tests"
-  tool "shell syntax" bash bash -n "$DOT/install.sh" "$DOT/link.sh" "$DOT"/tests/*.sh "$DOT/config/nvim/dashboard/clock.sh"
+  tool "shell syntax" bash bash -n "$DOT"/macos/*.sh "$DOT"/macos/*/*.sh "$DOT"/tests/*.sh "$DOT/config/nvim/dashboard/clock.sh"
   check "zsh: Neovim is the editor" zsh -f -c "source '$DOT/config/zsh/dotfiles.zsh' && [[ \$EDITOR == nvim && \$VISUAL == nvim ]]"
-  tool "shfmt" shfmt shfmt -d "$DOT/install.sh" "$DOT/link.sh" "$DOT"/tests/*.sh "$DOT/config/nvim/dashboard/clock.sh"
+  tool "shfmt" shfmt shfmt -d "$DOT"/macos/*.sh "$DOT"/macos/*/*.sh "$DOT"/tests/*.sh "$DOT/config/nvim/dashboard/clock.sh"
   tool "rumdl" rumdl rumdl check "$DOT" --config "$DOT/config/rumdl/rumdl.toml"
   check_silent "no comments in Lua" grep -rnE '^[[:space:]]*--' --include='*.lua' "$DOT/config/nvim" "$DOT/tests"
-  check_silent "no comments in shell" grep -nE '^[[:space:]]*#([^!]|$)' "$DOT/install.sh" "$DOT/link.sh" "$DOT"/tests/*.sh "$DOT/config/nvim/dashboard/clock.sh" "$DOT/config/zsh/dotfiles.zsh"
+  check_silent "no comments in shell" grep -nE '^[[:space:]]*#([^!]|$)' "$DOT"/macos/*.sh "$DOT"/macos/*/*.sh "$DOT"/tests/*.sh "$DOT/config/nvim/dashboard/clock.sh" "$DOT/config/zsh/dotfiles.zsh"
   check "the dashboard clock draws its digits and date" clock_frame
   if [ -z "$(find "$REAL_STATE/nvim/sessions" -newer "$marker" 2>/dev/null)" ]; then
     pass "the quick tests leave your sessions alone"

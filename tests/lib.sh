@@ -131,10 +131,10 @@ cleanup() {
 install() {
   local before
   before="$(lock_hash)"
-  if "$DOT/install.sh" nvim >"$T/install.log" 2>&1; then
-    pass "install.sh nvim in an empty home"
+  if "$DOT/macos/nvim/install.sh" >"$T/install.log" 2>&1; then
+    pass "macos/nvim/install.sh in an empty home"
   else
-    fail "install.sh nvim in an empty home" "$(tail -n 15 "$T/install.log")"
+    fail "macos/nvim/install.sh in an empty home" "$(tail -n 15 "$T/install.log")"
   fi
   if [ "$before" = "$(lock_hash)" ]; then
     pass "a fresh install leaves lazy-lock.json alone"

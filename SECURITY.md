@@ -1,7 +1,7 @@
 # Security policy
 
 These are one person's dotfiles, kept small. If you find a problem, such as a leaked secret, an
-unsafe step in `install.sh` or `link.sh`, or a workflow that can be abused, report it privately
+unsafe step in the `macos/` install scripts, or a workflow that can be abused, report it privately
 through [Report a vulnerability](https://github.com/aguiar-arthur/dotfiles/security/advisories/new)
 rather than a public issue.
 
