@@ -628,6 +628,18 @@ return { wrap = false, spelllang = { "en_us" }, notes = { dir = "~/Documents/not
 
 For a single project, a `.nvim.lua` at its root ([docs/core.md](docs/core.md#per-project-settings)).
 
+## Windows health report
+
+Not part of the macOS setup: to find why a Windows 11 PC shuts down or crashes, run in
+PowerShell as Administrator
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\windows\collect-diagnostics.ps1
+```
+
+It only reads, zips a report into `Documents\diagnostics`, and asks before any repair. Its
+options and what it collects are in [docs/windows.md](docs/windows.md).
+
 ## Layout
 
 ```text
@@ -644,6 +656,7 @@ link.sh           links, the ~/.zshrc block, app preferences; `nvim`: Neovim and
 SECURITY.md       how to report a problem
 .github/          the security workflows and Dependabot
 tests/            the Neovim checks: nvim.sh runs them (quick, full, fresh), one file per area
+windows/          collect-diagnostics.ps1: debug a Windows PC's health (docs/windows.md)
 docs/             how each context works and why, for you and for AI assistants
 AGENTS.md         rules and the context map for AI assistants (CLAUDE.md points to it)
 ```

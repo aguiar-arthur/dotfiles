@@ -1,7 +1,8 @@
 # AGENTS.md
 
-Personal dotfiles for macOS: Neovim, Starship and an iTerm2 profile. Keep them small: this
-is one person's setup, not a product.
+Personal dotfiles for macOS: Neovim, Starship and an iTerm2 profile, plus one standalone
+Windows script to debug a PC's health. Keep them small: this is one person's setup, not a
+product.
 
 ## Context map
 
@@ -20,6 +21,7 @@ two. The README is the user's guide (keys); it is not needed to change code.
 | Markdown | [docs/markdown.md](docs/markdown.md) | render-markdown, `,p` preview, rumdl rules, notes (obsidian.nvim), marksman | core, code |
 | Install | [docs/install.md](docs/install.md) | Brewfiles, `install.sh`, `link.sh`, Mason / parser / spell installs, lockfile, zsh, Starship, iTerm2 | core (settings) |
 | Tests | [docs/tests.md](docs/tests.md) | `tests/`, where a new check goes, checking by hand | all |
+| Windows | [docs/windows.md](docs/windows.md) | `windows/collect-diagnostics.ps1`: a Windows 11 health report (events, dumps, drivers, disks, temperatures) and an optional DISM / SFC repair | none |
 
 How the contexts relate (upstream / downstream, the contract, the shared words) is in
 [docs/map.md](docs/map.md). A change inside one context needs only its doc; a change to
@@ -51,6 +53,7 @@ link.sh             links, the ~/.zshrc block, iTerm2 and Skim preferences
 SECURITY.md         how to report a problem
 .github/            security workflows and Dependabot
 tests/              nvim.sh (quick, full, fresh) and its checks, see docs/tests.md
+windows/            collect-diagnostics.ps1, a standalone Windows health report, see docs/windows.md
 ```
 
 ## Rules
@@ -67,7 +70,8 @@ tests/              nvim.sh (quick, full, fresh) and its checks, see docs/tests.
 - **No comments in code**, in any file. Names and `desc` / `:wk` labels say what; a reason
   worth keeping goes in one sentence in its context's doc in `docs/`. Exceptions: `#!` lines
   and text the code writes or matches (the `# >>> dotfiles >>>` markers).
-- **macOS only**, no branches for other systems.
+- **macOS only**, no branches for other systems. The one exception is `windows/`: standalone
+  PowerShell for debugging a Windows PC, never installed, linked or tested by the rest.
 - **English** in code, docs and commit messages; reply to the user in their language.
 - **Every program goes in the Brewfile**; what Neovim needs goes in `Brewfile.nvim`, which
   the Brewfile includes.
