@@ -217,6 +217,9 @@ LaTeX and Clojure.
 | `Space d t` | every `TODO` / `FIXME` of the project |
 | `Space d q` / `Space d l` | quickfix / location list, in a picker |
 
+The line under the cursor shows its diagnostics in full on lines below it; other lines show
+them at the end. Renaming an HTML tag renames its closing tag too.
+
 Saving formats the file only in projects that declare that formatter's style (a
 `stylua.toml`, a prettier config, `[tool.ruff]`, …), so other people's code is never
 restyled. Prettier runs a project's JavaScript, so it also needs a `.nvim.lua` approved with
@@ -255,9 +258,9 @@ Results appear as signs next to each test and as diagnostics on the failing line
 | `,d b` / `,d B` | breakpoint / breakpoint with a condition |
 | `,d c` | start, or continue to the next breakpoint |
 | `,d i` / `,d o` / `,d O` | step into / over / out |
-| `,d e` | evaluate the expression under the cursor or the selection |
+| `,d e` | evaluate the expression under the cursor or the selection, in a float (`q` closes) |
 | `,d r` / `,d l` | debug REPL / run the last session again |
-| `,d t` / `,d u` | stop / close the panels |
+| `,d t` / `,d u` | stop / show or hide the panels (nvim-dap-view: `]v` / `[v` switch view, `g?` its keys) |
 
 A session opens panels with variables, the call stack, breakpoints and the program's output;
 they stay open after the program ends so its output can be read.
@@ -328,7 +331,8 @@ this Neovim: it sees the open files, the selection and the diagnostics, and show
 diff to accept or reject. Sending a selection or a file moves you into Claude, ready to type
 (`Esc Esc` or `C-\ C-n` comes back). When Claude is hidden and it sends a terminal notification
 or exits, a notification tells you; whether Claude Code sends one depends on its own
-notification setting. Log in once in the terminal first (`claude`, then `/login`). Nothing
+notification setting. A diff Claude proposes opens in its own tab, where `Space a a` / `Space a d`
+accept or reject it. Log in once in the terminal first (`claude`, then `/login`). Nothing
 starts with Neovim: the connection opens with the first of these keys.
 
 | Key | Does |
@@ -368,9 +372,10 @@ state.
 
 ### Clojure (Conjure, nvim-paredit, clojure-lsp)
 
-Open a file of a `deps.edn` or `project.clj` project and press `,cj`: it starts an nREPL in a
-terminal below and connects as soon as it is up (or only connects when a REPL already runs).
-Results show next to the code and in the log.
+Open a file of a `deps.edn`, `project.clj` or `bb.edn` (Babashka) project and press `,cj`: it
+starts an nREPL in a terminal below and connects as soon as it is up (or only connects when a
+REPL already runs). Results show next to the code and in the log. Once connected, completion
+also offers what the running REPL knows (Conjure's omnifunc, beside clojure-lsp's).
 
 | Key | Does |
 |---|---|

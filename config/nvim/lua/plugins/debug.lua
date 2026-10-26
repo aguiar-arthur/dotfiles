@@ -16,8 +16,7 @@ return {
   {
     "mfussenegger/nvim-dap",
     dependencies = {
-      "rcarriga/nvim-dap-ui",
-      "nvim-neotest/nvim-nio",
+      "igorlfs/nvim-dap-view",
       "mason-org/mason.nvim",
     },
     keys = {
@@ -39,31 +38,25 @@ return {
       key("dl", dap("run_last"), "Run last"),
       key("dt", dap("terminate"), "Terminate"),
       key("du", function()
-        require("dapui").toggle()
-      end, "Toggle DAP UI"),
+        require("dap-view").toggle(true)
+      end, "Toggle the debug panels"),
       key("de", function()
-        require("dapui").eval()
-      end, "Eval expression", { "n", "v" }),
+        require("dap-view").hover()
+      end, "Eval expression"),
+      key("de", function()
+        local lines =
+          vim.fn.getregion(vim.fn.getpos("v"), vim.fn.getpos("."), { type = vim.fn.mode() })
+        require("dap-view").hover(table.concat(lines, "\n"))
+      end, "Eval selection", "x"),
     },
     config = function()
-      local dap, dapui = require("dap"), require("dapui")
+      local dap = require("dap")
 
       dap.adapters.python = { type = "executable", command = vim.fn.exepath("debugpy-adapter") }
 
-      dapui.setup({
-        layouts = {
-          {
-            elements = {
-              { id = "scopes", size = 0.35 },
-              { id = "breakpoints", size = 0.15 },
-              { id = "stacks", size = 0.25 },
-              { id = "watches", size = 0.25 },
-            },
-            size = 40,
-            position = "left",
-          },
-          { elements = { "repl", "console" }, size = 0.25, position = "bottom" },
-        },
+      require("dap-view").setup({
+        auto_toggle = "open",
+        winbar = { default_section = "scopes" },
       })
 
       dap.configurations.python = {
@@ -87,12 +80,6 @@ return {
       for name, sign in pairs(signs) do
         vim.fn.sign_define(name, sign)
       end
-
-      local function open_ui()
-        dapui.open()
-      end
-      dap.listeners.before.attach.dapui_config = open_ui
-      dap.listeners.before.launch.dapui_config = open_ui
     end,
   },
 }

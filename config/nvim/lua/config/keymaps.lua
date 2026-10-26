@@ -42,9 +42,7 @@ end, o("Close buffer"))
 
 local function diagnostic_jump(count, severity)
   return function()
-    if vim.diagnostic.jump({ count = count, severity = severity }) then
-      vim.diagnostic.open_float({ scope = "cursor", focus = false })
-    end
+    vim.diagnostic.jump({ count = count, severity = severity })
   end
 end
 local error_only = vim.diagnostic.severity.ERROR

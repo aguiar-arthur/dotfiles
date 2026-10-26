@@ -55,6 +55,7 @@ return {
     end,
     opts = {
       focus_after_send = true,
+      diff_opts = { open_in_new_tab = true, hide_terminal_in_new_tab = true },
       terminal = {
         snacks_win_opts = require("dotfiles.float").win("Claude"),
       },

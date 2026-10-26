@@ -2,7 +2,7 @@ local M = {}
 
 local versions = { nrepl = "1.8.0", cider_nrepl = "0.63.1" }
 
-local function repl_command(root)
+function M.repl_command(root)
   if vim.uv.fs_stat(root .. "/deps.edn") then
     return {
       "clojure",
@@ -29,6 +29,9 @@ local function repl_command(root)
       "repl",
       ":headless",
     }
+  end
+  if vim.uv.fs_stat(root .. "/bb.edn") then
+    return { "bb", "nrepl-server", "0" }
   end
 end
 
@@ -88,10 +91,10 @@ local function when_port_answers(port_file, callback)
 end
 
 function M.jack_in()
-  local root = vim.fs.root(0, { "deps.edn", "project.clj" })
-  local cmd = root and repl_command(root)
+  local root = vim.fs.root(0, { "deps.edn", "project.clj", "bb.edn" })
+  local cmd = root and M.repl_command(root)
   if not cmd then
-    vim.notify("No deps.edn or project.clj above this file", vim.log.levels.ERROR)
+    vim.notify("No deps.edn, project.clj or bb.edn above this file", vim.log.levels.ERROR)
     return
   end
   local port_file = root .. "/.nrepl-port"

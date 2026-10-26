@@ -57,6 +57,10 @@ its own.
 With `focus_after_send` every send (`<leader>as`, `ab`, `aS`, `aB`) opens Claude, focuses it and
 enters terminal mode; without it the window opened but the cursor stayed in the code, in normal mode.
 
+A diff Claude proposes opens in a new tab without the Claude float (`diff_opts.open_in_new_tab`,
+`hide_terminal_in_new_tab`), as a codediff review does, instead of beside the code under the
+float; `<leader>aa` / `<leader>ad` accept or reject it and close the tab.
+
 A Claude that is out of sight (hidden, or another window focused) notifies through `TermRequest`:
 an OSC 9 message (the iTerm2 notification Claude Code sends) is shown as is, OSC 9;4 progress is
 ignored, and `TermClose` says it exited. Only the fake-program check proves this; whether the real

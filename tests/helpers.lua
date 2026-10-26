@@ -69,6 +69,20 @@ T.eq("clojure-lsp: Conjure's log buffers start no server", {
   clojure_root(clojure .. "/conjure-log-dev.cljc"),
 }, { "not started", "not started" })
 
+local jack_in = require("dotfiles.clojure")
+local function repl(files)
+  local cmd = jack_in.repl_command(T.dir(files))
+  return cmd and cmd[1]
+end
+T.eq("clojure: deps.edn starts clojure", repl({ ["deps.edn"] = {}, ["bb.edn"] = {} }), "clojure")
+T.eq("clojure: project.clj starts lein", repl({ ["project.clj"] = {}, ["bb.edn"] = {} }), "lein")
+T.eq(
+  "clojure: bb.edn alone starts Babashka on a free port",
+  jack_in.repl_command(T.dir({ ["bb.edn"] = {} })),
+  { "bb", "nrepl-server", "0" }
+)
+T.eq("clojure: no project file, no command", repl({}), nil)
+
 local install = require("dotfiles.install")
 local spell = T.dir()
 local files = install.spell_files({ "en_us", "pt_br" }, spell)

@@ -54,6 +54,7 @@ return {
         default = { "lsp", "path", "snippets", "buffer" },
         per_filetype = {
           lua = { inherit_defaults = true, "lazydev" },
+          clojure = { inherit_defaults = true, "omni" },
         },
         providers = {
           lazydev = { name = "LazyDev", module = "lazydev.integrations.blink", score_offset = 100 },

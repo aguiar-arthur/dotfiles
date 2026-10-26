@@ -43,9 +43,12 @@ return {
         end
       end
 
+      vim.lsp.linked_editing_range.enable(true)
+
       vim.diagnostic.config({
         severity_sort = true,
-        virtual_text = { spacing = 4, prefix = "●", source = "if_many" },
+        virtual_text = { spacing = 4, prefix = "●", source = "if_many", current_line = false },
+        virtual_lines = { current_line = true },
         float = { source = true, max_width = 80, header = "" },
         signs = {
           text = {

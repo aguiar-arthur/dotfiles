@@ -68,8 +68,15 @@ test_debug() {
   probe "Python: ,db sets a breakpoint" 'vim.tbl_count(require("dap.breakpoints").get())' 1 20
   keys ,dc
   probe "Python: ,dc stops at the breakpoint" 'require("dap").session() and require("dap").session().stopped_thread_id and 1 or 0' 1 60
-  probe "Python: the six debug panels open" '#vim.tbl_filter(function(w) return vim.bo[vim.api.nvim_win_get_buf(w)].filetype:find("dap") end, vim.api.nvim_tabpage_list_wins(0))' 6 10
+  probe "Python: the debug panels and the program's terminal open" '#vim.tbl_filter(function(w) return vim.bo[vim.api.nvim_win_get_buf(w)].filetype:find("dap") end, vim.api.nvim_tabpage_list_wins(0))' 2 10
   probe "Python: the cursor stays in the code" 'vim.bo.filetype' python 5
+  keys ,de
+  probe "Python: ,de shows the value under the cursor" '#vim.tbl_filter(function(w) return vim.bo[vim.api.nvim_win_get_buf(w)].filetype == "dap-view-hover" end, vim.api.nvim_list_wins())' 1 10
+  keys Escape
+  lua_do 'for _, w in ipairs(vim.api.nvim_list_wins()) do if vim.bo[vim.api.nvim_win_get_buf(w)].filetype == "dap-view-hover" then vim.api.nvim_win_close(w, true) end end'
+  keys :2 Enter 0 w w v '$' ,de
+  probe "Python: ,de in visual mode evaluates the selection" 'require("dap-view.state").hover' 'x + 1' 10
+  lua_do 'for _, w in ipairs(vim.api.nvim_list_wins()) do if vim.bo[vim.api.nvim_win_get_buf(w)].filetype == "dap-view-hover" then vim.api.nvim_win_close(w, true) end end'
   keys ,dt
   probe "Python: ,dt ends the session" 'require("dap").session() and 1 or 0' 0 20
   keys ,du
@@ -132,7 +139,7 @@ test_clojure() {
     probe "Clojure: ,o stays paredit's raise" 'vim.fn.maparg(",o", "n", false, true).desc or ""' "Raise form"
   fi
   keys ,cj
-  probe "Clojure: ,cj without deps.edn says so" 'Snacks.notifier.get_history()[#Snacks.notifier.get_history()].msg' "No deps.edn or project.clj above this file"
+  probe "Clojure: ,cj without deps.edn says so" 'Snacks.notifier.get_history()[#Snacks.notifier.get_history()].msg' "No deps.edn, project.clj or bb.edn above this file"
   stop_nvim
   if ! have clojure; then
     skip "Clojure: ,cj starts the REPL and connects" "clojure not installed"
@@ -144,6 +151,17 @@ test_clojure() {
   keys ,cj
   probe "Clojure: ,cj replaces a dead .nrepl-port" '(vim.fn.readfile(".nrepl-port")[1] or "1") ~= "1" and 1 or 0' 1 240
   probe "Clojure: ,cj connects Conjure" 'require("conjure.client.clojure.nrepl.state").get("conn") and 1 or 0' 1 30
+  probe "Clojure: completion asks the REPL (Conjure's omnifunc in blink)" '(vim.bo.omnifunc == "v:lua._conjure_omnifunc" and require("blink.cmp.config").sources.providers.omni.enabled()) and 1 or 0' 1 10
   stop_nvim
   rm -f "$PROJ/clj/deps.edn" "$PROJ/clj/.nrepl-port"
+  if ! have bb; then
+    skip "Clojure: ,cj starts Babashka for bb.edn" "bb not installed"
+    return
+  fi
+  printf '{}\n' >"$PROJ/clj/bb.edn"
+  start_nvim "$PROJ/clj" demo.clj
+  keys ,cj
+  probe "Clojure: ,cj starts Babashka for bb.edn and connects" 'require("conjure.client.clojure.nrepl.state").get("conn") and 1 or 0' 1 60
+  stop_nvim
+  rm -f "$PROJ/clj/bb.edn" "$PROJ/clj/.nrepl-port"
 }

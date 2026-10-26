@@ -22,11 +22,11 @@ Clojure in detail. Its relationships are in [map](map.md).
 | `config/nvim/lua/plugins/formatting.lua` | conform, `style_markers`, the prettier trust check, `<leader>lf` |
 | `config/nvim/lua/plugins/run.lua` | code_runner.nvim, `,r` and its `commands` |
 | `config/nvim/lua/plugins/test.lua` | Neotest, neotest-python, `,t` |
-| `config/nvim/lua/plugins/debug.lua` | nvim-dap, dap-ui, the debugpy adapter, `,d`, the Python launch |
+| `config/nvim/lua/plugins/debug.lua` | nvim-dap, nvim-dap-view, the debugpy adapter, `,d`, the Python launch |
 | `config/nvim/lua/dotfiles/python.lua` | the interpreter: `.venv` upward, else `$VIRTUAL_ENV`, else `python3` |
 | `config/nvim/after/ftplugin/lua.lua` | `,s` sources the file |
 | `config/nvim/lua/plugins/clojure.lua` | Conjure (Clojure only), nvim-paredit, `,cj` |
-| `config/nvim/lua/dotfiles/clojure.lua` | jack-in: the nREPL command, waiting for `.nrepl-port`, the dead-REPL check |
+| `config/nvim/lua/dotfiles/clojure.lua` | jack-in: the nREPL command (`clojure`, `lein` or `bb`), waiting for `.nrepl-port`, the dead-REPL check |
 | `config/nvim/after/ftplugin/clojure.lua` | which-key names of Conjure's groups |
 
 ## How it works
@@ -48,6 +48,11 @@ Clojure in detail. Its relationships are in [map](map.md).
 - `LspAttach` maps `gd` / `gr` and `<leader>l…` to Snacks pickers, clears `formatexpr` so `gq`
   keeps wrapping prose and comments, and maps `,o` (organize imports) only when the server
   offers it and the file type has no `,o` of its own (in Clojure it stays paredit's raise).
+- `vim.lsp.linked_editing_range` is on for every server that offers it (html): renaming an
+  opening tag renames its closing tag.
+- Diagnostics show in full as virtual lines on the cursor line (`virtual_lines.current_line`)
+  and as virtual text on the others (`virtual_text.current_line = false`), so `]d` / `]e` only
+  jump: a float on top would repeat the same text.
 - In Python, ruff is asked for UTF-16 positions like basedpyright, and its hover is off so `K`
   shows basedpyright's. basedpyright's organize imports is off; ruff's is the one.
 - Files named `*.json.*` (`config.json.example`) are JSON, so jsonls lints them; prettier gets
@@ -100,8 +105,12 @@ and Rust with the plugin's own commands.
 summary, `,to` output, `,tO` output panel, `,td` debug the nearest test. Results show as signs
 and diagnostics. neotest-python runs pytest from the project's virtualenv.
 
-`,d` drives nvim-dap with dap-ui in Python buffers. dap-ui opens on launch and stays open after
-the program ends so its output can be read (`,du` closes it). Breakpoints show as `●` (`◆` with
+`,d` drives nvim-dap with nvim-dap-view in Python buffers: one panel below with views switched
+from its winbar (scopes first) and the program's terminal beside it. It opens on launch
+(`auto_toggle = "open"`) and stays open after the program ends so its output can be read (`,du`
+hides both). It replaced nvim-dap-ui, which needed a six-window layout and nvim-nio. `,de` opens
+dap-view's hover; in visual mode the selection comes from `getregion`, because `:DapViewHover`
+is not declared with a range and so never sees one. Breakpoints show as `●` (`◆` with
 a condition) and the stopped line is tinted green. debugpy runs the file with the interpreter
 from `python.lua`; its adapter is Mason's `debugpy-adapter`, set in one line (mason-nvim-dap did
 only that and was dropped).
@@ -110,12 +119,16 @@ only that and was dropped).
 
 clojure-lsp gives navigation, rename, diagnostics and formatting. Conjure evaluates code in a
 REPL, nvim-paredit edits s-expressions (`>)` / `<)` slurp and barf, `,o` raises a form).
-`,cj` starts an nREPL with cider-nrepl in a terminal below (`clojure` for `deps.edn`, `lein`
-for `project.clj`) and connects as soon as `.nrepl-port` appears; when a REPL already answers
-it only connects; a `.nrepl-port` left by a dead REPL is removed and a new one starts,
-replacing the dead REPL's terminal. Conjure keeps its own keys (`,e` evaluate, `,l` log, `,t`
-tests, `,r` refresh, `,s` sessions). The nREPL and cider-nrepl versions are at the top of
-`dotfiles/clojure.lua`.
+`,cj` starts an nREPL with cider-nrepl in a terminal below (`clojure` for `deps.edn`, `lein` for
+`project.clj`, else `bb nrepl-server 0` for `bb.edn`, on a free port that Babashka writes to
+`.nrepl-port`; a `bb.edn` beside `deps.edn` is only for tasks, so `deps.edn` wins) and connects
+as soon as `.nrepl-port` appears; when a REPL already answers it only connects; a `.nrepl-port`
+left by a dead REPL is removed and a new one starts, replacing the dead REPL's terminal. Conjure
+keeps its own keys (`,e` evaluate, `,l` log, `,t` tests, `,r` refresh, `,s` sessions). blink.cmp
+adds the `omni` source in Clojure, which calls Conjure's omnifunc, so completion offers what the
+running REPL knows beside clojure-lsp's static items. Neovim keeps Conjure's omnifunc: it sets
+`v:lua.vim.lsp.omnifunc` only when `omnifunc` is empty, and blink's `omni` turns itself off on
+the LSP one. The nREPL and cider-nrepl versions are at the top of `dotfiles/clojure.lua`.
 
 ## Contract
 
@@ -161,12 +174,12 @@ Consumes:
 |---|---|
 | Format on save per style marker (none without one), prettier trust, `*.json.*` parser | `tests/files.lua` |
 | `gq` keeps wrapping (`formatexpr` cleared) | `tests/keys.lua` |
-| Python interpreter, Mason lists, clojure-lsp skips Conjure's log | `tests/helpers.lua` |
+| Python interpreter, Mason lists, clojure-lsp skips Conjure's log, the jack-in command per project file | `tests/helpers.lua` |
 | Every `<Cmd>` key names a command that exists (`Space l R` once ran a removed `:LspRestart`) | `tests/keys.lua` |
 | Servers attach (Lua, Python, …), `Space l R` restarts one, `,o`, `,s` | full: `test_lua`, `test_language_actions` |
 | `,r` per language | full: `test_run` in `tests/code.sh` |
-| `,t` keys, `,d` debugger (the six panels, `,du`) | full: `test_test_keys`, `test_debug` |
-| `,cj` jack-in | full: `test_clojure` |
+| `,t` keys, `,d` debugger (the panel and terminal, `,de` on a word and a selection, `,du`) | full: `test_test_keys`, `test_debug` |
+| `,cj` jack-in (deps.edn, bb.edn), REPL completion through blink's `omni` | full: `test_clojure` |
 
 ## Changing it
 
