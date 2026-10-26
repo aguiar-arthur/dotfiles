@@ -48,6 +48,9 @@ Where a new check goes:
   `terminals.sh` and `claude.sh`) and list it in the `for part in …` loop of `tests/nvim.sh`.
 - A key sent while a terminal has the cursor goes to the program, so set Lua state there with
   `lua_do`, not with `send ':lua …'`.
+- `ui2` keeps its message and `:` line windows as floats in the current tab, so a probe that
+  counts windows by an option (wrap, cursorline) keeps only `relative == ""` ones, as `tiles`
+  does.
 
 ## Contract
 

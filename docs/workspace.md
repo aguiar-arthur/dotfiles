@@ -24,7 +24,7 @@ objects, completion and snippets, sharing code, and Claude Code. Its relationshi
 
 ## How it works
 
-`gd` / `gr` / `K` work as usual (implementation is `<leader>li`; `gi` keeps Vim's meaning);
+`gd` / `grr` / `K` work as usual (implementation is `gri`; `gi` keeps Vim's meaning);
 `]r` / `[r` jump between references of the word under the cursor; `s` / `S` jump with flash;
 `gs…` surrounds. Text objects (mini.ai) work in every language with a treesitter parser:
 `af` / `if` function, `ac` / `ic` class, `au` / `iu` call, `aa` / `ia` argument, plus brackets,

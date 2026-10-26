@@ -37,12 +37,6 @@ map({ "n", "x" }, "<leader>cl", function()
   require("dotfiles.share").link()
 end, o("Copy permalink (line or selection)"))
 
-for _, lhs in ipairs({ "grn", "grr", "gra", "gri", "grt", "grx" }) do
-  for _, mode in ipairs({ "n", "x" }) do
-    pcall(vim.keymap.del, mode, lhs)
-  end
-end
-
 map("n", "<C-h>", "<C-w>h", o("Window left"))
 map("n", "<C-j>", "<C-w>j", o("Window below"))
 map("n", "<C-k>", "<C-w>k", o("Window above"))

@@ -103,8 +103,8 @@ and [Markdown](docs/markdown.md).
 | `Space f r` / `Space b b` | recent files / open buffers |
 | `Space o p` | file tree |
 | `Space s` / `Space q` | save / quit |
-| `gd` / `gr` / `K` | go to definition / references / documentation |
-| `Space l a` / `Space l n` | code action / rename |
+| `gd` / `grr` / `K` | go to definition / references / documentation |
+| `gra` / `grn` | code action / rename |
 | `Space g g` | lazygit |
 | `,r` | run the file (Python, Lua, shell, JavaScript, C, C++, Java, Ruby, Rust) |
 
@@ -208,14 +208,14 @@ LaTeX and Clojure.
 
 | Key | Does |
 |---|---|
-| `gd` / `gr` | go to the definition / list references (the list opens even for one) |
+| `gd` / `grr` | go to the definition / list references (the list opens even for one) |
 | `K` | documentation of the word under the cursor |
-| `Space l i` / `Space l t` / `Space l D` | implementation / type definition / declaration |
-| `Space l n` | rename everywhere |
-| `Space l a` | code action (fix, import, refactor), also on a selection |
+| `gri` / `grt` / `Space l D` | implementation / type definition / declaration |
+| `grn` | rename everywhere (Neovim's own) |
+| `gra` | code action (fix, import, refactor), also on a selection (Neovim's own) |
 | `Space l s` | signature help |
 | `Space l c` / `Space l C` | who calls the function under the cursor / what it calls, in a picker |
-| `Space l l` | run the code lens of this line (the grey text a server shows above some lines, such as clojure-lsp's reference counts) |
+| `grx` | run the code lens of this line (the grey text a server shows above some lines, such as clojure-lsp's reference counts; Neovim's own) |
 | `Space l f` | format the buffer or the selection |
 | `Space l R` / `Space l M` | restart the servers / open Mason |
 | `]d` / `[d`, `]e` / `[e` | next / previous diagnostic, error |
@@ -305,7 +305,7 @@ the left when there are several:
 | `Space g h` / `Space g L` | the history of the file / of the line or selected lines, commit by commit |
 
 The right side is the real file, so `gd`, `K` and edits work there. A file you open from the
-review (`gf`, or a picker: `gd`, `gr`, `Space f f`, …) opens in the tab just before it, so
+review (`gf`, or a picker: `gd`, `grr`, `Space f f`, …) opens in the tab just before it, so
 the review stays as it was; `gt` / `gT` switch between the two. `Space g q` closes the review from
 either tab, even when the review is the last tab. The two sides never wrap lines: codediff keeps
 them aligned that way.
@@ -406,10 +406,13 @@ also offers what the running REPL knows (Conjure's omnifunc, beside clojure-lsp'
 
 ### Look
 
-Dracula everywhere. The status line shows the mode, git branch and changes, diagnostics, the
-file, the language servers and a running LaTeX build. The left column shows marks,
-diagnostics, git changes and folds. `Space o d` opens the start screen (`q` closes it, or quits
-when it is the start screen itself), `Space o n` the notification history.
+Dracula everywhere. The status line shows the mode, git branch and changes, diagnostics, the file,
+the language servers, their progress while they load or index (`40%(1)`: the average and how many
+tasks; the `:` line names the task) and a running LaTeX build. Messages and the `:` line use
+Neovim's new message UI: no "Press ENTER" prompts, the `:` line is highlighted as you type, and long
+output is folded behind a `[+N]` mark (`g<` or `:messages` shows it in full). The left column shows
+marks, diagnostics, git changes and folds. `Space o d` opens the start screen (`q` closes it, or
+quits when it is the start screen itself), `Space o n` the notification history.
 
 ## LaTeX
 

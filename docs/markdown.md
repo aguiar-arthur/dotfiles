@@ -32,7 +32,7 @@ Notes are handled by obsidian.nvim, which loads only in the notes folder or with
 key and needs no Obsidian app or account. `<leader>nf` / `ng` find and grep, `nn` asks for a
 title and creates `the-title.md`, `nd` opens today's note, `nb` lists backlinks (on a `#`
 heading, links to that heading). Links are `[[note]]`: obsidian.nvim completes them, `<CR>` or
-`gd` follows one and `gr` lists references; `<CR>` on a checkbox ticks it. No YAML frontmatter
+`gd` follows one and `grr` lists references; `<CR>` on a checkbox ticks it. No YAML frontmatter
 is written. marksman serves Markdown outside the notes folder only, so the two never answer
 the same request twice.
 

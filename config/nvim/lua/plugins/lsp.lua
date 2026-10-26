@@ -45,6 +45,7 @@ return {
 
       vim.lsp.linked_editing_range.enable(true)
       vim.lsp.codelens.enable(true)
+      require("dotfiles.progress").setup()
 
       vim.diagnostic.config({
         severity_sort = true,
@@ -72,18 +73,15 @@ return {
           end
 
           map("gd", Snacks.picker.lsp_definitions, "Go to definition")
-          map("gr", Snacks.picker.lsp_references, "Go to references")
+          map("grr", Snacks.picker.lsp_references, "Go to references")
+          map("gri", Snacks.picker.lsp_implementations, "Go to implementation")
+          map("grt", Snacks.picker.lsp_type_definitions, "Go to type definition")
 
-          map("<leader>li", Snacks.picker.lsp_implementations, "Implementation")
-          map("<leader>lt", Snacks.picker.lsp_type_definitions, "Type definition")
           map("<leader>lD", vim.lsp.buf.declaration, "Declaration")
-          map("<leader>ln", vim.lsp.buf.rename, "Rename symbol")
-          map("<leader>la", vim.lsp.buf.code_action, "Code action", { "n", "v" })
           map("<leader>ls", vim.lsp.buf.signature_help, "Signature help")
           map("<leader>lR", "<cmd>lsp restart<CR>", "Restart LSP")
           map("<leader>lc", Snacks.picker.lsp_incoming_calls, "Incoming calls (who calls this)")
           map("<leader>lC", Snacks.picker.lsp_outgoing_calls, "Outgoing calls (what this calls)")
-          map("<leader>ll", vim.lsp.codelens.run, "Run code lens")
 
           local client = vim.lsp.get_client_by_id(ev.data.client_id)
           local provider = client and client.server_capabilities.codeActionProvider

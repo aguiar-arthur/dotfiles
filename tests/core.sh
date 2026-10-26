@@ -7,6 +7,10 @@ test_look() {
   start_nvim "$PROJ" look.lua
   probe "mini.statusline draws the statusline" 'vim.o.statusline:find("MiniStatusline", 1, true) and 1 or 0' 1 15
   probe "Snacks draws the status column" 'vim.wo.statuscolumn:find("snacks.statuscolumn", 1, true) and 1 or 0' 1 15
+  probe "ui2 draws the messages and the : line" 'vim.api.nvim_win_is_valid(require("vim._core.ui2").wins.cmd) and 1 or 0' 1 15
+  lua_do 'vim.api.nvim_echo({ { "look" } }, false, { id = "look", kind = "progress", source = "test", status = "running", percent = 40 })'
+  probe "the statusline shows running progress" 'MiniStatusline.active():find(vim.trim(vim.ui.progress_status()), 1, true) and vim.ui.progress_status() ~= "" and 1 or 0' 1 10
+  lua_do 'vim.api.nvim_echo({ { "look" } }, false, { id = "look", kind = "progress", source = "test", status = "success", percent = 100 })'
   keys 70G
   probe "treesitter-context shows the enclosing function" '#vim.tbl_filter(function(w) return vim.w[w].treesitter_context end, vim.api.nvim_list_wins())' 1 15
   keys C-w v
@@ -56,9 +60,9 @@ test_windows() {
   start_nvim "$PROJ" look.lua
   keys C-w v
   keys Space u w
-  probe "Space u w unwraps every window" '#vim.tbl_filter(function(w) return vim.wo[w].wrap end, vim.api.nvim_tabpage_list_wins(0))' 0 5
+  probe "Space u w unwraps every window" '#vim.tbl_filter(function(w) return vim.api.nvim_win_get_config(w).relative == "" and vim.wo[w].wrap end, vim.api.nvim_tabpage_list_wins(0))' 0 5
   keys Space u w
-  probe "Space u w wraps them again" '#vim.tbl_filter(function(w) return vim.wo[w].wrap end, vim.api.nvim_tabpage_list_wins(0))' 2 5
+  probe "Space u w wraps them again" '#vim.tbl_filter(function(w) return vim.api.nvim_win_get_config(w).relative == "" and vim.wo[w].wrap end, vim.api.nvim_tabpage_list_wins(0))' 2 5
   keys :help Enter
   probe ":help opens a help window" 'vim.bo.filetype' help 10
   keys q

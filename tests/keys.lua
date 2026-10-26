@@ -232,4 +232,34 @@ T.eq(
   { "permalink", "https://example.com/blob/abc/a.lua#L1-L1" }
 )
 
+T.eq(
+  "Neovim's own grn / gra / grx stay",
+  vim.tbl_map(function(lhs)
+    return vim.fn.maparg(lhs, "n") ~= ""
+  end, { "grn", "gra", "grx" }),
+  { true, true, true }
+)
+require("lazy").load({ plugins = { "nvim-lspconfig" } })
+local lsp_buf = vim.api.nvim_create_buf(true, false)
+vim.api.nvim_set_current_buf(lsp_buf)
+vim.api.nvim_exec_autocmds("LspAttach", {
+  group = "user_lsp_attach",
+  buffer = lsp_buf,
+  data = { client_id = -1 },
+})
+local function buffer_map(lhs)
+  local m = vim.fn.maparg(lhs, "n", false, true)
+  return m.buffer == 1 and m.callback or nil
+end
+T.eq(
+  "grr / gri / grt open Snacks pickers",
+  { buffer_map("grr"), buffer_map("gri"), buffer_map("grt") },
+  {
+    Snacks.picker.lsp_references,
+    Snacks.picker.lsp_implementations,
+    Snacks.picker.lsp_type_definitions,
+  }
+)
+T.eq("gr has no key of its own, so grn / gra / grx still work", buffer_map("gr"), nil)
+
 T.done()

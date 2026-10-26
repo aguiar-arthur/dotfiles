@@ -71,9 +71,9 @@ quick() {
   check "every Lua module loads" nvim --headless -l "$DOT/tests/modules.lua"
   check "Space c s copies the path, line:col and the code" nvim --headless -l "$DOT/tests/share.lua"
   lua_check "filetypes, format on save and the references list" files.lua
-  lua_check "python, mason, spell files and the review base branch" helpers.lua
+  lua_check "python, mason, spell files, the review base branch and LSP progress" helpers.lua
   lua_check "Space u toggles, also beside a codediff review" toggles.lua
-  lua_check "]e, the TeX and Markdown keys, the preview and gq" keys.lua
+  lua_check "]e, the TeX and Markdown keys, the preview, gq and the gr keys" keys.lua
   lua_check "yank highlight, focus reload, last line, q, new folders, resize" autocmds.lua
   if [ "$before" = "$(lock_hash)" ]; then
     pass "starting nvim leaves lazy-lock.json alone"

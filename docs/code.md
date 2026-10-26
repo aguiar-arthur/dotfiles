@@ -17,7 +17,8 @@ Clojure in detail. Its relationships are in [map](map.md).
 
 | Path | Holds |
 |---|---|
-| `config/nvim/lua/plugins/lsp.lua` | Mason, mason-lspconfig, system servers, diagnostics, the `LspAttach` keys (`gd`, `gr`, `<leader>l`, `,o`) |
+| `config/nvim/lua/plugins/lsp.lua` | Mason, mason-lspconfig, system servers, diagnostics, the `LspAttach` keys (`gd`, `grr` / `gri` / `grt`, `<leader>l`, `,o`) |
+| `config/nvim/lua/dotfiles/progress.lua` | servers' `$/progress` as Neovim's own progress messages (statusline, `:` line, the terminal's progress bar) |
 | `config/nvim/after/lsp/<server>.lua` | per-server settings (basedpyright, clojure_lsp, jsonls, ltex_plus, lua_ls, marksman, ruff, texlab, yamlls) |
 | `config/nvim/lua/plugins/formatting.lua` | conform, `style_markers`, the prettier trust check, `<leader>lf` |
 | `config/nvim/lua/plugins/run.lua` | code_runner.nvim, `,r` and its `commands` |
@@ -45,12 +46,19 @@ Clojure in detail. Its relationships are in [map](map.md).
 - JavaScript and TypeScript have no server, formatter, runner, tests or debugger: they were
   removed as unused. Adding them back is a server in `settings.mason_servers` and a line in
   conform. The `javascript` parser stays for `<script>` blocks in HTML.
-- `LspAttach` maps `gd` / `gr` and `<leader>l…` to Snacks pickers (`<leader>lc` / `lC` the call
-  hierarchy, `lsp_incoming_calls` / `lsp_outgoing_calls`), clears `formatexpr` so `gq`
+- `LspAttach` maps `gd`, `grr` / `gri` / `grt` (Neovim's names for references, implementation
+  and type definition) and `<leader>lc` / `lC` (the call hierarchy, `lsp_incoming_calls` /
+  `lsp_outgoing_calls`) to Snacks pickers; rename, code action and code lens stay Neovim's own
+  `grn` / `gra` / `grx`, with no `<leader>l` copy. It also clears `formatexpr` so `gq`
   keeps wrapping prose and comments, and maps `,o` (organize imports) only when the server
   offers it and the file type has no `,o` of its own (in Clojure it stays paredit's raise).
 - Code lenses show for every server that sends them (`vim.lsp.codelens.enable`), mostly
-  clojure-lsp's reference counts; `<leader>ll` runs the one on the cursor line.
+  clojure-lsp's reference counts; `grx` runs the one on the cursor line.
+- Neovim 0.12 keeps servers' `$/progress` to itself (`LspProgress`); `dotfiles/progress.lua`
+  turns each task into a native progress message (`nvim_echo` with `kind = "progress"`, one id
+  per client and token), so the statusline shows `vim.ui.progress_status()`, the `:` line names
+  the task, and iTerm2 draws its progress bar (OSC 9;4, Neovim's own `Progress` autocmd). A
+  task without a percentage counts as 0% until it ends.
 - `vim.lsp.linked_editing_range` is on for every server that offers it (html): renaming an
   opening tag renames its closing tag.
 - Diagnostics show in full as virtual lines on the cursor line (`virtual_lines.current_line`)
@@ -85,7 +93,11 @@ everywhere, `<leader>uF` in this buffer only (both in `dotfiles/toggles.lua`). p
 project's JavaScript (`.prettierrc.js`, plugins), so it runs, on save or with `<leader>lf`,
 only where a `.nvim.lua` approved with `:trust` sits next to the prettier config and has not
 changed since; elsewhere `<leader>lf` falls back to the language server. It is always the
-prettier on `PATH` (Homebrew's), never a repository's `node_modules/.bin/prettier`.
+prettier on `PATH` (Homebrew's), never a repository's `node_modules/.bin/prettier`. Neovim has
+no call that asks whether a file is trusted without prompting, so `trusted()` in
+`formatting.lua` reads Neovim's own `trust` file (`stdpath("state")`, lines of `<sha256> <path>`,
+the format `vim.secure` writes in 0.12); if a Neovim update changes that format, prettier stops
+running and the `tests/files.lua` trust cases fail.
 
 ### Run, test, debug
 
@@ -185,7 +197,9 @@ Consumes:
 | `,r` per language | full: `test_run` in `tests/code.sh` |
 | `,dp` log point, `]T` / `[T` | `tests/keys.lua` |
 | `,t` keys, `,d` debugger (the panel and terminal, `,de` on a word and a selection, `,dw`, `,dC`, `,du`) | full: `test_test_keys`, `test_debug` |
-| `<leader>lc` / `lC` / `ll` mapped on attach | full: `test_lua` |
+| `grr` / `gri` / `grt` open Snacks pickers on attach, Neovim's `grn` / `gra` / `grx` stay | `tests/keys.lua`, full: `test_lua` |
+| `<leader>lc` / `lC` mapped on attach | full: `test_lua` |
+| A server's progress becomes one native progress message (title, status, percent) | `tests/helpers.lua` |
 | `,cj` jack-in (deps.edn, bb.edn), REPL completion through blink's `omni` | full: `test_clojure` |
 
 ## Changing it

@@ -413,4 +413,29 @@ vim.keymap.set("n", "q", "<cmd>qa<CR>", { buffer = main })
 vim.api.nvim_exec_autocmds("User", { pattern = "SnacksDashboardUpdatePost" })
 T.eq("dashboard: q still quits the start dashboard", qmap(main), "<cmd>qa<CR>")
 
+require("dotfiles.progress").setup()
+local shown = {}
+vim.api.nvim_create_autocmd("Progress", {
+  callback = function(ev)
+    if ev.data.id == "dotfiles.lsp.-1.index" then
+      shown[#shown + 1] = { ev.data.title, ev.data.status, ev.data.percent }
+    end
+  end,
+})
+local function lsp_progress(value)
+  vim.api.nvim_exec_autocmds("LspProgress", {
+    group = "user_lsp_progress",
+    pattern = value.kind,
+    data = { client_id = -1, params = { token = "index", value = value } },
+  })
+end
+lsp_progress({ kind = "begin", title = "Indexing" })
+lsp_progress({ kind = "report", title = "Indexing", percentage = 40 })
+lsp_progress({ kind = "end", title = "Indexing" })
+T.eq("progress: a server's task becomes one native progress message", shown, {
+  { "LSP: Indexing", "running", 0 },
+  { "LSP: Indexing", "running", 40 },
+  { "LSP: Indexing", "success", 100 },
+})
+
 T.done()

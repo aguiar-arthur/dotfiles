@@ -6,7 +6,7 @@ test_lua() {
   fi
   start_nvim "$PROJ" sample.lua
   probe "lua_ls attaches to Lua" "$(clients lua_ls)" 1 60
-  probe "Space l c / l C / l l are mapped for the server" '(vim.fn.maparg("<leader>lc", "n") ~= "" and vim.fn.maparg("<leader>lC", "n") ~= "" and vim.fn.maparg("<leader>ll", "n") ~= "") and 1 or 0' 1 10
+  probe "Space l c / l C and grr / gri / grt are mapped for the server" '(vim.fn.maparg("<leader>lc", "n") ~= "" and vim.fn.maparg("<leader>lC", "n") ~= "" and vim.fn.maparg("grr", "n", false, true).buffer == 1 and vim.fn.maparg("gri", "n", false, true).buffer == 1 and vim.fn.maparg("grt", "n", false, true).buffer == 1) and 1 or 0' 1 10
   lua_do 'vim.g.lsp_id = vim.lsp.get_clients({ name = "lua_ls" })[1].id'
   keys Space l R
   probe "Space l R restarts lua_ls" '(function() local c = vim.lsp.get_clients({ name = "lua_ls" })[1] return c and c.id ~= vim.g.lsp_id and 1 or 0 end)()' 1 60

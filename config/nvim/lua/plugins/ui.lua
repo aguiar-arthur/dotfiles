@@ -63,7 +63,11 @@ return {
               "%=",
               {
                 hl = "MiniStatuslineFileinfo",
-                strings = { lsp_clients(), statusline.section_fileinfo({ trunc_width = 120 }) },
+                strings = {
+                  vim.trim(vim.ui.progress_status()),
+                  lsp_clients(),
+                  statusline.section_fileinfo({ trunc_width = 120 }),
+                },
               },
               {
                 hl = mode_hl,
