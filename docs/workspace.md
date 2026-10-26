@@ -7,16 +7,17 @@ objects, completion and snippets, sharing code, and Claude Code. Its relationshi
 ## Language
 
 - **picker**: any Snacks list (files, grep, symbols, references, git); one set of keys for all.
-- **share**: `<leader>cs`, which copies `path:line:col-line:col` and a fenced code block.
+- **share**: the `<leader>c` keys: `cs` / `cf` copy `path:line:col-line:col` and a fenced code
+  block (the line or selection / the whole file), `cp` / `cP` the path, `cl` a permalink.
 
 ## Files
 
 | Path | Holds |
 |---|---|
 | `config/nvim/lua/plugins/snacks.lua` | pickers `<leader>f` and `<leader>d` (diagnostics, todos, quickfix), file tree `<leader>o`, terminals `<leader>t`, lazygit, `]r`, the picker `confirm` |
-| `config/nvim/lua/plugins/editor.lua` | flash, mini.ai, mini.surround, mini.pairs, grug-far, todo-comments, persistence (and gitsigns, codediff: see [git](git.md)) |
+| `config/nvim/lua/plugins/editor.lua` | flash, mini.ai, the `]f` / `]a` moves, mini.surround, mini.pairs, grug-far, todo-comments, persistence (and gitsigns, codediff: see [git](git.md)) |
 | `config/nvim/lua/plugins/completion.lua` | blink.cmp, LuaSnip, friendly-snippets, the `:` line |
-| `config/nvim/lua/dotfiles/share.lua` | what `<leader>cs` copies; the key is in `lua/config/keymaps.lua` |
+| `config/nvim/lua/dotfiles/share.lua` | what the `<leader>c` keys copy; the keys are in `lua/config/keymaps.lua` |
 | `config/nvim/lua/plugins/claude.lua` | claudecode.nvim, `<leader>a` |
 | `config/nvim/lua/dotfiles/claude.lua` | `<leader>aS` (visual) and `<leader>aB`: open the last session if none runs, then send the selection / add the file; notifications from a hidden Claude |
 | `config/nvim/lua/dotfiles/float.lua` | the one float style: Claude, the float terminal and lazygit |
@@ -27,8 +28,14 @@ objects, completion and snippets, sharing code, and Claude Code. Its relationshi
 `]r` / `[r` jump between references of the word under the cursor; `s` / `S` jump with flash;
 `gs…` surrounds. Text objects (mini.ai) work in every language with a treesitter parser:
 `af` / `if` function, `ac` / `ic` class, `au` / `iu` call, `aa` / `ia` argument, plus brackets,
-quotes and tags. The function and class queries come from nvim-treesitter-textobjects, which
-is installed only for them.
+quotes and tags. The function and class queries come from nvim-treesitter-textobjects, whose
+own move functions give `]f` / `[f` (function) and `]a` / `[a` (argument; Vim's `]a` walked
+the argument list, unused here) in normal, visual and operator-pending mode.
+
+`<leader>r` searches with ripgrep and `<leader>R` with ast-grep (`brew "ast-grep"`), the engine
+grug-far already ships, so a pattern with `$A` meta-variables matches code by its syntax tree.
+`<leader>cl` asks Snacks' gitbrowse for a `permalink` (the file's last commit) and copies it
+through gitbrowse's `open` option instead of opening a browser, which `<leader>gO` still does.
 
 Completion: `<Tab>` is left alone in normal mode so `<C-i>` still walks the jump list forward;
 in insert mode it jumps to the next snippet field first, then moves in the menu (`<C-n>` /
@@ -104,7 +111,8 @@ Consumes: [core](core.md) keys and toggles.
 
 | What | Where |
 |---|---|
-| `<leader>cs` in each mode, fences, block columns | `tests/share.lua`, `tests/keys.lua` |
+| `<leader>cs` in each mode, fences, block columns; `<leader>cf`, `cp`, `cP` | `tests/share.lua`, `tests/keys.lua` |
+| `<leader>cl` copies a permalink, `<leader>R` uses ast-grep, `]f` / `]a` | `tests/keys.lua` |
 | References always open the list | `tests/files.lua` |
 | Completion and snippets typed for real | full: `test_snippets` in `tests/tex.sh` |
 | Claude helpers, notifications, the file tree keys | `tests/helpers.lua`, `tests/keys.lua` |

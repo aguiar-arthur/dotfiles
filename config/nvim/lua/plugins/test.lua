@@ -25,6 +25,22 @@ return {
       neotest("to", { "output", "open" }, { enter = true, auto_close = true }, "Test output"),
       neotest("tO", { "output_panel", "toggle" }, nil, "Toggle the output panel"),
       neotest("td", { "run", "run" }, { strategy = "dap" }, "Debug the nearest test"),
+      {
+        "]T",
+        function()
+          require("neotest").jump.next({ status = "failed" })
+        end,
+        ft = "python",
+        desc = "Next failed test",
+      },
+      {
+        "[T",
+        function()
+          require("neotest").jump.prev({ status = "failed" })
+        end,
+        ft = "python",
+        desc = "Previous failed test",
+      },
     },
     dependencies = {
       "nvim-neotest/nvim-nio",

@@ -1,5 +1,26 @@
 local M = {}
 
+local function path(full)
+  local file = vim.api.nvim_buf_get_name(0)
+  local root = not full and vim.fs.root(0, ".git")
+  return full and file or root and vim.fs.relpath(root, file) or vim.fn.fnamemodify(file, ":~")
+end
+
+local function copy(text, what)
+  vim.fn.setreg("+", text)
+  vim.notify("Copied " .. what)
+end
+
+local function block(from, first, to, last, lines)
+  local location = ("%s:%d:%d-%d:%d"):format(path(), from, first, to, last)
+  local code = table.concat(lines, "\n")
+  local fence = "```"
+  while code:find(fence, 1, true) do
+    fence = fence .. "`"
+  end
+  copy(("%s\n\n%s%s\n%s\n%s\n"):format(location, fence, vim.bo.filetype, code, fence), location)
+end
+
 function M.selection()
   local mode = vim.fn.mode()
   local from, to = vim.fn.getpos("v"), vim.fn.getpos(".")
@@ -23,20 +44,31 @@ function M.selection()
   local lines = vim.fn.getregion(region[1], region[2], {
     type = mode == "\22" and mode .. (last - first + 1) or mode,
   })
-
-  local file = vim.api.nvim_buf_get_name(0)
-  local root = vim.fs.root(0, ".git")
-  local path = root and vim.fs.relpath(root, file) or vim.fn.fnamemodify(file, ":~")
-  local location = ("%s:%d:%d-%d:%d"):format(path, from[2], first, to[2], last)
-  local code = table.concat(lines, "\n")
-  local fence = "```"
-  while code:find(fence, 1, true) do
-    fence = fence .. "`"
-  end
-
-  vim.fn.setreg("+", ("%s\n\n%s%s\n%s\n%s\n"):format(location, fence, vim.bo.filetype, code, fence))
+  block(from[2], first, to[2], last, lines)
   vim.api.nvim_feedkeys(vim.keycode("<Esc>"), "n", false)
-  vim.notify("Copied " .. location)
+end
+
+function M.file()
+  local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+  block(1, 1, #lines, math.max(1, #lines[#lines]), lines)
+end
+
+function M.path(full)
+  local text = path(full)
+  copy(text, text)
+end
+
+function M.link()
+  Snacks.gitbrowse({
+    what = "permalink",
+    notify = false,
+    open = function(url)
+      copy(url, url)
+    end,
+  })
+  if vim.fn.mode():find("[vV]") then
+    vim.api.nvim_feedkeys(vim.keycode("<Esc>"), "n", false)
+  end
 end
 
 return M

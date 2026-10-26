@@ -28,7 +28,15 @@ return {
           end
         end)
       end, "Conditional breakpoint"),
+      key("dp", function()
+        vim.ui.input({ prompt = "Log message: " }, function(message)
+          if message and message ~= "" then
+            require("dap").set_breakpoint(nil, nil, message)
+          end
+        end)
+      end, "Log point"),
       key("dc", dap("continue"), "Continue / start"),
+      key("dC", dap("run_to_cursor"), "Run to the cursor"),
       key("di", dap("step_into"), "Step into"),
       key("do", dap("step_over"), "Step over"),
       key("dO", dap("step_out"), "Step out"),
@@ -37,6 +45,8 @@ return {
       end, "Toggle REPL"),
       key("dl", dap("run_last"), "Run last"),
       key("dt", dap("terminate"), "Terminate"),
+      key("dw", "<cmd>DapViewWatch<CR>", "Watch the expression under the cursor"),
+      key("dw", ":DapViewWatch<CR>", "Watch the selection", "x"),
       key("du", function()
         require("dap-view").toggle(true)
       end, "Toggle the debug panels"),

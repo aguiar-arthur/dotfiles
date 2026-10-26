@@ -40,6 +40,24 @@ case("2G02l<C-v>3G08l4G", "src/a.lua:2:3-4:9\n\n```lua\nif x th\n  retur\nend\n`
 case("2G02l<C-v>4G$", "src/a.lua:2:3-4:12\n\n```lua\nif x then\n  return x\nend\n```\n")
 case("4GV5G", "src/a.lua:4:1-5:3\n\n````lua\n  end\n```\n````\n")
 
+local share = require("dotfiles.share")
+local function same(name, got, want)
+  if got ~= want then
+    failed[#failed + 1] = ("%s\nwanted:\n%s\ngot:\n%s"):format(name, want, tostring(got))
+  end
+end
+copied = nil
+share.file()
+same(
+  "Space c f shares the whole file",
+  copied,
+  "src/a.lua:1:1-5:3\n\n````lua\nlocal x = 1\n  if x then\n    return x\n  end\n```\n````\n"
+)
+share.path()
+same("Space c p copies the path from the git root", copied, "src/a.lua")
+share.path(true)
+same("Space c P copies the full path", copied, vim.api.nvim_buf_get_name(0))
+
 vim.fn.delete(root, "rf")
 if #failed > 0 then
   io.stderr:write(table.concat(failed, "\n\n") .. "\n")

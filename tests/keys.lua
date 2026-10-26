@@ -142,4 +142,94 @@ T.eq(
   true
 )
 
+local function rhs(spec, lhs)
+  return vim.iter(spec.keys):find(function(key)
+    return key[1] == lhs and key.mode ~= "x"
+  end)[2]
+end
+local function spec_of(file, name)
+  return vim.iter(T.config(file)):find(function(spec)
+    return spec[1] == name and spec.keys
+  end)
+end
+
+local textobjects = spec_of("plugins/editor.lua", "nvim-treesitter/nvim-treesitter-textobjects")
+local funcs = T.dir({
+  ["f.lua"] = { "local function a(x, y)", "  return x", "end", "", "local function b()", "end" },
+})
+vim.cmd("edit " .. funcs .. "/f.lua")
+require("lazy").load({ plugins = { "nvim-treesitter-textobjects" } })
+vim.api.nvim_win_set_cursor(0, { 1, 0 })
+rhs(textobjects, "]f")()
+T.eq("]f goes to the next function", vim.api.nvim_win_get_cursor(0)[1], 5)
+vim.api.nvim_win_set_cursor(0, { 1, 0 })
+rhs(textobjects, "]a")()
+T.eq("]a goes to the next argument", vim.api.nvim_win_get_cursor(0), { 1, 17 })
+
+local dap_keys = T.config("plugins/debug.lua")[1]
+local logged
+package.loaded.dap = {
+  set_breakpoint = function(condition, hit, message)
+    logged = { condition or false, hit or false, message }
+  end,
+}
+local input = vim.ui.input
+local answer
+vim.ui.input = function(_, callback)
+  callback(answer)
+end
+answer = "x is {x}"
+rhs(dap_keys, "<localleader>dp")()
+T.eq(",dp sets a log point with the message", logged, { false, false, "x is {x}" })
+logged, answer = nil, ""
+rhs(dap_keys, "<localleader>dp")()
+T.eq(",dp with no message sets nothing", logged, nil)
+vim.ui.input = input
+package.loaded.dap = nil
+
+local jumped
+package.loaded.neotest = {
+  jump = {
+    next = function(opts)
+      jumped = { "next", opts.status }
+    end,
+    prev = function(opts)
+      jumped = { "prev", opts.status }
+    end,
+  },
+}
+local tests = vim.iter(T.config("plugins/test.lua")):find(function(spec)
+  return spec[1] == "nvim-neotest/neotest"
+end)
+rhs(tests, "]T")()
+T.eq("]T goes to the next failed test", jumped, { "next", "failed" })
+rhs(tests, "[T")()
+T.eq("[T goes to the previous failed test", jumped, { "prev", "failed" })
+package.loaded.neotest = nil
+
+local grug
+package.loaded["grug-far"] = {
+  open = function(opts)
+    grug = opts
+  end,
+}
+rhs(spec_of("plugins/editor.lua", "MagicDuck/grug-far.nvim"), "<leader>R")()
+T.eq("Space R replaces with ast-grep", grug and grug.engine, "astgrep")
+package.loaded["grug-far"] = nil
+
+local gitbrowse = Snacks.gitbrowse
+local browsed
+Snacks.gitbrowse = function(opts)
+  browsed = opts.what
+  opts.open("https://example.com/blob/abc/a.lua#L1-L1")
+end
+copied = nil
+vim.fn.maparg("<leader>cl", "n", false, true).callback()
+Snacks.gitbrowse = gitbrowse
+T.eq(
+  "Space c l copies a permalink",
+  { browsed, copied },
+  { "permalink", "https://example.com/blob/abc/a.lua#L1-L1" }
+)
+
 T.done()

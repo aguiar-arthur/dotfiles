@@ -24,6 +24,18 @@ map("x", "<leader>cs", function()
   require("dotfiles.share").selection()
 end, o("Share selection (path and code block)"))
 map("n", "<leader>cs", "V<leader>cs", { remap = true, desc = "Share line (path and code block)" })
+map("n", "<leader>cf", function()
+  require("dotfiles.share").file()
+end, o("Share file (path and code block)"))
+map("n", "<leader>cp", function()
+  require("dotfiles.share").path()
+end, o("Copy path (from the git root)"))
+map("n", "<leader>cP", function()
+  require("dotfiles.share").path(true)
+end, o("Copy full path"))
+map({ "n", "x" }, "<leader>cl", function()
+  require("dotfiles.share").link()
+end, o("Copy permalink (line or selection)"))
 
 for _, lhs in ipairs({ "grn", "grr", "gra", "gri", "grt", "grx" }) do
   for _, mode in ipairs({ "n", "x" }) do

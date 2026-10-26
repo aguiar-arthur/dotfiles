@@ -143,6 +143,7 @@ leaves insert mode and a second `Esc` closes. `Space f R` reopens the last picke
 | `Space f c` / `Space f C` | the Neovim config files / colorschemes |
 | `Space o p` / `Space o f` | file tree / the current file in the tree |
 | `Space r` | search and replace in the whole project (grug-far), prefilled with the word or selection |
+| `Space R` | the same by code structure (ast-grep): `print($A)` finds every `print` call, whatever its argument, and `logger.info($A)` rewrites them |
 
 In the file tree `a` creates, `d` deletes, `r` renames, `c` copies, `m` moves and `?` lists
 the rest.
@@ -157,9 +158,13 @@ the rest.
 | `r` after an operator | act at a distance: `yr`, a label, then `iw` copies a far-away word and the cursor stays |
 | `af` / `if`, `ac` / `ic` | around / inside a function, a class (`daf` deletes a function) |
 | `au` / `iu`, `aa` / `ia` | around / inside a function call, an argument (`ciu` rewrites a call's arguments) |
+| `]f` / `[f`, `]a` / `[a` | next / previous function, argument (also after an operator: `d]f`); `]a` replaces Vim's argument-list jump |
 | `gsa` / `gsd` / `gsr` | add / delete / replace a surrounding (`gsaiw"` quotes a word, `gsd(` removes parentheses) |
 | `gcc` / `gc` | comment a line / a motion or selection |
 | `Space c s` | copy the line (the selection in visual mode) to paste anywhere: `path:line:col-line:col`, then a code block |
+| `Space c f` | the same for the whole file |
+| `Space c p` / `Space c P` | copy the file's path from the git root / its full path |
+| `Space c l` | copy a link to the line or selection on GitHub (GitLab, …), fixed to the file's last commit |
 | `Alt-j` / `Alt-k` | move the line or selection down / up |
 | `<` / `>` in visual mode | indent, keeping the selection |
 | `]r` / `[r` | next / previous reference of the word under the cursor |
@@ -209,6 +214,8 @@ LaTeX and Clojure.
 | `Space l n` | rename everywhere |
 | `Space l a` | code action (fix, import, refactor), also on a selection |
 | `Space l s` | signature help |
+| `Space l c` / `Space l C` | who calls the function under the cursor / what it calls, in a picker |
+| `Space l l` | run the code lens of this line (the grey text a server shows above some lines, such as clojure-lsp's reference counts) |
 | `Space l f` | format the buffer or the selection |
 | `Space l R` / `Space l M` | restart the servers / open Mason |
 | `]d` / `[d`, `]e` / `[e` | next / previous diagnostic, error |
@@ -250,15 +257,18 @@ the project's `.venv`, else `$VIRTUAL_ENV`, else `python3`.
 | `,t s` | summary tree of every test (`r` runs the one under the cursor, `i` jumps to it, `o` its output) |
 | `,t o` / `,t O` | output of the test under the cursor / the output panel |
 | `,t d` | debug the nearest test (Python) |
+| `]T` / `[T` | next / previous failed test |
 
 Results appear as signs next to each test and as diagnostics on the failing line.
 
 | Debugger | Does |
 |---|---|
 | `,d b` / `,d B` | breakpoint / breakpoint with a condition |
-| `,d c` | start, or continue to the next breakpoint |
+| `,d p` | log point: prints a message (`x is {x}`) instead of stopping |
+| `,d c` / `,d C` | start, or continue to the next breakpoint / run to the cursor |
 | `,d i` / `,d o` / `,d O` | step into / over / out |
 | `,d e` | evaluate the expression under the cursor or the selection, in a float (`q` closes) |
+| `,d w` | watch the expression under the cursor or the selection (the Watches view) |
 | `,d r` / `,d l` | debug REPL / run the last session again |
 | `,d t` / `,d u` | stop / show or hide the panels (nvim-dap-view: `]v` / `[v` switch view, `g?` its keys) |
 
@@ -602,7 +612,7 @@ is missing are skipped.
 
 | Mode | Command | Takes | Checks |
 |---|---|---|---|
-| quick (default) | `~/dotfiles/tests/nvim.sh` | seconds | startup, every Lua module, the lockfile, Skim preferences, Mason's Python tools (broken by a Homebrew Python upgrade), `zg` writing to the versioned word list, stylua, shell syntax, `EDITOR` in zsh, shfmt, rumdl, no comments, and our own code headless: `Space c s`, filetypes, format on save, the `Space u` toggles, `]e`, the preview, the helpers |
+| quick (default) | `~/dotfiles/tests/nvim.sh` | seconds | startup, every Lua module, the lockfile, Skim preferences, Mason's Python tools (broken by a Homebrew Python upgrade), `zg` writing to the versioned word list, stylua, shell syntax, `EDITOR` in zsh, shfmt, rumdl, no comments, and our own code headless: `Space c` keys, `]f` / `]a`, `,d p`, `]T`, `Space R`, filetypes, format on save, the `Space u` toggles, `]e`, the preview, the helpers |
 | full | `~/dotfiles/tests/nvim.sh full` | minutes | quick, plus a real Neovim driven in tmux: language servers, toggles, the look, Markdown and notes, the `,` keys, `,r`, the debugger, tests, a LaTeX build and its snippets, a `Space g V` review, `,cj` |
 | fresh | `~/dotfiles/tests/nvim.sh fresh` | longer | full, in a throwaway directory deleted at the end, as on a new machine |
 

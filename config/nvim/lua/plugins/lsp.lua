@@ -44,6 +44,7 @@ return {
       end
 
       vim.lsp.linked_editing_range.enable(true)
+      vim.lsp.codelens.enable(true)
 
       vim.diagnostic.config({
         severity_sort = true,
@@ -80,6 +81,9 @@ return {
           map("<leader>la", vim.lsp.buf.code_action, "Code action", { "n", "v" })
           map("<leader>ls", vim.lsp.buf.signature_help, "Signature help")
           map("<leader>lR", "<cmd>lsp restart<CR>", "Restart LSP")
+          map("<leader>lc", Snacks.picker.lsp_incoming_calls, "Incoming calls (who calls this)")
+          map("<leader>lC", Snacks.picker.lsp_outgoing_calls, "Outgoing calls (what this calls)")
+          map("<leader>ll", vim.lsp.codelens.run, "Run code lens")
 
           local client = vim.lsp.get_client_by_id(ev.data.client_id)
           local provider = client and client.server_capabilities.codeActionProvider

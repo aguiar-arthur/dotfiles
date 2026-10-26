@@ -6,6 +6,7 @@ test_lua() {
   fi
   start_nvim "$PROJ" sample.lua
   probe "lua_ls attaches to Lua" "$(clients lua_ls)" 1 60
+  probe "Space l c / l C / l l are mapped for the server" '(vim.fn.maparg("<leader>lc", "n") ~= "" and vim.fn.maparg("<leader>lC", "n") ~= "" and vim.fn.maparg("<leader>ll", "n") ~= "") and 1 or 0' 1 10
   lua_do 'vim.g.lsp_id = vim.lsp.get_clients({ name = "lua_ls" })[1].id'
   keys Space l R
   probe "Space l R restarts lua_ls" '(function() local c = vim.lsp.get_clients({ name = "lua_ls" })[1] return c and c.id ~= vim.g.lsp_id and 1 or 0 end)()' 1 60
@@ -77,6 +78,13 @@ test_debug() {
   keys :2 Enter 0 w w v '$' ,de
   probe "Python: ,de in visual mode evaluates the selection" 'require("dap-view.state").hover' 'x + 1' 10
   lua_do 'for _, w in ipairs(vim.api.nvim_list_wins()) do if vim.bo[vim.api.nvim_win_get_buf(w)].filetype == "dap-view-hover" then vim.api.nvim_win_close(w, true) end end'
+  keys Escape
+  keys :2 Enter 0 w w
+  keys ,dw
+  probe "Python: ,dw watches the expression under the cursor" 'vim.tbl_count(require("dap-view.state").watched_expressions)' 1 10
+  keys :3 Enter
+  keys ,dC
+  probe "Python: ,dC runs to the cursor" '(function() local s = require("dap").session() return s and s.current_frame and s.current_frame.line or 0 end)()' 3 30
   keys ,dt
   probe "Python: ,dt ends the session" 'require("dap").session() and 1 or 0' 0 20
   keys ,du

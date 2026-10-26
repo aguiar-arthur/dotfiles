@@ -1,3 +1,9 @@
+local function move(direction, query)
+  return function()
+    require("nvim-treesitter-textobjects.move")[direction](query, "textobjects")
+  end
+end
+
 return {
 
   {
@@ -168,6 +174,37 @@ return {
   },
 
   {
+    "nvim-treesitter/nvim-treesitter-textobjects",
+    branch = "main",
+    keys = {
+      {
+        "]f",
+        move("goto_next_start", "@function.outer"),
+        mode = { "n", "x", "o" },
+        desc = "Next function",
+      },
+      {
+        "[f",
+        move("goto_previous_start", "@function.outer"),
+        mode = { "n", "x", "o" },
+        desc = "Previous function",
+      },
+      {
+        "]a",
+        move("goto_next_start", "@parameter.inner"),
+        mode = { "n", "x", "o" },
+        desc = "Next argument",
+      },
+      {
+        "[a",
+        move("goto_previous_start", "@parameter.inner"),
+        mode = { "n", "x", "o" },
+        desc = "Previous argument",
+      },
+    },
+  },
+
+  {
     "MagicDuck/grug-far.nvim",
     cmd = "GrugFar",
     opts = {},
@@ -180,6 +217,22 @@ return {
         desc = "Replace in project",
       },
       { "<leader>r", ":GrugFar<CR>", mode = "x", desc = "Replace selection in project" },
+      {
+        "<leader>R",
+        function()
+          require("grug-far").open({
+            engine = "astgrep",
+            prefills = { search = vim.fn.expand("<cword>") },
+          })
+        end,
+        desc = "Structural replace in project (ast-grep)",
+      },
+      {
+        "<leader>R",
+        ":GrugFar astgrep<CR>",
+        mode = "x",
+        desc = "Structural replace of the selection (ast-grep)",
+      },
     },
   },
 

@@ -45,9 +45,12 @@ Clojure in detail. Its relationships are in [map](map.md).
 - JavaScript and TypeScript have no server, formatter, runner, tests or debugger: they were
   removed as unused. Adding them back is a server in `settings.mason_servers` and a line in
   conform. The `javascript` parser stays for `<script>` blocks in HTML.
-- `LspAttach` maps `gd` / `gr` and `<leader>l…` to Snacks pickers, clears `formatexpr` so `gq`
+- `LspAttach` maps `gd` / `gr` and `<leader>l…` to Snacks pickers (`<leader>lc` / `lC` the call
+  hierarchy, `lsp_incoming_calls` / `lsp_outgoing_calls`), clears `formatexpr` so `gq`
   keeps wrapping prose and comments, and maps `,o` (organize imports) only when the server
   offers it and the file type has no `,o` of its own (in Clojure it stays paredit's raise).
+- Code lenses show for every server that sends them (`vim.lsp.codelens.enable`), mostly
+  clojure-lsp's reference counts; `<leader>ll` runs the one on the cursor line.
 - `vim.lsp.linked_editing_range` is on for every server that offers it (html): renaming an
   opening tag renames its closing tag.
 - Diagnostics show in full as virtual lines on the cursor line (`virtual_lines.current_line`)
@@ -102,18 +105,20 @@ running the same file again replaces its terminal. It also runs JavaScript, Java
 and Rust with the plugin's own commands.
 
 `,t` runs Neotest: `,tt` nearest, `,tf` file, `,tp` project, `,tl` last, `,tS` stop, `,ts`
-summary, `,to` output, `,tO` output panel, `,td` debug the nearest test. Results show as signs
+summary, `,to` output, `,tO` output panel, `,td` debug the nearest test; `]T` / `[T` jump to the
+next / previous failed test (they replace Vim's tag jumps in Python only). Results show as signs
 and diagnostics. neotest-python runs pytest from the project's virtualenv.
 
 `,d` drives nvim-dap with nvim-dap-view in Python buffers: one panel below with views switched
 from its winbar (scopes first) and the program's terminal beside it. It opens on launch
 (`auto_toggle = "open"`) and stays open after the program ends so its output can be read (`,du`
 hides both). It replaced nvim-dap-ui, which needed a six-window layout and nvim-nio. `,de` opens
-dap-view's hover; in visual mode the selection comes from `getregion`, because `:DapViewHover`
-is not declared with a range and so never sees one. Breakpoints show as `●` (`◆` with
-a condition) and the stopped line is tinted green. debugpy runs the file with the interpreter
-from `python.lua`; its adapter is Mason's `debugpy-adapter`, set in one line (mason-nvim-dap did
-only that and was dropped).
+dap-view's hover, `,dw` adds a watch (`:DapViewWatch`, which takes a range, unlike its hover),
+`,dC` runs to the cursor and `,dp` sets a log point from a prompt; in visual mode the selection
+comes from `getregion`, because `:DapViewHover` is not declared with a range and so never sees
+one. Breakpoints show as `●` (`◆` with a condition) and the stopped line is tinted green.
+debugpy runs the file with the interpreter from `python.lua`; its adapter is Mason's
+`debugpy-adapter`, set in one line (mason-nvim-dap did only that and was dropped).
 
 ### Clojure
 
@@ -178,7 +183,9 @@ Consumes:
 | Every `<Cmd>` key names a command that exists (`Space l R` once ran a removed `:LspRestart`) | `tests/keys.lua` |
 | Servers attach (Lua, Python, …), `Space l R` restarts one, `,o`, `,s` | full: `test_lua`, `test_language_actions` |
 | `,r` per language | full: `test_run` in `tests/code.sh` |
-| `,t` keys, `,d` debugger (the panel and terminal, `,de` on a word and a selection, `,du`) | full: `test_test_keys`, `test_debug` |
+| `,dp` log point, `]T` / `[T` | `tests/keys.lua` |
+| `,t` keys, `,d` debugger (the panel and terminal, `,de` on a word and a selection, `,dw`, `,dC`, `,du`) | full: `test_test_keys`, `test_debug` |
+| `<leader>lc` / `lC` / `ll` mapped on attach | full: `test_lua` |
 | `,cj` jack-in (deps.edn, bb.edn), REPL completion through blink's `omni` | full: `test_clojure` |
 
 ## Changing it
