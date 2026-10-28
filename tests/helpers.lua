@@ -267,6 +267,29 @@ T.case("git: reviews, Space g q and Space b d", function()
   end)
   git.close_buffer()
   T.eq("git: Space b d on another file deletes it", deleted, other)
+  local closed = {}
+  T.stub(Snacks, "bufdelete", {
+    other = function()
+      table.insert(closed, "other")
+    end,
+    all = function()
+      table.insert(closed, "all")
+    end,
+  })
+  warned = nil
+  capture(function()
+    git.close_buffers("other")
+  end)
+  T.eq(
+    "git: Space b o with a review open keeps every buffer",
+    { warned, #closed },
+    { "A review is open: close it first (Space g q)", 0 }
+  )
+  vim.api.nvim_set_current_tabpage(review_tab)
+  git.close_review()
+  git.close_buffers("other")
+  git.close_buffers("all")
+  T.eq("git: Space b o / Space b D close the other / all buffers", closed, { "other", "all" })
   vim.cmd("tabonly")
 end)
 

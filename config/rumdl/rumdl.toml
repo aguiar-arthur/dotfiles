@@ -5,3 +5,6 @@ exclude = ["CLAUDE.md"]
 [MD013]
 code-blocks = false
 tables = false
+
+[MD033]
+allowed-elements = ["a", "b", "details", "h1", "img", "p", "summary"]

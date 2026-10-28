@@ -48,7 +48,12 @@ friendly-snippets are loaded for every language but LaTeX, which has its own (se
 
 `<leader>tf` / `th` / `tv` toggle three separate terminals (float, bottom, right). Inside a
 terminal every key goes to the program; a quick double `Esc` or `C-\ C-n` returns to Neovim,
-where `q` hides the terminal. The float terminal has the look of `float.lua`.
+where `q` hides the terminal and `<leader>bd` ends it. `<C-/>` hides one of the three from
+terminal mode, since a `<leader>` key there would reach the shell; it is mapped in their own
+`win.keys`, not for every Snacks terminal, so lazygit and Claude still get it (iTerm2 sends
+`<C-/>` as `<C-_>`, so both are mapped). which-key never opens in terminal mode and a single
+key has nothing to wait for, so the `<leader>t` group label in `ui.lua` names these keys instead.
+The float terminal has the look of `float.lua`.
 
 `<leader>cs` on a block selection (`C-v`) reports screen columns (`virtcol`), so tabs and wide
 characters give the columns you see, and it lengthens the fence when the code has one. The path
@@ -122,7 +127,7 @@ Consumes: [core](core.md) keys and toggles.
 | References always open the list | `tests/files.lua` |
 | Completion and snippets typed for real | full: `test_snippets` in `tests/tex.sh` |
 | Claude helpers, notifications, the file tree keys | `tests/helpers.lua`, `tests/keys.lua` |
-| `Space t f` / `t h` / `t v`: modes, same terminal back, sizes, resize | full: `test_terminals` in `tests/workspace.sh` |
+| `Space t f` / `t h` / `t v`: modes, same terminal back, sizes, resize, `C-/` hides | full: `test_terminals` in `tests/workspace.sh` |
 | The tree, pickers (`Esc`, `C-v`), `Space d x`, the floating dashboard | full: `test_tree_and_pickers` |
 | Claude: `Space a s` / `a b` / `a B`, focus back to the window it came from, resize | full: `test_claude` |
 | A hidden Claude notifies (OSC 9, exit) | full: `test_claude_notices` |

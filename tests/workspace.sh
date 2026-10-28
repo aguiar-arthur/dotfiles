@@ -84,6 +84,8 @@ test_terminals() {
   probe "Space t h hides it" '#vim.tbl_filter(function(w) return vim.bo[vim.api.nvim_win_get_buf(w)].buftype == "terminal" and not vim.api.nvim_win_get_config(w).hide end, vim.api.nvim_list_wins())' 0 10
   keys Space t v
   probe "Space t v: a terminal 60 columns wide in terminal mode" 'vim.fn.mode() == "t" and vim.api.nvim_win_get_width(0) == 60 and 1 or 0' 1 20
+  keys C-_
+  probe "C-/ hides the terminal from terminal mode" "$HOME_BACK" 1 10
   stop_nvim
 }
 

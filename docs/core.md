@@ -19,7 +19,7 @@ look. Every other context builds on this one (see [map](map.md)).
 | `config/nvim/lua/config/settings.lua` | colorscheme, wrap, format on save, spell languages, notes folder, servers, Mason tools, parsers |
 | `config/nvim/lua/config/local.lua` | per-machine overrides (untracked, merged over the settings) |
 | `config/nvim/lua/config/options.lua` | options, leader keys, `ui2`, `.mdc` and `*.json.*` filetypes, the spell file |
-| `config/nvim/lua/config/keymaps.lua` | save, quit, `C-h/j/k/l`, `<leader>bd`, `]d` / `]e`, `<leader>cs` |
+| `config/nvim/lua/config/keymaps.lua` | save, quit, `C-h/j/k/l`, `<leader>bd` / `bo` / `bD`, `]d` / `]e`, `<leader>cs` |
 | `config/nvim/lua/config/autocmds.lua` | yank highlight, reload on focus, last position, `q` closes, missing folders, resize |
 | `config/nvim/lua/config/lazy.lua` | lazy.nvim bootstrap at the commit in `lazy-lock.json` |
 | `config/nvim/lua/dotfiles/windows.lua` | the cursorline only in the active window, the path in the winbar of file windows, the welcome screen when the last file closes, `q` closing a floating dashboard (`<leader>od`) instead of quitting |

@@ -18,7 +18,7 @@ the notes folder with obsidian.nvim. Its relationships are in [map](map.md).
 | `config/nvim/after/ftplugin/markdown.lua` | `,p`, the backtick pair |
 | `config/nvim/after/lsp/marksman.lua` | marksman outside the notes folder only |
 | `config/nvim/templates/note.md` | the `# title` new and daily notes start with |
-| `config/rumdl/rumdl.toml` | the lint rules (line length 100); `.rumdl.toml` and `~/.config/rumdl/rumdl.toml` link to it |
+| `config/rumdl/rumdl.toml` | the lint rules (line length 100, only the inline HTML the README's header and `<details>` need); `.rumdl.toml` and `~/.config/rumdl/rumdl.toml` link to it |
 
 ## How it works
 

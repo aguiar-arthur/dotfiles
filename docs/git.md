@@ -17,8 +17,8 @@ branch, a pull request, a file's or a line's history. Its relationships are in [
 |---|---|
 | `config/nvim/lua/plugins/editor.lua` (gitsigns) | signs, line blame, `]c` / `[c`, `<leader>g` hunk keys, `ih` |
 | `config/nvim/lua/plugins/editor.lua` (codediff) | the review keys (`gD`, `gC`, `gV`, `gd`, `gh`, `gL`, `gP`, `gq`), the keys inside a review and a merge conflict, `git.setup()` |
-| `config/nvim/lua/dotfiles/git.lua` | the base branch, the `review` tab variable, the editing tab, closing a review (and every review before a session is saved), `<leader>bd` beside a review, Enter in the log pickers |
-| `config/nvim/lua/config/keymaps.lua` | `<leader>bd`, through `git.close_buffer` |
+| `config/nvim/lua/dotfiles/git.lua` | the base branch, the `review` tab variable, the editing tab, closing a review (and every review before a session is saved), `<leader>bd` beside a review, `<leader>bo` / `<leader>bD` while one is open, Enter in the log pickers |
+| `config/nvim/lua/config/keymaps.lua` | `<leader>bd`, `<leader>bo`, `<leader>bD`, through `git.close_buffer` / `close_buffers` |
 | `config/nvim/lua/plugins/snacks.lua` | lazygit, the git pickers (`gl`, `gt`, `gc`) and their Enter, `gO`, the `confirm` that sends a file from a review to the editing tab |
 | `config/nvim/lua/plugins/ui.lua` | the which-key groups `<leader>g` and `<leader>gm` |
 
@@ -42,7 +42,8 @@ works: the pickers' `confirm` points `picker.main` at a file window of that tab 
 replaces a side of the diff nor a terminal. `gt` / `gT` switch between the two. `<leader>gq`
 closes the review from either tab (opening a tab first when the review is the last one, as
 codediff's own `q` does); `<leader>bd` in a review closes it, and on a file a review shows it only warns,
-because `Snacks.bufdelete` would take the buffer out of the review's window.
+because `Snacks.bufdelete` would take the buffer out of the review's window. `<leader>bo` /
+`<leader>bD` (`git.close_buffers`) only warn while any review is open, for the same reason.
 
 Snacks' log pickers check a commit out on Enter (`git checkout <commit> -- <file>` for a file's
 log, which drops its uncommitted changes); their `confirm` is `git.review_commit` instead, which
@@ -58,7 +59,10 @@ work there. On the real file hunks are gitsigns' (codediff's stage and discard k
 `<leader>gs` unstages a hunk already staged. A review of staged changes shows two codediff
 buffers gitsigns does not attach to, so codediff's `<leader>gu` unstages a hunk there; no
 gitsigns key uses it. `ih` is both plugins' on the real file (they select the same hunk) and
-codediff's alone on the old side. The two sides never wrap. `<leader>op` inside a review toggles
+codediff's alone on the old side. The two sides never wrap, and neither does the diff preview of
+the git pickers (`previewers.diff.wo` in `snacks.lua`): Snacks wraps it by default, which breaks
+the box it draws around a long hunk header. So those pickers (`git_layout`) put the list on top and
+the diff below it at full width, where a cut line is rare. `<leader>op` inside a review toggles
 the file list (codediff's `toggle_explorer` is set to it and to `<leader>ge`; its keys are
 buffer-local, so everywhere else `<leader>op` is still the file tree).
 
@@ -92,7 +96,7 @@ Consumes:
 
 | What | Where |
 |---|---|
-| Base branch order and its repository, the `review` variable from codediff's events, the editing tab (before, made when missing, never a review nor a tab without a file window), `Space g q` and `Space b d` around a review and on a review alone, Enter in the log pickers (parent, first commit) | `tests/helpers.lua` |
+| Base branch order and its repository, the `review` variable from codediff's events, the editing tab (before, made when missing, never a review nor a tab without a file window), `Space g q`, `Space b d`, `Space b o` and `Space b D` around a review and on a review alone, Enter in the log pickers (parent, first commit) | `tests/helpers.lua` |
 | Toggles beside a review | `tests/toggles.lua` |
 | A `Space g V` review: file list, `]c`, unwrapped sides and `Space u w`, an edit on the real side, `Space g e` / `Space o p`, `Space g i`, `gc` left alone, `gf` and a pick open in the tab before, `gt` back, `Space g q` and `q` close; `Space g D`, `Space g d`, `Space g h`, `Space g L`; Enter in `Space g l` reviews without a checkout; `Space g C` and `Space g u` unstaging there | full: `test_review` in `tests/git.sh` |
 | `Space g D` opens on the current file, and closes a review; lazygit: `e`, stage, unstage, commit, back to the window it came from | full: `test_lazygit` |

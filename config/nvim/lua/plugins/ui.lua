@@ -107,7 +107,10 @@ return {
         { "<leader>n", group = "notes" },
         { "<leader>o", group = "open/toggle" },
         { "<leader>S", group = "session" },
-        { "<leader>t", group = "terminal" },
+        {
+          "<leader>t",
+          group = "terminal [inside: C-/ hides, Esc Esc leaves (or C-\\ C-n), Space b d ends]",
+        },
         { "<leader>u", group = "ui toggles" },
         { "<localleader>d", group = "debug" },
         { "<localleader>t", group = "tests" },

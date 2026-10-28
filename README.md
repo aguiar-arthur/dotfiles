@@ -1,19 +1,55 @@
-# Dotfiles
+<h1 align="center">dotfiles</h1>
 
-[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/aguiar-arthur/dotfiles/badge)](https://scorecard.dev/viewer/?uri=github.com/aguiar-arthur/dotfiles)
+<p align="center">
+  <b>One command turns a fresh Mac into a Neovim IDE for code, LaTeX, notes and code review,
+  tested like a product.</b>
+</p>
 
-Personal macOS setup:
+<p align="center">
+  <a href="https://github.com/aguiar-arthur/dotfiles/actions/workflows/tests.yml"><img alt="Tests" src="https://github.com/aguiar-arthur/dotfiles/actions/workflows/tests.yml/badge.svg"></a>
+  <a href="https://scorecard.dev/viewer/?uri=github.com/aguiar-arthur/dotfiles"><img alt="OpenSSF Scorecard" src="https://api.scorecard.dev/projects/github.com/aguiar-arthur/dotfiles/badge"></a>
+  <img alt="Neovim 0.12+" src="https://img.shields.io/badge/Neovim-0.12%2B-57A143?logo=neovim&logoColor=white">
+  <img alt="macOS" src="https://img.shields.io/badge/macOS-only-000000?logo=apple&logoColor=white">
+  <img alt="Dracula" src="https://img.shields.io/badge/theme-Dracula-BD93F9">
+  <a href="LICENSE"><img alt="MIT" src="https://img.shields.io/badge/license-MIT-50FA7B"></a>
+</p>
 
-- **Neovim**: the editor, for everything (code, LaTeX, Markdown and notes, git).
-- **Starship** prompt and an **iTerm2** profile, both in Dracula colors.
+<p align="center">
+  <img src="docs/img/screenshot.png" width="900" alt="Neovim with the file tree and the start screen's clock, in Dracula">
+</p>
 
-This page is the hands-on guide: [install](#install), then how to use each part of
-[Neovim](#using-neovim) with its keys (finding, editing, code, run / test / debug, git,
-toggles, Clojure), [LaTeX](#latex), [Markdown and notes](#markdown-and-notes), the
-[shell and terminal](#shell-prompt-and-terminal), [update](#update), [check](#check) and
-[test](#test). How each part works inside, and why, is in [docs/](docs), one file per
-context (listed in [AGENTS.md](AGENTS.md#context-map)), which is also what an AI assistant
-reads before changing it.
+```sh
+git clone https://github.com/aguiar-arthur/dotfiles.git ~/dotfiles && ~/dotfiles/macos/install.sh
+```
+
+## Why this one
+
+| | |
+|---|---|
+| **Review pull requests in the editor** | `Space g P 42`: side by side, nothing checked out, and `gd` and `K` work on the real file |
+| **Claude Code, wired in** | it sees your files, selection and diagnostics, and proposes diffs you accept with a key |
+| **Tested like software** | the checks drive a real Neovim in tmux: servers, debugger, a LaTeX build, a run on a fresh machine |
+| **Secure by default** | OpenSSF Scorecard, gitleaks, CodeQL, zizmor and ShellCheck on every push |
+| **Never restyles other people's code** | format on save only where the project declares a style |
+| **LaTeX, live** | the PDF follows your typing in Skim, Cmd+Shift+click jumps back, math snippets expand as you type |
+| **Notes without an app** | plain Markdown, `[[links]]`, backlinks and daily notes, no Obsidian account |
+| **Clojure in one key** | `,cj` starts the REPL and connects; results appear next to the code |
+| **Built for AI assistants** | `AGENTS.md` and one doc per context, so an agent changes it without breaking it |
+| **Idempotent, part by part** | run it again and it only does what is missing; install only Neovim on a borrowed Mac |
+| **Small on purpose** | about 40 plugins, each well tested and maintained, pinned in a lockfile you can roll back |
+
+## What you get
+
+- **Neovim**: the editor for everything: code in 11 languages with their servers, run, test and
+  debug, git and reviews, LaTeX, Markdown and notes, Claude Code.
+- **Starship** prompt, **zsh** and an **iTerm2** profile, all in Dracula with JetBrains Mono
+  Nerd Font.
+
+Below: [install](#install), then each part of [Neovim](#using-neovim), [LaTeX](#latex),
+[Markdown and notes](#markdown-and-notes) and the [shell and terminal](#shell-prompt-and-terminal),
+then [update](#update), [check](#check) and [test](#test). Each part opens to its keys. How
+each one works inside, and why, is in [docs/](docs), one file per context (listed in
+[AGENTS.md](AGENTS.md#context-map)), which is also what an AI assistant reads before changing it.
 
 ## Install
 
@@ -55,7 +91,9 @@ On a Mac with macOS and an internet connection; nothing else is needed beforehan
 
 ### One part at a time
 
-Each part installs on its own, so a machine gets only what you want on it:
+Neovim, terminal and apps install on their own, so a machine gets only what you want on it.
+
+<details><summary>Details</summary>
 
 | Part | Command | Installs and links |
 |---|---|---|
@@ -68,7 +106,13 @@ On a machine whose shell and terminal are already set up and must stay as they a
 stay up to that machine: Homebrew on `PATH` (if Homebrew was just installed, it prints the line
 to add) and a Nerd Font in the terminal for the icons. Running another part later adds it.
 
+</details>
+
 ### What the `link.sh` files do
+
+Links into this repository, with your old files kept as backups.
+
+<details><summary>Details</summary>
 
 Each part's `link.sh` (`macos/nvim/link.sh`, `macos/terminal/link.sh`) also runs on its own
 after a `git pull`. Together they:
@@ -81,6 +125,8 @@ after a `git pull`. Together they:
   Starship prompt;
 - set Skim's inverse search to Neovim and make Skim reload a PDF when it changes (nvim);
 - make "Dotfiles (Dracula)" iTerm2's default profile (terminal).
+
+</details>
 
 ## Using Neovim
 
@@ -97,6 +143,10 @@ and [Markdown](docs/markdown.md).
 
 ### First day
 
+The keys to start with.
+
+<details open><summary>Keys</summary>
+
 | Key | Does |
 |---|---|
 | `Space f f` / `Space f g` | find a file / search text in the project |
@@ -108,7 +158,13 @@ and [Markdown](docs/markdown.md).
 | `Space g g` | lazygit |
 | `,r` | run the file (Python, Lua, shell, JavaScript, C, C++, Java, Ruby, Rust) |
 
+</details>
+
 ### Completion and snippets (blink.cmp, LuaSnip)
+
+Suggestions from the server, the buffer, paths and snippets, as you type.
+
+<details><summary>Keys</summary>
 
 The menu opens by itself in insert mode, with suggestions from the language server, the
 buffer, file paths and snippets. On the `:` line the menu also opens: `Tab` completes (a single
@@ -123,7 +179,13 @@ match at once) and `Enter` runs the line as typed.
 | `C-b` / `C-f` | scroll the documentation |
 | `C-s` | show / hide the function signature |
 
+</details>
+
 ### Finding things (Snacks picker, file tree, grug-far)
+
+One fuzzy picker for files, text, symbols, git and more, plus project-wide search and replace.
+
+<details><summary>Keys</summary>
 
 Every list (files, text, buffers, symbols, git) opens in the same picker: type to filter,
 `C-n` / `C-p` move, `Enter` opens, `C-v` / `C-s` open in a vertical / horizontal split, `Esc`
@@ -147,7 +209,13 @@ leaves insert mode and a second `Esc` closes. `Space f R` reopens the last picke
 In the file tree `a` creates, `d` deletes, `r` renames, `c` copies, `m` moves and `?` lists
 the rest.
 
+</details>
+
 ### Moving and editing (flash, mini.ai, mini.surround, mini.pairs)
+
+Jump anywhere in two keystrokes, edit functions and arguments as objects, copy a line as a GitHub link.
+
+<details><summary>Keys</summary>
 
 | Key | Does |
 |---|---|
@@ -172,7 +240,13 @@ the rest.
 
 Brackets and quotes close themselves as you type in a file (mini.pairs), not on the `:` line.
 
+</details>
+
 ### Windows, buffers, terminals and sessions
+
+Floating terminals, one session per folder, restored where you left it.
+
+<details><summary>Keys</summary>
 
 | Key | Does |
 |---|---|
@@ -183,6 +257,8 @@ Brackets and quotes close themselves as you type in a file (mini.pairs), not on 
 | `C-w <` / `>` / `-` / `+` | narrower / wider / shorter / taller (a count first, as in `5 C-w >`, for more) |
 | `]b` / `[b` | next / previous buffer (Neovim's own) |
 | `Space b d` | close the buffer (keeps the window, asks about unsaved changes); in a review, close it; on a file a review shows, only warn |
+| `Space b o` / `Space b D` | close the other buffers / all of them (terminals stay; with a review open, only warn) |
+| `Space b b` | the open buffers in a picker: `C-x` (or `dd` in the list) closes the one under the cursor |
 | `Space t f` / `t h` / `t v` | show or hide a floating / bottom / right terminal, each its own shell |
 | `Space S r` / `Space S l` | restore the session of this folder / the last session |
 | `Space S s` / `Space S d` | pick a session / do not save this one |
@@ -194,13 +270,22 @@ Inside a terminal (a shell, lazygit, a REPL, Claude) every key goes to the progr
 | `C-\ C-n` | back to Neovim; the program never sees it |
 | `Esc Esc` (quick) | back to Neovim too, but the first `Esc` reaches the program (it stops Claude while it works) |
 | `C-h` / `C-j` / `C-k` / `C-l` | once back in Neovim, go to the window on the left / below / above / right |
+| `C-/` | hide a `Space t` terminal at once (it keeps running); `Space t f` / `t h` / `t v` brings it back |
 | `q` | once back in Neovim, hide the terminal (it keeps running) |
+| `Space b d` | once back in Neovim, end the terminal and its program |
 | `i` | type into the program again |
 | `Shift-Enter` | a new line in Claude's prompt instead of sending it |
 
 Sessions are saved on quit, one per folder.
 
+</details>
+
 ### Code: language servers, diagnostics and formatting
+
+Definitions, references, call hierarchy, rename and code actions in Lua, Python, web, shell,
+Markdown, LaTeX and Clojure.
+
+<details><summary>Keys</summary>
 
 Servers start by themselves for Lua, Python, HTML, CSS, JSON, YAML, TOML, Bash, Markdown,
 LaTeX and Clojure.
@@ -238,7 +323,13 @@ restyled. Prettier runs a project's JavaScript, so it also needs a `.nvim.lua` a
 (prettier still only there); `Space u f` turns format-on-save off, `Space u F` only for this
 file.
 
+</details>
+
 ### Run, test and debug (`,` keys)
+
+`,r` runs the file, `,t` runs the tests under the cursor, `,d` debugs with breakpoints and a watch panel.
+
+<details><summary>Keys</summary>
 
 These keys exist only in the languages listed; in other files they are not mapped.
 
@@ -279,7 +370,13 @@ Results appear as signs next to each test and as diagnostics on the failing line
 A session opens panels with variables, the call stack, breakpoints and the program's output;
 they stay open after the program ends so its output can be read.
 
+</details>
+
 ### Git (gitsigns, Snacks, codediff, lazygit)
+
+Stage hunks inline, review the working tree, a branch or a pull request side by side, and resolve conflicts.
+
+<details><summary>Keys</summary>
 
 Changed lines are marked in the left column and the line's last commit shows at its end.
 
@@ -338,7 +435,13 @@ In a merge conflict, `Space g D` lists the conflicted files and shows theirs, ou
 
 lazygit (`Space g g`) does the rest of a merge: continue, abort, or pick a whole side per file.
 
+</details>
+
 ### Claude Code (claudecode.nvim)
+
+Claude in a floating window that sees your editor and proposes edits as diffs.
+
+<details><summary>Keys</summary>
 
 Claude Code runs in a bordered window over the editor, with a margin on each side, and talks to
 this Neovim: it sees the open files, the selection and the diagnostics, and shows its edits as a
@@ -361,7 +464,13 @@ starts with Neovim: the connection opens with the first of these keys.
 | `Space a a` / `Space a d` | accept / reject the diff Claude proposes |
 | `Space a q` | stop the connection |
 
+</details>
+
 ### Toggles (`Space u`)
+
+Spelling, wrap, diagnostics, inlay hints, format on save and more, one key each.
+
+<details><summary>Keys</summary>
 
 Each toggle changes every window and buffer, including the ones opened later, and shows its new
 state.
@@ -385,7 +494,13 @@ state.
 | `Space u F` | format on save, this file only |
 | `Space u n` | dismiss the notifications (`Space o n` shows their history) |
 
+</details>
+
 ### Clojure (Conjure, nvim-paredit, clojure-lsp)
+
+Jack-in with one key, evaluate forms inline, edit structure with slurp and barf.
+
+<details><summary>Keys</summary>
 
 Open a file of a `deps.edn`, `project.clj` or `bb.edn` (Babashka) project and press `,cj`: it
 starts an nREPL in a terminal below and connects as soon as it is up (or only connects when a
@@ -409,7 +524,13 @@ also offers what the running REPL knows (Conjure's omnifunc, beside clojure-lsp'
 
 `gd`, `K` and rename come from clojure-lsp, as in any language.
 
+</details>
+
 ### Look
+
+Dracula, a status line that tells you what the servers are doing, no "Press ENTER" prompts.
+
+<details><summary>Details</summary>
 
 Dracula everywhere. The status line shows the mode, git branch and changes, diagnostics, the file,
 the language servers, their progress while they load or index (`40%(1)`: the average and how many
@@ -419,9 +540,15 @@ output is folded behind a `[+N]` mark (`g<` or `:messages` shows it in full). Th
 marks, diagnostics, git changes and folds. `Space o d` opens the start screen (`q` closes it, or
 quits when it is the start screen itself), `Space o n` the notification history.
 
+</details>
+
 ## LaTeX
 
 ### Write and build
+
+Continuous build, the PDF in Skim at the cursor, and a click in the PDF back to the source.
+
+<details><summary>Keys</summary>
 
 1. Open the main file: `nvim main.tex`.
 2. The build starts by itself when the file opens (latexmk, continuous) and the file is saved
@@ -449,7 +576,13 @@ over the linked `~/.latexmkrc`.
 | `,lx` | reload vimtex after editing the preamble |
 | `za` / `zR` / `zM` | fold or unfold a section / open all / close all |
 
+</details>
+
 ### Snippets
+
+Article, beamer and abnTeX2 skeletons; `//` becomes a fraction and `;a` an alpha as you type.
+
+<details><summary>Keys</summary>
 
 Snippets marked **auto** expand as you type. The others appear in the completion menu when
 you type their name: pick one with `Tab` and accept with `Enter`. Inside a snippet, `Tab` and
@@ -502,7 +635,13 @@ typed by hand stays as typed.
 | `part` | `\frac{\partial }{\partial }` |
 | `mbb`, `mcal`, `mbf` | `\mathbb{}`, `\mathcal{}`, `\mathbf{}` |
 
+</details>
+
 ### Spelling and grammar
+
+Spelling in English and Portuguese, grammar with ltex-ls-plus.
+
+<details><summary>Keys</summary>
 
 | Key | Does |
 |---|---|
@@ -515,9 +654,15 @@ typed by hand stays as typed.
 Grammar is checked in Portuguese (`pt-BR`). A comment `% LTeX: language=en-US` switches it
 from that line on.
 
+</details>
+
 ## Markdown and notes
 
 ### Any Markdown file
+
+A rendered view in the editor, a browser preview that follows your saves, lint as you type.
+
+<details><summary>Keys</summary>
 
 | Key | Does |
 |---|---|
@@ -529,7 +674,13 @@ rumdl underlines problems as you type (rules in `config/rumdl/rumdl.toml`). It r
 save only in projects with a `.rumdl.toml` or `.markdownlint.*`, so nobody else's files are
 restyled.
 
+</details>
+
 ### Notes
+
+A plain folder of Markdown notes with links, backlinks and daily notes.
+
+<details><summary>Keys</summary>
 
 Notes are plain `.md` files in `~/notes` (change it with `notes.dir` in
 [`local.lua`](#per-machine-settings)), handled by obsidian.nvim. No Obsidian app or account is
@@ -545,6 +696,8 @@ needed. The folder is created the first time a note is opened.
 | `Enter` or `gd` on a link | open the linked note |
 | `]o` / `[o` | next / previous link |
 | `Enter` on a checkbox | tick or untick it |
+
+</details>
 
 ## Shell, prompt and terminal
 
@@ -566,6 +719,10 @@ needed. The folder is created the first time a note is opened.
 
 ## On a machine that is not yours
 
+Install only Neovim and leave nothing personal behind.
+
+<details><summary>Details</summary>
+
 Install the Neovim part only (`macos/nvim/install.sh`): it leaves the shell, the prompt and the terminal
 untouched. Then:
 
@@ -582,6 +739,8 @@ gitleaks on the history, zizmor and CodeQL on the workflows, and OSSF Scorecard 
 repository settings. To see the score, open
 `https://scorecard.dev/viewer/?uri=github.com/aguiar-arthur/dotfiles`.
 
+</details>
+
 ## Update
 
 | What | How |
@@ -592,6 +751,10 @@ repository settings. To see the score, open
 | Mason servers and tools | `:Mason`, then `U` |
 
 ## Check
+
+Read-only commands that say what is missing or wrong.
+
+<details><summary>Details</summary>
 
 Nothing here changes anything; each command says what is missing or wrong.
 
@@ -612,7 +775,13 @@ Run `:checkhealth` in a real Neovim window: in `nvim --headless` the Snacks chec
 errors that are not real. When a check fails, `macos/install.sh` (or the part's) is the fix for anything
 missing (a program, a server, a parser): it installs only what is not there.
 
+</details>
+
 ## Test
+
+`tests/nvim.sh`: seconds for the quick checks, minutes for a real Neovim driven in tmux.
+
+<details><summary>Details</summary>
 
 `tests/nvim.sh` checks the Neovim setup after a change. It is run by hand, never touches the
 real home (not even your sessions) and fails if `lazy-lock.json` changes. Checks whose program
@@ -636,6 +805,8 @@ When to run which:
 
 Each check prints one line: `pass`, `skip` with the reason, or `FAIL` with what was wanted and
 what came back. The last line is the count, for example `65 passed, 0 failed, 0 skipped`.
+
+</details>
 
 ## Per-machine settings
 
@@ -662,6 +833,10 @@ options and what it collects are in [docs/windows.md](docs/windows.md).
 
 ## Layout
 
+Where each file lives.
+
+<details><summary>Details</summary>
+
 ```text
 config/nvim/      Neovim (lazy.nvim, native LSP)
 config/zsh/       dotfiles.zsh, sourced from ~/.zshrc
@@ -676,11 +851,14 @@ macos/            the macOS install:
   terminal/       Brewfile, install.sh, link.sh: Starship, tmux, iTerm2, ~/.zshrc
   apps/           Brewfile, install.sh: the other programs
 SECURITY.md       how to report a problem
+CONTRIBUTING.md   how to change this setup
 .github/          the security workflows and Dependabot
 tests/            the Neovim checks: nvim.sh runs them (quick, full, fresh), one file per area
 windows/          collect-diagnostics.ps1: debug a Windows PC's health (docs/windows.md)
-docs/             how each context works and why, for you and for AI assistants
+docs/             how each context works and why, for you and for AI assistants; img/ the screenshot
 AGENTS.md         rules and the context map for AI assistants (CLAUDE.md points to it)
 ```
+
+</details>
 
 MIT, see [LICENSE](LICENSE).

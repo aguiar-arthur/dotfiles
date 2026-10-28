@@ -77,6 +77,14 @@ function M.close_buffer()
   end
 end
 
+function M.close_buffers(which)
+  if vim.iter(vim.api.nvim_list_tabpages()):any(M.review) then
+    vim.notify("A review is open: close it first (Space g q)", vim.log.levels.WARN)
+  else
+    Snacks.bufdelete[which]()
+  end
+end
+
 function M.review_commit(picker, item)
   picker:close()
   if item and item.commit then

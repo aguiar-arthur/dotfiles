@@ -27,8 +27,30 @@ local function review_commit(...)
   require("dotfiles.git").review_commit(...)
 end
 
-local float_terminal = { count = 1, win = require("dotfiles.float").win("Terminal") }
-local bottom_terminal = { count = 2, win = { position = "bottom", height = 15 } }
+local hide_keys = {
+  hide_slash = { "<c-/>", "hide", mode = "t", desc = "Hide terminal" },
+  hide_underscore = { "<c-_>", "hide", mode = "t", desc = "Hide terminal" },
+}
+local git_layout = {
+  layout = {
+    backdrop = 60,
+    width = 0.92,
+    height = 0.9,
+    box = "vertical",
+    border = true,
+    title = "{title} {live} {flags}",
+    title_pos = "center",
+    { win = "input", height = 1, border = "bottom" },
+    { win = "list", height = 0.3, border = "none" },
+    { win = "preview", title = "{preview}", border = "top" },
+  },
+}
+local float_terminal = {
+  count = 1,
+  win = vim.tbl_extend("force", require("dotfiles.float").win("Terminal"), { keys = hide_keys }),
+}
+local bottom_terminal = { count = 2, win = { position = "bottom", height = 15, keys = hide_keys } }
+local right_terminal = { count = 3, win = { position = "right", width = 60, keys = hide_keys } }
 
 return {
   "folke/snacks.nvim",
@@ -62,14 +84,17 @@ return {
     picker = {
       enabled = true,
       layout = { layout = { backdrop = 60 } },
+      previewers = { diff = { wo = { wrap = false } } },
       sources = {
         explorer = { hidden = true, ignored = false },
         files = { hidden = true },
         grep = { hidden = true },
         lsp_references = { auto_confirm = false },
-        git_log = { confirm = review_commit },
-        git_log_file = { confirm = review_commit },
-        git_log_line = { confirm = review_commit },
+        git_diff = { layout = git_layout },
+        git_status = { layout = git_layout },
+        git_log = { confirm = review_commit, layout = git_layout },
+        git_log_file = { confirm = review_commit, layout = git_layout },
+        git_log_line = { confirm = review_commit, layout = git_layout },
       },
       actions = {
         confirm = function(picker, item, action)
@@ -133,11 +158,7 @@ return {
 
     key("<leader>tf", snack("terminal", nil, float_terminal), "Float terminal"),
     key("<leader>th", snack("terminal", nil, bottom_terminal), "Horizontal terminal"),
-    key(
-      "<leader>tv",
-      snack("terminal", nil, { count = 3, win = { position = "right", width = 60 } }),
-      "Vertical terminal"
-    ),
+    key("<leader>tv", snack("terminal", nil, right_terminal), "Vertical terminal"),
 
     key("]r", words_jump(1), "Next reference"),
     key("[r", words_jump(-1), "Previous reference"),

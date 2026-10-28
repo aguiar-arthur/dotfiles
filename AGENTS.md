@@ -45,7 +45,7 @@ config/starship/    starship.toml
 config/rumdl/       rumdl.toml (Markdown lint rules; the root .rumdl.toml links to it)
 config/iterm2/      dracula.json (Dynamic Profile)
 config/latex/       latexmkrc (linked to ~/.latexmkrc)
-docs/               one doc per context (the map above)
+docs/               one doc per context (the map above); img/ holds the README screenshot
 macos/              the macOS install, see docs/install.md:
   install.sh        runs every part: terminal, apps, nvim
   lib.sh            what the parts share: Homebrew, links with backups, preferences, steps
@@ -53,6 +53,7 @@ macos/              the macOS install, see docs/install.md:
   terminal/         Brewfile, install.sh (brew, link), link.sh (Starship, iTerm2, ~/.zshrc)
   apps/             Brewfile, install.sh (brew): programs that are neither of the others
 SECURITY.md         how to report a problem
+CONTRIBUTING.md     how to change it, for people (a summary of this file)
 .github/            security workflows and Dependabot
 tests/              nvim.sh (quick, full, fresh) and its checks, see docs/tests.md
 windows/            collect-diagnostics.ps1, a standalone Windows health report, see docs/windows.md
@@ -104,8 +105,9 @@ windows/            collect-diagnostics.ps1, a standalone Windows health report,
   Neotest (`,t`: runs tests, one adapter per language, pytest here) replaced our test runner,
   and code_runner.nvim (`,r`: runs the current file, any file type) replaced our own `,r`.
   They do different jobs and both stay.
-- **Docs.** The README is the user's guide: install, then one section per module with what
-  it is for and a table of its keys. `docs/<context>.md` says how that context works, why, its
+- **Docs.** The README is the user's guide: a header (tagline, badges, "Why this one"), install,
+  then one section per module with a one-line pitch and, folded in `<details>`, what it is for
+  and a table of its keys. `docs/<context>.md` says how that context works, why, its
   pitfalls, its checks and how to change it. A key added, moved or removed changes its README
   table in the same change; a file, setting, pitfall or check added changes its context doc.
   Take the keys from the code, not from memory (the `desc` of each mapping, or
