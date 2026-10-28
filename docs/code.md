@@ -67,7 +67,8 @@ Clojure in detail. Its relationships are in [map](map.md).
 - `zipPlugin` stays enabled (lazy.nvim's `disabled_plugins`): clojure-lsp points into library
   sources as `zipfile://<jar>::<path>`, and without it a jump there fails ("Invalid cursor line").
 - Code lenses show for every server that sends them (`vim.lsp.codelens.enable`), mostly
-  clojure-lsp's reference counts; `grx` runs the one on the cursor line.
+  clojure-lsp's reference counts; `grx` runs the one on the cursor line and `<leader>uC` hides
+  them all.
 - Neovim 0.12 keeps servers' `$/progress` to itself (`LspProgress`); `dotfiles/progress.lua`
   turns each task into a native progress message (`nvim_echo` with `kind = "progress"`, one id
   per client and token), so the statusline shows `vim.ui.progress_status()`, the `:` line names
@@ -144,7 +145,9 @@ dap-view's hover, `,dw` adds a watch (`:DapViewWatch`, which takes a range, unli
 comes from `getregion`, because `:DapViewHover` is not declared with a range and so never sees
 one. Breakpoints show as `●` (`◆` with a condition) and the stopped line is tinted green.
 debugpy runs the file with the interpreter from `python.lua`; its adapter is Mason's
-`debugpy-adapter`, set in one line (mason-nvim-dap did only that and was dropped).
+`debugpy-adapter` (mason-nvim-dap did only that and was dropped), looked up when a session
+starts rather than when nvim-dap loads, so a debugpy installed later is found and a missing one
+says how to install it.
 
 ### Clojure
 
@@ -210,6 +213,7 @@ Consumes:
 | Servers attach (Lua, Python, …), `Space l R` restarts one, `,o`, `,s` | full: `test_lua`, `test_language_actions` |
 | `,r` per language | full: `test_run` in `tests/code.sh` |
 | `,dp` log point, `]T` / `[T` | `tests/keys.lua` |
+| The debugpy adapter found when a session starts, or a message without it | `tests/helpers.lua` |
 | `,t` keys, `,d` debugger (the panel and terminal, `,de` on a word and a selection, `,dw`, `,dC`, `,du`) | full: `test_test_keys`, `test_debug` |
 | `gd`, `grr` / `gri` / `grt` and the `<leader>l` pickers open theirs on attach, `<leader>lc` / `lC` warn without a call hierarchy, the other `<leader>l` keys, Neovim's `grn` / `gra` / `grx` stay | `tests/keys.lua`, full: `test_lua` |
 | clojure-lsp's call hierarchy replies mended (and spec replies kept) | `tests/helpers.lua` |

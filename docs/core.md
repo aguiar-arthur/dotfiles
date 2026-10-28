@@ -128,7 +128,9 @@ Consumes: nothing.
 - `ui2` is still marked experimental in 0.12 and turns itself on only when a UI is attached, so
   the headless quick tests never see it; `test_look` checks it, and a probe in a real terminal
   (see [tests](tests.md)) is how to check the `:` line and blink's menu after a Neovim update.
-  Turning it off is deleting its line in `options.lua`.
+  Turning it off is deleting its line in `options.lua`. The call is in a `pcall`, because
+  `vim._core.ui2` is a private module: a Neovim that renames it only warns, instead of stopping
+  `init.lua` before the keys, the autocmds and lazy.nvim.
 
 ## Checks
 
@@ -137,7 +139,8 @@ Consumes: nothing.
 | Startup prints nothing, every module loads | quick: `nvim starts without messages`, `tests/modules.lua` |
 | Autocmds, the cursorline and winbar of `windows.lua` | `tests/autocmds.lua` |
 | `]d`, `]e` | `tests/keys.lua` |
-| The `<leader>u` toggles, beside a review, `keep_local_opts`, `uT`, `uf` / `uF` | `tests/toggles.lua` |
+| The `<leader>u` toggles, beside a review, `keep_local_opts`, `uT`, `uf` / `uF`, `uC` | `tests/toggles.lua` |
+| A Neovim without `ui2` still runs the rest of `options.lua` | `tests/helpers.lua` |
 | Filetypes (`.mdc`, `*.json.*`) | `tests/files.lua` |
 | `zg` writes to the versioned list | quick: `zg writes to the versioned word list` |
 | The look, `ui2`, progress in the statusline, code context, `C-w` splits | full: `test_look` in `tests/core.sh` |

@@ -62,7 +62,14 @@ return {
     config = function()
       local dap = require("dap")
 
-      dap.adapters.python = { type = "executable", command = vim.fn.exepath("debugpy-adapter") }
+      dap.adapters.python = function(callback)
+        local adapter = vim.fn.exepath("debugpy-adapter")
+        if adapter == "" then
+          vim.notify("debugpy is not installed: :MasonInstall debugpy", vim.log.levels.ERROR)
+          return
+        end
+        callback({ type = "executable", command = adapter })
+      end
 
       require("dap-view").setup({
         auto_toggle = "open",

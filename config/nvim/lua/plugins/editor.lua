@@ -18,7 +18,7 @@ return {
         changedelete = { text = "~" },
         untracked = { text = "┆" },
       },
-      current_line_blame = true,
+      current_line_blame = false,
       current_line_blame_opts = { virt_text_pos = "eol", delay = 500 },
       on_attach = function(buf)
         local gs = require("gitsigns")
@@ -255,7 +255,7 @@ return {
     "nvim-mini/mini.pairs",
     event = "VeryLazy",
     opts = {
-      modes = { insert = true, command = true, terminal = false },
+      modes = { insert = true, command = false, terminal = false },
 
       mappings = { ["`"] = false },
     },

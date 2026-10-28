@@ -6,7 +6,17 @@ local g = vim.g
 g.mapleader = " "
 g.maplocalleader = ","
 
-require("vim._core.ui2").enable()
+local ui2_ok, ui2_err = pcall(function()
+  require("vim._core.ui2").enable()
+end)
+if not ui2_ok then
+  vim.schedule(function()
+    vim.notify(
+      "ui2 is off, delete its line in options.lua: " .. tostring(ui2_err),
+      vim.log.levels.WARN
+    )
+  end)
+end
 
 o.number = true
 o.relativenumber = true

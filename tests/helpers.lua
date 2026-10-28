@@ -486,4 +486,64 @@ T.eq("progress: a server's task becomes one native progress message", shown, {
   { "LSP: Indexing", "success", 100 },
 })
 
+do
+  require("lazy").load({ plugins = { "nvim-dap" } })
+  local adapter = require("dap").adapters.python
+  local bin = T.dir({ ["debugpy-adapter"] = { "#!/bin/sh" } })
+  vim.fn.setfperm(bin .. "/debugpy-adapter", "rwxr-xr-x")
+  local got, told
+  local before_path, before_notify = vim.env.PATH, vim.notify
+  vim.notify = function(msg, level)
+    told = { msg, level }
+  end
+  vim.env.PATH = bin
+  adapter(function(found)
+    got = found
+  end)
+  T.eq(
+    "debugpy: the adapter is looked up when a session starts",
+    got,
+    { type = "executable", command = bin .. "/debugpy-adapter" }
+  )
+  got = nil
+  vim.env.PATH = T.dir()
+  adapter(function(found)
+    got = found
+  end)
+  vim.env.PATH, vim.notify = before_path, before_notify
+  T.eq(
+    "debugpy: without it no session starts, and the message says how to install it",
+    { got == nil, told },
+    { true, { "debugpy is not installed: :MasonInstall debugpy", vim.log.levels.ERROR } }
+  )
+end
+
+do
+  local module = "vim._core.ui2"
+  local loaded, preload, before_notify = package.loaded[module], package.preload[module], vim.notify
+  local warning
+  package.loaded[module] = nil
+  package.preload[module] = function()
+    error("module '" .. module .. "' not found")
+  end
+  vim.notify = function(msg, level)
+    warning = { msg:match("^[^:]*"), level }
+  end
+  vim.o.grepprg = ""
+  local ok = pcall(T.config, "config/options.lua")
+  vim.wait(1000, function()
+    return warning ~= nil
+  end)
+  package.loaded[module], package.preload[module], vim.notify = loaded, preload, before_notify
+  T.eq(
+    "ui2: a Neovim without it still runs the rest of options.lua, and says so",
+    { ok, vim.o.grepprg, warning },
+    {
+      true,
+      "rg --vimgrep --smart-case",
+      { "ui2 is off, delete its line in options.lua", vim.log.levels.WARN },
+    }
+  )
+end
+
 T.done()

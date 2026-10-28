@@ -112,8 +112,6 @@ return {
     key("<leader>fc", picker("files", { cwd = vim.fn.stdpath("config") }), "Neovim config files"),
     key("<leader>fh", picker("help"), "Help pages"),
     key("<leader>fk", picker("keymaps"), "Keymaps"),
-    key("<leader>fs", picker("lsp_symbols"), "LSP symbols"),
-    key("<leader>fS", picker("lsp_workspace_symbols"), "LSP workspace symbols"),
     key("<leader>fu", picker("undo"), "Undo history"),
     key("<leader>fC", picker("colorschemes"), "Colorschemes"),
     key("<leader>fR", picker("resume"), "Resume last picker"),

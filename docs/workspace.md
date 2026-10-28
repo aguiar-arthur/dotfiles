@@ -26,11 +26,13 @@ objects, completion and snippets, sharing code, and Claude Code. Its relationshi
 
 `gd` / `grr` / `K` work as usual (implementation is `gri`; `gi` keeps Vim's meaning);
 `]r` / `[r` jump between references of the word under the cursor; `s` / `S` jump with flash;
-`gs…` surrounds. Text objects (mini.ai) work in every language with a treesitter parser:
-`af` / `if` function, `ac` / `ic` class, `au` / `iu` call, `aa` / `ia` argument, plus brackets,
-quotes and tags. The function and class queries come from nvim-treesitter-textobjects, whose
-own move functions give `]f` / `[f` (function) and `]a` / `[a` (argument; Vim's `]a` walked
-the argument list, unused here) in normal, visual and operator-pending mode.
+`gs…` surrounds; mini.pairs closes brackets and quotes in a file, not on the `:` line, where it
+got in the way of ranges and patterns. Text objects (mini.ai) work in every language with a
+treesitter parser: `af` / `if` function, `ac` / `ic` class, `au` / `iu` call, `aa` / `ia`
+argument, plus brackets, quotes and tags. The function and class queries come from
+nvim-treesitter-textobjects, whose own move functions give `]f` / `[f` (function) and `]a` /
+`[a` (argument; Vim's `]a` walked the argument list, unused here) in normal, visual and
+operator-pending mode.
 
 `<leader>r` searches with ripgrep and `<leader>R` with ast-grep (`brew "ast-grep"`), the engine
 grug-far already ships, so a pattern with `$A` meta-variables matches code by its syntax tree.

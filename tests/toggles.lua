@@ -101,6 +101,12 @@ T.eq(
 press("<leader>uF")
 T.eq("Space u F again turns it back on", vim.b[buf].disable_autoformat, false)
 
+local lens = vim.lsp.codelens.is_enabled()
+press("<leader>uC")
+T.eq("Space u C turns code lens off or on everywhere", vim.lsp.codelens.is_enabled(), not lens)
+press("<leader>uC")
+T.eq("Space u C again restores it", vim.lsp.codelens.is_enabled(), lens)
+
 vim.b[buf].keep_local_opts = nil
 package.loaded["dotfiles.toggles"] = nil
 local fresh = require("dotfiles.toggles")

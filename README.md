@@ -136,7 +136,6 @@ leaves insert mode and a second `Esc` closes. `Space f R` reopens the last picke
 | `Space f g` / `Space f w` | search text / the word or selection under the cursor |
 | `Space f /` | search in this buffer |
 | `Space f r` / `Space f p` | recent files / projects |
-| `Space f s` / `Space f S` | symbols of this file / of the workspace |
 | `Space f m` | marks (`mA` sets mark A, `'A` jumps back to that file) |
 | `Space f u` | undo history |
 | `Space f h` / `Space f k` | help pages / keymaps |
@@ -171,7 +170,7 @@ the rest.
 | `]t` / `[t` | next / previous `TODO`, `FIXME`, `NOTE` comment |
 | `Esc` | clear the search highlight |
 
-Brackets and quotes close themselves as you type (mini.pairs).
+Brackets and quotes close themselves as you type in a file (mini.pairs), not on the `:` line.
 
 ### Windows, buffers, terminals and sessions
 
@@ -291,7 +290,7 @@ Changed lines are marked in the left column and the line's last commit shows at 
 | `Space g p` | preview the hunk |
 | `Space g s` / `Space g r` | stage (or unstage, if staged) / reset the hunk or the selected lines |
 | `Space g S` / `Space g R` | stage / reset the whole file |
-| `Space g b` / `Space g B` | blame the line / turn the end-of-line blame off |
+| `Space g b` / `Space g B` | blame the line / turn the end-of-line blame on or off (off at start) |
 | `Space g c` / `Space g t` | jump to a changed hunk / a changed file of the working tree (`Tab` stages) |
 | `Space g l` | search the log; `Enter` reviews that commit against its parent (it never checks it out) |
 | `Space g O` | open the file in the browser (GitHub, GitLab, …) |
@@ -375,6 +374,7 @@ state.
 | `Space u c` | conceal (hidden Markdown and LaTeX markup) |
 | `Space u d` | diagnostics |
 | `Space u h` | inlay hints (types and parameter names inside the code) |
+| `Space u C` | code lens (the grey text a server shows above some lines) |
 | `Space u g` | indent guides |
 | `Space u S` | smooth scrolling (animated `C-d`, `C-u`, `zz`) |
 | `Space u x` | code context (the current function pinned on top) |
