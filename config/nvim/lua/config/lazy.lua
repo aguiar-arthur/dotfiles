@@ -46,7 +46,7 @@ require("lazy").setup({
   rocks = { enabled = false },
   performance = {
     rtp = {
-      disabled_plugins = { "gzip", "tarPlugin", "tohtml", "tutor", "zipPlugin" },
+      disabled_plugins = { "gzip", "tarPlugin", "tohtml", "tutor" },
     },
   },
 })

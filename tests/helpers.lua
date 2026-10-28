@@ -69,6 +69,54 @@ T.eq("clojure-lsp: Conjure's log buffers start no server", {
   clojure_root(clojure .. "/conjure-log-dev.cljc"),
 }, { "not started", "not started" })
 
+local function range(line, from, to)
+  return { start = { line = line, character = from }, ["end"] = { line = line, character = to } }
+end
+local function clojure_calls(method, calls)
+  local client = {
+    request = function(_, _, _, handler)
+      handler(nil, calls, {})
+    end,
+  }
+  clojure_lsp.on_init(client)
+  local got
+  client:request(method, {}, function(_, result)
+    got = result
+  end)
+  return got[1]
+end
+local outgoing = clojure_calls("callHierarchy/outgoingCalls", {
+  {
+    fromRanges = {},
+    to = {
+      uri = "zipfile:///c.jar::clojure/string.clj",
+      range = range(206, 14, 24),
+      selectionRange = range(4, 3, 17),
+    },
+  },
+})
+local incoming = clojure_calls("callHierarchy/incomingCalls", {
+  {
+    fromRanges = {},
+    from = { uri = "file:///a.clj", range = range(6, 6, 12), selectionRange = range(7, 3, 9) },
+  },
+})
+T.eq("clojure-lsp: an outgoing call opens the callee, an incoming call its call site", {
+  outgoing.to.selectionRange,
+  outgoing.fromRanges,
+  incoming.from.selectionRange,
+  incoming.fromRanges,
+}, { range(206, 14, 24), { range(4, 3, 17) }, range(6, 6, 12), { range(7, 3, 9) } })
+local spec = {
+  fromRanges = { range(1, 0, 3) },
+  to = { range = range(9, 0, 3), selectionRange = range(9, 0, 3) },
+}
+T.eq(
+  "clojure-lsp: a reply that already follows the spec is kept",
+  clojure_calls("callHierarchy/outgoingCalls", { vim.deepcopy(spec) }),
+  spec
+)
+
 local jack_in = require("dotfiles.clojure")
 local function repl(files)
   local cmd = jack_in.repl_command(T.dir(files))

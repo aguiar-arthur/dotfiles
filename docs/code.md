@@ -19,7 +19,7 @@ Clojure in detail. Its relationships are in [map](map.md).
 |---|---|
 | `config/nvim/lua/plugins/lsp.lua` | Mason, mason-lspconfig, system servers, diagnostics, the `LspAttach` keys (`gd`, `grr` / `gri` / `grt`, `<leader>l`, `,o`) |
 | `config/nvim/lua/dotfiles/progress.lua` | servers' `$/progress` as Neovim's own progress messages (statusline, `:` line, the terminal's progress bar) |
-| `config/nvim/after/lsp/<server>.lua` | per-server settings (basedpyright, clojure_lsp, jsonls, ltex_plus, lua_ls, marksman, ruff, texlab, yamlls) |
+| `config/nvim/after/lsp/<server>.lua` | per-server settings (basedpyright, clojure_lsp, jsonls, ltex_plus, lua_ls, marksman, ruff, texlab, yamlls); `clojure_lsp.lua` also mends its call hierarchy replies |
 | `config/nvim/lua/plugins/formatting.lua` | conform, `style_markers`, the prettier trust check, `<leader>lf` |
 | `config/nvim/lua/plugins/run.lua` | code_runner.nvim, `,r` and its `commands` |
 | `config/nvim/lua/plugins/test.lua` | Neotest, neotest-python, `,t` |
@@ -46,12 +46,26 @@ Clojure in detail. Its relationships are in [map](map.md).
 - JavaScript and TypeScript have no server, formatter, runner, tests or debugger: they were
   removed as unused. Adding them back is a server in `settings.mason_servers` and a line in
   conform. The `javascript` parser stays for `<script>` blocks in HTML.
-- `LspAttach` maps `gd`, `grr` / `gri` / `grt` (Neovim's names for references, implementation
-  and type definition) and `<leader>lc` / `lC` (the call hierarchy, `lsp_incoming_calls` /
-  `lsp_outgoing_calls`) to Snacks pickers; rename, code action and code lens stay Neovim's own
-  `grn` / `gra` / `grx`, with no `<leader>l` copy. It also clears `formatexpr` so `gq`
-  keeps wrapping prose and comments, and maps `,o` (organize imports) only when the server
-  offers it and the file type has no `,o` of its own (in Clojure it stays paredit's raise).
+- `LspAttach` maps `gd` and `grr` / `gri` / `grt` (Neovim's names for references,
+  implementation and type definition) to Snacks pickers, and `<leader>l` as the whole menu:
+  `d` / `D` / `i` / `t` / `r` (definition, declaration, implementations, type definition,
+  references), `c` / `C` (incoming / outgoing calls), `s` / `S` (symbols of the file / the
+  workspace), `a` / `A` (code action, source action), `n` rename, `l` code lens, `k` signature
+  help, `I` the servers (`lsp_config`), `R` restart; `f` (conform) and `M` (Mason) come from
+  their plugins. Neovim's own `grn` / `gra` / `grx` stay beside them. A picker key first asks
+  whether a server on the buffer offers the method and warns when none does (lua_ls has no
+  call hierarchy), since a Snacks picker would only say "No results". It also clears
+  `formatexpr` so `gq` keeps wrapping prose and comments, and maps `,o` (organize imports)
+  only when the server offers it and the file type has no `,o` of its own (in Clojure it stays
+  paredit's raise).
+- clojure-lsp's call hierarchy replies break the spec: `fromRanges` is empty, the call site is
+  in `selectionRange` and the definition in `range`. Snacks then placed the call site in the
+  callee's file ("index out of range" when that line is shorter) and listed no incoming calls.
+  `after/lsp/clojure_lsp.lua` wraps the client's `request` (`on_init`) and moves the call site
+  into `fromRanges` and `range` into `selectionRange` when `fromRanges` is empty, so a fixed
+  clojure-lsp passes through untouched.
+- `zipPlugin` stays enabled (lazy.nvim's `disabled_plugins`): clojure-lsp points into library
+  sources as `zipfile://<jar>::<path>`, and without it a jump there fails ("Invalid cursor line").
 - Code lenses show for every server that sends them (`vim.lsp.codelens.enable`), mostly
   clojure-lsp's reference counts; `grx` runs the one on the cursor line.
 - Neovim 0.12 keeps servers' `$/progress` to itself (`LspProgress`); `dotfiles/progress.lua`
@@ -197,7 +211,8 @@ Consumes:
 | `,r` per language | full: `test_run` in `tests/code.sh` |
 | `,dp` log point, `]T` / `[T` | `tests/keys.lua` |
 | `,t` keys, `,d` debugger (the panel and terminal, `,de` on a word and a selection, `,dw`, `,dC`, `,du`) | full: `test_test_keys`, `test_debug` |
-| `grr` / `gri` / `grt` open Snacks pickers on attach, Neovim's `grn` / `gra` / `grx` stay | `tests/keys.lua`, full: `test_lua` |
+| `gd`, `grr` / `gri` / `grt` and the `<leader>l` pickers open theirs on attach, `<leader>lc` / `lC` warn without a call hierarchy, the other `<leader>l` keys, Neovim's `grn` / `gra` / `grx` stay | `tests/keys.lua`, full: `test_lua` |
+| clojure-lsp's call hierarchy replies mended (and spec replies kept) | `tests/helpers.lua` |
 | `<leader>lc` / `lC` mapped on attach | full: `test_lua` |
 | A server's progress becomes one native progress message (title, status, percent) | `tests/helpers.lua` |
 | `,cj` jack-in (deps.edn, bb.edn), REPL completion through blink's `omni` | full: `test_clojure` |

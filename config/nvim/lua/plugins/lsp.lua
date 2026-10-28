@@ -72,16 +72,67 @@ return {
             vim.keymap.set(mode or "n", lhs, rhs, { buffer = buf, silent = true, desc = desc })
           end
 
-          map("gd", Snacks.picker.lsp_definitions, "Go to definition")
-          map("grr", Snacks.picker.lsp_references, "Go to references")
-          map("gri", Snacks.picker.lsp_implementations, "Go to implementation")
-          map("grt", Snacks.picker.lsp_type_definitions, "Go to type definition")
+          local function pick(source, method, what)
+            return function()
+              if #vim.lsp.get_clients({ bufnr = 0, method = method }) == 0 then
+                vim.notify("No language server here offers " .. what, vim.log.levels.WARN)
+                return
+              end
+              Snacks.picker[source]()
+            end
+          end
 
-          map("<leader>lD", vim.lsp.buf.declaration, "Declaration")
-          map("<leader>ls", vim.lsp.buf.signature_help, "Signature help")
+          local definition = pick("lsp_definitions", "textDocument/definition", "definitions")
+          local references = pick("lsp_references", "textDocument/references", "references")
+          local implementation =
+            pick("lsp_implementations", "textDocument/implementation", "implementations")
+          local type_definition =
+            pick("lsp_type_definitions", "textDocument/typeDefinition", "type definitions")
+          local calls = "textDocument/prepareCallHierarchy"
+
+          map("gd", definition, "Go to definition")
+          map("grr", references, "Go to references")
+          map("gri", implementation, "Go to implementation")
+          map("grt", type_definition, "Go to type definition")
+
+          map("<leader>ld", definition, "Definition")
+          map(
+            "<leader>lD",
+            pick("lsp_declarations", "textDocument/declaration", "declarations"),
+            "Declaration"
+          )
+          map("<leader>li", implementation, "Implementations")
+          map("<leader>lt", type_definition, "Type definition")
+          map("<leader>lr", references, "References")
+          map(
+            "<leader>lc",
+            pick("lsp_incoming_calls", calls, "a call hierarchy"),
+            "Incoming calls (who calls this)"
+          )
+          map(
+            "<leader>lC",
+            pick("lsp_outgoing_calls", calls, "a call hierarchy"),
+            "Outgoing calls (what this calls)"
+          )
+          map(
+            "<leader>ls",
+            pick("lsp_symbols", "textDocument/documentSymbol", "symbols"),
+            "Symbols (this file)"
+          )
+          map(
+            "<leader>lS",
+            pick("lsp_workspace_symbols", "workspace/symbol", "workspace symbols"),
+            "Symbols (workspace)"
+          )
+          map("<leader>la", vim.lsp.buf.code_action, "Code action", { "n", "x" })
+          map("<leader>lA", function()
+            vim.lsp.buf.code_action({ context = { only = { "source" }, diagnostics = {} } })
+          end, "Source action (imports, fix all)")
+          map("<leader>ln", vim.lsp.buf.rename, "Rename")
+          map("<leader>ll", vim.lsp.codelens.run, "Run code lens")
+          map("<leader>lk", vim.lsp.buf.signature_help, "Signature help")
+          map("<leader>lI", Snacks.picker.lsp_config, "Servers (info)")
           map("<leader>lR", "<cmd>lsp restart<CR>", "Restart LSP")
-          map("<leader>lc", Snacks.picker.lsp_incoming_calls, "Incoming calls (who calls this)")
-          map("<leader>lC", Snacks.picker.lsp_outgoing_calls, "Outgoing calls (what this calls)")
 
           local client = vim.lsp.get_client_by_id(ev.data.client_id)
           local provider = client and client.server_capabilities.codeActionProvider

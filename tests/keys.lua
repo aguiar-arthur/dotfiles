@@ -251,15 +251,99 @@ local function buffer_map(lhs)
   local m = vim.fn.maparg(lhs, "n", false, true)
   return m.buffer == 1 and m.callback or nil
 end
+local picker, get_clients, notify = Snacks.picker, vim.lsp.get_clients, vim.notify
+local opened, warned, offered = {}, {}, {}
+Snacks.picker = setmetatable({}, {
+  __index = function(_, source)
+    return function()
+      opened[#opened + 1] = source
+    end
+  end,
+})
+vim.lsp.get_clients = function(filter)
+  return vim.tbl_contains(offered, filter.method) and { {} } or {}
+end
+vim.notify = function(msg)
+  warned[#warned + 1] = msg
+end
+local function press(lhs)
+  opened = {}
+  buffer_map(lhs)()
+  return opened[1] or false
+end
+offered = {
+  "textDocument/definition",
+  "textDocument/references",
+  "textDocument/implementation",
+  "textDocument/typeDefinition",
+  "textDocument/declaration",
+  "textDocument/prepareCallHierarchy",
+  "textDocument/documentSymbol",
+  "workspace/symbol",
+}
 T.eq(
-  "grr / gri / grt open Snacks pickers",
-  { buffer_map("grr"), buffer_map("gri"), buffer_map("grt") },
+  "gd / gr* and Space l open their Snacks pickers when a server offers them",
+  vim.tbl_map(press, {
+    "gd",
+    "grr",
+    "gri",
+    "grt",
+    "<leader>ld",
+    "<leader>lD",
+    "<leader>li",
+    "<leader>lt",
+    "<leader>lr",
+    "<leader>lc",
+    "<leader>lC",
+    "<leader>ls",
+    "<leader>lS",
+  }),
   {
-    Snacks.picker.lsp_references,
-    Snacks.picker.lsp_implementations,
-    Snacks.picker.lsp_type_definitions,
+    "lsp_definitions",
+    "lsp_references",
+    "lsp_implementations",
+    "lsp_type_definitions",
+    "lsp_definitions",
+    "lsp_declarations",
+    "lsp_implementations",
+    "lsp_type_definitions",
+    "lsp_references",
+    "lsp_incoming_calls",
+    "lsp_outgoing_calls",
+    "lsp_symbols",
+    "lsp_workspace_symbols",
   }
 )
+offered = {}
+T.eq(
+  "Space l c / l C warn instead of an empty picker where no server has a call hierarchy",
+  { press("<leader>lc"), press("<leader>lC"), warned },
+  {
+    false,
+    false,
+    {
+      "No language server here offers a call hierarchy",
+      "No language server here offers a call hierarchy",
+    },
+  }
+)
+Snacks.picker, vim.lsp.get_clients, vim.notify = picker, get_clients, notify
+T.eq(
+  "Space l a / A / n / l / k / I / R are mapped on attach",
+  vim.tbl_map(function(lhs)
+    return buffer_map(lhs) ~= nil or vim.fn.maparg(lhs, "n") ~= ""
+  end, {
+    "<leader>la",
+    "<leader>lA",
+    "<leader>ln",
+    "<leader>ll",
+    "<leader>lk",
+    "<leader>lI",
+    "<leader>lR",
+  }),
+  { true, true, true, true, true, true, true }
+)
+T.eq("Space l a works on a selection", vim.fn.maparg("<leader>la", "x", false, true).buffer, 1)
 T.eq("gr has no key of its own, so grn / gra / grx still work", buffer_map("gr"), nil)
 
 T.done()

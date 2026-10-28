@@ -40,9 +40,10 @@ Neovim 0.12 or newer: the grammar toggle reads `vim.lsp.is_enabled()` and relies
 `<Space>` is the leader, `,` the local leader; which-key shows every key after a short pause.
 `<leader>` keys work everywhere, `,` keys depend on the file type (see [code](code.md)).
 `<A-j>` / `<A-k>` move lines; `C-h/j/k/l` move between windows. Splits, resizing, `]b` / `[b`,
-`gcc`, `C-w d` (the line's diagnostics) and the LSP keys `grn` / `gra` / `grx` (rename, code
-action, code lens) are Neovim's own keys, not repeated under `<leader>`; `grr` / `gri` / `grt`
-keep Neovim's names but open Snacks pickers (see [code](code.md)). `<Esc>` clears the search
+`gcc` and `C-w d` (the line's diagnostics) are Neovim's own keys, not repeated under
+`<leader>`. The LSP keys are the exception: Neovim's quick `gr…` keys stay (`grr` / `gri` /
+`grt` open Snacks pickers) and `<leader>l` repeats them, with the rest, as one menu that
+which-key shows (see [code](code.md)). `<Esc>` clears the search
 highlight; Neovim's `nohlsearch` package is not used because it clears it after `updatetime`
 (250 ms here), before the matches can be read.
 

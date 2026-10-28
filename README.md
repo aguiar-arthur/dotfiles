@@ -208,16 +208,21 @@ LaTeX and Clojure.
 
 | Key | Does |
 |---|---|
-| `gd` / `grr` | go to the definition / list references (the list opens even for one) |
 | `K` | documentation of the word under the cursor |
-| `gri` / `grt` / `Space l D` | implementation / type definition / declaration |
-| `grn` | rename everywhere (Neovim's own) |
-| `gra` | code action (fix, import, refactor), also on a selection (Neovim's own) |
-| `Space l s` | signature help |
+| `gd` / `Space l d` | go to the definition |
+| `grr` / `Space l r` | list references (the list opens even for one) |
+| `gri` / `Space l i` | go to the implementation |
+| `grt` / `Space l t` | go to the type definition |
+| `Space l D` | go to the declaration |
 | `Space l c` / `Space l C` | who calls the function under the cursor / what it calls, in a picker |
-| `grx` | run the code lens of this line (the grey text a server shows above some lines, such as clojure-lsp's reference counts; Neovim's own) |
+| `Space l s` / `Space l S` | symbols of this file / of the workspace, in a picker |
+| `gra` / `Space l a` | code action (fix, import, refactor), also on a selection |
+| `Space l A` | source action for the whole file (organize imports, fix all) |
+| `grn` / `Space l n` | rename everywhere |
+| `grx` / `Space l l` | run the code lens of this line (the grey text a server shows above some lines, such as clojure-lsp's reference counts) |
+| `Space l k` | signature help (`C-s` while typing) |
 | `Space l f` | format the buffer or the selection |
-| `Space l R` / `Space l M` | restart the servers / open Mason |
+| `Space l I` / `Space l R` / `Space l M` | the servers and their state / restart the servers / open Mason |
 | `]d` / `[d`, `]e` / `[e` | next / previous diagnostic, error |
 | `C-w d` | the diagnostics of this line in a float (Neovim's own) |
 | `Space d x` / `Space d d` | all diagnostics / those of this file, in a picker |
