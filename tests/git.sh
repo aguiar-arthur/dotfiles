@@ -152,7 +152,7 @@ test_review_debug() {
   keys ,db
   keys ,dc
   probe "debug in a review: stops at the breakpoint" 'require("dap").session() and require("dap").session().stopped_thread_id and 1 or 0' 1 60
-  probe "the debug panels open in the review tab" '#vim.tbl_filter(function(w) return vim.bo[vim.api.nvim_win_get_buf(w)].filetype:find("dap") end, vim.api.nvim_tabpage_list_wins(0))' 2 10
+  probe "the debug panels open in the review tab" 'P.dap_panels()' 2 10
   probe "no tab is added" 'vim.fn.tabpagenr("$")' 2 5
   keys ,dt
   keys ,du

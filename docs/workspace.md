@@ -103,6 +103,10 @@ Consumes: [core](core.md) keys and toggles.
   dashboard it would fail before the first file is read.
 - blink.cmp on the `:` line inserts the selected item already: mapping `<CR>` to `accept`
   there makes a completed command need a second `<CR>`.
+- `getregion` pads a block selection to its width while `virtualedit` contains `block` (set in
+  `options.lua`), so `<leader>cs` copied trailing spaces after short lines; `share.lua` turns
+  `virtualedit` off around the call. `tests/share.lua` caught it once it ran with the real
+  config: under `nvim -l` the option was off.
 - `dotfiles/claude.lua` calls two functions claudecode.nvim does not document,
   `claudecode.terminal.get_active_terminal_bufnr` and `toggle_open_no_focus`: its commands
   cannot ask whether a Claude terminal runs nor open one without focus. The plugin uses both

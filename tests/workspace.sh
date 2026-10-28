@@ -6,7 +6,7 @@ roundtrip() {
 }
 
 claude_stub() {
-  send ":lua local c = require(\"claudecode\"); c.start(); require(\"claudecode.terminal\").setup({}, \"${1:-sleep 600}\"); c.is_claude_connected = function() return true end; c._broadcast_at_mention = function() return true, nil, { file_path = \"x\" } end<CR>"
+  send ":lua P.claude_stub(\"${1:-sleep 600}\")<CR>"
 }
 
 test_claude() {
@@ -129,7 +129,7 @@ test_tree_and_pickers() {
   lua_do 'vim.diagnostic.set(vim.api.nvim_create_namespace("test"), 0, { { lnum = 0, col = 0, message = "x" } })'
   keys Space d x
   probe "Space d x lists the diagnostics in a picker" 'vim.bo.filetype' snacks_picker_input 15
-  probe "and the picker has the diagnostic" '(function() local p = Snacks.picker.get()[1] return p and p:count() or 0 end)()' 1 10
+  probe "and the picker has the diagnostic" 'P.picker_count()' 1 10
   keys Escape
   sleep 0.5
   keys Escape

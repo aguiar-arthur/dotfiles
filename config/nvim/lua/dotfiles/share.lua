@@ -41,9 +41,12 @@ function M.selection()
     end
     first, last = math.min(unpack(corners)), math.max(unpack(corners))
   end
+  local virtualedit = vim.o.virtualedit
+  vim.o.virtualedit = ""
   local lines = vim.fn.getregion(region[1], region[2], {
     type = mode == "\22" and mode .. (last - first + 1) or mode,
   })
+  vim.o.virtualedit = virtualedit
   block(from[2], first, to[2], last, lines)
   vim.api.nvim_feedkeys(vim.keycode("<Esc>"), "n", false)
 end

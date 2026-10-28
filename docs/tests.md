@@ -19,9 +19,11 @@ how they are built. Its relationships are in [map](map.md).
 | `tests/nvim.sh` | the one test command: `quick` (default), `full`, `fresh` |
 | `tests/lib.sh` | pass / fail / skip, the isolated home, tmux, `probe`, `menu_shows`, `install` |
 | `tests/core.sh`, `workspace.sh`, `code.sh`, `git.sh`, `markdown.sh`, `tex.sh` | the full checks, one file per context (the same names as the docs), one `test_<name>` function per scenario |
-| `tests/lib.lua` | `T.eq`, `T.dir` (a temporary project), `T.config` (load a config file), `T.done` |
-| `tests/files.lua`, `helpers.lua`, `toggles.lua`, `keys.lua`, `autocmds.lua` | headless checks with the real config, run through `lua_check` |
-| `tests/share.lua`, `tests/modules.lua` | headless checks run without `lua_check` |
+| `tests/lib.lua` | `T.case` (a named group of checks), `T.stub` (a fake undone after its case), `T.eq`, `T.dir` (a temporary project), `T.config` (load a config file), `T.done` |
+| `tests/lib_check.lua` | the check of `lib.lua` itself: a crash fails only its case, every stub is undone |
+| `tests/files.lua`, `helpers.lua`, `toggles.lua`, `keys.lua`, `autocmds.lua`, `share.lua` | headless checks with the real config, run through `lua_check` |
+| `tests/modules.lua` | every module loads on its own, without the config (`nvim -l`) |
+| `tests/probes.lua` | `P.*`, the multi-statement Lua the full checks call in the running Neovim (loaded by `start_nvim`) |
 | `tests/snippets.lua` | the LaTeX probe the full run types into a real Neovim |
 
 ## How it works
@@ -40,8 +42,14 @@ and the `XDG_*` folders pointed there, and drives Neovim through tmux and `nvim 
 
 Where a new check goes:
 
-- It can run headless: a `T.eq` in the `tests/<area>.lua` of what it tests (or a new file and
-  one `lua_check` line in `quick()`), with fakes for the clipboard, browser, Mason or codediff.
+- It can run headless: a `T.eq` in a `T.case` of the `tests/<area>.lua` of what it tests (or a
+  new file and one `lua_check` line in `quick()`), with fakes for the clipboard, browser, Mason
+  or codediff. A case runs in `xpcall`, so a crash fails only that case and the next ones still
+  run; it opens the buffer it needs itself and never relies on what an earlier case left. A fake
+  goes in with `T.stub(table, key, value)`, which puts the old value back when the case ends,
+  passed or crashed; a fake left by hand once replaced `vim.notify` for the rest of a file.
+- A probe that needs more than one statement is a function in `tests/probes.lua`, called as
+  `P.name()`, so stylua checks it; a one-line expression stays in the `.sh` file.
 - It needs a UI, a server or typing: a `probe` in the `test_<area>` function of the `.sh` file
   of what it tests; a new helper goes in `tests/lib.sh`.
 - There is no line limit: split a file by sub-context when it grows (`workspace.sh` could become

@@ -68,8 +68,9 @@ quick() {
   touch "$marker"
   export XDG_STATE_HOME="$QUICK_STATE"
   check_silent "nvim starts without messages" nvim --headless "+qa"
-  check "every Lua module loads" nvim --headless -l "$DOT/tests/modules.lua"
-  check "Space c s copies the path, line:col and the code" nvim --headless -l "$DOT/tests/share.lua"
+  lua_check "the test harness: a crash fails only its case, stubs are undone" lib_check.lua
+  check "every Lua module loads" perl -e 'alarm 120; exec @ARGV' nvim --headless -l "$DOT/tests/modules.lua"
+  lua_check "Space c s copies the path, line:col and the code" share.lua
   lua_check "filetypes, format on save and the references list" files.lua
   lua_check "python, debugpy, mason, spell files, the review base branch, LSP progress, no ui2" helpers.lua
   lua_check "Space u toggles, also beside a codediff review" toggles.lua

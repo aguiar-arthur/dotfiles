@@ -9,12 +9,12 @@ test_lua() {
   probe "Space l c / l C and grr / gri / grt are mapped for the server" '(vim.fn.maparg("<leader>lc", "n") ~= "" and vim.fn.maparg("<leader>lC", "n") ~= "" and vim.fn.maparg("grr", "n", false, true).buffer == 1 and vim.fn.maparg("gri", "n", false, true).buffer == 1 and vim.fn.maparg("grt", "n", false, true).buffer == 1) and 1 or 0' 1 10
   lua_do 'vim.g.lsp_id = vim.lsp.get_clients({ name = "lua_ls" })[1].id'
   keys Space l R
-  probe "Space l R restarts lua_ls" '(function() local c = vim.lsp.get_clients({ name = "lua_ls" })[1] return c and c.id ~= vim.g.lsp_id and 1 or 0 end)()' 1 60
+  probe "Space l R restarts lua_ls" 'P.lua_ls_restarted()' 1 60
   stop_nvim
 }
 
 term_has() {
-  echo "(function() for _, b in ipairs(vim.api.nvim_list_bufs()) do if vim.bo[b].buftype == \"terminal\" and table.concat(vim.api.nvim_buf_get_lines(b, 0, -1, false), \" \"):find(\"$1\", 1, true) then return 1 end end return 0 end)()"
+  echo "P.terminal_has(\"$1\")"
 }
 
 terminal_windows() {
@@ -69,26 +69,26 @@ test_debug() {
   probe "Python: ,db sets a breakpoint" 'vim.tbl_count(require("dap.breakpoints").get())' 1 20
   keys ,dc
   probe "Python: ,dc stops at the breakpoint" 'require("dap").session() and require("dap").session().stopped_thread_id and 1 or 0' 1 60
-  probe "Python: the debug panels and the program's terminal open" '#vim.tbl_filter(function(w) return vim.bo[vim.api.nvim_win_get_buf(w)].filetype:find("dap") end, vim.api.nvim_tabpage_list_wins(0))' 2 10
+  probe "Python: the debug panels and the program's terminal open" 'P.dap_panels()' 2 10
   probe "Python: the cursor stays in the code" 'vim.bo.filetype' python 5
   keys ,de
-  probe "Python: ,de shows the value under the cursor" '#vim.tbl_filter(function(w) return vim.bo[vim.api.nvim_win_get_buf(w)].filetype == "dap-view-hover" end, vim.api.nvim_list_wins())' 1 10
+  probe "Python: ,de shows the value under the cursor" 'P.hovers()' 1 10
   keys Escape
-  lua_do 'for _, w in ipairs(vim.api.nvim_list_wins()) do if vim.bo[vim.api.nvim_win_get_buf(w)].filetype == "dap-view-hover" then vim.api.nvim_win_close(w, true) end end'
+  lua_do 'P.close_hovers()'
   keys :2 Enter 0 w w v '$' ,de
   probe "Python: ,de in visual mode evaluates the selection" 'require("dap-view.state").hover' 'x + 1' 10
-  lua_do 'for _, w in ipairs(vim.api.nvim_list_wins()) do if vim.bo[vim.api.nvim_win_get_buf(w)].filetype == "dap-view-hover" then vim.api.nvim_win_close(w, true) end end'
+  lua_do 'P.close_hovers()'
   keys Escape
   keys :2 Enter 0 w w
   keys ,dw
   probe "Python: ,dw watches the expression under the cursor" 'vim.tbl_count(require("dap-view.state").watched_expressions)' 1 10
   keys :3 Enter
   keys ,dC
-  probe "Python: ,dC runs to the cursor" '(function() local s = require("dap").session() return s and s.current_frame and s.current_frame.line or 0 end)()' 3 30
+  probe "Python: ,dC runs to the cursor" 'P.dap_line()' 3 30
   keys ,dt
   probe "Python: ,dt ends the session" 'require("dap").session() and 1 or 0' 0 20
   keys ,du
-  probe "Python: ,du closes the panels" '#vim.tbl_filter(function(w) return vim.bo[vim.api.nvim_win_get_buf(w)].filetype:find("dap") end, vim.api.nvim_tabpage_list_wins(0))' 0 10
+  probe "Python: ,du closes the panels" 'P.dap_panels()' 0 10
   stop_nvim
 }
 
@@ -112,7 +112,7 @@ test_language_actions() {
 }
 
 neotest_count() {
-  echo "(function() local n = require(\"neotest\") for _, id in ipairs(n.state.adapter_ids()) do local c = n.state.status_counts(id, { buffer = vim.api.nvim_get_current_buf() }) if c and c.$1 > 0 then return c.$1 end end return 0 end)()"
+  echo "P.test_count(\"$1\")"
 }
 
 test_test_keys() {

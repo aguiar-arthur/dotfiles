@@ -81,7 +81,7 @@ probe() {
 
 start_nvim() {
   stop_nvim
-  "${TMUX[@]}" new-session -d -x 200 -y 50 -c "$1" "env TERM=xterm-256color nvim -n -i NONE --cmd 'let g:vimtex_view_automatic = 0' --cmd 'autocmd User VimtexEventCompileSuccess let g:test_compiled = 1' --cmd 'autocmd User VimtexEventView let g:test_viewed = 1' --listen '$SOCK' '$2'"
+  "${TMUX[@]}" new-session -d -x 200 -y 50 -c "$1" "env TERM=xterm-256color nvim -n -i NONE --cmd 'luafile $DOT/tests/probes.lua' --cmd 'let g:vimtex_view_automatic = 0' --cmd 'autocmd User VimtexEventCompileSuccess let g:test_compiled = 1' --cmd 'autocmd User VimtexEventView let g:test_viewed = 1' --listen '$SOCK' '$2'"
   wait_for 'vim.v.vim_did_enter' 1 20
 }
 
