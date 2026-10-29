@@ -17,11 +17,12 @@ how they are built. Its relationships are in [map](map.md).
 | Path | Holds |
 |---|---|
 | `tests/nvim.sh` | the one test command: `quick` (default), `full`, `fresh` |
-| `tests/lib.sh` | pass / fail / skip, the isolated home, tmux, `probe`, `menu_shows`, `install` |
+| `tests/lib.sh` | pass / fail / skip, the isolated home, tmux, `probe`, `menu_shows`, `install`, `review_repo` (a fresh repository with a pushed base and a local change) |
 | `tests/core.sh`, `workspace.sh`, `code.sh`, `git.sh`, `markdown.sh`, `tex.sh` | the full checks, one file per context (the same names as the docs), one `test_<name>` function per scenario |
-| `tests/lib.lua` | `T.case` (a named group of checks), `T.stub` (a fake undone after its case), `T.eq`, `T.dir` (a temporary project), `T.config` (load a config file), `T.done` |
+| `tests/lib.lua` | `T.case` (a named group of checks), `T.stub` (a fake undone after its case), `T.eq`, `T.dir` (a temporary project), `T.config` (load a config file), `T.skip` (say a check could not run), `T.done` |
 | `tests/lib_check.lua` | the check of `lib.lua` itself: a crash fails only its case, every stub is undone |
-| `tests/files.lua`, `helpers.lua`, `toggles.lua`, `keys.lua`, `autocmds.lua`, `share.lua` | headless checks with the real config, run through `lua_check` |
+| `tests/core.lua`, `install.lua`, `code.lua`, `workspace.lua`, `git.lua`, `files.lua`, `toggles.lua`, `keys.lua`, `autocmds.lua`, `share.lua`, `treesitter.lua`, `tex_snippets.lua` | headless checks with the real config, run through `lua_check`; named after the context they check (the `.sh` names) where one file fits |
+| `tests/comments.lua` | no comments in Lua, shell and PowerShell, found by parsing (trailing ones too) |
 | `tests/modules.lua` | every module loads on its own, without the config (`nvim -l`) |
 | `tests/probes.lua` | `P.*`, the multi-statement Lua the full checks call in the running Neovim (loaded by `start_nvim`) |
 | `tests/snippets.lua` | the LaTeX probe the full run types into a real Neovim |
@@ -35,7 +36,9 @@ The quick checks run headless Neovim with the real config, so `quick` points `XD
 at a temporary folder: persistence saves a session on exit, and it once replaced the real
 session of `~/dotfiles` with test files. `the quick tests leave your sessions alone` checks it.
 Each check prints `pass`, `skip` with the reason, or `FAIL` with what was wanted and what came
-back; the last line is the count.
+back; the last line is the count. A headless check that cannot run something here (no pandoc,
+no rumdl) calls `T.skip(name, reason)` and `lua_check` prints a `skip` line below its `pass`,
+so a missing program never reads as a pass of what it was meant to check.
 
 `full` installs Neovim into `~/.cache/dotfiles-nvim-test` (reused by later runs) with `HOME`
 and the `XDG_*` folders pointed there, and drives Neovim through tmux and `nvim --server`.
@@ -54,6 +57,12 @@ Where a new check goes:
   of what it tests; a new helper goes in `tests/lib.sh`.
 - There is no line limit: split a file by sub-context when it grows (`workspace.sh` could become
   `terminals.sh` and `claude.sh`) and list it in the `for part in …` loop of `tests/nvim.sh`.
+- Wait for the signal the next key needs (`wait_for`, or `expect_screen`, which fails with the
+  screen when the text never comes; the text is the program's own, so the test config pins
+  lazygit to English: in Portuguese its file list never says `Files`), not for a `sleep`; a sleep
+  stays only where Neovim shows nothing to wait for (a second run replacing a terminal, a
+  server indexing). Each full test builds the repository it needs (`review_repo`) and never
+  relies on what an earlier one left, so one runs alone.
 - A key sent while a terminal has the cursor goes to the program, so set Lua state there with
   `lua_do`, not with `send ':lua …'`.
 - `ui2` keeps its message and `:` line windows as floats in the current tab, so a probe that
@@ -70,7 +79,8 @@ context's file; the map's last column says which.
 ## Quick tests in CI
 
 `.github/workflows/tests.yml` runs `tests/nvim.sh` (quick) on a macOS runner on push and pull
-request: it installs the programs the checks use and BasicTeX with `latexmk`, runs
+request: it installs the programs the checks use (pandoc among them: without it the preview
+check skips) and BasicTeX with `latexmk`, runs
 `macos/nvim/link.sh`, restores the plugins from `lazy-lock.json`, runs `dotfiles.install`
 (servers, parsers, spell files, as `macos/nvim/install.sh` does) and then the suite. Checks for
 programs or apps the runner lacks (Skim, tmux) skip. `full` and `fresh` stay manual: they need

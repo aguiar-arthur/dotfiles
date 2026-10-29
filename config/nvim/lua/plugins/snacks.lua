@@ -1,16 +1,13 @@
-local function snack(path, ...)
-  local args, count = { ... }, select("#", ...)
+local function picker(name, opts)
   return function()
-    local target = Snacks
-    for part in path:gmatch("[^.]+") do
-      target = target[part]
-    end
-    target(unpack(args, 1, count))
+    Snacks.picker[name](opts)
   end
 end
 
-local function picker(name, opts)
-  return snack("picker." .. name, opts)
+local function terminal(opts)
+  return function()
+    Snacks.terminal(nil, opts)
+  end
 end
 
 local function key(lhs, rhs, desc, mode)
@@ -124,10 +121,18 @@ return {
     words = { enabled = true },
   },
   keys = {
-    key("<leader>op", snack("explorer"), "Toggle file tree"),
-    key("<leader>of", snack("explorer.reveal"), "Find file in tree"),
-    key("<leader>on", snack("notifier.show_history"), "Notification history"),
-    key("<leader>od", snack("dashboard"), "Dashboard"),
+    key("<leader>op", function()
+      Snacks.explorer()
+    end, "Toggle file tree"),
+    key("<leader>of", function()
+      Snacks.explorer.reveal()
+    end, "Find file in tree"),
+    key("<leader>on", function()
+      Snacks.notifier.show_history()
+    end, "Notification history"),
+    key("<leader>od", function()
+      Snacks.dashboard()
+    end, "Dashboard"),
 
     key("<leader>ff", picker("smart"), "Find files (smart)"),
     key("<leader>fF", picker("files", { ignored = true }), "Find files (all)"),
@@ -150,15 +155,19 @@ return {
     key("<leader>dq", picker("qflist"), "Quickfix list"),
     key("<leader>dl", picker("loclist"), "Location list"),
 
-    key("<leader>gg", snack("lazygit"), "Lazygit"),
+    key("<leader>gg", function()
+      Snacks.lazygit()
+    end, "Lazygit"),
     key("<leader>gl", picker("git_log"), "Git log (Enter reviews the commit)"),
     key("<leader>gt", picker("git_status"), "Changed files"),
     key("<leader>gc", picker("git_diff"), "Changes (hunks)"),
-    key("<leader>gO", snack("gitbrowse"), "Open in browser", { "n", "v" }),
+    key("<leader>gO", function()
+      Snacks.gitbrowse()
+    end, "Open in browser", { "n", "v" }),
 
-    key("<leader>tf", snack("terminal", nil, float_terminal), "Float terminal"),
-    key("<leader>th", snack("terminal", nil, bottom_terminal), "Horizontal terminal"),
-    key("<leader>tv", snack("terminal", nil, right_terminal), "Vertical terminal"),
+    key("<leader>tf", terminal(float_terminal), "Float terminal"),
+    key("<leader>th", terminal(bottom_terminal), "Horizontal terminal"),
+    key("<leader>tv", terminal(right_terminal), "Vertical terminal"),
 
     key("]r", words_jump(1), "Next reference"),
     key("[r", words_jump(-1), "Previous reference"),

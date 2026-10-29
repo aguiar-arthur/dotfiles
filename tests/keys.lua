@@ -105,6 +105,8 @@ T.case("the Markdown preview", function()
       after and (after.sec ~= before.sec or after.nsec ~= before.nsec),
       true
     )
+  else
+    T.skip("the Markdown preview", "pandoc not installed")
   end
 end)
 
@@ -117,19 +119,21 @@ T.case("rumdl and every <Cmd> key", function()
     end)
     T.eq("rumdl attaches to Markdown", #vim.lsp.get_clients({ bufnr = 0, name = "rumdl" }), 1)
     T.eq("gq keeps wrapping: formatexpr is cleared", vim.bo.formatexpr, "")
-    local unknown = {}
-    for _, mode in ipairs({ "n", "x" }) do
-      local maps =
-        vim.list_extend(vim.api.nvim_get_keymap(mode), vim.api.nvim_buf_get_keymap(0, mode))
-      for _, m in ipairs(maps) do
-        local command = (m.rhs or ""):match("^<[Cc][Mm][Dd]>[%s%.%%']*(%a+)")
-        if command and vim.fn.exists(":" .. command) == 0 then
-          unknown[#unknown + 1] = m.lhs:gsub(" ", "<Space>") .. " runs :" .. command
-        end
+  else
+    T.skip("rumdl attaches to Markdown", "rumdl not installed")
+  end
+  local unknown = {}
+  for _, mode in ipairs({ "n", "x" }) do
+    local maps =
+      vim.list_extend(vim.api.nvim_get_keymap(mode), vim.api.nvim_buf_get_keymap(0, mode))
+    for _, m in ipairs(maps) do
+      local command = (m.rhs or ""):match("^<[Cc][Mm][Dd]>[%s%.%%']*(%a+)")
+      if command and vim.fn.exists(":" .. command) == 0 then
+        unknown[#unknown + 1] = m.lhs:gsub(" ", "<Space>") .. " runs :" .. command
       end
     end
-    T.eq("every <Cmd> key runs a command that exists (LSP keys included)", unknown, {})
   end
+  T.eq("every <Cmd> key runs a command that exists (LSP keys included)", unknown, {})
 end)
 
 T.case("Claude keys in the file tree", function()
@@ -369,6 +373,37 @@ T.case("the LSP keys", function()
   )
   T.eq("Space l a works on a selection", vim.fn.maparg("<leader>la", "x", false, true).buffer, 1)
   T.eq("gr has no key of its own, so grn / gra / grx still work", buffer_map("gr"), nil)
+
+  T.stub(vim.lsp, "get_client_by_id", function()
+    return {
+      server_capabilities = {
+        codeActionProvider = { codeActionKinds = { "source.organizeImports" } },
+      },
+    }
+  end)
+  local function organize_imports_desc(own_key)
+    local buf = vim.api.nvim_create_buf(true, false)
+    vim.api.nvim_set_current_buf(buf)
+    if own_key then
+      vim.keymap.set("n", "<localleader>o", "<Nop>", { buffer = buf, desc = "Raise form" })
+    end
+    vim.api.nvim_exec_autocmds("LspAttach", {
+      group = "user_lsp_attach",
+      buffer = buf,
+      data = { client_id = 1 },
+    })
+    return vim.fn.maparg("<localleader>o", "n", false, true).desc
+  end
+  T.eq(
+    ",o organizes imports when the server offers it and the file type has no ,o",
+    organize_imports_desc(false),
+    "Organize imports"
+  )
+  T.eq(
+    ",o stays the file type's own key when it has one, whatever loads first",
+    organize_imports_desc(true),
+    "Raise form"
+  )
 end)
 
 T.done()

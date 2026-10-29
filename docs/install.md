@@ -28,7 +28,7 @@ are in [map](map.md).
 | `config/nvim/lua/dotfiles/mason.lua` | which Mason packages the settings want and which are missing or broken |
 | `config/nvim/lua/config/lazy.lua` | lazy.nvim cloned at the lockfile's commit |
 | `config/nvim/lazy-lock.json` | plugin versions (committed) |
-| `config/zsh/dotfiles.zsh` | Homebrew on `PATH`, a valid `LANG`, `JAVA_HOME`, `EDITOR` / `VISUAL`, history, `path_report`, `command_origin`, Starship |
+| `config/zsh/dotfiles.zsh` | Homebrew on `PATH` (Apple Silicon or Intel), a valid `LANG`, `JAVA_HOME`, `EDITOR` / `VISUAL`, history, `path_report`, `command_origin`, Starship |
 | `config/starship/starship.toml` | the prompt, Dracula colors |
 | `config/iterm2/dracula.json` | the "Dotfiles (Dracula)" Dynamic Profile |
 
@@ -43,8 +43,9 @@ codediff's library), then `dotfiles.install` installs the Mason packages, the pa
 the `tree-sitter` CLI) and the non-English spell files. Everything is idempotent and only does
 what is missing; already installed programs are not upgraded (`brew bundle --no-upgrade`).
 
-Each `link.sh` links its files, moving whatever was there to `<name>.bak.<timestamp>` (three
-kept), and writes its app's preferences with `defaults` (Skim, iTerm2); the terminal one also
+Each `link.sh` links its files, moving whatever was there to `<name>.bak.<timestamp>` (the three
+newest are kept; each older one is named with `prune` as it is deleted), and writes its app's
+preferences with `defaults` (Skim, iTerm2); the terminal one also
 adds one marked block (`# >>> dotfiles >>>`) to `~/.zshrc` that sources `dotfiles.zsh`. Every
 line they print starts with `ok` when nothing had to change.
 
@@ -72,18 +73,40 @@ Consumes: [core](core.md) `settings` (which servers, tools, parsers and spell la
   them installed. `dotfiles.mason` counts such a package as missing, so `macos/nvim/install.sh`
   reinstalls it, and the quick tests say when one is broken.
 - Every network step needs a timeout or a failure path: the Mason registry waits a minute, its
-  installs 15 minutes, a spell file two; a failed Homebrew or plugin step fails its step.
+  installs 15 minutes, a spell file two, the Homebrew installer's download two (checked before it
+  runs: `bash -c` of an empty download would succeed), the lazy.nvim clone two and `Lazy! restore`
+  15; a failed Homebrew or plugin step fails its step.
+- Only plugins and parsers are pinned. Mason packages take whatever the registry offers when
+  they are installed, Homebrew programs stay at their version (`--no-upgrade`), and the nREPL and
+  CIDER versions are in the `versions` table of `dotfiles/clojure.lua`: none of them moves until
+  [Updating](#updating) says so.
 
 ## Checks
 
 | What | Where |
 |---|---|
-| Mason wanted, missing and broken lists, spell files to fetch | `tests/helpers.lua` |
+| Mason wanted, missing and broken lists, spell files to fetch, the parsers still missing | `tests/install.lua` |
 | Mason's Python tools on this machine can start | quick: `Mason's Python tools still have their Python` |
 | Starting Neovim leaves the lockfile alone | quick: `starting nvim leaves lazy-lock.json alone` |
 | Shell syntax and format of the scripts | quick: `shell syntax`, `shfmt` |
-| `dotfiles.zsh` makes Neovim the editor, without comments | quick: `zsh: Neovim is the editor`, `no comments in shell` |
+| `dotfiles.zsh` makes Neovim the editor, without comments | quick: `zsh: Neovim is the editor`, `no comments in Lua, shell and PowerShell` |
 | `macos/nvim/install.sh` in an empty home | full: `install` in `tests/lib.sh`; `fresh` in a throwaway folder |
+
+## Updating
+
+Nothing updates itself, so do it on purpose, on a branch, and run the tests before you keep it:
+
+1. Plugins: `nvim --headless "+Lazy! update" +qa` (the one time `:Lazy update` is right), then read
+   `git diff config/nvim/lazy-lock.json`. `:Lazy restore` or `git checkout` of the lockfile is
+   the way back.
+2. Parsers: `:TSUpdate`. Mason packages: `:Mason`, then `U`.
+3. Programs: `brew upgrade` (the install scripts never do), then `macos/nvim/install.sh` so
+   Mason's Python tools get a venv for the new Python.
+4. Clojure: the newest `nrepl/nrepl` and `cider/cider-nrepl` on Clojars go in the `versions`
+   table of `dotfiles/clojure.lua`.
+5. `tests/nvim.sh full`. After a Neovim update also check `ui2` in a real terminal (see
+   [core](core.md)); if it breaks, deleting its line in `options.lua` is the way out.
+6. Commit the lockfile and the version table together.
 
 ## Changing it
 

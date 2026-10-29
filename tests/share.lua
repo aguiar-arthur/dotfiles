@@ -49,6 +49,22 @@ T.case("Space c s on a selection", function()
   T.eq("Space c s leaves virtualedit as it was", vim.o.virtualedit, "block")
 end)
 
+T.case("Space c s when the region cannot be read", function()
+  T.stub(vim, "notify", function() end)
+  T.stub(vim.fn, "getregion", function()
+    error("boom")
+  end)
+  vim.cmd("normal! \27")
+  vim.api.nvim_feedkeys(vim.keycode("1GV2G"), "x", false)
+  local ok = pcall(share.selection)
+  vim.api.nvim_feedkeys("", "x", false)
+  T.eq(
+    "Space c s fails loudly, restores virtualedit and leaves Visual mode",
+    { ok, vim.o.virtualedit, vim.api.nvim_get_mode().mode },
+    { false, "block", "n" }
+  )
+end)
+
 T.case("Space c f, Space c p and Space c P", function()
   T.stub(vim, "notify", function() end)
   copied = nil

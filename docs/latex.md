@@ -14,6 +14,7 @@ and the snippets. Its relationships are in [map](map.md).
 | Path | Holds |
 |---|---|
 | `config/nvim/lua/plugins/tex.lua` | vimtex: Skim viewer, latexmk into `build/`, folds, quickfix filters, conceal, build notifications, the live build (start on open, save on idle, view sync) |
+| `config/nvim/lua/dotfiles/vimtex.lua` | `compiler()`: `idle`, `running` or empty for the buffer's latexmk; the live build and the statusline both ask it |
 | `config/nvim/after/ftplugin/tex.lua` | no hard wrap, `,lw`, which-key labels of the daily `,l` keys |
 | `config/nvim/snippets/tex.lua` | the LaTeX snippets (documents, text, math, ABNT) |
 | `config/nvim/after/lsp/texlab.lua` | texlab reads `build/`, chktex on open and save, latexindent |
@@ -100,6 +101,7 @@ Consumes:
 | Live build, outside edits, view sync (stubs) | quick: `tests/autocmds.lua` |
 | Skim preferences | quick: `Skim is set up for Neovim` in `tests/nvim.sh` |
 | A real live build into `build/`, save on idle, ltex, `u G` | full: `test_tex` in `tests/tex.sh` |
+| Every snippet expands, no trigger is defined twice, the common ones type what they should | quick: `tests/tex_snippets.lua` |
 | Snippets typed for real | full: `test_snippets`, driven by `tests/snippets.lua` |
 
 ## Changing it

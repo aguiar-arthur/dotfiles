@@ -39,9 +39,7 @@ return {
         if vim.bo.filetype ~= "tex" then
           return ""
         end
-        local ok, running =
-          pcall(vim.api.nvim_eval, "exists('b:vimtex.compiler') && b:vimtex.compiler.is_running()")
-        return (ok and running == 1) and "⟳ latexmk" or ""
+        return require("dotfiles.vimtex").compiler() == "running" and "⟳ latexmk" or ""
       end
 
       return {

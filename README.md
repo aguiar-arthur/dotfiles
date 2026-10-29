@@ -789,7 +789,7 @@ is missing are skipped.
 
 | Mode | Command | Takes | Checks |
 |---|---|---|---|
-| quick (default) | `~/dotfiles/tests/nvim.sh` | seconds | startup, every Lua module, the lockfile, Skim preferences, Mason's Python tools (broken by a Homebrew Python upgrade), `zg` writing to the versioned word list, stylua, shell syntax, `EDITOR` in zsh, shfmt, rumdl, no comments, and our own code headless: `Space c` keys, `]f` / `]a`, `,d p`, `]T`, `Space R`, filetypes, format on save, the `Space u` toggles, `]e`, the preview, the helpers |
+| quick (default) | `~/dotfiles/tests/nvim.sh` | seconds | startup, every Lua module, the lockfile, Skim preferences, Mason's Python tools (broken by a Homebrew Python upgrade), `zg` writing to the versioned word list, stylua, shell syntax, `EDITOR` in zsh, shfmt, rumdl, and our own code headless: `Space c` keys, `]f` / `]a`, `,d p`, `]T`, `Space R`, filetypes, format on save, the `Space u` toggles, `]e`, the preview, tree-sitter per file type, every LaTeX snippet, no comments (Lua, shell, PowerShell), the helpers of each context |
 | full | `~/dotfiles/tests/nvim.sh full` | minutes | quick, plus a real Neovim driven in tmux: language servers, toggles, the look, Markdown and notes, the `,` keys, `,r`, the debugger, tests, a LaTeX build and its snippets, a `Space g V` review, `,cj` |
 | fresh | `~/dotfiles/tests/nvim.sh fresh` | longer | full, in a throwaway directory deleted at the end, as on a new machine |
 
@@ -828,7 +828,8 @@ PowerShell as Administrator
 powershell -ExecutionPolicy Bypass -File .\windows\collect-diagnostics.ps1
 ```
 
-It only reads, zips a report into `Documents\diagnostics`, and asks before any repair. Its
+It only reads, zips a report into `Documents\diagnostics`, and asks before any repair. The ZIP
+holds computer and user names, serial numbers and crash dumps: read it before sharing. Its
 options and what it collects are in [docs/windows.md](docs/windows.md).
 
 ## Layout

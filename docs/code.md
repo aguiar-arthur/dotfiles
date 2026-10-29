@@ -17,17 +17,17 @@ Clojure in detail. Its relationships are in [map](map.md).
 
 | Path | Holds |
 |---|---|
-| `config/nvim/lua/plugins/lsp.lua` | Mason, mason-lspconfig, system servers, diagnostics, the `LspAttach` keys (`gd`, `grr` / `gri` / `grt`, `<leader>l`, `,o`) |
-| `config/nvim/lua/dotfiles/progress.lua` | servers' `$/progress` as Neovim's own progress messages (statusline, `:` line, the terminal's progress bar) |
-| `config/nvim/after/lsp/<server>.lua` | per-server settings (basedpyright, clojure_lsp, jsonls, ltex_plus, lua_ls, marksman, ruff, texlab, yamlls); `clojure_lsp.lua` also mends its call hierarchy replies |
+| `config/nvim/lua/plugins/lsp.lua` | Mason, mason-lspconfig, system servers, diagnostics, the `LspAttach` keys (`gd`, `grr` / `gri` / `grt`, `<leader>l`, `,o`), written as two tables: one of pickers (key, picker, method) and one of plain actions |
+| `config/nvim/lua/dotfiles/progress.lua` | servers' `$/progress` as Neovim's own progress messages (statusline, `:` line, the terminal's progress bar); its `setup()` calls `vim.ui.progress_status()` once because Neovim starts tracking progress on the first call, and without it the statusline misses what began before its first redraw |
+| `config/nvim/after/lsp/<server>.lua` | per-server settings (basedpyright, which also gets the project's interpreter in `before_init`; clojure_lsp, jsonls, ltex_plus, lua_ls, marksman, ruff, texlab, yamlls); `clojure_lsp.lua` also mends its call hierarchy replies |
 | `config/nvim/lua/plugins/formatting.lua` | conform, `style_markers`, the prettier trust check, `<leader>lf` |
 | `config/nvim/lua/plugins/run.lua` | code_runner.nvim, `,r` and its `commands` |
 | `config/nvim/lua/plugins/test.lua` | Neotest, neotest-python, `,t` |
 | `config/nvim/lua/plugins/debug.lua` | nvim-dap, nvim-dap-view, the debugpy adapter, `,d`, the Python launch |
-| `config/nvim/lua/dotfiles/python.lua` | the interpreter: `.venv` upward, else `$VIRTUAL_ENV`, else `python3` |
+| `config/nvim/lua/dotfiles/python.lua` | the interpreter: `.venv` upward from a folder (the file's by default), else `$VIRTUAL_ENV`, else `python3`; `,r`, the debugger and basedpyright ask it |
 | `config/nvim/after/ftplugin/lua.lua` | `,s` sources the file |
 | `config/nvim/lua/plugins/clojure.lua` | Conjure (Clojure only), nvim-paredit, `,cj` |
-| `config/nvim/lua/dotfiles/clojure.lua` | jack-in: the nREPL command (`clojure`, `lein` or `bb`), waiting for `.nrepl-port`, the dead-REPL check |
+| `config/nvim/lua/dotfiles/clojure.lua` | jack-in: the nREPL command (`clojure`, `lein` or `bb`), waiting for `.nrepl-port` (`poll` and `limit` are fields so the tests can shorten them; a tick queued after the timer closed returns at once), the dead-REPL check |
 | `config/nvim/after/ftplugin/clojure.lua` | which-key names of Conjure's groups |
 
 ## How it works
@@ -45,7 +45,8 @@ Clojure in detail. Its relationships are in [map](map.md).
   nvim-lspconfig so it loads, and registers them, before the first server starts.
 - JavaScript and TypeScript have no server, formatter, runner, tests or debugger: they were
   removed as unused. Adding them back is a server in `settings.mason_servers` and a line in
-  conform. The `javascript` parser stays for `<script>` blocks in HTML.
+  conform. The `javascript` parser stays for `<script>` blocks in HTML, and the `ruby` one for
+  the Ruby files `,r` runs.
 - `LspAttach` maps `gd` and `grr` / `gri` / `grt` (Neovim's names for references,
   implementation and type definition) to Snacks pickers, and `<leader>l` as the whole menu:
   `d` / `D` / `i` / `t` / `r` (definition, declaration, implementations, type definition,
@@ -57,13 +58,24 @@ Clojure in detail. Its relationships are in [map](map.md).
   call hierarchy), since a Snacks picker would only say "No results". It also clears
   `formatexpr` so `gq` keeps wrapping prose and comments, and maps `,o` (organize imports)
   only when the server offers it and the file type has no `,o` of its own (in Clojure it stays
-  paredit's raise).
+  paredit's raise); `tests/keys.lua` checks both ways, since the order of ftplugin and `LspAttach`
+  is what decides it.
+- One Python: `dotfiles.python` is what `,r`, the debugger and basedpyright (`python.pythonPath`,
+  set in `before_init` from the root, unless the project or machine set one) run, so a project
+  with a `.venv` that is not activated behaves the same in each. `before_init` changes
+  `config.settings` in place: the client keeps the table it was given before `before_init` runs,
+  so a new table (as in Neovim's own example) never reaches the server. Its `root_dir` is the
+  project's (lspconfig's markers) or the file's own folder, so `before_init` never guesses from
+  whichever buffer is current. neotest-python keeps its own lookup, which also finds `venv/`,
+  Poetry, Pipenv and uv environments; a `python` option would replace all of that.
 - clojure-lsp's call hierarchy replies break the spec: `fromRanges` is empty, the call site is
   in `selectionRange` and the definition in `range`. Snacks then placed the call site in the
   callee's file ("index out of range" when that line is shorter) and listed no incoming calls.
   `after/lsp/clojure_lsp.lua` wraps the client's `request` (`on_init`) and moves the call site
   into `fromRanges` and `range` into `selectionRange` when `fromRanges` is empty, so a fixed
-  clojure-lsp passes through untouched.
+  clojure-lsp passes through untouched. No upstream issue was found to link; remove the
+  `on_init` patch (and its case in `tests/code.lua`) once `vim.lsp.buf.incoming_calls()` lists
+  call sites with `after/lsp/clojure_lsp.lua` reduced to `root_dir`.
 - `zipPlugin` stays enabled (lazy.nvim's `disabled_plugins`): clojure-lsp points into library
   sources as `zipfile://<jar>::<path>`, and without it a jump there fails ("Invalid cursor line").
 - Code lenses show for every server that sends them (`vim.lsp.codelens.enable`), mostly
@@ -208,17 +220,19 @@ Consumes:
 |---|---|
 | Format on save per style marker (none without one), prettier trust, `*.json.*` parser | `tests/files.lua` |
 | `gq` keeps wrapping (`formatexpr` cleared) | `tests/keys.lua` |
-| Python interpreter, Mason lists, clojure-lsp skips Conjure's log, the jack-in command per project file | `tests/helpers.lua` |
-| Every `<Cmd>` key names a command that exists (`Space l R` once ran a removed `:LspRestart`) | `tests/keys.lua` |
+| Python interpreter (given a folder, in basedpyright's live settings; neotest-python left to its own), clojure-lsp skips Conjure's log, the jack-in command per project file, waiting for the REPL (port file, REPL gone, timeout) | `tests/code.lua` |
+| Mason lists | `tests/install.lua` |
+| Every `<Cmd>` key names a command that exists (`Space l R` once ran a removed `:LspRestart`), also without rumdl | `tests/keys.lua` |
+| `,o` set when the server offers it, left alone when the file type has its own | `tests/keys.lua` |
 | Servers attach (Lua, Python, …), `Space l R` restarts one, `,o`, `,s` | full: `test_lua`, `test_language_actions` |
 | `,r` per language | full: `test_run` in `tests/code.sh` |
 | `,dp` log point, `]T` / `[T` | `tests/keys.lua` |
-| The debugpy adapter found when a session starts, or a message without it | `tests/helpers.lua` |
+| The debugpy adapter found when a session starts, or a message without it | `tests/code.lua` |
 | `,t` keys, `,d` debugger (the panel and terminal, `,de` on a word and a selection, `,dw`, `,dC`, `,du`) | full: `test_test_keys`, `test_debug` |
 | `gd`, `grr` / `gri` / `grt` and the `<leader>l` pickers open theirs on attach, `<leader>lc` / `lC` warn without a call hierarchy, the other `<leader>l` keys, Neovim's `grn` / `gra` / `grx` stay | `tests/keys.lua`, full: `test_lua` |
-| clojure-lsp's call hierarchy replies mended (and spec replies kept) | `tests/helpers.lua` |
+| clojure-lsp's call hierarchy replies mended (and spec replies kept) | `tests/code.lua` |
 | `<leader>lc` / `lC` mapped on attach | full: `test_lua` |
-| A server's progress becomes one native progress message (title, status, percent) | `tests/helpers.lua` |
+| A server's progress becomes one native progress message (title, status, percent) | `tests/code.lua` |
 | `,cj` jack-in (deps.edn, bb.edn), REPL completion through blink's `omni` | full: `test_clojure` |
 
 ## Changing it

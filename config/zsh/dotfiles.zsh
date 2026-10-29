@@ -1,4 +1,9 @@
-(( $+commands[brew] )) || eval "$(/opt/homebrew/bin/brew shellenv zsh 2>/dev/null)"
+if (( ! $+commands[brew] )); then
+  for brew_bin in /opt/homebrew/bin/brew /usr/local/bin/brew; do
+    [[ -x $brew_bin ]] && eval "$($brew_bin shellenv zsh)" && break
+  done
+  unset brew_bin
+fi
 [[ -n $LANG && $LANG != (C|POSIX) && ! -d /usr/share/locale/$LANG ]] && export LANG=en_US.UTF-8
 typeset -U path PATH
 

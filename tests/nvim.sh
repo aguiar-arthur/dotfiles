@@ -72,9 +72,16 @@ quick() {
   check "every Lua module loads" perl -e 'alarm 120; exec @ARGV' nvim --headless -l "$DOT/tests/modules.lua"
   lua_check "Space c s copies the path, line:col and the code" share.lua
   lua_check "filetypes, format on save and the references list" files.lua
-  lua_check "python, debugpy, mason, spell files, the review base branch, LSP progress, no ui2" helpers.lua
+  lua_check "core: the dashboard q, no ui2" core.lua
+  lua_check "install: Mason lists, spell files, parsers" install.lua
+  lua_check "code: python, clojure, LSP progress, debugpy" code.lua
+  lua_check "workspace: the float style, Claude" workspace.lua
+  lua_check "git: reviews, Space b d, log pickers, base branch" git.lua
   lua_check "Space u toggles, also beside a codediff review" toggles.lua
   lua_check "]e, the TeX and Markdown keys, the preview, gq and the gr keys" keys.lua
+  lua_check "treesitter highlight and indent per file type" treesitter.lua
+  lua_check "every LaTeX snippet expands and the common ones type what they should" tex_snippets.lua
+  lua_check "no comments in Lua, shell and PowerShell, trailing ones included" comments.lua
   lua_check "yank highlight, focus reload, last line, q, new folders, resize" autocmds.lua
   if [ "$before" = "$(lock_hash)" ]; then
     pass "starting nvim leaves lazy-lock.json alone"
@@ -93,7 +100,6 @@ quick() {
   check "zsh: Neovim is the editor" zsh -f -c "source '$DOT/config/zsh/dotfiles.zsh' && [[ \$EDITOR == nvim && \$VISUAL == nvim ]]"
   tool "shfmt" shfmt shfmt -d "$DOT"/macos/*.sh "$DOT"/macos/*/*.sh "$DOT"/tests/*.sh "$DOT/config/nvim/dashboard/clock.sh"
   tool "rumdl" rumdl rumdl check "$DOT" --config "$DOT/config/rumdl/rumdl.toml"
-  check_silent "no comments in Lua" grep -rnE '^[[:space:]]*--' --include='*.lua' "$DOT/config/nvim" "$DOT/tests"
   check_silent "no comments in shell" grep -nE '^[[:space:]]*#([^!]|$)' "$DOT"/macos/*.sh "$DOT"/macos/*/*.sh "$DOT"/tests/*.sh "$DOT/config/nvim/dashboard/clock.sh" "$DOT/config/zsh/dotfiles.zsh"
   check "the dashboard clock draws its digits and date" clock_frame
   if [ -z "$(find "$REAL_STATE/nvim/sessions" -newer "$marker" 2>/dev/null)" ]; then

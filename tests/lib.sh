@@ -37,8 +37,16 @@ check_silent() {
 }
 
 lua_check() {
-  check "$1" env DOT="$DOT" perl -e 'alarm 120; exec @ARGV' nvim --headless -n -i NONE \
-    -c "lua local ok, e = pcall(dofile, '$DOT/tests/$2') if not ok then io.stderr:write(tostring(e)) vim.cmd('cquit 1') end"
+  local name="$1" out tag what why
+  if out="$(env DOT="$DOT" perl -e 'alarm 120; exec @ARGV' nvim --headless -n -i NONE \
+    -c "lua local ok, e = pcall(dofile, '$DOT/tests/$2') if not ok then io.stderr:write(tostring(e)) vim.cmd('cquit 1') end" 2>&1)"; then
+    pass "$name"
+    while IFS=$'\t' read -r tag what why; do
+      [ "$tag" = SKIP ] && skip "$what" "$why"
+    done <<<"$out"
+  else
+    fail "$name" "$out"
+  fi
 }
 
 tool() {
@@ -95,6 +103,16 @@ lua_do() { lua_eval "(function() $1 return 1 end)()" >/dev/null; }
 set_home() { send ':lua vim.g.home = vim.api.nvim_get_current_win()<CR>'; }
 tiles() { echo '#vim.tbl_filter(function(w) return vim.api.nvim_win_get_config(w).relative == "" end, vim.api.nvim_tabpage_list_wins(0))'; }
 notified() { echo "vim.inspect(Snacks.notifier.get_history()):find(\"$1\", 1, true) and 1 or 0"; }
+review_repo() {
+  local repo="$PROJ/$1" g=(git -c user.name=t -c user.email=t@t)
+  rm -rf "$repo" "$repo.git"
+  git init -q --bare "$repo.git" && git -C "$PROJ" clone -q "$1.git" "$1" 2>/dev/null
+  printf 'a = 1\n\nb = 2\n' >"$repo/r.lua"
+  "${g[@]}" -C "$repo" add r.lua && "${g[@]}" -C "$repo" commit -qm base && git -C "$repo" push -q origin HEAD 2>/dev/null
+  printf 'a = 1\n\nb = 3\n' >"$repo/r.lua"
+  "${g[@]}" -C "$repo" commit -qam change
+}
+
 resize() { "${TMUX[@]}" resize-window -x "$1" -y "$2"; }
 
 clients() { echo "#vim.lsp.get_clients({name=\"$1\"})"; }
@@ -144,13 +162,21 @@ install() {
 }
 
 screen_has() {
-  local tries=10
+  local tries=$((${2:-5} * 2))
   while [ "$tries" -gt 0 ]; do
     "${TMUX[@]}" capture-pane -p | grep -q "$1" && return 0
     sleep 0.5
     tries=$((tries - 1))
   done
   return 1
+}
+
+expect_screen() {
+  if screen_has "$2" "${3:-20}"; then
+    pass "$1"
+  else
+    fail "$1" "$("${TMUX[@]}" capture-pane -p | tail -n 12)"
+  fi
 }
 
 menu_shows() {

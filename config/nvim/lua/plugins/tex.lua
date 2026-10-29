@@ -67,8 +67,7 @@ return {
         group = group,
         pattern = "VimtexEventInitPost",
         callback = function()
-          local idle = vim.fn.eval("exists('b:vimtex.compiler') && !b:vimtex.compiler.is_running()")
-          if live() and idle == 1 then
+          if live() and require("dotfiles.vimtex").compiler() == "idle" then
             vim.cmd("VimtexCompile")
           end
         end,

@@ -25,7 +25,12 @@ step_brew() {
   have brew || load_brew
   if ! have brew; then
     echo "Installing Homebrew (it asks for your password)"
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || return 1
+    local installer
+    installer="$(curl -fsSL --max-time 120 https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || {
+      echo "ERROR  could not download the Homebrew installer (network?)"
+      return 1
+    }
+    /bin/bash -c "$installer" || return 1
     load_brew
   fi
   trust_taps "$HERE/Brewfile" || return 1
@@ -55,6 +60,7 @@ prune_backups() {
   local -a all=()
   while IFS= read -r old; do all+=("$old"); done < <(ls -1d "$dst".bak.* 2>/dev/null | sort)
   for ((i = 0; i < ${#all[@]} - KEEP_BACKUPS; i++)); do
+    say prune "${all[$i]} (only the newest $KEEP_BACKUPS backups are kept)"
     rm -rf "${all[$i]}"
   done
 }

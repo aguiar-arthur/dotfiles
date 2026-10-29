@@ -50,7 +50,7 @@ test_claude_notices() {
   start_nvim "$PROJ" look.lua
   claude_stub "sh $T/osc.sh"
   keys Space a c
-  sleep 1
+  wait_for 'vim.bo.buftype' terminal 10
   keys C-\\ C-n q
   probe "a message from a hidden Claude is notified" "$(notified "needs you")" 1 20
   stop_nvim
@@ -101,7 +101,7 @@ test_tree_and_pickers() {
   keys q
   probe "q closes the tree and returns to the code" "$HOME_BACK" 1 10
   keys Space o p
-  sleep 1
+  wait_for 'vim.bo.filetype' snacks_picker_list 10
   keys Space o p
   probe "Space o p twice leaves no tree" "$(tiles)" 1 10
   keys Space f f
@@ -111,14 +111,14 @@ test_tree_and_pickers() {
   keys Escape
   probe "Escape twice closes the picker and returns to the code" "$HOME_BACK" 1 10
   keys Space f f
-  sleep 1
+  wait_for 'vim.bo.filetype' snacks_picker_input 10
   keys sample.lua
   sleep 1
   keys Enter
   probe "a picked file opens in the same window" 'vim.fn.expand("%:t")' sample.lua 10
   probe "and no window is added" "$(tiles)" 1 5
   keys Space f f
-  sleep 1
+  wait_for 'vim.bo.filetype' snacks_picker_input 10
   keys look.lua C-v
   probe "C-v in a picker opens a vertical split" "$(tiles)" 2 10
   keys C-w o
@@ -133,7 +133,7 @@ test_tree_and_pickers() {
   probe "Space d x lists the diagnostics in a picker" 'vim.bo.filetype' snacks_picker_input 15
   probe "and the picker has the diagnostic" 'P.picker_count()' 1 10
   keys Escape
-  sleep 0.5
+  wait_for 'vim.fn.mode()' n 5
   keys Escape
   probe "Escape twice closes it and returns to the code" 'vim.bo.filetype' lua 5
   stop_nvim

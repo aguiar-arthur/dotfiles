@@ -20,7 +20,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Programs
-        run: brew install neovim ripgrep fd tree-sitter-cli node stylua shfmt rumdl
+        run: brew install neovim ripgrep fd tree-sitter-cli node stylua shfmt rumdl pandoc
       - name: TeX
         run: |
           brew install --cask basictex

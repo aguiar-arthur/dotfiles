@@ -15,8 +15,8 @@ branch, a pull request, a file's or a line's history. Its relationships are in [
 
 | Path | Holds |
 |---|---|
-| `config/nvim/lua/plugins/editor.lua` (gitsigns) | signs, line blame, `]c` / `[c`, `<leader>g` hunk keys, `ih` |
-| `config/nvim/lua/plugins/editor.lua` (codediff) | the review keys (`gD`, `gC`, `gV`, `gd`, `gh`, `gL`, `gP`, `gq`), the keys inside a review and a merge conflict, `git.setup()` |
+| `config/nvim/lua/plugins/git.lua` (gitsigns) | signs, line blame, `]c` / `[c`, `<leader>g` hunk keys, `ih` |
+| `config/nvim/lua/plugins/git.lua` (codediff) | the review keys (`gD`, `gC`, `gV`, `gd`, `gh`, `gL`, `gP`, `gq`), the keys inside a review and a merge conflict, `git.setup()` |
 | `config/nvim/lua/dotfiles/git.lua` | the base branch, the `review` tab variable, the editing tab, closing a review (and every review before a session is saved), `<leader>bd` beside a review, `<leader>bo` / `<leader>bD` while one is open, Enter in the log pickers |
 | `config/nvim/lua/config/keymaps.lua` | `<leader>bd`, `<leader>bo`, `<leader>bD`, through `git.close_buffer` / `close_buffers` |
 | `config/nvim/lua/plugins/snacks.lua` | lazygit, the git pickers (`gl`, `gt`, `gc`) and their Enter, `gO`, the `confirm` that sends a file from a review to the editing tab |
@@ -96,7 +96,7 @@ Consumes:
 
 | What | Where |
 |---|---|
-| Base branch order and its repository, the `review` variable from codediff's events, the editing tab (before, made when missing, never a review nor a tab without a file window), `Space g q`, `Space b d`, `Space b o` and `Space b D` around a review and on a review alone, Enter in the log pickers (parent, first commit) | `tests/helpers.lua` |
+| Base branch order and its repository, the `review` variable from codediff's events, the editing tab (before, made when missing, never a review nor a tab without a file window), `Space g q`, `Space b d`, `Space b o` and `Space b D` around a review and on a review alone, Enter in the log pickers (parent, first commit) | `tests/git.lua` |
 | Toggles beside a review | `tests/toggles.lua` |
 | A `Space g V` review: file list, `]c`, unwrapped sides and `Space u w`, an edit on the real side, `Space g e` / `Space o p`, `Space g i`, `gc` left alone, `gf` and a pick open in the tab before, `gt` back, `Space g q` and `q` close; `Space g D`, `Space g d`, `Space g h`, `Space g L`; Enter in `Space g l` reviews without a checkout; `Space g C` and `Space g u` unstaging there | full: `test_review` in `tests/git.sh` |
 | `Space g D` opens on the current file, and closes a review; lazygit: `e`, stage, unstage, commit, back to the window it came from | full: `test_lazygit` |
@@ -106,5 +106,5 @@ Consumes:
 
 - **A git key**: gitsigns keys go in `on_attach` (buffer-local), picker keys in `snacks.lua`,
   `:CodeDiff` keys and the keys inside a review in codediff's spec; then the README's Git tables.
-- **Review behaviour**: logic goes in `dotfiles/git.lua`, with a case in `tests/helpers.lua`; use
+- **Review behaviour**: logic goes in `dotfiles/git.lua`, with a case in `tests/git.lua`; use
   codediff's options, command and events, not its modules.

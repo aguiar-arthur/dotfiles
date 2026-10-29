@@ -2,6 +2,9 @@ local M = {}
 
 local versions = { nrepl = "1.8.0", cider_nrepl = "0.63.1" }
 
+M.poll = 500
+M.limit = 180000
+
 function M.repl_command(root)
   if vim.uv.fs_stat(root .. "/deps.edn") then
     return {
@@ -46,15 +49,18 @@ local function job_running(buf)
   return job and vim.fn.jobwait({ job }, 0)[1] == -1
 end
 
-local function connect_when_ready(port_file, buf)
+function M.connect_when_ready(port_file, buf)
   local timer = assert(vim.uv.new_timer())
   local waited = 0
   starting[port_file] = true
   timer:start(
-    500,
-    500,
+    M.poll,
+    M.poll,
     vim.schedule_wrap(function()
-      waited = waited + 500
+      if timer:is_closing() then
+        return
+      end
+      waited = waited + M.poll
       if vim.uv.fs_stat(port_file) then
         timer:close()
         starting[port_file] = nil
@@ -63,10 +69,13 @@ local function connect_when_ready(port_file, buf)
         timer:close()
         starting[port_file] = nil
         vim.notify("The REPL stopped before it was ready", vim.log.levels.ERROR)
-      elseif waited >= 180000 then
+      elseif waited >= M.limit then
         timer:close()
         starting[port_file] = nil
-        vim.notify("The REPL did not start within 3 minutes", vim.log.levels.ERROR)
+        vim.notify(
+          ("The REPL did not start within %g minutes"):format(M.limit / 60000),
+          vim.log.levels.ERROR
+        )
       end
     end)
   )
@@ -111,7 +120,7 @@ function M.jack_in()
     local term = Snacks.terminal.open(cmd, opts)
     vim.cmd.wincmd("p")
     vim.cmd.stopinsert()
-    connect_when_ready(port_file, term.buf)
+    M.connect_when_ready(port_file, term.buf)
   end
   if not vim.uv.fs_stat(port_file) then
     return start()

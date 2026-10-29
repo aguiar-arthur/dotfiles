@@ -15,7 +15,7 @@ objects, completion and snippets, sharing code, and Claude Code. Its relationshi
 | Path | Holds |
 |---|---|
 | `config/nvim/lua/plugins/snacks.lua` | pickers `<leader>f` and `<leader>d` (diagnostics, todos, quickfix), file tree `<leader>o`, terminals `<leader>t`, lazygit, `]r`, the picker `confirm` |
-| `config/nvim/lua/plugins/editor.lua` | flash, mini.ai, the `]f` / `]a` moves, mini.surround, mini.pairs, grug-far, todo-comments, persistence (and gitsigns, codediff: see [git](git.md)) |
+| `config/nvim/lua/plugins/editor.lua` | flash, mini.ai, the `]f` / `]a` moves, mini.surround, mini.pairs, grug-far, todo-comments, persistence (gitsigns and codediff are in `git.lua`: see [git](git.md)) |
 | `config/nvim/lua/plugins/completion.lua` | blink.cmp, LuaSnip, friendly-snippets, the `:` line |
 | `config/nvim/lua/dotfiles/share.lua` | what the `<leader>c` keys copy; the keys are in `lua/config/keymaps.lua` |
 | `config/nvim/lua/plugins/claude.lua` | claudecode.nvim, `<leader>a` |
@@ -115,8 +115,8 @@ Consumes: [core](core.md) keys and toggles.
 - `dotfiles/claude.lua` calls two functions claudecode.nvim does not document,
   `claudecode.terminal.get_active_terminal_bufnr` and `toggle_open_no_focus`: its commands
   cannot ask whether a Claude terminal runs nor open one without focus. The plugin uses both
-  itself; if an update renames them, `tests/helpers.lua` (fakes) still passes but full
-  `test_claude` (`Space a B`) fails.
+  itself; if an update renames them, `tests/workspace.lua` fails in quick, because it reads the
+  real plugin for both (the other cases there use fakes).
 
 ## Checks
 
@@ -126,13 +126,13 @@ Consumes: [core](core.md) keys and toggles.
 | `<leader>cl` copies a permalink, `<leader>R` uses ast-grep, `]f` / `]a` | `tests/keys.lua` |
 | References always open the list | `tests/files.lua` |
 | Completion and snippets typed for real | full: `test_snippets` in `tests/tex.sh` |
-| Claude helpers, notifications, the file tree keys | `tests/helpers.lua`, `tests/keys.lua` |
+| Claude helpers, the plugin still offering the two functions we call, notifications, the file tree keys | `tests/workspace.lua`, `tests/keys.lua` |
 | `Space t f` / `t h` / `t v`: modes, same terminal back, sizes, resize, `C-/` hides | full: `test_terminals` in `tests/workspace.sh` |
 | The tree, pickers (`Esc`, `C-v`), `Space d x`, the floating dashboard | full: `test_tree_and_pickers` |
 | Claude: `Space a s` / `a b` / `a B`, focus back to the window it came from, resize | full: `test_claude` |
 | A hidden Claude notifies (OSC 9, exit) | full: `test_claude_notices` |
 | Sessions: `Space S r` restores, `Space S d` keeps the old one | full: `test_sessions` |
-| A session is saved without its reviews | `tests/helpers.lua` |
+| A session is saved without its reviews | `tests/git.lua` |
 | Everything else here | plugin defaults, no check of our own |
 
 ## Changing it

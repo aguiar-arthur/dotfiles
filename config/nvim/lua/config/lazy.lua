@@ -4,7 +4,7 @@ if not vim.uv.fs_stat(lazypath) then
   local clone = vim
     .system(
       { "git", "clone", "--filter=blob:none", "https://github.com/folke/lazy.nvim.git", lazypath },
-      { text = true }
+      { text = true, timeout = 120000 }
     )
     :wait()
   if clone.code ~= 0 then

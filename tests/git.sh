@@ -1,11 +1,6 @@
 test_review() {
-  local repo="$PROJ/review" g=(git -c user.name=t -c user.email=t@t)
-  rm -rf "$repo" "$PROJ/review.git"
-  git init -q --bare "$PROJ/review.git" && git -C "$PROJ" clone -q review.git review 2>/dev/null
-  printf 'a = 1\n\nb = 2\n' >"$repo/r.lua"
-  "${g[@]}" -C "$repo" add r.lua && "${g[@]}" -C "$repo" commit -qm base && git -C "$repo" push -q origin HEAD 2>/dev/null
-  printf 'a = 1\n\nb = 3\n' >"$repo/r.lua"
-  "${g[@]}" -C "$repo" commit -qam change
+  review_repo review
+  local repo="$PROJ/review"
   start_nvim "$repo" other.txt
   keys Space g V
   wait_for 'vim.fn.tabpagenr("$")' 2 20
@@ -45,7 +40,7 @@ test_review() {
   send ':enew<CR>'
   keys g t
   keys Space f f
-  sleep 1
+  wait_for 'vim.bo.filetype' snacks_picker_input 10
   keys r.lua Enter
   probe "a picked file opens in the tab before the review too" 'vim.fn.tabpagenr("$") * 10 + vim.fn.tabpagenr()' 21 10
   probe "and shows it there" 'vim.fn.expand("%:t")' r.lua 5
@@ -77,7 +72,7 @@ test_review() {
   keys Space g q
   wait_for 'vim.fn.tabpagenr("$")' 1 10
   keys Space g l
-  sleep 1
+  wait_for 'P.picker_count() > 0 and 1 or 0' 1 15
   keys Enter
   probe "Enter in Space g l reviews the commit" 'vim.fn.tabpagenr("$")' 2 20
   probe "and checks nothing out" 'vim.fn.system("git -C " .. vim.fn.getcwd() .. " symbolic-ref -q HEAD") ~= "" and 1 or 0' 1 5
@@ -93,13 +88,14 @@ test_review() {
 }
 
 test_lazygit() {
-  local repo="$PROJ/review" staged='vim.trim(vim.fn.system("git -C " .. vim.fn.getcwd() .. " diff --cached --name-only"))'
+  local repo="$PROJ/lazygit" staged='vim.trim(vim.fn.system("git -C " .. vim.fn.getcwd() .. " diff --cached --name-only"))'
   if ! have lazygit; then
     skip "lazygit stage and commit" "lazygit not installed"
     return
   fi
+  review_repo lazygit
   printf 'a = 1\n\nb = 4\n' >"$repo/r.lua"
-  printf 'disableStartupPopups: true\n' >"$T/lazygit.yml"
+  printf 'disableStartupPopups: true\ngui:\n  language: en\n' >"$T/lazygit.yml"
   printf 'z = 0\n' >"$repo/a.lua"
   start_nvim "$repo" r.lua
   keys Space g D
@@ -113,7 +109,7 @@ test_lazygit() {
   probe "Space g D inside a review closes it" 'vim.fn.tabpagenr("$")' 1 10
   keys Space g g
   probe "lazygit opens in terminal mode" 'vim.fn.mode()' t 20
-  sleep 2
+  expect_screen "lazygit shows its file list" Files
   keys j e
   probe "lazygit: e opens the file in a new tab" 'vim.fn.expand("%:t") .. vim.fn.tabpagenr("$")' r.lua2 15
   probe "lazygit: and that tab is in normal mode" 'vim.fn.mode()' n 5
@@ -123,13 +119,13 @@ test_lazygit() {
   send ':lua vim.g.home = vim.api.nvim_get_current_win()<CR>'
   keys Space g g
   probe "lazygit opens in terminal mode" 'vim.fn.mode()' t 20
-  sleep 2
+  expect_screen "lazygit shows its file list" Files
   keys Space
   probe "lazygit: space stages the file" "$staged" r.lua 10
   keys Space
   probe "lazygit: space unstages it" "$staged" "" 10
   keys Space c
-  sleep 1
+  expect_screen "lazygit asks for the commit summary" "Commit summary"
   keys "commit in lazygit" Enter
   probe "lazygit: c commits with a message" 'vim.trim(vim.fn.system("git -C " .. vim.fn.getcwd() .. " log -1 --format=%s"))' "commit in lazygit" 10
   keys q
@@ -138,7 +134,8 @@ test_lazygit() {
 }
 
 test_review_debug() {
-  local repo="$PROJ/review" g=(git -c user.name=t -c user.email=t@t)
+  review_repo debug
+  local repo="$PROJ/debug" g=(git -c user.name=t -c user.email=t@t)
   printf 'x = 1\ny = x + 1\nprint(y)\n' >"$repo/d.py"
   "${g[@]}" -C "$repo" add d.py && "${g[@]}" -C "$repo" commit -qm py
   printf '# changed\n' >>"$repo/d.py"
@@ -159,5 +156,4 @@ test_review_debug() {
   probe ",du gives the review its three windows back" 'vim.fn.winnr("$")' 3 10
   probe "and the sides stay unwrapped" 'vim.wo.wrap and 1 or 0' 0 5
   stop_nvim
-  "${g[@]}" -C "$repo" checkout -q d.py
 }

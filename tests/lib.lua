@@ -32,6 +32,10 @@ function T.case(name, fn)
   end
 end
 
+function T.skip(name, reason)
+  io.stdout:write(("SKIP\t%s\t%s\n"):format(name, reason))
+end
+
 function T.dir(files)
   local root = vim.fn.tempname()
   for path, lines in pairs(files or {}) do

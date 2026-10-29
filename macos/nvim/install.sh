@@ -14,7 +14,7 @@ step_nvim() {
     echo "ERROR  ~/.config/nvim does not link to $DOT/config/nvim"
     return 1
   }
-  nvim --headless "+Lazy! restore" +qa || return 1
+  perl -e 'alarm 900; exec @ARGV' nvim --headless "+Lazy! restore" +qa || return 1
   nvim --headless "+lua require('dotfiles.install').run()"
 }
 

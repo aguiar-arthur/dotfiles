@@ -140,7 +140,8 @@ Consumes: nothing.
 | Autocmds, the cursorline and winbar of `windows.lua` | `tests/autocmds.lua` |
 | `]d`, `]e` | `tests/keys.lua` |
 | The `<leader>u` toggles, beside a review, `keep_local_opts`, `uT`, `uf` / `uF`, `uC` | `tests/toggles.lua` |
-| A Neovim without `ui2` still runs the rest of `options.lua` | `tests/helpers.lua` |
+| A Neovim without `ui2` still runs the rest of `options.lua`; `q` on a floating dashboard | `tests/core.lua` |
+| Treesitter highlight and indent per file type (Lua yes, Python highlight only, LaTeX none) | `tests/treesitter.lua` |
 | Filetypes (`.mdc`, `*.json.*`) | `tests/files.lua` |
 | `zg` writes to the versioned list | quick: `zg writes to the versioned word list` |
 | The look, `ui2`, progress in the statusline, code context, `C-w` splits | full: `test_look` in `tests/core.sh` |
