@@ -99,7 +99,7 @@ Neovim, terminal and apps install on their own, so a machine gets only what you 
 |---|---|---|
 | Neovim | `macos/nvim/install.sh` | Neovim, git, ripgrep, ast-grep, fd, tree-sitter, node, python, the formatters, pandoc, lazygit, Clojure and its tools, LaTeX, Skim, Claude Code; `~/.config/nvim`, `~/.config/rumdl/rumdl.toml`, `~/.latexmkrc`, Skim's preferences; then the plugins, servers and parsers |
 | Terminal | `macos/terminal/install.sh` | Starship, tmux, iTerm2, JetBrains Mono Nerd Font; `~/.config/starship.toml`, the iTerm2 profile, the `~/.zshrc` block |
-| Apps | `macos/apps/install.sh` | uv, ruby, mole, GrandPerspective |
+| Apps | `macos/apps/install.sh` | uv, ruby, mole, gh, GrandPerspective |
 
 On a machine whose shell and terminal are already set up and must stay as they are, run only
 `macos/nvim/install.sh`. MacTeX is a large download and asks for your password. Two things then
