@@ -42,8 +42,8 @@ git clone https://github.com/aguiar-arthur/dotfiles.git ~/dotfiles && ~/dotfiles
 
 - **Neovim**: the editor for everything: code in 11 languages with their servers, run, test and
   debug, git and reviews, LaTeX, Markdown and notes, Claude Code.
-- **Starship** prompt, **zsh** and an **iTerm2** profile, all in Dracula with JetBrains Mono
-  Nerd Font.
+- **Starship** prompt, **zsh**, **tmux** and an **iTerm2** profile, all in Dracula with
+  JetBrains Mono Nerd Font.
 
 Below: [install](#install), then each part of [Neovim](#using-neovim), [LaTeX](#latex),
 [Markdown and notes](#markdown-and-notes) and the [shell and terminal](#shell-prompt-and-terminal),
@@ -69,7 +69,7 @@ On a Mac with macOS and an internet connection; nothing else is needed beforehan
    cd ~/dotfiles && macos/install.sh
    ```
 
-   It runs the three parts below one after the other, and a failed part does not stop the
+   It runs the four parts below one after the other, and a failed part does not stop the
    others. Each part goes through its steps (a failed step does not stop the next):
 
    - **brew**: Homebrew, if missing, then every program in the part's `Brewfile` that is not
@@ -91,20 +91,22 @@ On a Mac with macOS and an internet connection; nothing else is needed beforehan
 
 ### One part at a time
 
-Neovim, terminal and apps install on their own, so a machine gets only what you want on it.
+Neovim, terminal, tmux and apps install on their own, so a machine gets only what you want on it.
 
 <details><summary>Details</summary>
 
 | Part | Command | Installs and links |
 |---|---|---|
 | Neovim | `macos/nvim/install.sh` | Neovim, git, ripgrep, ast-grep, fd, tree-sitter, node, python, the formatters, pandoc, lazygit, Clojure and its tools, LaTeX, Skim, Claude Code; `~/.config/nvim`, `~/.config/rumdl/rumdl.toml`, `~/.latexmkrc`, Skim's preferences; then the plugins, servers and parsers |
-| Terminal | `macos/terminal/install.sh` | Starship, tmux, iTerm2, JetBrains Mono Nerd Font; `~/.config/starship.toml`, the iTerm2 profile, the `~/.zshrc` block |
+| Terminal | `macos/terminal/install.sh` | Starship, iTerm2, JetBrains Mono Nerd Font; `~/.config/starship.toml`, the iTerm2 profile, the `~/.zshrc` block |
+| tmux | `macos/tmux/install.sh` | tmux, lazygit; `~/.config/tmux/tmux.conf` |
 | Apps | `macos/apps/install.sh` | uv, ruby, mole, gh, GrandPerspective |
 
 On a machine whose shell and terminal are already set up and must stay as they are, run only
-`macos/nvim/install.sh`. MacTeX is a large download and asks for your password. Two things then
-stay up to that machine: Homebrew on `PATH` (if Homebrew was just installed, it prints the line
-to add) and a Nerd Font in the terminal for the icons. Running another part later adds it.
+`macos/nvim/install.sh`, and `macos/tmux/install.sh` if you want tmux there too. MacTeX is a
+large download and asks for your password. Two things then stay up to that machine: Homebrew
+on `PATH` (if Homebrew was just installed, it prints the line to add) and a Nerd Font in the
+terminal for the icons. Running another part later adds it.
 
 </details>
 
@@ -114,12 +116,13 @@ Links into this repository, with your old files kept as backups.
 
 <details><summary>Details</summary>
 
-Each part's `link.sh` (`macos/nvim/link.sh`, `macos/terminal/link.sh`) also runs on its own
-after a `git pull`. Together they:
+Each part's `link.sh` (`macos/nvim/link.sh`, `macos/terminal/link.sh`, `macos/tmux/link.sh`)
+also runs on its own after a `git pull`. Together they:
 
 - link `~/.config/nvim`, `~/.config/rumdl/rumdl.toml` and `~/.latexmkrc` (nvim),
-  `~/.config/starship.toml` and the iTerm2 Dynamic Profile (terminal) to this repository,
-  moving whatever was there to `<name>.bak.<timestamp>` (three backups kept);
+  `~/.config/starship.toml` and the iTerm2 Dynamic Profile (terminal), and
+  `~/.config/tmux/tmux.conf` (tmux) to this repository, moving whatever was there to
+  `<name>.bak.<timestamp>` (three backups kept);
 - add one marked block to `~/.zshrc` that sources `config/zsh/dotfiles.zsh` (terminal):
   Homebrew on `PATH`, a valid `LANG`, Java, Neovim as `EDITOR`, a long shared history and the
   Starship prompt;
@@ -710,6 +713,28 @@ needed. The folder is created the first time a note is opened.
 - **Starship** (`config/starship/starship.toml`): folder, git branch and status, the
   language versions of the project, how long the last command took and the time, in Dracula
   colors.
+- **tmux** (`config/tmux/tmux.conf`, linked to `~/.config/tmux/tmux.conf` by its own part,
+  `macos/tmux/install.sh`, so a machine can get it without the rest): a Dracula status
+  bar and borders, true color and focus events for Neovim, the mouse, a 50,000-line history,
+  windows and panes numbered from 1, windows named after their folder or program, closing a
+  session's last window moving you to another session instead of out of tmux, and `git
+  commit` opening Neovim even in a tmux started from Claude Code. It does not depend on the
+  Neovim config. The prefix stays `Ctrl-b`:
+
+  | Key | Does |
+  |---|---|
+  | `Ctrl-h` / `j` / `k` / `l` | go to the pane on the left / below / above / right; in a Neovim pane the key goes to Neovim (its windows), so leave it with `prefix` and an arrow |
+  | `prefix Ctrl-l` | clear the shell's screen (`Ctrl-l` now moves between panes) |
+  | `prefix "` or `-` / `prefix %` or `\|` | split below / beside, in the pane's folder |
+  | `prefix H` / `J` / `K` / `L` | resize the pane by 5; repeat without the prefix |
+  | `prefix x` | close the pane, without asking |
+  | `prefix c` | new window, in the pane's folder |
+  | `prefix G` | lazygit in a popup, in the pane's folder (`q` closes it) |
+  | `prefix t` | a scratch shell in a popup; `prefix t` again hides it, and it keeps its history |
+  | `prefix s` | sessions and windows as a tree, with previews (tmux's own) |
+  | `prefix r` | reload `tmux.conf` |
+  | `prefix [`, then `v` / `Ctrl-v` / `y` | copy mode: select, select a block, copy to the clipboard |
+
 - **iTerm2** (`config/iterm2/dracula.json`): the "Dotfiles (Dracula)" profile with JetBrains
   Mono Nerd Font, which the icons in Neovim and the prompt need.
 - **latexmk** (`config/latex/latexmkrc`, linked to `~/.latexmkrc`): PDF output, BibTeX when a
@@ -760,8 +785,8 @@ Nothing here changes anything; each command says what is missing or wrong.
 
 | What | How | All good when |
 |---|---|---|
-| Programs | `brew bundle check --verbose --file ~/dotfiles/macos/<part>/Brewfile` (`nvim`, `terminal`, `apps`) | `The Brewfile's dependencies are satisfied.` |
-| Links, `~/.zshrc`, app preferences | `~/dotfiles/macos/nvim/link.sh` and `~/dotfiles/macos/terminal/link.sh` (fix what differs) | every line starts with `ok` |
+| Programs | `brew bundle check --verbose --file ~/dotfiles/macos/<part>/Brewfile` (`nvim`, `terminal`, `tmux`, `apps`) | `The Brewfile's dependencies are satisfied.` |
+| Links, `~/.zshrc`, app preferences | `~/dotfiles/macos/nvim/link.sh`, `~/dotfiles/macos/terminal/link.sh` and `~/dotfiles/macos/tmux/link.sh` (fix what differs) | every line starts with `ok` |
 | Neovim starts cleanly | `nvim --headless "+qa"` | it prints nothing |
 | Everything inside Neovim | `:checkhealth` | no `ERROR` |
 | Language servers in this buffer | `:checkhealth vim.lsp` | the server is under "Active Clients" |
@@ -842,6 +867,7 @@ Where each file lives.
 config/nvim/      Neovim (lazy.nvim, native LSP)
 config/zsh/       dotfiles.zsh, sourced from ~/.zshrc
 config/starship/  starship.toml
+config/tmux/      tmux.conf
 config/iterm2/    dracula.json (Dynamic Profile)
 config/rumdl/     Markdown lint rules
 config/latex/     latexmkrc (linked to ~/.latexmkrc)
@@ -849,7 +875,8 @@ macos/            the macOS install:
   install.sh      runs every part
   lib.sh          what the parts share
   nvim/           Brewfile, install.sh, link.sh: Neovim and what it needs
-  terminal/       Brewfile, install.sh, link.sh: Starship, tmux, iTerm2, ~/.zshrc
+  terminal/       Brewfile, install.sh, link.sh: Starship, iTerm2, ~/.zshrc
+  tmux/           Brewfile, install.sh, link.sh: tmux and its tmux.conf
   apps/           Brewfile, install.sh: the other programs
 SECURITY.md       how to report a problem
 CONTRIBUTING.md   how to change this setup

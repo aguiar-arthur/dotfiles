@@ -19,6 +19,7 @@ how they are built. Its relationships are in [map](map.md).
 | `tests/nvim.sh` | the one test command: `quick` (default), `full`, `fresh` |
 | `tests/lib.sh` | pass / fail / skip, the isolated home, tmux, `probe`, `menu_shows`, `install`, `review_repo` (a fresh repository with a pushed base and a local change) |
 | `tests/core.sh`, `workspace.sh`, `code.sh`, `git.sh`, `markdown.sh`, `tex.sh` | the full checks, one file per context (the same names as the docs), one `test_<name>` function per scenario |
+| `tests/tmux.sh` | the quick tmux checks: the config loads, and keys typed through a client attached with `script` (`send-keys -K`) |
 | `tests/lib.lua` | `T.case` (a named group of checks), `T.stub` (a fake undone after its case), `T.eq`, `T.dir` (a temporary project), `T.config` (load a config file), `T.skip` (say a check could not run), `T.done` |
 | `tests/lib_check.lua` | the check of `lib.lua` itself: a crash fails only its case, every stub is undone |
 | `tests/core.lua`, `install.lua`, `code.lua`, `workspace.lua`, `git.lua`, `files.lua`, `toggles.lua`, `keys.lua`, `autocmds.lua`, `share.lua`, `treesitter.lua`, `tex_snippets.lua` | headless checks with the real config, run through `lua_check`; named after the context they check (the `.sh` names) where one file fits |
@@ -63,6 +64,9 @@ Where a new check goes:
   stays only where Neovim shows nothing to wait for (a second run replacing a terminal, a
   server indexing). Each full test builds the repository it needs (`review_repo`) and never
   relies on what an earlier one left, so one runs alone.
+- tmux keys need an attached client (`script -q /dev/null tmux attach`) and `send-keys -K`;
+  a key that opens a popup blocks `send-keys` until the popup closes, so send it in the
+  background.
 - A key sent while a terminal has the cursor goes to the program, so set Lua state there with
   `lua_do`, not with `send ':lua …'`.
 - `ui2` keeps its message and `:` line windows as floats in the current tab, so a probe that

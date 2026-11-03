@@ -7,9 +7,10 @@ are in [map](map.md).
 
 ## Language
 
-- **part**: one folder in `macos/` (`nvim`, `terminal`, `apps`) with its own `Brewfile`,
-  `install.sh` and (nvim, terminal) `link.sh`; it installs alone, so a machine whose shell and
-  terminal must stay as they are runs only `macos/nvim/install.sh`.
+- **part**: one folder in `macos/` (`nvim`, `terminal`, `tmux`, `apps`) with its own `Brewfile`,
+  `install.sh` and (all but apps) `link.sh`; it installs alone, so a machine whose shell and
+  terminal must stay as they are runs only `macos/nvim/install.sh` (and `macos/tmux/install.sh`
+  for tmux, which is a part of its own for that reason).
 - **step**: one of `brew`, `link`, `nvim` in a part's `install.sh`; a failed step does not stop
   the others, and a failed part does not stop `macos/install.sh`.
 - **lockfile**: `config/nvim/lazy-lock.json`, the plugin commits; the way back after a bad
@@ -19,10 +20,11 @@ are in [map](map.md).
 
 | Path | Holds |
 |---|---|
-| `macos/install.sh` | runs every part: terminal, apps, nvim |
+| `macos/install.sh` | runs every part: terminal, tmux, apps, nvim |
 | `macos/lib.sh` | what the parts share: `step_brew` (trusting third-party taps first), `step_link`, `run_steps`, `link` with backups, `pref` |
 | `macos/nvim/` | `Brewfile` (what Neovim needs), `install.sh` (brew, link, nvim), `link.sh` (`~/.config/nvim`, rumdl, `~/.latexmkrc`, Skim) |
-| `macos/terminal/` | `Brewfile` (Starship, tmux, iTerm2, the font), `install.sh` (brew, link), `link.sh` (Starship, the iTerm2 profile and default, `~/.zshrc`) |
+| `macos/terminal/` | `Brewfile` (Starship, iTerm2, the font), `install.sh` (brew, link), `link.sh` (Starship, the iTerm2 profile and default, `~/.zshrc`) |
+| `macos/tmux/` | `Brewfile` (tmux, lazygit for `prefix G`), `install.sh` (brew, link), `link.sh` (`~/.config/tmux/tmux.conf`) |
 | `macos/apps/` | `Brewfile` (programs that are neither), `install.sh` (brew) |
 | `config/nvim/lua/dotfiles/install.lua` | headless install of Mason packages, parsers and spell files, with time limits |
 | `config/nvim/lua/dotfiles/mason.lua` | which Mason packages the settings want and which are missing or broken |
@@ -30,11 +32,12 @@ are in [map](map.md).
 | `config/nvim/lazy-lock.json` | plugin versions (committed) |
 | `config/zsh/dotfiles.zsh` | Homebrew on `PATH` (Apple Silicon or Intel), a valid `LANG`, `JAVA_HOME`, `EDITOR` / `VISUAL`, history, `path_report`, `command_origin`, Starship |
 | `config/starship/starship.toml` | the prompt, Dracula colors |
+| `config/tmux/tmux.conf` | tmux: Dracula status bar, true color and focus events for Neovim, `C-h/j/k/l` across panes (not into Neovim), splits in the pane's folder, lazygit and scratch popups, vi copy mode to `pbcopy`, no `GIT_EDITOR` |
 | `config/iterm2/dracula.json` | the "Dotfiles (Dracula)" Dynamic Profile |
 
 ## How it works
 
-`macos/install.sh` runs the parts' `install.sh` (terminal, apps, nvim) and ends with `Done.`
+`macos/install.sh` runs the parts' `install.sh` (terminal, tmux, apps, nvim) and ends with `Done.`
 or `Failed: <parts>`; each part runs its steps in order (`brew`, `link`, then `nvim` for
 Neovim) and ends with `Done: <part>.` or `Failed: <steps>`. The nvim step needs
 `~/.config/nvim` to link to this repository, so Neovim uses the same config as every day:
@@ -76,6 +79,17 @@ Consumes: [core](core.md) `settings` (which servers, tools, parsers and spell la
   installs 15 minutes, a spell file two, the Homebrew installer's download two (checked before it
   runs: `bash -c` of an empty download would succeed), the lazy.nvim clone two and `Lazy! restore`
   15; a failed Homebrew or plugin step fails its step.
+- A tmux server keeps the environment of the shell that started it, and Claude Code's shells
+  set `GIT_EDITOR=true`; one tmux started from there made `git commit` and `git merge` skip
+  the editor in every pane, so `tmux.conf` unsets it.
+- tmux stays independent of the Neovim config: `C-h/j/k/l` move between panes except in a
+  pane running Neovim (found with `ps` on the pane's tty), where the key goes to Neovim and
+  `prefix` with an arrow leaves it. Making Neovim hand the key back needs a plugin on its side
+  (vim-tmux-navigator), which was left out on purpose.
+- tmux 3.8 uses `prefix g` for its floating panes, so lazygit is on `prefix G`. The scratch
+  popup is a session named `scratch` attached inside `display-popup`; it sets
+  `detach-on-destroy on` for itself, or exiting its shell would switch the popup to another
+  session.
 - Only plugins and parsers are pinned. Mason packages take whatever the registry offers when
   they are installed, Homebrew programs stay at their version (`--no-upgrade`), and the nREPL and
   CIDER versions are in the `versions` table of `dotfiles/clojure.lua`: none of them moves until
@@ -89,6 +103,8 @@ Consumes: [core](core.md) `settings` (which servers, tools, parsers and spell la
 | Mason's Python tools on this machine can start | quick: `Mason's Python tools still have their Python` |
 | Starting Neovim leaves the lockfile alone | quick: `starting nvim leaves lazy-lock.json alone` |
 | Shell syntax and format of the scripts | quick: `shell syntax`, `shfmt` |
+| `tmux.conf` loads and keeps `GIT_EDITOR` out of the panes | quick: `tmux: the config loads and git commit opens Neovim` (`tests/tmux.sh`) |
+| `C-h/j/k/l` across a shell and a Neovim pane, the scratch popup | quick: `tmux: C-h/j/k/l cross panes but not Neovim, prefix t toggles the scratch popup`, through a client attached with `script` |
 | `dotfiles.zsh` makes Neovim the editor, without comments | quick: `zsh: Neovim is the editor`, `no comments in Lua, shell and PowerShell` |
 | `macos/nvim/install.sh` in an empty home | full: `install` in `tests/lib.sh`; `fresh` in a throwaway folder |
 
@@ -111,7 +127,7 @@ Nothing updates itself, so do it on purpose, on a branch, and run the tests befo
 ## Changing it
 
 - **A program**: one line in the `Brewfile` of the part that needs it (`macos/apps/Brewfile`
-  when it is neither Neovim nor terminal); a third-party tap needs nothing more, `step_brew`
+  when it belongs to no other part); a third-party tap needs nothing more, `step_brew`
   trusts it. Then the README's part table.
 - **A Mason tool, parser or spell language**: the list in `settings.lua` (see [core](core.md));
   `install.lua` picks it up.

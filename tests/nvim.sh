@@ -18,7 +18,7 @@ quick | full | fresh) ;;
   ;;
 esac
 
-for part in lib core workspace code git markdown tex; do
+for part in lib core workspace code git markdown tex tmux; do
   . "$DOT/tests/$part.sh"
 done
 
@@ -98,9 +98,11 @@ quick() {
   tool "stylua" stylua bash -c "cd '$DOT/config/nvim' && stylua --check . ../../tests"
   tool "shell syntax" bash bash -n "$DOT"/macos/*.sh "$DOT"/macos/*/*.sh "$DOT"/tests/*.sh "$DOT/config/nvim/dashboard/clock.sh"
   check "zsh: Neovim is the editor" zsh -f -c "source '$DOT/config/zsh/dotfiles.zsh' && [[ \$EDITOR == nvim && \$VISUAL == nvim ]]"
+  tool "tmux: the config loads and git commit opens Neovim" tmux tmux_config
+  tool "tmux: C-h/j/k/l cross panes but not Neovim, prefix t toggles the scratch popup" tmux tmux_keys
   tool "shfmt" shfmt shfmt -d "$DOT"/macos/*.sh "$DOT"/macos/*/*.sh "$DOT"/tests/*.sh "$DOT/config/nvim/dashboard/clock.sh"
   tool "rumdl" rumdl rumdl check "$DOT" --config "$DOT/config/rumdl/rumdl.toml"
-  check_silent "no comments in shell" grep -nE '^[[:space:]]*#([^!]|$)' "$DOT"/macos/*.sh "$DOT"/macos/*/*.sh "$DOT"/tests/*.sh "$DOT/config/nvim/dashboard/clock.sh" "$DOT/config/zsh/dotfiles.zsh"
+  check_silent "no comments in shell" grep -nE '^[[:space:]]*#([^!]|$)' "$DOT"/macos/*.sh "$DOT"/macos/*/*.sh "$DOT"/tests/*.sh "$DOT/config/nvim/dashboard/clock.sh" "$DOT/config/zsh/dotfiles.zsh" "$DOT/config/tmux/tmux.conf"
   check "the dashboard clock draws its digits and date" clock_frame
   if [ -z "$(find "$REAL_STATE/nvim/sessions" -newer "$marker" 2>/dev/null)" ]; then
     pass "the quick tests leave your sessions alone"

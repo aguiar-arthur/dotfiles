@@ -4,7 +4,7 @@ set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 FAILED=()
 
-for part in terminal apps nvim; do
+for part in terminal tmux apps nvim; do
   "$HERE/$part/install.sh" || FAILED+=("$part")
 done
 

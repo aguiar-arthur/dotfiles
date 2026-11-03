@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Personal dotfiles for macOS: Neovim, Starship and an iTerm2 profile, plus one standalone
+Personal dotfiles for macOS: Neovim, Starship, tmux and an iTerm2 profile, plus one standalone
 Windows script to debug a PC's health. Keep them small: this is one person's setup, not a
 product.
 
@@ -19,7 +19,7 @@ two. The README is the user's guide (keys); it is not needed to change code.
 | Git | [docs/git.md](docs/git.md) | gitsigns, codediff review, lazygit, git pickers, jumps from a review | core, workspace |
 | LaTeX | [docs/latex.md](docs/latex.md) | vimtex, texlab, ltex-ls-plus, snippets, latexmkrc, Skim | core, code, install |
 | Markdown | [docs/markdown.md](docs/markdown.md) | render-markdown, `,p` preview, rumdl rules, notes (obsidian.nvim), marksman | core, code |
-| Install | [docs/install.md](docs/install.md) | `macos/` (one part each for nvim, terminal, apps), Mason / parser / spell installs, lockfile, zsh, Starship, iTerm2 | core (settings) |
+| Install | [docs/install.md](docs/install.md) | `macos/` (one part each for nvim, terminal, tmux, apps), Mason / parser / spell installs, lockfile, zsh, Starship, tmux, iTerm2 | core (settings) |
 | Tests | [docs/tests.md](docs/tests.md) | `tests/`, where a new check goes, checking by hand | all |
 | Windows | [docs/windows.md](docs/windows.md) | `windows/collect-diagnostics.ps1`: a Windows 11 health report (events, dumps, drivers, disks, temperatures) and an optional DISM / SFC repair | none |
 
@@ -42,15 +42,17 @@ config/nvim/        Neovim >= 0.12: lazy.nvim, one spec per concern in lua/plugi
                     helpers in lua/dotfiles/, per-server settings in after/lsp/
 config/zsh/         dotfiles.zsh, sourced by the one ~/.zshrc block
 config/starship/    starship.toml
+config/tmux/        tmux.conf
 config/rumdl/       rumdl.toml (Markdown lint rules; the root .rumdl.toml links to it)
 config/iterm2/      dracula.json (Dynamic Profile)
 config/latex/       latexmkrc (linked to ~/.latexmkrc)
 docs/               one doc per context (the map above); img/ holds the README screenshot
 macos/              the macOS install, see docs/install.md:
-  install.sh        runs every part: terminal, apps, nvim
+  install.sh        runs every part: terminal, tmux, apps, nvim
   lib.sh            what the parts share: Homebrew, links with backups, preferences, steps
   nvim/             Brewfile, install.sh (brew, link, plugins and Mason), link.sh (incl. Skim)
   terminal/         Brewfile, install.sh (brew, link), link.sh (Starship, iTerm2, ~/.zshrc)
+  tmux/             Brewfile, install.sh (brew, link), link.sh (tmux.conf)
   apps/             Brewfile, install.sh (brew): programs that are neither of the others
 SECURITY.md         how to report a problem
 CONTRIBUTING.md     how to change it, for people (a summary of this file)
@@ -64,8 +66,8 @@ windows/            collect-diagnostics.ps1, a standalone Windows health report,
 - **Simple first.** No health checks, no doctor, no flags, no tests beyond `tests/nvim.sh`
   ([docs/tests.md](docs/tests.md)), and no CI beyond the security workflows and the quick tests
   (`.github/workflows/`: ShellCheck, gitleaks, zizmor, CodeQL, Scorecard, `tests.yml`).
-  `macos/install.sh` runs every part (`macos/<part>/install.sh`: terminal, apps, nvim); a part
-  runs on its own on a machine where the rest must stay untouched, so no script takes an
+  `macos/install.sh` runs every part (`macos/<part>/install.sh`: terminal, tmux, apps, nvim); a
+  part runs on its own on a machine where the rest must stay untouched, so no script takes an
   argument. Each part installs its own `Brewfile`, runs its `link.sh`, and (nvim) sets up
   Neovim through the linked `~/.config/nvim`, as every day. Every script stays idempotent and
   only does what is missing. Every network step has a timeout or a failure path.
@@ -76,7 +78,7 @@ windows/            collect-diagnostics.ps1, a standalone Windows health report,
   PowerShell for debugging a Windows PC, never installed, linked or tested by the rest.
 - **English** in code, docs and commit messages; reply to the user in their language.
 - **Every program goes in a Brewfile**: the one of the part that needs it (`macos/nvim/`,
-  `macos/terminal/`), or `macos/apps/` when it is neither.
+  `macos/terminal/`, `macos/tmux/`), or `macos/apps/` when it is neither.
 - **Keys.** `<leader>` is for what works everywhere, `,` (the local leader) for what depends on
   the file type. A `,` key goes in its plugin's `keys` with lazy.nvim's `ft`, in `LspAttach`
   when it depends on the server, or in `after/ftplugin/`; never in an autocmd of our own.
