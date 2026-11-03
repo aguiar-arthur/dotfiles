@@ -90,7 +90,8 @@ real language servers and tmux and would fail for reasons that are not in a chan
 
 `.github/workflows/security.yml` runs on push, pull request and every Monday: ShellCheck on the
 shell scripts, gitleaks on the full history, and zizmor on the workflows. Actions are pinned to
-a commit SHA and the token is read-only; Dependabot (`.github/dependabot.yml`) bumps the pins.
+a commit SHA and the token is read-only; Dependabot (`.github/dependabot.yml`) bumps the pins,
+all `github/codeql-action` steps in one pull request, since CodeQL fails when they differ.
 ShellCheck does not read zsh, so `config/zsh/` is left out. Run `gitleaks detect` locally for the
 same secret scan.
 
