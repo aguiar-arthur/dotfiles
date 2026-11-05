@@ -102,7 +102,7 @@ Neovim, terminal, tmux and apps install on their own, so a machine gets only wha
 | Part | Command | Installs and links |
 |---|---|---|
 | Neovim | `macos/nvim/install.sh` | Neovim, git, ripgrep, ast-grep, fd, tree-sitter, node, python, the formatters, pandoc, lazygit, Clojure and its tools, LaTeX, Skim, Claude Code; `~/.config/nvim`, `~/.config/rumdl/rumdl.toml`, `~/.latexmkrc`, Skim's preferences; then the plugins, servers and parsers |
-| Terminal | `macos/terminal/install.sh` | Starship, iTerm2, JetBrains Mono Nerd Font; `~/.config/starship.toml`, the iTerm2 profile, the `~/.zshrc` block |
+| Terminal | `macos/terminal/install.sh` | Starship, eza, iTerm2, JetBrains Mono Nerd Font; `~/.config/starship.toml`, the iTerm2 profile, the `~/.zshrc` block |
 | tmux | `macos/tmux/install.sh` | tmux, lazygit; `~/.config/tmux/tmux.conf`; the whichkey-tmux plugin in `~/.config/tmux/plugins/` |
 | Apps | `macos/apps/install.sh` | uv, ruby, mole, gh, GrandPerspective |
 
@@ -128,8 +128,8 @@ also runs on its own after a `git pull`. Together they:
   `~/.config/tmux/tmux.conf` (tmux) to this repository, moving whatever was there to
   `<name>.bak.<timestamp>` (three backups kept);
 - add one marked block to `~/.zshrc` that sources `config/zsh/dotfiles.zsh` (terminal):
-  Homebrew on `PATH`, a valid `LANG`, Java, Neovim as `EDITOR`, a long shared history and the
-  Starship prompt;
+  Homebrew on `PATH`, a valid `LANG`, Java, Neovim as `EDITOR`, a long shared history, emacs
+  keys, eza as `ls` and the Starship prompt;
 - set Skim's inverse search to Neovim and make Skim reload a PDF when it changes (nvim);
 - make "Dotfiles (Dracula)" iTerm2's default profile (terminal).
 
@@ -712,8 +712,18 @@ needed. The folder is created the first time a note is opened.
   `config/zsh/dotfiles.zsh`: Homebrew on `PATH`, a valid `LANG`, Homebrew's Java as
   `JAVA_HOME` (Clojure needs it), Neovim as `EDITOR` and `VISUAL`, a 50,000-line history shared
   by every open shell, the Starship prompt, and two helpers: `path_report` lists `PATH` in order
-  and `command_origin <name>…` says which program runs and whether Homebrew installed it.
-  Everything else in `~/.zshrc` stays yours.
+  and `command_origin <name>…` says which program runs and whether Homebrew installed it. The
+  line keeps emacs keys (`Ctrl-a`, `Ctrl-e`, `Ctrl-r`) in every shell. Everything else in
+  `~/.zshrc` stays yours.
+- **eza** lists files with icons, folders first:
+
+  | Command | Does |
+  |---|---|
+  | `ls` | list this folder |
+  | `ll` | everything, in detail, with each file's git status |
+  | `lt` | in detail, by date, newest last (what `ls -ltr` did) |
+  | `command ls` | the system's `ls`: eza refuses `ls -lt` and `ls -ltr`, its `-t` asks for a field |
+
 - **Starship** (`config/starship/starship.toml`): folder, git branch and status, the
   language versions of the project, how long the last command took and the time, in Dracula
   colors.
@@ -823,7 +833,7 @@ is missing are skipped.
 
 | Mode | Command | Takes | Checks |
 |---|---|---|---|
-| quick (default) | `~/dotfiles/tests/nvim.sh` | seconds | startup, every Lua module, the lockfile, Skim preferences, Mason's Python tools (broken by a Homebrew Python upgrade), `zg` writing to the versioned word list, stylua, shell syntax, `EDITOR` in zsh, shfmt, rumdl, and our own code headless: `Space c` keys, `]f` / `]a`, `,d p`, `]T`, `Space R`, filetypes, format on save, the `Space u` toggles, `]e`, the preview, tree-sitter per file type, every LaTeX snippet, no comments (Lua, shell, PowerShell), the helpers of each context |
+| quick (default) | `~/dotfiles/tests/nvim.sh` | seconds | startup, every Lua module, the lockfile, Skim preferences, Mason's Python tools (broken by a Homebrew Python upgrade), `zg` writing to the versioned word list, stylua, shell syntax, `EDITOR`, keys and eza in zsh, shfmt, rumdl, and our own code headless: `Space c` keys, `]f` / `]a`, `,d p`, `]T`, `Space R`, filetypes, format on save, the `Space u` toggles, `]e`, the preview, tree-sitter per file type, every LaTeX snippet, no comments (Lua, shell, PowerShell), the helpers of each context |
 | full | `~/dotfiles/tests/nvim.sh full` | minutes | quick, plus a real Neovim driven in tmux: language servers, toggles, the look, Markdown and notes, the `,` keys, `,r`, the debugger, tests, a LaTeX build and its snippets, a `Space g V` review, `,cj` |
 | fresh | `~/dotfiles/tests/nvim.sh fresh` | longer | full, in a throwaway directory deleted at the end, as on a new machine |
 

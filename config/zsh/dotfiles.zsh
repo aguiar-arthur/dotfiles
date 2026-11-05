@@ -18,6 +18,14 @@ HISTSIZE=50000
 SAVEHIST=50000
 setopt share_history hist_ignore_all_dups hist_ignore_space
 
+bindkey -e
+
+if [[ -o interactive ]] && (( $+commands[eza] )); then
+  alias ls='eza --icons=auto --group-directories-first'
+  alias ll='ls --long --all --git'
+  alias lt='ls --long --sort=modified'
+fi
+
 path_report() {
   local directory brew_prefix="${HOMEBREW_PREFIX:-}" source
   for directory in "${path[@]}"; do

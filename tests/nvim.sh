@@ -61,6 +61,18 @@ clock_frame() {
   [ "$(printf '%s' "$frame" | wc -l)" -eq 10 ] || { echo "a frame must not end in a newline: the screen would scroll" && return 1; }
 }
 
+zsh_eza() {
+  local rc="$DOT/config/zsh/dotfiles.zsh"
+  zsh -f -i -c "source '$rc'; [[ \$aliases[ls] == eza* ]] && eval 'll \"$DOT/macos\"' && eval 'lt \"$DOT/macos\"'" >/dev/null || {
+    echo "ls, ll or lt does not run eza in an interactive shell"
+    return 1
+  }
+  zsh -f -c "source '$rc'; (( ! \$+aliases[ls] ))" || {
+    echo "a script that sources dotfiles.zsh gets the eza alias"
+    return 1
+  }
+}
+
 quick() {
   local before marker
   before="$(lock_hash)"
@@ -98,6 +110,8 @@ quick() {
   tool "stylua" stylua bash -c "cd '$DOT/config/nvim' && stylua --check . ../../tests"
   tool "shell syntax" bash bash -n "$DOT"/macos/*.sh "$DOT"/macos/*/*.sh "$DOT"/tests/*.sh "$DOT/config/nvim/dashboard/clock.sh"
   check "zsh: Neovim is the editor" zsh -f -c "source '$DOT/config/zsh/dotfiles.zsh' && [[ \$EDITOR == nvim && \$VISUAL == nvim ]]"
+  check "zsh: emacs keys, even with EDITOR=nvim inherited from a parent shell" env EDITOR=nvim VISUAL=nvim zsh -f -i -c "source '$DOT/config/zsh/dotfiles.zsh'; [[ \$(bindkey -lL main) == 'bindkey -A emacs main' ]]"
+  tool "zsh: ls, ll and lt run eza in a shell, a script keeps ls" eza zsh_eza
   tool "tmux: the config loads and git commit opens Neovim" tmux tmux_config
   tool "tmux: C-h/j/k/l cross panes but not Neovim, prefix t toggles the scratch popup" tmux tmux_keys
   tool "tmux: the config loads without whichkey-tmux" tmux tmux_without_whichkey

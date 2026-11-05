@@ -23,14 +23,14 @@ are in [map](map.md).
 | `macos/install.sh` | runs every part: terminal, tmux, apps, nvim |
 | `macos/lib.sh` | what the parts share: `step_brew` (trusting third-party taps first), `step_link`, `run_steps`, `link` with backups, `pref` |
 | `macos/nvim/` | `Brewfile` (what Neovim needs), `install.sh` (brew, link, nvim), `link.sh` (`~/.config/nvim`, rumdl, `~/.latexmkrc`, Skim) |
-| `macos/terminal/` | `Brewfile` (Starship, iTerm2, the font), `install.sh` (brew, link), `link.sh` (Starship, the iTerm2 profile and default, `~/.zshrc`) |
+| `macos/terminal/` | `Brewfile` (Starship, eza, iTerm2, the font), `install.sh` (brew, link), `link.sh` (Starship, the iTerm2 profile and default, `~/.zshrc`) |
 | `macos/tmux/` | `Brewfile` (tmux, lazygit for `prefix G`), `install.sh` (brew, link, whichkey), `link.sh` (`~/.config/tmux/tmux.conf`), `whichkey.sh` (the whichkey-tmux clone in `~/.config/tmux/plugins/`) |
 | `macos/apps/` | `Brewfile` (programs that are neither), `install.sh` (brew) |
 | `config/nvim/lua/dotfiles/install.lua` | headless install of Mason packages, parsers and spell files, with time limits |
 | `config/nvim/lua/dotfiles/mason.lua` | which Mason packages the settings want and which are missing or broken |
 | `config/nvim/lua/config/lazy.lua` | lazy.nvim cloned at the lockfile's commit |
 | `config/nvim/lazy-lock.json` | plugin versions (committed) |
-| `config/zsh/dotfiles.zsh` | Homebrew on `PATH` (Apple Silicon or Intel), a valid `LANG`, `JAVA_HOME`, `EDITOR` / `VISUAL`, history, `path_report`, `command_origin`, Starship |
+| `config/zsh/dotfiles.zsh` | Homebrew on `PATH` (Apple Silicon or Intel), a valid `LANG`, `JAVA_HOME`, `EDITOR` / `VISUAL`, history, emacs keys, the eza aliases (`ls`, `ll`, `lt`), `path_report`, `command_origin`, Starship |
 | `config/starship/starship.toml` | the prompt, Dracula colors |
 | `config/tmux/tmux.conf` | tmux: Dracula status bar, true color and focus events for Neovim, `C-h/j/k/l` across panes (not into Neovim), splits in the pane's folder, lazygit and scratch popups, vi copy mode to `pbcopy`, no `GIT_EDITOR`, menus in the terminal's colors, whichkey-tmux in auto mode (when it is there) |
 | `config/iterm2/dracula.json` | the "Dotfiles (Dracula)" Dynamic Profile |
@@ -85,6 +85,13 @@ Consumes: [core](core.md) `settings` (which servers, tools, parsers and spell la
   runs: `bash -c` of an empty download would succeed), the lazy.nvim clone two, the whichkey-tmux
   clone two (without asking for a password, and removed when it fails half-way) and
   `Lazy! restore` 15; a failed Homebrew or plugin step fails its step.
+- zsh picks vi keys when `EDITOR` or `VISUAL` already holds `vi` at its start, so with
+  `EDITOR=nvim` the first shell had emacs keys and a shell that inherited it (nested, or a tmux
+  pane) had vi keys, with `Ctrl-r` and `Ctrl-a` doing nothing useful; `bindkey -e` keeps them all
+  the same. The block runs last in `~/.zshrc`, so a `bindkey -v` above it loses: change that line.
+- eza is not a drop-in `ls`: its `-t` takes a field, so `ls -lt` and `ls -ltr` fail with an error.
+  `lt` is the same listing and `command ls` the system's. The aliases exist only in an interactive
+  shell, so a script that sources `~/.zshrc` keeps the real `ls`.
 - A tmux server keeps the environment of the shell that started it, and Claude Code's shells
   set `GIT_EDITOR=true`; one tmux started from there made `git commit` and `git merge` skip
   the editor in every pane, so `tmux.conf` unsets it.
@@ -121,6 +128,7 @@ Consumes: [core](core.md) `settings` (which servers, tools, parsers and spell la
 | `tmux.conf` loads, with the prefix on `Ctrl-b`, where whichkey-tmux is not installed | quick: `tmux: the config loads without whichkey-tmux` |
 | `whichkey.sh` keeps a clone of whichkey-tmux and refuses any other folder, without network | quick: `tmux: the whichkey step keeps its clone and refuses anything else` |
 | `dotfiles.zsh` makes Neovim the editor, without comments | quick: `zsh: Neovim is the editor`, `no comments in Lua, shell and PowerShell` |
+| Emacs keys with `EDITOR` inherited; `ls`, `ll`, `lt` run eza, and a script keeps `ls` | quick: `zsh: emacs keys, even with EDITOR=nvim inherited from a parent shell`, `zsh: ls, ll and lt run eza in a shell, a script keeps ls` |
 | `macos/nvim/install.sh` in an empty home | full: `install` in `tests/lib.sh`; `fresh` in a throwaway folder |
 
 ## Updating
