@@ -739,6 +739,7 @@ needed. The folder is created the first time a note is opened.
   | `prefix t` | a scratch shell in a popup; `prefix t` again hides it, and it keeps its history |
   | `prefix`, then a pause | a popup with the keys of this table; any key goes on to tmux, `Esc` closes it |
   | `prefix Space` | every key binding in a menu, these first (`Space` no longer changes the layout) |
+  | `prefix /` | search every key binding as you type; `Enter` runs it, `Esc` closes |
   | `prefix s` | sessions and windows as a tree, with previews (tmux's own) |
   | `prefix r` | reload `tmux.conf` |
   | `prefix [`, then `v` / `Ctrl-v` / `y` | copy mode: select, select a block, copy to the clipboard |
