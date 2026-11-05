@@ -100,6 +100,8 @@ quick() {
   check "zsh: Neovim is the editor" zsh -f -c "source '$DOT/config/zsh/dotfiles.zsh' && [[ \$EDITOR == nvim && \$VISUAL == nvim ]]"
   tool "tmux: the config loads and git commit opens Neovim" tmux tmux_config
   tool "tmux: C-h/j/k/l cross panes but not Neovim, prefix t toggles the scratch popup" tmux tmux_keys
+  tool "tmux: the config loads without whichkey-tmux" tmux tmux_without_whichkey
+  tool "tmux: the whichkey step keeps its clone and refuses anything else" git tmux_whichkey_step
   tool "shfmt" shfmt shfmt -d "$DOT"/macos/*.sh "$DOT"/macos/*/*.sh "$DOT"/tests/*.sh "$DOT/config/nvim/dashboard/clock.sh"
   tool "rumdl" rumdl rumdl check "$DOT" --config "$DOT/config/rumdl/rumdl.toml"
   check_silent "no comments in shell" grep -nE '^[[:space:]]*#([^!]|$)' "$DOT"/macos/*.sh "$DOT"/macos/*/*.sh "$DOT"/tests/*.sh "$DOT/config/nvim/dashboard/clock.sh" "$DOT/config/zsh/dotfiles.zsh" "$DOT/config/tmux/tmux.conf"

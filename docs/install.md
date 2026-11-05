@@ -11,8 +11,8 @@ are in [map](map.md).
   `install.sh` and (all but apps) `link.sh`; it installs alone, so a machine whose shell and
   terminal must stay as they are runs only `macos/nvim/install.sh` (and `macos/tmux/install.sh`
   for tmux, which is a part of its own for that reason).
-- **step**: one of `brew`, `link`, `nvim` in a part's `install.sh`; a failed step does not stop
-  the others, and a failed part does not stop `macos/install.sh`.
+- **step**: one of `brew`, `link`, `whichkey`, `nvim` in a part's `install.sh`; a failed step
+  does not stop the others, and a failed part does not stop `macos/install.sh`.
 - **lockfile**: `config/nvim/lazy-lock.json`, the plugin commits; the way back after a bad
   update.
 
@@ -24,7 +24,7 @@ are in [map](map.md).
 | `macos/lib.sh` | what the parts share: `step_brew` (trusting third-party taps first), `step_link`, `run_steps`, `link` with backups, `pref` |
 | `macos/nvim/` | `Brewfile` (what Neovim needs), `install.sh` (brew, link, nvim), `link.sh` (`~/.config/nvim`, rumdl, `~/.latexmkrc`, Skim) |
 | `macos/terminal/` | `Brewfile` (Starship, iTerm2, the font), `install.sh` (brew, link), `link.sh` (Starship, the iTerm2 profile and default, `~/.zshrc`) |
-| `macos/tmux/` | `Brewfile` (tmux, lazygit for `prefix G`), `install.sh` (brew, link), `link.sh` (`~/.config/tmux/tmux.conf`) |
+| `macos/tmux/` | `Brewfile` (tmux, lazygit for `prefix G`), `install.sh` (brew, link, whichkey), `link.sh` (`~/.config/tmux/tmux.conf`), `whichkey.sh` (the whichkey-tmux clone in `~/.config/tmux/plugins/`) |
 | `macos/apps/` | `Brewfile` (programs that are neither), `install.sh` (brew) |
 | `config/nvim/lua/dotfiles/install.lua` | headless install of Mason packages, parsers and spell files, with time limits |
 | `config/nvim/lua/dotfiles/mason.lua` | which Mason packages the settings want and which are missing or broken |
@@ -32,7 +32,7 @@ are in [map](map.md).
 | `config/nvim/lazy-lock.json` | plugin versions (committed) |
 | `config/zsh/dotfiles.zsh` | Homebrew on `PATH` (Apple Silicon or Intel), a valid `LANG`, `JAVA_HOME`, `EDITOR` / `VISUAL`, history, `path_report`, `command_origin`, Starship |
 | `config/starship/starship.toml` | the prompt, Dracula colors |
-| `config/tmux/tmux.conf` | tmux: Dracula status bar, true color and focus events for Neovim, `C-h/j/k/l` across panes (not into Neovim), splits in the pane's folder, lazygit and scratch popups, vi copy mode to `pbcopy`, no `GIT_EDITOR` |
+| `config/tmux/tmux.conf` | tmux: Dracula status bar, true color and focus events for Neovim, `C-h/j/k/l` across panes (not into Neovim), splits in the pane's folder, lazygit and scratch popups, vi copy mode to `pbcopy`, no `GIT_EDITOR`, menus in the terminal's colors, whichkey-tmux in auto mode (when it is there) |
 | `config/iterm2/dracula.json` | the "Dotfiles (Dracula)" Dynamic Profile |
 
 ## How it works
@@ -45,6 +45,11 @@ Neovim) and ends with `Done: <part>.` or `Failed: <steps>`. The nvim step needs
 codediff's library), then `dotfiles.install` installs the Mason packages, the parsers (with
 the `tree-sitter` CLI) and the non-English spell files. Everything is idempotent and only does
 what is missing; already installed programs are not upgraded (`brew bundle --no-upgrade`).
+
+The tmux part's `whichkey` step runs `whichkey.sh`: it clones whichkey-tmux into
+`~/.config/tmux/plugins/whichkey-tmux` when that folder is missing, says `ok` when it already
+holds a clone of it, and stops with an error, touching nothing, when it holds anything else.
+It never pulls: an update is on purpose (see [Updating](#updating)).
 
 Each `link.sh` links its files, moving whatever was there to `<name>.bak.<timestamp>` (the three
 newest are kept; each older one is named with `prune` as it is deleted), and writes its app's
@@ -77,8 +82,9 @@ Consumes: [core](core.md) `settings` (which servers, tools, parsers and spell la
   reinstalls it, and the quick tests say when one is broken.
 - Every network step needs a timeout or a failure path: the Mason registry waits a minute, its
   installs 15 minutes, a spell file two, the Homebrew installer's download two (checked before it
-  runs: `bash -c` of an empty download would succeed), the lazy.nvim clone two and `Lazy! restore`
-  15; a failed Homebrew or plugin step fails its step.
+  runs: `bash -c` of an empty download would succeed), the lazy.nvim clone two, the whichkey-tmux
+  clone two (without asking for a password, and removed when it fails half-way) and
+  `Lazy! restore` 15; a failed Homebrew or plugin step fails its step.
 - A tmux server keeps the environment of the shell that started it, and Claude Code's shells
   set `GIT_EDITOR=true`; one tmux started from there made `git commit` and `git merge` skip
   the editor in every pane, so `tmux.conf` unsets it.
@@ -90,6 +96,13 @@ Consumes: [core](core.md) `settings` (which servers, tools, parsers and spell la
   popup is a session named `scratch` attached inside `display-popup`; it sets
   `detach-on-destroy on` for itself, or exiting its shell would switch the popup to another
   session.
+- whichkey-tmux lives in `~/.config/tmux/plugins/`, where TPM would put it, outside this
+  repository: it is a project of its own with its own git history. `tmux.conf` loads it through
+  `if-shell`, so on a machine without it tmux still starts, with the prefix on `Ctrl-b`.
+- In auto mode whichkey-tmux takes over the prefix (`tmux show -g prefix` prints `None` and the
+  key is bound in the root table); reloading `tmux.conf` keeps that right, and its own README
+  says how to undo it. `set -g theme terminal` (tmux 3.6 and later) gives tmux's menus and
+  popups the terminal's palette instead of tmux's own greys.
 - Only plugins and parsers are pinned. Mason packages take whatever the registry offers when
   they are installed, Homebrew programs stay at their version (`--no-upgrade`), and the nREPL and
   CIDER versions are in the `versions` table of `dotfiles/clojure.lua`: none of them moves until
@@ -105,6 +118,8 @@ Consumes: [core](core.md) `settings` (which servers, tools, parsers and spell la
 | Shell syntax and format of the scripts | quick: `shell syntax`, `shfmt` |
 | `tmux.conf` loads and keeps `GIT_EDITOR` out of the panes | quick: `tmux: the config loads and git commit opens Neovim` (`tests/tmux.sh`) |
 | `C-h/j/k/l` across a shell and a Neovim pane, the scratch popup | quick: `tmux: C-h/j/k/l cross panes but not Neovim, prefix t toggles the scratch popup`, through a client attached with `script` |
+| `tmux.conf` loads, with the prefix on `Ctrl-b`, where whichkey-tmux is not installed | quick: `tmux: the config loads without whichkey-tmux` |
+| `whichkey.sh` keeps a clone of whichkey-tmux and refuses any other folder, without network | quick: `tmux: the whichkey step keeps its clone and refuses anything else` |
 | `dotfiles.zsh` makes Neovim the editor, without comments | quick: `zsh: Neovim is the editor`, `no comments in Lua, shell and PowerShell` |
 | `macos/nvim/install.sh` in an empty home | full: `install` in `tests/lib.sh`; `fresh` in a throwaway folder |
 
@@ -120,9 +135,10 @@ Nothing updates itself, so do it on purpose, on a branch, and run the tests befo
    Mason's Python tools get a venv for the new Python.
 4. Clojure: the newest `nrepl/nrepl` and `cider/cider-nrepl` on Clojars go in the `versions`
    table of `dotfiles/clojure.lua`.
-5. `tests/nvim.sh full`. After a Neovim update also check `ui2` in a real terminal (see
+5. whichkey-tmux: `git -C ~/.config/tmux/plugins/whichkey-tmux pull`, then `prefix r`.
+6. `tests/nvim.sh full`. After a Neovim update also check `ui2` in a real terminal (see
    [core](core.md)); if it breaks, deleting its line in `options.lua` is the way out.
-6. Commit the lockfile and the version table together.
+7. Commit the lockfile and the version table together.
 
 ## Changing it
 

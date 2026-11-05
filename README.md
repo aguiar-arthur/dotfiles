@@ -76,6 +76,10 @@ On a Mac with macOS and an internet connection; nothing else is needed beforehan
      installed yet (already installed ones are not upgraded; formulae from other taps are
      trusted first, as Homebrew requires);
    - **link**: the part's `link.sh`, described below;
+   - **whichkey** (tmux part only): clones
+     [whichkey-tmux](https://github.com/aguiar-arthur/whichkey-tmux) into
+     `~/.config/tmux/plugins/whichkey-tmux` when it is missing; a clone already there is kept,
+     and anything else in its place is left alone and reported;
    - **nvim** (Neovim part only): the plugins at the versions in `lazy-lock.json`, the Mason
      servers and tools, the treesitter parsers and the Portuguese spell file, through the
      linked `~/.config/nvim`.
@@ -99,7 +103,7 @@ Neovim, terminal, tmux and apps install on their own, so a machine gets only wha
 |---|---|---|
 | Neovim | `macos/nvim/install.sh` | Neovim, git, ripgrep, ast-grep, fd, tree-sitter, node, python, the formatters, pandoc, lazygit, Clojure and its tools, LaTeX, Skim, Claude Code; `~/.config/nvim`, `~/.config/rumdl/rumdl.toml`, `~/.latexmkrc`, Skim's preferences; then the plugins, servers and parsers |
 | Terminal | `macos/terminal/install.sh` | Starship, iTerm2, JetBrains Mono Nerd Font; `~/.config/starship.toml`, the iTerm2 profile, the `~/.zshrc` block |
-| tmux | `macos/tmux/install.sh` | tmux, lazygit; `~/.config/tmux/tmux.conf` |
+| tmux | `macos/tmux/install.sh` | tmux, lazygit; `~/.config/tmux/tmux.conf`; the whichkey-tmux plugin in `~/.config/tmux/plugins/` |
 | Apps | `macos/apps/install.sh` | uv, ruby, mole, gh, GrandPerspective |
 
 On a machine whose shell and terminal are already set up and must stay as they are, run only
@@ -718,8 +722,10 @@ needed. The folder is created the first time a note is opened.
   bar and borders, true color and focus events for Neovim, the mouse, a 50,000-line history,
   windows and panes numbered from 1, windows named after their folder or program, closing a
   session's last window moving you to another session instead of out of tmux, and `git
-  commit` opening Neovim even in a tmux started from Claude Code. It does not depend on the
-  Neovim config. The prefix stays `Ctrl-b`:
+  commit` opening Neovim even in a tmux started from Claude Code. Menus and popups take the
+  terminal's colors, and [whichkey-tmux](https://github.com/aguiar-arthur/whichkey-tmux) shows
+  the keys below when you pause after the prefix. It does not depend on the Neovim config. The
+  prefix stays `Ctrl-b`:
 
   | Key | Does |
   |---|---|
@@ -731,6 +737,8 @@ needed. The folder is created the first time a note is opened.
   | `prefix c` | new window, in the pane's folder |
   | `prefix G` | lazygit in a popup, in the pane's folder (`q` closes it) |
   | `prefix t` | a scratch shell in a popup; `prefix t` again hides it, and it keeps its history |
+  | `prefix`, then a pause | a popup with the keys of this table; any key goes on to tmux, `Esc` closes it |
+  | `prefix Space` | every key binding in a menu, these first (`Space` no longer changes the layout) |
   | `prefix s` | sessions and windows as a tree, with previews (tmux's own) |
   | `prefix r` | reload `tmux.conf` |
   | `prefix [`, then `v` / `Ctrl-v` / `y` | copy mode: select, select a block, copy to the clipboard |
@@ -876,7 +884,7 @@ macos/            the macOS install:
   lib.sh          what the parts share
   nvim/           Brewfile, install.sh, link.sh: Neovim and what it needs
   terminal/       Brewfile, install.sh, link.sh: Starship, iTerm2, ~/.zshrc
-  tmux/           Brewfile, install.sh, link.sh: tmux and its tmux.conf
+  tmux/           Brewfile, install.sh, link.sh, whichkey.sh: tmux, its tmux.conf, whichkey-tmux
   apps/           Brewfile, install.sh: the other programs
 SECURITY.md       how to report a problem
 CONTRIBUTING.md   how to change this setup

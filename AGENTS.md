@@ -52,7 +52,8 @@ macos/              the macOS install, see docs/install.md:
   lib.sh            what the parts share: Homebrew, links with backups, preferences, steps
   nvim/             Brewfile, install.sh (brew, link, plugins and Mason), link.sh (incl. Skim)
   terminal/         Brewfile, install.sh (brew, link), link.sh (Starship, iTerm2, ~/.zshrc)
-  tmux/             Brewfile, install.sh (brew, link), link.sh (tmux.conf)
+  tmux/             Brewfile, install.sh (brew, link, whichkey), link.sh (tmux.conf),
+                    whichkey.sh (clones whichkey-tmux into ~/.config/tmux/plugins/)
   apps/             Brewfile, install.sh (brew): programs that are neither of the others
 SECURITY.md         how to report a problem
 CONTRIBUTING.md     how to change it, for people (a summary of this file)
@@ -68,8 +69,9 @@ windows/            collect-diagnostics.ps1, a standalone Windows health report,
   (`.github/workflows/`: ShellCheck, gitleaks, zizmor, CodeQL, Scorecard, `tests.yml`).
   `macos/install.sh` runs every part (`macos/<part>/install.sh`: terminal, tmux, apps, nvim); a
   part runs on its own on a machine where the rest must stay untouched, so no script takes an
-  argument. Each part installs its own `Brewfile`, runs its `link.sh`, and (nvim) sets up
-  Neovim through the linked `~/.config/nvim`, as every day. Every script stays idempotent and
+  argument. Each part installs its own `Brewfile`, runs its `link.sh`, (tmux) clones
+  whichkey-tmux when it is missing, and (nvim) sets up Neovim through the linked
+  `~/.config/nvim`, as every day. Every script stays idempotent and
   only does what is missing. Every network step has a timeout or a failure path.
 - **No comments in code**, in any file. Names and `desc` / `:wk` labels say what; a reason
   worth keeping goes in one sentence in its context's doc in `docs/`. Exceptions: `#!` lines

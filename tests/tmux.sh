@@ -59,3 +59,48 @@ closing the popup ended the scratch session"
     return 1
   }
 }
+
+tmux_without_whichkey() {
+  local home sock="dotfiles-tmux-bare-$$" status=0 prefix
+  home="$(mktemp -d)"
+  HOME="$home" tmux -L "$sock" -f /dev/null new-session -d \; source-file "$DOT/config/tmux/tmux.conf" || status=1
+  prefix="$(tmux -L "$sock" show -gv prefix 2>&1)"
+  tmux -L "$sock" kill-server 2>/dev/null
+  rm -rf "$home"
+  [ "$status" = 0 ] || {
+    echo "tmux.conf fails to load without ~/.config/tmux/plugins/whichkey-tmux"
+    return 1
+  }
+  [ "$prefix" = C-b ] || {
+    echo "without the plugin the prefix is $prefix, not C-b"
+    return 1
+  }
+}
+
+tmux_whichkey_step() {
+  local home dir out=""
+  home="$(mktemp -d)"
+  dir="$home/.config/tmux/plugins/whichkey-tmux"
+  mkdir -p "$dir"
+  echo keep >"$dir/file"
+  HOME="$home" "$DOT/macos/tmux/whichkey.sh" >/dev/null 2>&1 && out="$out
+a folder that is not the plugin was accepted"
+  [ "$(cat "$dir/file" 2>/dev/null)" = keep ] || out="$out
+a folder that is not the plugin was changed"
+  rm -rf "$dir"
+  mkdir -p "$dir"
+  git -C "$dir" init -q
+  git -C "$dir" remote add origin https://example.com/other.git
+  HOME="$home" "$DOT/macos/tmux/whichkey.sh" >/dev/null 2>&1 && out="$out
+a clone of another repository was accepted"
+  git -C "$dir" remote set-url origin https://github.com/aguiar-arthur/whichkey-tmux.git
+  printf '#!/bin/sh\n' >"$dir/whichkey.tmux"
+  chmod +x "$dir/whichkey.tmux"
+  HOME="$home" "$DOT/macos/tmux/whichkey.sh" >/dev/null 2>&1 || out="$out
+an existing clone of the plugin was not accepted"
+  rm -rf "$home"
+  [ -z "$out" ] || {
+    echo "${out#$'\n'}"
+    return 1
+  }
+}
