@@ -111,9 +111,10 @@ Consumes: [core](core.md) `settings` (which servers, tools, parsers and spell la
   `prefix` with an arrow leaves it. Making Neovim hand the key back needs a plugin on its side
   (vim-tmux-navigator), which was left out on purpose.
 - tmux 3.8 uses `prefix g` for its floating panes, so lazygit is on `prefix G`. The scratch
-  popup is a session named `scratch` attached inside `display-popup`; it sets
-  `detach-on-destroy on` for itself, or exiting its shell would switch the popup to another
-  session.
+  popup is a session named `scratch` attached inside `display-popup`.
+- `detach-on-destroy` is `on`: with `off`, closing a session's last pane moved you into any other
+  session, even a forgotten one with an old shell, and exiting the scratch popup's shell switched
+  the popup to another session. Other sessions keep running after you leave (`tmux ls`).
 - whichkey-tmux lives in `~/.config/tmux/plugins/`, where TPM would put it, outside this
   repository: it is a project of its own with its own git history. `tmux.conf` loads it through
   `if-shell`, so on a machine without it tmux still starts, with the prefix on `Ctrl-b`.

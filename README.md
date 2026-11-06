@@ -734,7 +734,7 @@ needed. The folder is created the first time a note is opened.
   bar with rounded pills like the prompt's and Dracula borders, true color and focus events
   for Neovim, the mouse, a 50,000-line history,
   windows and panes numbered from 1, windows named after their folder or program, closing a
-  session's last window moving you to another session instead of out of tmux, and `git
+  session's last window taking you out of tmux while other sessions keep running, and `git
   commit` opening Neovim even in a tmux started from Claude Code. Menus and popups take the
   terminal's colors, and [whichkey-tmux](https://github.com/aguiar-arthur/whichkey-tmux) shows
   the keys below when you pause after the prefix. It does not depend on the Neovim config. The
