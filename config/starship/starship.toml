@@ -7,10 +7,6 @@ command_timeout = 1000
 format = """
 [╭─ ](fg:comment)\
 $os\
-$directory\
-$git_branch\
-$git_status\
-$git_metrics\
 $python\
 $nodejs\
 $lua\
@@ -21,16 +17,25 @@ $java\
 $c\
 $docker_context\
 $nix_shell\
+[╌╌](fg:comment)\
 $fill \
+$status\
 $cmd_duration\
 $time\
 $line_break\
-[╰─](fg:comment)\
+[│](fg:comment)\
+$line_break\
+[├╌ ](fg:comment)\
 $username\
 $hostname\
+$directory\
+$git_branch\
+$git_status\
+$git_metrics\
+$line_break\
+[╰─ ──╌╌ ](fg:comment)\
 $sudo\
 $jobs\
-$status\
 $character"""
 
 continuation_prompt = "[∙](fg:comment) "
@@ -104,43 +109,43 @@ deleted_style = "bg:surface fg:red"
 
 [python]
 symbol = " "
-format = "[](fg:yellow)[ $symbol$pyenv_prefix($version )(\\($virtualenv\\) )](bg:yellow fg:base)[](fg:yellow) "
+format = "[──╌╌ ](fg:comment)[](fg:yellow)[ $symbol$pyenv_prefix($version )(\\($virtualenv\\) )](bg:yellow fg:base)[](fg:yellow) "
 
 [nodejs]
 symbol = " "
-format = "[](fg:orange)[ $symbol($version) ](bg:orange fg:base)[](fg:orange) "
+format = "[──╌╌ ](fg:comment)[](fg:orange)[ $symbol($version) ](bg:orange fg:base)[](fg:orange) "
 
 [lua]
 symbol = " "
-format = "[](fg:cyan)[ $symbol($version) ](bg:cyan fg:base)[](fg:cyan) "
+format = "[──╌╌ ](fg:comment)[](fg:cyan)[ $symbol($version) ](bg:cyan fg:base)[](fg:cyan) "
 
 [ruby]
 symbol = " "
-format = "[](fg:red)[ $symbol($version) ](bg:red fg:base)[](fg:red) "
+format = "[──╌╌ ](fg:comment)[](fg:red)[ $symbol($version) ](bg:red fg:base)[](fg:red) "
 
 [rust]
 symbol = " "
-format = "[](fg:orange)[ $symbol($version) ](bg:orange fg:base)[](fg:orange) "
+format = "[──╌╌ ](fg:comment)[](fg:orange)[ $symbol($version) ](bg:orange fg:base)[](fg:orange) "
 
 [golang]
 symbol = " "
-format = "[](fg:cyan)[ $symbol($version) ](bg:cyan fg:base)[](fg:cyan) "
+format = "[──╌╌ ](fg:comment)[](fg:cyan)[ $symbol($version) ](bg:cyan fg:base)[](fg:cyan) "
 
 [java]
 symbol = " "
-format = "[](fg:red)[ $symbol($version) ](bg:red fg:base)[](fg:red) "
+format = "[──╌╌ ](fg:comment)[](fg:red)[ $symbol($version) ](bg:red fg:base)[](fg:red) "
 
 [c]
 symbol = " "
-format = "[](fg:comment)[ $symbol($version(-$name)) ](bg:comment fg:text)[](fg:comment) "
+format = "[──╌╌ ](fg:comment)[](fg:comment)[ $symbol($version(-$name)) ](bg:comment fg:text)[](fg:comment) "
 
 [docker_context]
 symbol = " "
-format = "[](fg:cyan)[ $symbol$context ](bg:cyan fg:base)[](fg:cyan) "
+format = "[──╌╌ ](fg:comment)[](fg:cyan)[ $symbol$context ](bg:cyan fg:base)[](fg:cyan) "
 
 [nix_shell]
 symbol = " "
-format = "[](fg:purple)[ $symbol$state ](bg:purple fg:base)[](fg:purple) "
+format = "[──╌╌ ](fg:comment)[](fg:purple)[ $symbol$state ](bg:purple fg:base)[](fg:purple) "
 
 [fill]
 symbol = "─"
@@ -149,7 +154,7 @@ style = "fg:comment"
 [cmd_duration]
 min_time = 2000
 show_milliseconds = false
-format = "[](fg:orange)[  $duration ](bg:orange fg:base)[](fg:orange) "
+format = "[](fg:orange)[  $duration ](bg:orange fg:base)[](fg:orange)[ ──╌╌ ](fg:comment)"
 
 [time]
 disabled = false
@@ -174,7 +179,7 @@ format = "[$symbol$number ](fg:cyan)"
 
 [status]
 disabled = false
-format = "[](fg:red)[  $status ](bg:red fg:base)[](fg:red) "
+format = "[](fg:red)[  $status ](bg:red fg:base)[](fg:red)[ ──╌╌ ](fg:comment)"
 
 [character]
 success_symbol = "[❯](bold green)"

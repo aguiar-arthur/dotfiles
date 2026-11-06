@@ -31,7 +31,7 @@ are in [map](map.md).
 | `config/nvim/lua/config/lazy.lua` | lazy.nvim cloned at the lockfile's commit |
 | `config/nvim/lazy-lock.json` | plugin versions (committed) |
 | `config/zsh/dotfiles.zsh` | Homebrew on `PATH` (Apple Silicon or Intel), a valid `LANG`, `JAVA_HOME`, `EDITOR` / `VISUAL`, history, emacs keys, the eza aliases (`ls`, `ll`, `lt`), `path_report`, `command_origin`, Starship, `prompt_gap` and `clear` (the blank line between prompts) |
-| `config/starship/starship.toml` | the prompt: rounded pills and connectors, Dracula colors |
+| `config/starship/starship.toml` | the prompt: rounded pills on rows with a left bracket and fading lines, Dracula colors |
 | `config/tmux/tmux.conf` | tmux: Dracula status bar with pills for the session, the current window and the clock, true color and focus events for Neovim, `C-h/j/k/l` across panes (not into Neovim), splits in the pane's folder, lazygit and scratch popups, vi copy mode to `pbcopy`, no `GIT_EDITOR`, menus in the terminal's colors, whichkey-tmux in auto mode (when it is there) |
 | `config/iterm2/dracula.json` | the "Dotfiles (Dracula)" Dynamic Profile, with iTerm2's own Powerline glyphs and opaque cell backgrounds for the pills |
 
@@ -103,6 +103,9 @@ Consumes: [core](core.md) `settings` (which servers, tools, parsers and spell la
   characters that are easy to lose in an editor: check them with `python3` and `unicode_escape`.
 - tmux 3.8 underlines the current window by default (`window-status-current-style`), which runs
   under the pill's round caps, so `tmux.conf` sets that style to `default`.
+- Pills fill their row's whole height at any `Vertical Spacing`, so two stacked rows of pills
+  touch. The prompt keeps a `│` row between its two pill rows and shows a failed status on the
+  first row, so the row you type on never holds a pill.
 - A tmux server keeps the environment of the shell that started it, and Claude Code's shells
   set `GIT_EDITOR=true`; one tmux started from there made `git commit` and `git merge` skip
   the editor in every pane, so `tmux.conf` unsets it.

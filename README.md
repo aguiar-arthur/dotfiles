@@ -726,9 +726,10 @@ needed. The folder is created the first time a note is opened.
 
 - **Starship** (`config/starship/starship.toml`): folder, git branch and status, lines added
   and removed, the language versions of the project, how long the last command took, the time
-  and a failed command's status, as rounded pills in Dracula colors, on two lines joined by
-  `╭─` and `╰─`. A blank line separates prompts, but none sits above the first one or after
-  `clear`.
+  and a failed command's status, as rounded pills in Dracula colors. They sit on rows held by a
+  `╭─`, `│`, `├╌`, `╰─` bracket and joined by lines that fade into dashes: the system, languages,
+  status and time, a spacer, the folder and git, then what you type. A blank line separates
+  prompts, but none sits above the first one or after `clear`.
 - **tmux** (`config/tmux/tmux.conf`, linked to `~/.config/tmux/tmux.conf` by its own part,
   `macos/tmux/install.sh`, so a machine can get it without the rest): a Dracula status
   bar with rounded pills like the prompt's and Dracula borders, true color and focus events
