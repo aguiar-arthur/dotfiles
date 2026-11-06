@@ -54,4 +54,17 @@ command_origin() {
 
 if command -v starship >/dev/null 2>&1; then
   eval "$(starship init zsh)"
+
+  prompt_gap() {
+    [[ -n ${prompt_gap_due:-} ]] && print
+    prompt_gap_due=1
+  }
+
+  clear() {
+    command clear
+    unset prompt_gap_due
+  }
+
+  autoload -Uz add-zsh-hook
+  add-zsh-hook precmd prompt_gap
 fi

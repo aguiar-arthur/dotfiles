@@ -30,10 +30,10 @@ are in [map](map.md).
 | `config/nvim/lua/dotfiles/mason.lua` | which Mason packages the settings want and which are missing or broken |
 | `config/nvim/lua/config/lazy.lua` | lazy.nvim cloned at the lockfile's commit |
 | `config/nvim/lazy-lock.json` | plugin versions (committed) |
-| `config/zsh/dotfiles.zsh` | Homebrew on `PATH` (Apple Silicon or Intel), a valid `LANG`, `JAVA_HOME`, `EDITOR` / `VISUAL`, history, emacs keys, the eza aliases (`ls`, `ll`, `lt`), `path_report`, `command_origin`, Starship |
-| `config/starship/starship.toml` | the prompt, Dracula colors |
-| `config/tmux/tmux.conf` | tmux: Dracula status bar, true color and focus events for Neovim, `C-h/j/k/l` across panes (not into Neovim), splits in the pane's folder, lazygit and scratch popups, vi copy mode to `pbcopy`, no `GIT_EDITOR`, menus in the terminal's colors, whichkey-tmux in auto mode (when it is there) |
-| `config/iterm2/dracula.json` | the "Dotfiles (Dracula)" Dynamic Profile |
+| `config/zsh/dotfiles.zsh` | Homebrew on `PATH` (Apple Silicon or Intel), a valid `LANG`, `JAVA_HOME`, `EDITOR` / `VISUAL`, history, emacs keys, the eza aliases (`ls`, `ll`, `lt`), `path_report`, `command_origin`, Starship, `prompt_gap` and `clear` (the blank line between prompts) |
+| `config/starship/starship.toml` | the prompt: rounded pills and connectors, Dracula colors |
+| `config/tmux/tmux.conf` | tmux: Dracula status bar with pills for the session, the current window and the clock, true color and focus events for Neovim, `C-h/j/k/l` across panes (not into Neovim), splits in the pane's folder, lazygit and scratch popups, vi copy mode to `pbcopy`, no `GIT_EDITOR`, menus in the terminal's colors, whichkey-tmux in auto mode (when it is there) |
+| `config/iterm2/dracula.json` | the "Dotfiles (Dracula)" Dynamic Profile, with iTerm2's own Powerline glyphs and opaque cell backgrounds for the pills |
 
 ## How it works
 
@@ -92,6 +92,17 @@ Consumes: [core](core.md) `settings` (which servers, tools, parsers and spell la
 - eza is not a drop-in `ls`: its `-t` takes a field, so `ls -lt` and `ls -ltr` fail with an error.
   `lt` is the same listing and `command ls` the system's. The aliases exist only in an interactive
   shell, so a script that sources `~/.zshrc` keeps the real `ls`.
+- Starship's `add_newline` also puts a blank line above the first prompt of a window, so it is
+  off and the `prompt_gap` precmd hook prints the line from the second prompt on; `clear` is a
+  function so that the prompt after it stays at the top. The hook is added after Starship's,
+  which reads `$?` and would otherwise see the hook's status instead of the command's.
+- A prompt pill is a cell background between two font glyphs (U+E0B6, U+E0B4), so the iTerm2
+  profile keeps two settings: `Draw Powerline Glyphs`, or the caps stop short of a cell made
+  taller by `Vertical Spacing`, and `Only The Default BG Color Uses Transparency`, or the middle
+  is tinted and the caps are not. The glyphs, in `starship.toml` and `tmux.conf`, are private-use
+  characters that are easy to lose in an editor: check them with `python3` and `unicode_escape`.
+- tmux 3.8 underlines the current window by default (`window-status-current-style`), which runs
+  under the pill's round caps, so `tmux.conf` sets that style to `default`.
 - A tmux server keeps the environment of the shell that started it, and Claude Code's shells
   set `GIT_EDITOR=true`; one tmux started from there made `git commit` and `git merge` skip
   the editor in every pane, so `tmux.conf` unsets it.
@@ -129,6 +140,7 @@ Consumes: [core](core.md) `settings` (which servers, tools, parsers and spell la
 | `whichkey.sh` keeps a clone of whichkey-tmux and refuses any other folder, without network | quick: `tmux: the whichkey step keeps its clone and refuses anything else` |
 | `dotfiles.zsh` makes Neovim the editor, without comments | quick: `zsh: Neovim is the editor`, `no comments in Lua, shell and PowerShell` |
 | Emacs keys with `EDITOR` inherited; `ls`, `ll`, `lt` run eza, and a script keeps `ls` | quick: `zsh: emacs keys, even with EDITOR=nvim inherited from a parent shell`, `zsh: ls, ll and lt run eza in a shell, a script keeps ls` |
+| A blank line between prompts, none above the first or after `clear`, and the hook after Starship's | quick: `zsh: a blank line between prompts, none above the first or after clear` |
 | `macos/nvim/install.sh` in an empty home | full: `install` in `tests/lib.sh`; `fresh` in a throwaway folder |
 
 ## Updating

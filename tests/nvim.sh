@@ -73,6 +73,20 @@ zsh_eza() {
   }
 }
 
+zsh_prompt_gap() {
+  local rc="$DOT/config/zsh/dotfiles.zsh" got wanted prompt
+  prompt="$(STARSHIP_CONFIG="$DOT/config/starship/starship.toml" starship prompt)"
+  case "$prompt" in
+  $'\n'*) echo "Starship still starts the prompt with a blank line" && return 1 ;;
+  esac
+  got="$(TERM=xterm zsh -f -c "source '$rc'; source '$rc'; prompt_gap; print first; prompt_gap; print second; clear >/dev/null; prompt_gap; print third; print -l \$precmd_functions")"
+  wanted=$'first\n\nsecond\nthird\nprompt_starship_precmd\nprompt_gap'
+  [ "$got" = "$wanted" ] || {
+    printf 'wanted:\n%s\ngot:\n%s\n' "$wanted" "$got"
+    return 1
+  }
+}
+
 quick() {
   local before marker
   before="$(lock_hash)"
@@ -112,6 +126,7 @@ quick() {
   check "zsh: Neovim is the editor" zsh -f -c "source '$DOT/config/zsh/dotfiles.zsh' && [[ \$EDITOR == nvim && \$VISUAL == nvim ]]"
   check "zsh: emacs keys, even with EDITOR=nvim inherited from a parent shell" env EDITOR=nvim VISUAL=nvim zsh -f -i -c "source '$DOT/config/zsh/dotfiles.zsh'; [[ \$(bindkey -lL main) == 'bindkey -A emacs main' ]]"
   tool "zsh: ls, ll and lt run eza in a shell, a script keeps ls" eza zsh_eza
+  tool "zsh: a blank line between prompts, none above the first or after clear" starship zsh_prompt_gap
   tool "tmux: the config loads and git commit opens Neovim" tmux tmux_config
   tool "tmux: C-h/j/k/l cross panes but not Neovim, prefix t toggles the scratch popup" tmux tmux_keys
   tool "tmux: the config loads without whichkey-tmux" tmux tmux_without_whichkey

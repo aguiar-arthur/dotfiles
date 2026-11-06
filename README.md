@@ -724,12 +724,15 @@ needed. The folder is created the first time a note is opened.
   | `lt` | in detail, by date, newest last (what `ls -ltr` did) |
   | `command ls` | the system's `ls`: eza refuses `ls -lt` and `ls -ltr`, its `-t` asks for a field |
 
-- **Starship** (`config/starship/starship.toml`): folder, git branch and status, the
-  language versions of the project, how long the last command took and the time, in Dracula
-  colors.
+- **Starship** (`config/starship/starship.toml`): folder, git branch and status, lines added
+  and removed, the language versions of the project, how long the last command took, the time
+  and a failed command's status, as rounded pills in Dracula colors, on two lines joined by
+  `╭─` and `╰─`. A blank line separates prompts, but none sits above the first one or after
+  `clear`.
 - **tmux** (`config/tmux/tmux.conf`, linked to `~/.config/tmux/tmux.conf` by its own part,
   `macos/tmux/install.sh`, so a machine can get it without the rest): a Dracula status
-  bar and borders, true color and focus events for Neovim, the mouse, a 50,000-line history,
+  bar with rounded pills like the prompt's and Dracula borders, true color and focus events
+  for Neovim, the mouse, a 50,000-line history,
   windows and panes numbered from 1, windows named after their folder or program, closing a
   session's last window moving you to another session instead of out of tmux, and `git
   commit` opening Neovim even in a tmux started from Claude Code. Menus and popups take the
@@ -755,7 +758,8 @@ needed. The folder is created the first time a note is opened.
   | `prefix [`, then `v` / `Ctrl-v` / `y` | copy mode: select, select a block, copy to the clipboard |
 
 - **iTerm2** (`config/iterm2/dracula.json`): the "Dotfiles (Dracula)" profile with JetBrains
-  Mono Nerd Font, which the icons in Neovim and the prompt need.
+  Mono Nerd Font, which the icons in Neovim and the prompt need, and iTerm2's own Powerline
+  glyphs, which keep the prompt's pills round.
 - **latexmk** (`config/latex/latexmkrc`, linked to `~/.latexmkrc`): PDF output, BibTeX when a
   `.bib` exists, and what `,lc` cleans.
 - **rumdl** (`config/rumdl/rumdl.toml`): the Markdown lint rules, used by Neovim and by
@@ -833,7 +837,7 @@ is missing are skipped.
 
 | Mode | Command | Takes | Checks |
 |---|---|---|---|
-| quick (default) | `~/dotfiles/tests/nvim.sh` | seconds | startup, every Lua module, the lockfile, Skim preferences, Mason's Python tools (broken by a Homebrew Python upgrade), `zg` writing to the versioned word list, stylua, shell syntax, `EDITOR`, keys and eza in zsh, shfmt, rumdl, and our own code headless: `Space c` keys, `]f` / `]a`, `,d p`, `]T`, `Space R`, filetypes, format on save, the `Space u` toggles, `]e`, the preview, tree-sitter per file type, every LaTeX snippet, no comments (Lua, shell, PowerShell), the helpers of each context |
+| quick (default) | `~/dotfiles/tests/nvim.sh` | seconds | startup, every Lua module, the lockfile, Skim preferences, Mason's Python tools (broken by a Homebrew Python upgrade), `zg` writing to the versioned word list, stylua, shell syntax, `EDITOR`, keys, eza and the prompt's blank line in zsh, shfmt, rumdl, and our own code headless: `Space c` keys, `]f` / `]a`, `,d p`, `]T`, `Space R`, filetypes, format on save, the `Space u` toggles, `]e`, the preview, tree-sitter per file type, every LaTeX snippet, no comments (Lua, shell, PowerShell), the helpers of each context |
 | full | `~/dotfiles/tests/nvim.sh full` | minutes | quick, plus a real Neovim driven in tmux: language servers, toggles, the look, Markdown and notes, the `,` keys, `,r`, the debugger, tests, a LaTeX build and its snippets, a `Space g V` review, `,cj` |
 | fresh | `~/dotfiles/tests/nvim.sh fresh` | longer | full, in a throwaway directory deleted at the end, as on a new machine |
 
