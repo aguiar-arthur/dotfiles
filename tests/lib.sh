@@ -121,7 +121,7 @@ mason() { [ -x "$XDG_DATA_HOME/nvim/mason/bin/$1" ]; }
 setup() {
   local real_home="$HOME"
   if [ "$MODE" = fresh ]; then
-    T="$(mktemp -d)"
+    T="$(cd "$(mktemp -d)" && pwd -P)"
   else
     T="${XDG_CACHE_HOME:-$real_home/.cache}/dotfiles-nvim-test"
     mkdir -p "$T"

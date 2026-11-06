@@ -43,6 +43,9 @@ so a missing program never reads as a pass of what it was meant to check.
 
 `full` installs Neovim into `~/.cache/dotfiles-nvim-test` (reused by later runs) with `HOME`
 and the `XDG_*` folders pointed there, and drives Neovim through tmux and `nvim --server`.
+`fresh` uses a throwaway folder with its symlinks resolved: macOS keeps temporary folders under
+`/var`, a link to `/private/var`, and Neovim's paths and the checks' would not match. Run `fresh`
+now and then: a file left in the reused folder hides a test that never creates it, as one did.
 
 Where a new check goes:
 

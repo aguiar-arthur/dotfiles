@@ -90,6 +90,7 @@ test_terminals() {
 }
 
 test_tree_and_pickers() {
+  printf 'local x = 1\nreturn x\n' >"$PROJ/sample.lua"
   start_nvim "$PROJ" look.lua
   set_home
   keys Space o p
