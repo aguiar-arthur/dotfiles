@@ -106,12 +106,16 @@ windows/            collect-diagnostics.ps1, a standalone Windows health report,
   logic of our own in a plugin spec, keymap or autocmd) gets a check in `tests/` in the same
   change, and a bug fixed in it gets a check that fails without the fix. Plugin defaults and
   plain settings need none.
-- **Own code stays small.** A helper of our own (`lua/dotfiles/`) grows by a line, not a
-  feature; when it would need one, replace it with a proven plugin instead. Two did:
-  Neotest (`,t`: runs tests, one adapter per language, pytest here) replaced our test runner,
-  and code_runner.nvim (`,r`: runs the current file, any file type) replaced our own `,r`.
-  They do different jobs and both stay. The one exception is the git module,
-  `lua/dotfiles/git/`: it may grow, one file per subject, and every file is tested like the rest.
+- **Own code has a reason.** Prefer a proven plugin to code of our own: Neotest (`,t`: runs tests,
+  one adapter per language, pytest here) replaced our test runner, and code_runner.nvim (`,r`:
+  runs the current file, any file type) replaced our own `,r`. They do different jobs and both
+  stay. What no plugin does may grow, in a module.
+- **Modules.** `lua/plugins/` only declares: repository, trigger, options, and keys that call
+  functions; lazy.nvim reads its first level only, so it has no subfolders. Logic of our own goes
+  in `lua/dotfiles/`, as one file, or as a folder of one file per subject once it needs two; a
+  folder's `init.lua` only wires, and loading any module runs nothing. Code depends along
+  [docs/map.md](docs/map.md): downstream may require upstream, never the reverse. Paths Neovim
+  looks for (`after/lsp/`, `after/ftplugin/`) stay where they are.
 - **Docs.** The README is the user's guide: a header (tagline, badges, "Why this one"), install,
   then one section per module with a one-line pitch and, folded in `<details>`, what it is for
   and a table of its keys. `docs/<context>.md` says how that context works, why, its

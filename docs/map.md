@@ -14,7 +14,7 @@ Upstream offers, downstream consumes; a change upstream may break downstream.
 | Core | Git | `<leader>uw` leaves a review's wrap alone; `<leader>uC` and `<leader>um` only warn while one is open; `tabline` is `dotfiles/git/tabline.lua`; `windows.lua` keeps its winbar out of a review | `tests/toggles.lua`, `tests/git.lua`, full: `test_review` |
 | Code, Markdown | Git | a review turns lenses, virtual lines and rendering off, and back when the last one closes | `tests/git.lua` |
 | Workspace | Git | pickers' `confirm` opens a file from a review in the tab before it; the log pickers' Enter reviews a commit; `<leader>bd` beside a review keeps it whole | `tests/git.lua`, full: `test_review` |
-| Workspace | Git | persistence closes every review (`review.close_all`) before it saves a session | `tests/git.lua` |
+| Workspace | Git | persistence's `PersistenceSavePre`, on which every review closes (`review.close_all`) | `tests/git.lua` |
 | Workspace | Code | blink.cmp's LSP capabilities reach servers started before the first insert | none (plugin wiring) |
 | Workspace | Markdown | mini.pairs leaves the backtick alone; Markdown adds its own pair | `tests/keys.lua` |
 | Workspace | LaTeX | completion; LaTeX keeps its own snippets, not friendly-snippets | full: `test_snippets` |

@@ -4,6 +4,48 @@ local function git_call(module, name)
   end
 end
 
+local function git_action(module, name)
+  return function(...)
+    return require("dotfiles.git." .. module)[name](...)
+  end
+end
+
+local function picker(name, opts)
+  return function()
+    Snacks.picker[name](opts)
+  end
+end
+
+local function compare_branches(name)
+  return {
+    all = true,
+    confirm = git_action("compare", name),
+    transform = git_action("compare", "not_current"),
+  }
+end
+
+local git_layout = {
+  layout = {
+    backdrop = 60,
+    width = 0.92,
+    height = 0.9,
+    box = "vertical",
+    border = true,
+    title = "{title} {live} {flags}",
+    title_pos = "center",
+    { win = "input", height = 1, border = "bottom" },
+    { win = "list", height = 0.3, border = "none" },
+    { win = "preview", title = "{preview}", border = "top" },
+  },
+}
+
+local git_log = {
+  confirm = git_action("log", "commit"),
+  layout = git_layout,
+  actions = { review_worktree = git_action("log", "worktree") },
+  win = { input = { keys = { ["<c-e>"] = { "review_worktree", mode = { "n", "i" } } } } },
+}
+
 local function review(command, label)
   return function()
     require("dotfiles.git.review").expect(label)
@@ -12,6 +54,89 @@ local function review(command, label)
 end
 
 return {
+
+  {
+    "folke/snacks.nvim",
+    keys = {
+      {
+        "<leader>gg",
+        function()
+          Snacks.lazygit()
+        end,
+        desc = "Lazygit",
+      },
+      { "<leader>gl", picker("git_log"), desc = "Git log (Enter reviews the commit)" },
+      { "<leader>gt", picker("git_status"), desc = "Changed files" },
+      { "<leader>gc", picker("git_diff"), desc = "Changes (hunks)" },
+      {
+        "<leader>gO",
+        function()
+          Snacks.gitbrowse()
+        end,
+        mode = { "n", "v" },
+        desc = "Open in browser",
+      },
+      {
+        "<leader>gvb",
+        picker("git_branches", compare_branches("branch")),
+        desc = "Compare with a branch",
+      },
+      {
+        "<leader>gvf",
+        picker("git_branches", compare_branches("file")),
+        desc = "Compare this file with a branch",
+      },
+      { "<leader>gvh", git_action("compare", "hunks"), desc = "Hunks of the whole branch" },
+      { "<leader>gvp", picker("gh_pr"), desc = "Pick a pull request" },
+      {
+        "<leader>gvo",
+        git_action("pr", "comments"),
+        desc = "Comments on this branch's pull request",
+      },
+      { "<leader>gvk", git_action("pr", "checks"), desc = "Checks of this branch's pull request" },
+      { "<leader>gvz", picker("git_stash"), desc = "Review a stash" },
+    },
+    opts = {
+      lazygit = { enabled = true, win = require("dotfiles.float").win("Lazygit") },
+      picker = {
+        previewers = { diff = { wo = { wrap = false } } },
+        sources = {
+          git_diff = { layout = git_layout },
+          git_status = { layout = git_layout },
+          git_log = git_log,
+          git_log_file = git_log,
+          git_log_line = git_log,
+          git_stash = {
+            confirm = git_action("log", "stash"),
+            win = { input = { keys = { ["<c-e>"] = { "git_stash_apply", mode = { "n", "i" } } } } },
+          },
+          gh_pr = {
+            confirm = git_action("pr", "review"),
+            actions = { pr_menu = git_action("pr", "menu"), pr_hunks = git_action("pr", "hunks") },
+            win = {
+              input = {
+                keys = {
+                  ["<c-e>"] = { "pr_menu", mode = { "n", "i" } },
+                  ["<c-o>"] = { "pr_hunks", mode = { "n", "i" } },
+                },
+              },
+            },
+          },
+        },
+        actions = {
+          confirm = function(this_picker, item, action)
+            local win = require("dotfiles.git.jump").pick_win(this_picker, item)
+            require("snacks.picker.actions").jump(this_picker, item, action)
+            if win then
+              vim.schedule(function()
+                require("dotfiles.toggles").apply(win)
+              end)
+            end
+          end,
+        },
+      },
+    },
+  },
 
   {
     "lewis6991/gitsigns.nvim",

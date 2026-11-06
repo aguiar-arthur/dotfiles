@@ -20,43 +20,10 @@ local function words_jump(direction)
   end
 end
 
-local function git_action(module, name)
-  return function(...)
-    return require("dotfiles.git." .. module)[name](...)
-  end
-end
-
 local hide_keys = {
   hide_slash = { "<c-/>", "hide", mode = "t", desc = "Hide terminal" },
   hide_underscore = { "<c-_>", "hide", mode = "t", desc = "Hide terminal" },
 }
-local git_layout = {
-  layout = {
-    backdrop = 60,
-    width = 0.92,
-    height = 0.9,
-    box = "vertical",
-    border = true,
-    title = "{title} {live} {flags}",
-    title_pos = "center",
-    { win = "input", height = 1, border = "bottom" },
-    { win = "list", height = 0.3, border = "none" },
-    { win = "preview", title = "{preview}", border = "top" },
-  },
-}
-local git_log = {
-  confirm = git_action("log", "commit"),
-  layout = git_layout,
-  actions = { review_worktree = git_action("log", "worktree") },
-  win = { input = { keys = { ["<c-e>"] = { "review_worktree", mode = { "n", "i" } } } } },
-}
-local function compare_branches(name)
-  return {
-    all = true,
-    confirm = git_action("compare", name),
-    transform = git_action("compare", "not_current"),
-  }
-end
 local float_terminal = {
   count = 1,
   win = vim.tbl_extend("force", require("dotfiles.float").win("Terminal"), { keys = hide_keys }),
@@ -91,49 +58,15 @@ return {
     explorer = { enabled = true },
     indent = { enabled = true },
     input = { enabled = true },
-    lazygit = { enabled = true, win = require("dotfiles.float").win("Lazygit") },
     notifier = { enabled = true, timeout = 3000 },
     picker = {
       enabled = true,
       layout = { layout = { backdrop = 60 } },
-      previewers = { diff = { wo = { wrap = false } } },
       sources = {
         explorer = { hidden = true, ignored = false },
         files = { hidden = true },
         grep = { hidden = true },
         lsp_references = { auto_confirm = false },
-        git_diff = { layout = git_layout },
-        git_status = { layout = git_layout },
-        git_log = git_log,
-        git_log_file = git_log,
-        git_log_line = git_log,
-        git_stash = {
-          confirm = git_action("log", "stash"),
-          win = { input = { keys = { ["<c-e>"] = { "git_stash_apply", mode = { "n", "i" } } } } },
-        },
-        gh_pr = {
-          confirm = git_action("pr", "review"),
-          actions = { pr_menu = git_action("pr", "menu"), pr_hunks = git_action("pr", "hunks") },
-          win = {
-            input = {
-              keys = {
-                ["<c-e>"] = { "pr_menu", mode = { "n", "i" } },
-                ["<c-o>"] = { "pr_hunks", mode = { "n", "i" } },
-              },
-            },
-          },
-        },
-      },
-      actions = {
-        confirm = function(picker, item, action)
-          local win = require("dotfiles.git.jump").pick_win(picker, item)
-          require("snacks.picker.actions").jump(picker, item, action)
-          if win then
-            vim.schedule(function()
-              require("dotfiles.toggles").apply(win)
-            end)
-          end
-        end,
       },
       win = {
         input = { keys = { ["<c-j>"] = false, ["<c-k>"] = false } },
@@ -181,28 +114,6 @@ return {
     key("<leader>dd", picker("diagnostics_buffer"), "Diagnostics (this file)"),
     key("<leader>dq", picker("qflist"), "Quickfix list"),
     key("<leader>dl", picker("loclist"), "Location list"),
-
-    key("<leader>gg", function()
-      Snacks.lazygit()
-    end, "Lazygit"),
-    key("<leader>gl", picker("git_log"), "Git log (Enter reviews the commit)"),
-    key("<leader>gt", picker("git_status"), "Changed files"),
-    key("<leader>gc", picker("git_diff"), "Changes (hunks)"),
-    key("<leader>gO", function()
-      Snacks.gitbrowse()
-    end, "Open in browser", { "n", "v" }),
-    key("<leader>gvb", picker("git_branches", compare_branches("branch")), "Compare with a branch"),
-    key(
-      "<leader>gvf",
-      picker("git_branches", compare_branches("file")),
-      "Compare this file with a branch"
-    ),
-    key("<leader>gvh", git_action("compare", "hunks"), "Hunks of the whole branch"),
-    key("<leader>gvp", picker("gh_pr"), "Pick a pull request"),
-
-    key("<leader>gvo", git_action("pr", "comments"), "Comments on this branch's pull request"),
-    key("<leader>gvk", git_action("pr", "checks"), "Checks of this branch's pull request"),
-    key("<leader>gvz", picker("git_stash"), "Review a stash"),
 
     key("<leader>tf", terminal(float_terminal), "Float terminal"),
     key("<leader>th", terminal(bottom_terminal), "Horizontal terminal"),

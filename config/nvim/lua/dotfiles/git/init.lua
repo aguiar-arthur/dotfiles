@@ -20,6 +20,11 @@ function M.setup()
   })
   vim.api.nvim_create_autocmd("User", {
     group = group,
+    pattern = "PersistenceSavePre",
+    callback = review.close_all,
+  })
+  vim.api.nvim_create_autocmd("User", {
+    group = group,
     pattern = "CodeDiffClose",
     callback = function(ev)
       review.unmark(ev.data.tabpage)

@@ -36,7 +36,7 @@ branch, a pull request, two revisions, a file's or a line's history. Its relatio
 | `config/nvim/lua/dotfiles/git/log.lua` | the log pickers' actions, the commit of a line, a stash |
 | `config/nvim/lua/dotfiles/git/pr.lua` | the pull request picker's actions, this branch's comments and checks |
 | `config/nvim/lua/config/keymaps.lua` | `<leader>bd`, `<leader>bo`, `<leader>bD`, through `buffers.close_buffer` / `close_buffers` |
-| `config/nvim/lua/plugins/snacks.lua` | lazygit, the git pickers (`gl`, `gt`, `gc`, `gvb`, `gvf`, `gvh`, `gvp`) and their Enter, `gO`, the `confirm` that sends a file from a review to the editing tab |
+| `config/nvim/lua/plugins/git.lua` (Snacks) | lazygit, the git pickers (`gl`, `gt`, `gc`, `gvb`, `gvf`, `gvh`, `gvp`, `gvo`, `gvk`, `gvz`) and their Enter, `gO`, the `confirm` that sends a file from a review to the editing tab; lazy.nvim merges this spec into Snacks' |
 | `config/nvim/lua/plugins/ui.lua` | the which-key groups `<leader>g`, `<leader>gm` and `<leader>gv` |
 | `config/lazygit/config.yml` | lazygit's Dracula theme, for `prefix G` in tmux (inside Neovim Snacks adds its own on top) |
 
@@ -113,10 +113,12 @@ Consumes:
   is `tabline.render`; the winbar of `windows.lua` stays out of a review.
 - [code](code.md), [markdown](markdown.md): the aligned view turns their lenses, virtual lines and
   rendering off during a review.
-- [workspace](workspace.md): Snacks pickers and lazygit; the custom `confirm` must call
-  `snacks.picker.actions.jump` directly.
+- [workspace](workspace.md): Snacks pickers and lazygit; this context's `confirm` replaces their
+  default and must call `snacks.picker.actions.jump` directly, because actions such as `tab` route
+  back through `confirm` and recurse.
 - [install](install.md): codediff's prebuilt diff library, fetched in its `build` step.
-- [workspace](workspace.md): persistence closes every review before it saves a session.
+- [workspace](workspace.md): persistence's `PersistenceSavePre`, on which every review closes before
+  a session is saved.
 
 ## Pitfalls
 
@@ -160,8 +162,9 @@ Consumes:
 
 ## Changing it
 
-- **A git key**: gitsigns keys go in `on_attach` (buffer-local), picker keys in `snacks.lua`,
-  `:CodeDiff` keys and the keys inside a review in codediff's spec; then the README's Git tables.
+- **A git key**: gitsigns keys go in `on_attach` (buffer-local), picker keys in the Snacks spec of
+  `plugins/git.lua`, `:CodeDiff` keys and the keys inside a review in codediff's spec; then the
+  README's Git tables.
 - **A new git subject**: a new file in `dotfiles/git/`; this module may grow (see `AGENTS.md`).
 - **Review behaviour**: logic goes in the file of `dotfiles/git/` that holds its subject, with a
   case in `tests/git.lua`; use codediff's options, command and events, not its modules.
