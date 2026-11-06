@@ -102,7 +102,7 @@ Neovim, terminal, tmux and apps install on their own, so a machine gets only wha
 | Part | Command | Installs and links |
 |---|---|---|
 | Neovim | `macos/nvim/install.sh` | Neovim, git, ripgrep, ast-grep, fd, tree-sitter, node, python, the formatters, pandoc, lazygit, gh, Clojure and its tools, LaTeX, Skim, Claude Code; `~/.config/nvim`, `~/.config/rumdl/rumdl.toml`, `~/.latexmkrc`, Skim's preferences; then the plugins, servers and parsers |
-| Terminal | `macos/terminal/install.sh` | Starship, eza, iTerm2, JetBrains Mono Nerd Font; `~/.config/starship.toml`, the iTerm2 profile, the `~/.zshrc` block |
+| Terminal | `macos/terminal/install.sh` | Starship, eza, iTerm2, JetBrains Mono Nerd Font; `~/.config/starship.toml`, the iTerm2 profile, `~/.config/git/`, the `~/.zshrc` block |
 | tmux | `macos/tmux/install.sh` | tmux, lazygit; `~/.config/tmux/tmux.conf`, lazygit's Dracula `config.yml`; the whichkey-tmux plugin in `~/.config/tmux/plugins/` |
 | Apps | `macos/apps/install.sh` | uv, ruby, mole, GrandPerspective |
 
@@ -124,7 +124,7 @@ Each part's `link.sh` (`macos/nvim/link.sh`, `macos/terminal/link.sh`, `macos/tm
 also runs on its own after a `git pull`. Together they:
 
 - link `~/.config/nvim`, `~/.config/rumdl/rumdl.toml` and `~/.latexmkrc` (nvim),
-  `~/.config/starship.toml` and the iTerm2 Dynamic Profile (terminal), and
+  `~/.config/starship.toml`, the iTerm2 Dynamic Profile and `~/.config/git/` (terminal), and
   `~/.config/tmux/tmux.conf` (tmux) to this repository, moving whatever was there to
   `<name>.bak.<timestamp>` (three backups kept);
 - add one marked block to `~/.zshrc` that sources `config/zsh/dotfiles.zsh` (terminal):
@@ -920,6 +920,7 @@ config/starship/  starship.toml
 config/tmux/      tmux.conf
 config/iterm2/    dracula.json (Dynamic Profile)
 config/lazygit/   config.yml (Dracula theme)
+config/git/       config and ignore (git's behaviour, linked to ~/.config/git/)
 config/rumdl/     Markdown lint rules
 config/latex/     latexmkrc (linked to ~/.latexmkrc)
 macos/            the macOS install:

@@ -1,0 +1,21 @@
+[init]
+	defaultBranch = main
+[merge]
+	conflictStyle = zdiff3
+[rerere]
+	enabled = true
+[diff]
+	algorithm = histogram
+	colorMoved = zebra
+[rebase]
+	autoSquash = true
+	autoStash = true
+	updateRefs = true
+[push]
+	autoSetupRemote = true
+[fetch]
+	prune = true
+[commit]
+	verbose = true
+[branch]
+	sort = -committerdate

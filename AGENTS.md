@@ -46,13 +46,14 @@ config/tmux/        tmux.conf
 config/rumdl/       rumdl.toml (Markdown lint rules; the root .rumdl.toml links to it)
 config/iterm2/      dracula.json (Dynamic Profile)
 config/lazygit/     config.yml (Dracula theme, linked by macos/tmux/link.sh)
+config/git/         config and ignore (linked to ~/.config/git/ by macos/terminal/link.sh)
 config/latex/       latexmkrc (linked to ~/.latexmkrc)
 docs/               one doc per context (the map above); img/ holds the README screenshot
 macos/              the macOS install, see docs/install.md:
   install.sh        runs every part: terminal, tmux, apps, nvim
   lib.sh            what the parts share: Homebrew, links with backups, preferences, steps
   nvim/             Brewfile, install.sh (brew, link, plugins and Mason), link.sh (incl. Skim)
-  terminal/         Brewfile, install.sh (brew, link), link.sh (Starship, iTerm2, ~/.zshrc)
+  terminal/         Brewfile, install.sh (brew, link), link.sh (Starship, iTerm2, git, ~/.zshrc)
   tmux/             Brewfile, install.sh (brew, link, whichkey), link.sh (tmux.conf, lazygit),
                     whichkey.sh (clones whichkey-tmux into ~/.config/tmux/plugins/)
   apps/             Brewfile, install.sh (brew): programs that are neither of the others
