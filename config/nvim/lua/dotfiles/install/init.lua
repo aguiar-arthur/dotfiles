@@ -23,7 +23,7 @@ local function install_tools(settings, failures)
     return
   end
 
-  local mason = require("dotfiles.mason")
+  local mason = require("dotfiles.install.mason")
   local wanted = mason.wanted(settings)
   local absent = {}
   for _, name in ipairs(mason.missing(settings) or {}) do

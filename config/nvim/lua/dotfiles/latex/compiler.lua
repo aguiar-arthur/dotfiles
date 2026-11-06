@@ -1,6 +1,6 @@
 local M = {}
 
-function M.compiler()
+function M.state()
   local ok, state = pcall(
     vim.api.nvim_eval,
     "exists('b:vimtex.compiler') ? (b:vimtex.compiler.is_running() ? 'running' : 'idle') : ''"

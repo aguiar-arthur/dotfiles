@@ -46,7 +46,7 @@ SKAutoReloadFileUpdate is off"
 
 mason_python() {
   local broken
-  broken="$(nvim --headless -c "lua local m = require('dotfiles.mason') local b = m.broken() io.write(table.concat(vim.tbl_filter(function(n) return b[n] end, m.wanted(require('config.settings'))), ' '))" +qa 2>&1)"
+  broken="$(nvim --headless -c "lua local m = require('dotfiles.install.mason') local b = m.broken() io.write(table.concat(vim.tbl_filter(function(n) return b[n] end, m.wanted(require('config.settings'))), ' '))" +qa 2>&1)"
   if [ -z "$broken" ]; then
     pass "Mason's Python tools still have their Python"
   else

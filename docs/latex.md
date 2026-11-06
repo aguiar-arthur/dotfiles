@@ -14,7 +14,8 @@ and the snippets. Its relationships are in [map](map.md).
 | Path | Holds |
 |---|---|
 | `config/nvim/lua/plugins/tex.lua` | vimtex: Skim viewer, latexmk into `build/`, folds, quickfix filters, conceal, build notifications, the live build (start on open, save on idle, view sync) |
-| `config/nvim/lua/dotfiles/vimtex.lua` | `compiler()`: `idle`, `running` or empty for the buffer's latexmk; the live build and the statusline both ask it |
+| `config/nvim/lua/dotfiles/latex/live.lua` | live mode: compile on open, save when idle, reload the viewer, say when a build fails or recovers |
+| `config/nvim/lua/dotfiles/latex/compiler.lua` | `state()`: `idle`, `running` or empty for the buffer's latexmk; the live build and the statusline both ask it |
 | `config/nvim/after/ftplugin/tex.lua` | no hard wrap, `,lw`, which-key labels of the daily `,l` keys |
 | `config/nvim/snippets/tex.lua` | the LaTeX snippets (documents, text, math, ABNT) |
 | `config/nvim/after/lsp/texlab.lua` | texlab reads `build/`, chktex on open and save, latexindent |

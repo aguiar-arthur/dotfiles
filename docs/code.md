@@ -20,7 +20,8 @@ Clojure in detail. Its relationships are in [map](map.md).
 | `config/nvim/lua/plugins/lsp.lua` | Mason, mason-lspconfig, system servers, diagnostics, the `LspAttach` keys (`gd`, `grr` / `gri` / `grt`, `<leader>l`, `,o`), written as two tables: one of pickers (key, picker, method) and one of plain actions |
 | `config/nvim/lua/dotfiles/progress.lua` | servers' `$/progress` as Neovim's own progress messages (statusline, `:` line, the terminal's progress bar); its `setup()` calls `vim.ui.progress_status()` once because Neovim starts tracking progress on the first call, and without it the statusline misses what began before its first redraw |
 | `config/nvim/after/lsp/<server>.lua` | per-server settings (basedpyright, which also gets the project's interpreter in `before_init`; clojure_lsp, jsonls, ltex_plus, lua_ls, marksman, ruff, texlab, yamlls); `clojure_lsp.lua` also mends its call hierarchy replies |
-| `config/nvim/lua/plugins/formatting.lua` | conform, `style_markers`, the prettier trust check, `<leader>lf` |
+| `config/nvim/lua/plugins/formatting.lua` | conform, `formatters_by_ft`, `<leader>lf` |
+| `config/nvim/lua/dotfiles/format.lua` | `style_markers`, the prettier trust check, what format on save decides |
 | `config/nvim/lua/plugins/run.lua` | code_runner.nvim, `,r` and its `commands` |
 | `config/nvim/lua/plugins/test.lua` | Neotest, neotest-python, `,t` |
 | `config/nvim/lua/plugins/debug.lua` | nvim-dap, nvim-dap-view, the debugpy adapter, `,d`, the Python launch |
@@ -38,7 +39,7 @@ Clojure in detail. Its relationships are in [map](map.md).
   `settings.mason_tools` (shellcheck, debugpy). Only those servers are enabled
   (`automatic_enable = mason_servers`): a server left over in Mason stays off.
 - Mason installs nothing when Neovim starts: after adding a server or tool, run
-  `macos/nvim/install.sh` again (`dotfiles/install.lua` installs what is missing).
+  `macos/nvim/install.sh` again (`dotfiles/install/` installs what is missing).
 - rumdl and clojure-lsp (both `macos/nvim/Brewfile`) are enabled when the binary
   exists. stylua, shfmt and prettier come from `macos/nvim/Brewfile`; Mason does not install copies.
 - blink.cmp adds its completion capabilities to every server by itself; it is a dependency of
@@ -243,8 +244,9 @@ Consumes:
   `system_servers` with its binary), settings in `after/lsp/<name>.lua` if any, run
   `macos/nvim/install.sh`, list the language in the README's "Code" section, and a
   `clients("<name>")` check in a full test.
-- **A formatter**: a line in `formatters_by_ft`, a `style_markers` entry, its program in
-  `macos/nvim/Brewfile` (or Mason tools), a case in `tests/files.lua`, the table above.
+- **A formatter**: a line in `formatters_by_ft`, a `style_markers` entry (`dotfiles/format.lua`),
+  its program in `macos/nvim/Brewfile` (or Mason tools), a case in `tests/files.lua`, the table
+  above.
 - **A language for `,r`**: one line in `commands` in `run.lua` (or its name in the key's `ft`
   when the plugin knows it), a row in the README table, a `run_case` in `tests/code.sh`.
 - **A test adapter or debugger**: its plugin in `test.lua` / `debug.lua` with the new `ft`;

@@ -26,8 +26,8 @@ are in [map](map.md).
 | `macos/terminal/` | `Brewfile` (Starship, eza, iTerm2, the font), `install.sh` (brew, link), `link.sh` (Starship, the iTerm2 profile and default, `~/.config/git/`, `~/.zshrc`) |
 | `macos/tmux/` | `Brewfile` (tmux, lazygit for `prefix G`), `install.sh` (brew, link, whichkey), `link.sh` (`~/.config/tmux/tmux.conf`, lazygit's `config.yml`), `whichkey.sh` (the whichkey-tmux clone in `~/.config/tmux/plugins/`) |
 | `macos/apps/` | `Brewfile` (programs that are neither), `install.sh` (brew) |
-| `config/nvim/lua/dotfiles/install.lua` | headless install of Mason packages, parsers and spell files, with time limits |
-| `config/nvim/lua/dotfiles/mason.lua` | which Mason packages the settings want and which are missing or broken |
+| `config/nvim/lua/dotfiles/install/init.lua` | headless install of Mason packages, parsers and spell files, with time limits |
+| `config/nvim/lua/dotfiles/install/mason.lua` | which Mason packages the settings want and which are missing or broken |
 | `config/nvim/lua/config/lazy.lua` | lazy.nvim cloned at the lockfile's commit |
 | `config/nvim/lazy-lock.json` | plugin versions (committed) |
 | `config/zsh/dotfiles.zsh` | Homebrew on `PATH` (Apple Silicon or Intel), a valid `LANG`, `JAVA_HOME`, `EDITOR` / `VISUAL`, history, emacs keys, the eza aliases (`ls`, `ll`, `lt`), `path_report`, `command_origin`, Starship, `prompt_gap` and `clear` (the blank line between prompts) |
@@ -77,10 +77,10 @@ Consumes: [core](core.md) `settings` (which servers, tools, parsers and spell la
 - `:Lazy update` and `:Lazy sync` rewrite `lazy-lock.json`; never run them just to check
   something. The tests fail if the lockfile changes.
 - Mason installs nothing when Neovim starts: a new server needs `macos/nvim/install.sh` again
-  (`dotfiles/install.lua`; mason-tool-installer was dropped, it only duplicated that).
+  (`dotfiles/install/`; mason-tool-installer was dropped, it only duplicated that).
 - Mason's Python tools (basedpyright, debugpy) run from a venv tied to Homebrew's Python minor
   version; a `brew upgrade` to a new one leaves them unable to start while Mason still calls
-  them installed. `dotfiles.mason` counts such a package as missing, so `macos/nvim/install.sh`
+  them installed. `dotfiles.install.mason` counts such a package as missing, so `macos/nvim/install.sh`
   reinstalls it, and the quick tests say when one is broken.
 - Every network step needs a timeout or a failure path: the Mason registry waits a minute, its
   installs 15 minutes, a spell file two, the Homebrew installer's download two (checked before it

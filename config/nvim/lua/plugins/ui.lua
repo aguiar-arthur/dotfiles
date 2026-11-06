@@ -39,7 +39,7 @@ return {
         if vim.bo.filetype ~= "tex" then
           return ""
         end
-        return require("dotfiles.vimtex").compiler() == "running" and "⟳ latexmk" or ""
+        return require("dotfiles.latex.compiler").state() == "running" and "⟳ latexmk" or ""
       end
 
       return {

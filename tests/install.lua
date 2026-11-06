@@ -1,7 +1,7 @@
 local T = dofile(vim.env.DOT .. "/tests/lib.lua")
 
 T.case("mason", function()
-  local mason = require("dotfiles.mason")
+  local mason = require("dotfiles.install.mason")
   local settings = { mason_tools = { "shellcheck" }, mason_servers = { "lua_ls" } }
   T.eq(
     "mason: servers become package names",

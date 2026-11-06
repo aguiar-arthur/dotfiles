@@ -162,9 +162,9 @@ T.case("TeX live mode", function()
   vim.api.nvim_exec_autocmds("User", { pattern = "VimtexEventView" })
   vim.api.nvim_exec_autocmds("User", { pattern = "VimtexEventCompileSuccess" })
   T.eq("TeX: a build after a view syncs it", calls.view, 1)
-  T.eq("TeX: an idle compiler is reported idle", require("dotfiles.vimtex").compiler(), "idle")
+  T.eq("TeX: an idle compiler is reported idle", require("dotfiles.latex.compiler").state(), "idle")
   vim.cmd("unlet b:vimtex.compiler")
-  T.eq("TeX: no compiler is reported as none", require("dotfiles.vimtex").compiler(), "")
+  T.eq("TeX: no compiler is reported as none", require("dotfiles.latex.compiler").state(), "")
   local started = calls.compile
   vim.v.errmsg = ""
   pcall(vim.api.nvim_exec_autocmds, "User", { pattern = "VimtexEventInitPost" })
