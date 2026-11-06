@@ -46,14 +46,31 @@ local git_log = {
   win = { input = { keys = { ["<c-e>"] = { "review_worktree", mode = { "n", "i" } } } } },
 }
 
-local function review(command, label)
+local function review(command, label, diff)
   return function()
-    require("dotfiles.git.review").expect(label)
+    require("dotfiles.git.review").expect(label, diff)
     vim.cmd(command)
   end
 end
 
 return {
+
+  {
+    "coder/claudecode.nvim",
+    keys = {
+      { "<leader>aD", git_action("claude", "send"), desc = "Send the changes to Claude" },
+      {
+        "<leader>aV",
+        git_action("claude", "ask_review"),
+        desc = "Ask Claude to review the changes",
+      },
+      {
+        "<leader>aM",
+        git_action("claude", "ask_message"),
+        desc = "Ask Claude for a commit message",
+      },
+    },
+  },
 
   {
     "folke/snacks.nvim",
@@ -205,14 +222,25 @@ return {
   {
     "esmuellert/codediff.nvim",
     cmd = "CodeDiff",
+    init = function()
+      require("dotfiles.git").watch_diff()
+    end,
     build = ":CodeDiff install",
     keys = {
       { "<leader>gV", git_call("compare", "origin"), desc = "Review branch vs origin" },
-      { "<leader>gD", review("CodeDiff", "working tree"), desc = "Review working tree" },
-      { "<leader>gC", review("CodeDiff --staged", "staged"), desc = "Review staged changes" },
+      {
+        "<leader>gD",
+        review("CodeDiff", "working tree", { "git", "diff", "HEAD" }),
+        desc = "Review working tree",
+      },
+      {
+        "<leader>gC",
+        review("CodeDiff --staged", "staged", { "git", "diff", "--cached" }),
+        desc = "Review staged changes",
+      },
       {
         "<leader>gd",
-        review("CodeDiff file HEAD", "this file vs HEAD"),
+        review("CodeDiff file HEAD", "this file vs HEAD", { "git", "diff", "HEAD", "--", "%" }),
         desc = "Review this file against HEAD",
       },
       {

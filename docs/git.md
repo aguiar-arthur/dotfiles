@@ -13,9 +13,10 @@ branch, a pull request, two revisions, a file's or a line's history. Its relatio
 - **real side**: the side of a review that is the working file. Only a review against the working
   tree has one; a review of commits or of staged changes shows two read-only copies, with no
   filetype and no language server.
-- **aligned view**: what stays off while any review is open, because it adds or hides rows on the
-  real side only: code lens, the diagnostics' virtual lines, render-markdown, and the context
-  float, which covers a row of one side. The winbar of `windows.lua` is off in a review's tab.
+- **aligned view**: what stays off while any review or native diff is open, because it adds or hides
+  rows on the real side only: code lens, the diagnostics' virtual lines, render-markdown, and the
+  context float, which covers a row of one side. The winbar of `windows.lua` is off in a review's
+  tab.
 - **editing tab**: the tab just before a review, where files opened from the review go.
 - **base branch**: `origin/HEAD`, else `origin/main`, else `origin/master`.
 
@@ -32,6 +33,7 @@ branch, a pull request, two revisions, a file's or a line's history. Its relatio
 | `config/nvim/lua/dotfiles/git/repo.lua` | running git, the current file's folder, the base branch |
 | `config/nvim/lua/dotfiles/git/compare.lua` | comparing with a branch or the base, the branch by commit or hunk, the marks against the base |
 | `config/nvim/lua/dotfiles/git/log.lua` | the log pickers' actions, the commit of a line, a stash |
+| `config/nvim/lua/dotfiles/git/claude.lua` | `<leader>aD`, `aV`, `aM`: the review's or working tree's changes as a diff file for Claude, and the requests typed for it |
 | `config/nvim/lua/dotfiles/git/pr.lua` | the pull request picker's actions, this branch's comments and checks |
 | `config/nvim/lua/plugins/git.lua` (Snacks) | lazygit, the git pickers (`gl`, `gt`, `gc`, `gvb`, `gvf`, `gvh`, `gvp`, `gvo`, `gvk`, `gvz`) and their Enter, `gO`, the `confirm` that sends a file from a review to the editing tab; lazy.nvim merges this spec into Snacks' |
 | `config/nvim/lua/plugins/ui.lua` | the which-key groups `<leader>g`, `<leader>gm` and `<leader>gv` |
@@ -130,6 +132,11 @@ Consumes:
   open pull request, so `C-e` and `C-o` go through `pr.menu` and `pr.hunks`, which check the item.
 - `Snacks.picker.gh_pr` came back empty in some test runs and full in others, with the same
   arguments and the API limits untouched; the cause is unknown, and opening it again fills it.
+- Claude's proposals are a native diff with one real side and one scratch side, misaligned by lenses
+  like a review. `:diffthis` fires no `OptionSet`, so `watch_diff` (registered in codediff's `init`,
+  before any review) listens to `DiffUpdated` and `WinClosed`.
+- `<leader>aV` and `aM` type their request into Claude and never press Enter, since Claude may act
+  on it; the diff goes as a file because a review of a branch does not fit a prompt.
 - A picker with one result and `auto_confirm` (most `gd`) never opens, so Snacks' `picker:close`
   has no picker window to leave and stays in the current window: setting `picker.main` was not
   enough and `gd` replaced the real side. `jump.pick_win` moves the focus itself when
@@ -151,7 +158,7 @@ Consumes:
 
 | What | Where |
 |---|---|
-| Base branch order and its repository, the `review` variable from codediff's events, the editing tab (before, its focused window, made when missing, never a review nor a tab without a file window), where a pick goes (one result, a listed one, the same file), one review at a time, the aligned view, bringing it back and loading the servers first, no path bar, the tab line and its labels, a float in a tab, `Space g q`, `Space b d`, `Space b o` and `Space b D` around a review and on a review alone, Enter and `C-e` in the log pickers (parent, first commit, two picked), the actions of `Space g v`, `Space g v l` (committed, first commit, unsaved, no file, outside git), a stash, the pull request keys on an empty list, this branch's pull request | `tests/git.lua` |
+| Base branch order and its repository, the `review` variable from codediff's events, the editing tab (before, its focused window, made when missing, never a review nor a tab without a file window), where a pick goes (one result, a listed one, the same file), one review at a time, the aligned view, bringing it back, loading the servers first and a native diff, what a review remembers to send, sending changes to Claude, no path bar, the tab line and its labels, a float in a tab, `Space g q`, `Space b d`, `Space b o` and `Space b D` around a review and on a review alone, Enter and `C-e` in the log pickers (parent, first commit, two picked), the actions of `Space g v`, `Space g v l` (committed, first commit, unsaved, no file, outside git), a stash, the pull request keys on an empty list, this branch's pull request | `tests/git.lua` |
 | Toggles beside a review, `Space u C` and `Space u m` while one is open | `tests/toggles.lua` |
 | A `Space g V` review: file list, `]c`, unwrapped sides and `Space u w`, an edit on the real side, `Space g e` / `Space o p`, `Space g i`, `gc` left alone, `gf` and a pick open in the tab before, a pick with one result too, one in the same file stays, the tab line, `gt` back, `Space g q` and `q` close; `Space g D`, `Space g d`, `Space g h`, `Space g L`; Enter in `Space g l` reviews without a checkout; `Space g v b` compares without one; `Space g v l`; `Space g v z`; a second review replaces the first; `Space g C` and `Space g u` unstaging there | full: `test_review` in `tests/git.sh` |
 | `Space g D` opens on the current file, and closes a review; lazygit: `e`, stage, unstage, commit, back to the window it came from | full: `test_lazygit` |

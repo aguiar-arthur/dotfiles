@@ -439,9 +439,9 @@ opens in the tab just before it, so the review stays as it was, and a jump insid
 stays in the review; `gt` / `gT` switch between the two. `Space g q` closes the review from either
 tab, even when the review is the last tab.
 
-The two sides stay line by line: they never wrap, and while a review is open the code lens, the
-diagnostics' virtual lines, the Markdown rendering and the code context stay off everywhere, and
-come back when it closes.
+The two sides stay line by line: they never wrap, and while a review or any other diff (a proposal
+from Claude, `:diffsplit`) is open the code lens, the diagnostics' virtual lines, the Markdown
+rendering and the code context stay off everywhere, and come back when it closes.
 
 | Key (in the review) | Does |
 |---|---|
@@ -494,6 +494,9 @@ starts with Neovim: the connection opens with the first of these keys.
 | `Space a B` | the same, to the last session: opens it (continue) when Claude is not running |
 | `Space a s` | send the selection (visual mode) |
 | `Space a S` | send the selection to the last session: opens it (continue) when Claude is not running |
+| `Space a D` | send the changes to Claude as a diff: the open review's, else the working tree against HEAD |
+| `Space a V` | ask Claude to review those changes (the request is typed, `Enter` sends it) |
+| `Space a M` | ask Claude for a commit message for what is staged (typed the same way) |
 | `Space a a` / `Space a d` | accept / reject the diff Claude proposes |
 | `Space a q` | stop the connection |
 

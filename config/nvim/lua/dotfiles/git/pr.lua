@@ -8,7 +8,7 @@ local NETWORK_TIMEOUT_MS = 15000
 function M.review(picker, item)
   picker:close()
   if item and item.number then
-    review.expect("PR #" .. item.number)
+    review.expect("PR #" .. item.number, { "gh", "pr", "diff", tostring(item.number) })
     vim.cmd.CodeDiff("pr", tostring(item.number))
   end
 end
