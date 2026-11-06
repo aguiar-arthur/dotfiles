@@ -33,6 +33,8 @@ $git_branch\
 $git_status\
 $git_metrics\
 $line_break\
+[│](fg:comment)\
+$line_break\
 [╰─ ──╌╌ ](fg:comment)\
 $sudo\
 $jobs\

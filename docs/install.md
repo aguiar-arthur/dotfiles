@@ -104,8 +104,8 @@ Consumes: [core](core.md) `settings` (which servers, tools, parsers and spell la
 - tmux 3.8 underlines the current window by default (`window-status-current-style`), which runs
   under the pill's round caps, so `tmux.conf` sets that style to `default`.
 - Pills fill their row's whole height at any `Vertical Spacing`, so two stacked rows of pills
-  touch. The prompt keeps a `│` row between its two pill rows and shows a failed status on the
-  first row, so the row you type on never holds a pill.
+  touch. The prompt keeps a `│` row between its rows and shows a failed status on the first row,
+  so the row you type on never holds a pill.
 - iTerm2 paints what is left of a window below its last whole row in the bar's color, so a tall
   rest makes the tmux bar look twice its height, and tmux cannot change it. `Vertical Spacing`
   1.05 gives rows of 19 pt, which fill a full-screen window of 900 pt to 5 pt (1.1 gave 20 pt
