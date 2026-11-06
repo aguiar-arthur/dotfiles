@@ -1,4 +1,4 @@
-local review = require("dotfiles.git.review")
+local tabs = require("dotfiles.tabs")
 
 local M = {}
 
@@ -10,9 +10,9 @@ end
 
 function M.close_buffer()
   local buf = vim.api.nvim_get_current_buf()
-  if review.is() then
-    review.close()
-  elseif vim.iter(review.all()):any(function(tab)
+  if tabs.review() then
+    tabs.close(vim.api.nvim_get_current_tabpage())
+  elseif vim.iter(tabs.reviews()):any(function(tab)
     return shows(tab, buf)
   end) then
     vim.notify("A review shows this file: close the review first (Space g q)", vim.log.levels.WARN)
@@ -22,7 +22,7 @@ function M.close_buffer()
 end
 
 function M.close_buffers(which)
-  if review.any() then
+  if tabs.any_review() then
     vim.notify("A review is open: close it first (Space g q)", vim.log.levels.WARN)
   else
     Snacks.bufdelete[which]()

@@ -11,7 +11,7 @@ Upstream offers, downstream consumes; a change upstream may break downstream.
 |---|---|---|---|
 | Core | all | `settings.lua` keys (servers, tools, parsers, notes, spell), `<leader>` / `,` split | `tests/files.lua`, `install.lua` |
 | Core | Markdown | the global conceal toggle (`<leader>uc`) is re-applied to render-markdown | full: `test_markdown` |
-| Core | Git | `<leader>uw` leaves a review's wrap alone; `<leader>uC` and `<leader>um` only warn while one is open; `tabline` is `dotfiles/git/tabline.lua`; `windows.lua` keeps its winbar out of a review | `tests/toggles.lua`, `tests/git.lua`, full: `test_review` |
+| Core | Git | the tab variable `review`: `<leader>uw` leaves its wrap alone, `<leader>uC` and `<leader>um` only warn while one is open, `<leader>bd` closes it, `windows.lua` shows no path bar there; `tabline.set_labeler` names it | `tests/toggles.lua`, `tests/git.lua`, full: `test_review` |
 | Code, Markdown | Git | a review turns lenses, virtual lines and rendering off, and back when the last one closes | `tests/git.lua` |
 | Workspace | Git | pickers' `confirm` opens a file from a review in the tab before it; the log pickers' Enter reviews a commit; `<leader>bd` beside a review keeps it whole | `tests/git.lua`, full: `test_review` |
 | Workspace | Git | persistence's `PersistenceSavePre`, on which every review closes (`review.close_all`) | `tests/git.lua` |

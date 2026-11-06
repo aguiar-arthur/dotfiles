@@ -1,21 +1,14 @@
+local tabs = require("dotfiles.tabs")
+
 local M = {}
 
 local MODE_LABELS = { explorer = "working tree", standalone = "file", history = "history" }
 
 local expected
 
-function M.is(tab)
-  local ok, value = pcall(vim.api.nvim_tabpage_get_var, tab or 0, "review")
-  return ok and value == true
-end
-
-function M.all()
-  return vim.tbl_filter(M.is, vim.api.nvim_list_tabpages())
-end
-
-function M.any()
-  return #M.all() > 0
-end
+M.is = tabs.review
+M.all = tabs.reviews
+M.any = tabs.any_review
 
 function M.expect(label)
   expected = label
@@ -38,13 +31,6 @@ function M.label(tab)
   return ok and label or ""
 end
 
-local function close_tab(tab)
-  if #vim.api.nvim_list_tabpages() == 1 then
-    vim.cmd("tabnew")
-  end
-  vim.cmd.tabclose(vim.api.nvim_tabpage_get_number(tab))
-end
-
 function M.close()
   local here = vim.fn.tabpagenr()
   local reviews = M.all()
@@ -55,11 +41,11 @@ function M.close()
     vim.notify("No review is open", vim.log.levels.WARN)
     return
   end
-  close_tab(tab)
+  tabs.close(tab)
 end
 
 function M.close_all()
-  vim.iter(M.all()):each(close_tab)
+  vim.iter(M.all()):each(tabs.close)
 end
 
 function M.close_others(tab)
@@ -68,7 +54,7 @@ function M.close_others(tab)
   end
   for _, other in ipairs(M.all()) do
     if other ~= tab then
-      close_tab(other)
+      tabs.close(other)
     end
   end
 end

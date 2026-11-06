@@ -4,6 +4,9 @@ local review = require("dotfiles.git.review")
 local M = {}
 
 function M.setup()
+  require("dotfiles.tabline").set_labeler(function(tab)
+    return review.is(tab) and "review: " .. review.label(tab) or nil
+  end)
   local group = vim.api.nvim_create_augroup("user_review", { clear = true })
   vim.api.nvim_create_autocmd("User", {
     group = group,

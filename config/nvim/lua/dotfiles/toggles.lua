@@ -30,7 +30,7 @@ function M.apply(win)
   vim.b[buf].toggles_generation = M.generation
   if
     not vim.wo[win].diff
-    and not require("dotfiles.git.review").is(vim.api.nvim_win_get_tabpage(win))
+    and not require("dotfiles.tabs").review(vim.api.nvim_win_get_tabpage(win))
   then
     set_local(win, "wrap", M.values.wrap)
   end
@@ -85,14 +85,14 @@ function M.option(name, option, on, off, blocked)
 end
 
 local function review_blocks_wrap()
-  if require("dotfiles.git.review").is() then
+  if require("dotfiles.tabs").review() then
     return "Wrap stays off in a review: it would misalign the two sides"
   end
 end
 
 local function review_blocks(what)
   return function()
-    if require("dotfiles.git.review").any() then
+    if require("dotfiles.tabs").any_review() then
       return what .. " stays off while a review is open: it would misalign the two sides"
     end
   end

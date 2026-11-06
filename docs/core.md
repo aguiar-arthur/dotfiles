@@ -22,6 +22,9 @@ look. Every other context builds on this one (see [map](map.md)).
 | `config/nvim/lua/config/keymaps.lua` | save, quit, `C-h/j/k/l`, `<leader>bd` / `bo` / `bD`, `]d` / `]e`, `<leader>cs` |
 | `config/nvim/lua/config/autocmds.lua` | yank highlight, reload on focus, last position, `q` closes, missing folders, resize |
 | `config/nvim/lua/config/lazy.lua` | lazy.nvim bootstrap at the commit in `lazy-lock.json` |
+| `config/nvim/lua/dotfiles/tabs.lua` | the tab variable `review` that marks a tab whose two sides must stay aligned, and closing a tab even when it is the last |
+| `config/nvim/lua/dotfiles/tabline.lua` | the tab line: each tab's file, or what `set_labeler` returns for it |
+| `config/nvim/lua/dotfiles/buffers.lua` | `<leader>bd`, `<leader>bo`, `<leader>bD`, which respect a tab marked `review` |
 | `config/nvim/lua/dotfiles/windows.lua` | the cursorline only in the active window, the path in the winbar of file windows, the welcome screen when the last file closes, `q` closing a floating dashboard (`<leader>od`) instead of quitting |
 | `config/nvim/dashboard/clock.sh` | the welcome screen's logo: a seven-segment clock (HH:MM:SS, blinking colon, English date) drawn by awk; `clock.sh N` stops after N frames |
 | `config/nvim/lua/dotfiles/toggles.lua` | the global `<leader>u` toggles |
@@ -81,7 +84,7 @@ be static), so any script that redraws from the top-left corner can replace it. 
 frames a second (each frame runs `date`), which is enough for the blinking colon; ten cost about 15%
 of a core while the dashboard was visible. Smooth scrolling is Snacks' (`<leader>uS`), at 100 ms
 instead of its 200, since a review's `]c` and `C-d` wait for it. The tab line (`tabline`, from two
-tabs on) is `dotfiles/git/tabline.lua`: each tab's file, and what a review compares, see [git](git.md).
+tabs on) is `dotfiles/tabline.lua`: each tab's file, or the label git gives a review, see [git](git.md).
 Diff colors are tinted backgrounds over Dracula, so the code stays readable.
 
 Spell checking (`en_us`, `pt_br`) is on for prose filetypes. Words added with `zg` (in either
@@ -111,9 +114,11 @@ Offers:
 - `settings.lua` keys (servers, Mason tools, parsers, notes, spell languages) to code, install,
   Markdown and LaTeX.
 - The `<leader>` / `,` split and the global `<leader>u` toggles.
-- To [git](git.md): in a codediff tab `vim.go.wrap` is off (codediff sets it with `vim.wo`);
-  global toggles keep their own values instead of reading `vim.go`, and `<leader>uw` leaves a
-  review alone.
+- To [git](git.md): the tab variable `review` (`dotfiles/tabs.lua`), which git sets and Core only
+  reads, so Core requires nothing of git: in such a tab `<leader>uw` leaves wrap alone (codediff
+  sets it with `vim.wo`, so global toggles keep their own values instead of reading `vim.go`),
+  `<leader>uC` and `<leader>um` warn, `<leader>bd` closes the tab and `windows.lua` shows no path
+  bar. `tabline.set_labeler` names such a tab.
 - To [markdown](markdown.md): the conceal toggle is re-applied to render-markdown (it sets
   `conceallevel` on every redraw).
 

@@ -1,12 +1,12 @@
 local T = dofile(vim.env.DOT .. "/tests/lib.lua")
 
-local buffers = require("dotfiles.git.buffers")
+local buffers = require("dotfiles.buffers")
 local compare = require("dotfiles.git.compare")
 local jump = require("dotfiles.git.jump")
 local log_actions = require("dotfiles.git.log")
 local pr = require("dotfiles.git.pr")
 local review = require("dotfiles.git.review")
-local tabline = require("dotfiles.git.tabline")
+local tabline = require("dotfiles.tabline")
 require("dotfiles.git").setup()
 
 local root = T.dir({

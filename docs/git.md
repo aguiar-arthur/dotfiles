@@ -26,16 +26,13 @@ branch, a pull request, two revisions, a file's or a line's history. Its relatio
 | `config/nvim/lua/plugins/git.lua` (gitsigns) | signs (also of untracked files), blame, `]c` / `[c`, `<leader>g` hunk keys, the marks against the base (`gvs`), `ih` |
 | `config/nvim/lua/plugins/git.lua` (codediff) | the review keys (`gD`, `gC`, `gV`, `gd`, `gh`, `gL`, `gP`, `gvv`, `gvc`, `gq`), the keys inside a review and a merge conflict, its options (hunks across files, moves, line counts, opening a file by moving in the list), `git.setup()` |
 | `config/nvim/lua/dotfiles/git/init.lua` | `setup()`: what `CodeDiffOpen` and `CodeDiffClose` start |
-| `config/nvim/lua/dotfiles/git/review.lua` | the `review` and `review_label` tab variables, closing a review (and every review before a session is saved), one at a time |
+| `config/nvim/lua/dotfiles/git/review.lua` | setting the `review` and `review_label` tab variables, closing a review (and every review before a session is saved), one at a time |
 | `config/nvim/lua/dotfiles/git/aligned.lua` | the aligned view and bringing it back |
 | `config/nvim/lua/dotfiles/git/jump.lua` | the editing tab and where a pick goes |
-| `config/nvim/lua/dotfiles/git/buffers.lua` | `<leader>bd` beside a review, `<leader>bo` / `<leader>bD` while one is open |
-| `config/nvim/lua/dotfiles/git/tabline.lua` | the tab line |
 | `config/nvim/lua/dotfiles/git/repo.lua` | running git, the current file's folder, the base branch |
 | `config/nvim/lua/dotfiles/git/compare.lua` | comparing with a branch or the base, the branch by commit or hunk, the marks against the base |
 | `config/nvim/lua/dotfiles/git/log.lua` | the log pickers' actions, the commit of a line, a stash |
 | `config/nvim/lua/dotfiles/git/pr.lua` | the pull request picker's actions, this branch's comments and checks |
-| `config/nvim/lua/config/keymaps.lua` | `<leader>bd`, `<leader>bo`, `<leader>bD`, through `buffers.close_buffer` / `close_buffers` |
 | `config/nvim/lua/plugins/git.lua` (Snacks) | lazygit, the git pickers (`gl`, `gt`, `gc`, `gvb`, `gvf`, `gvh`, `gvp`, `gvo`, `gvk`, `gvz`) and their Enter, `gO`, the `confirm` that sends a file from a review to the editing tab; lazy.nvim merges this spec into Snacks' |
 | `config/nvim/lua/plugins/ui.lua` | the which-key groups `<leader>g`, `<leader>gm` and `<leader>gv` |
 | `config/lazygit/config.yml` | lazygit's Dracula theme, for `prefix G` in tmux (inside Neovim Snacks adds its own on top) |
@@ -75,7 +72,7 @@ already shows stays there, so `gd` or a symbol inside the file does not leave th
 `gT` switch between the two. `<leader>gq` closes the review from either tab (opening a tab first
 when the review is the last one, as codediff's own `q` does); `<leader>bd` in a review closes it,
 and on a file a review shows it only warns, because `Snacks.bufdelete` would take the buffer out of
-the review's window. `<leader>bo` / `<leader>bD` (`buffers.close_buffers`) only warn while any
+the review's window. `<leader>bo` / `<leader>bD` (`dotfiles/buffers.lua`) only warn while any
 review is open, for the same reason.
 
 Snacks' log pickers check a commit out on Enter (`git checkout <commit> -- <file>` for a file's
@@ -110,7 +107,7 @@ Consumes:
 
 - [core](core.md): in a review `vim.go.wrap` is off (codediff sets it with `vim.wo`), and
   `<leader>uw` leaves it alone; `<leader>uC` and `<leader>um` warn while one is open; the tab line
-  is `tabline.render`; the winbar of `windows.lua` stays out of a review.
+  names a review through `tabline.set_labeler`; the winbar of `windows.lua` stays out of a review.
 - [code](code.md), [markdown](markdown.md): the aligned view turns their lenses, virtual lines and
   rendering off during a review.
 - [workspace](workspace.md): Snacks pickers and lazygit; this context's `confirm` replaces their

@@ -13,7 +13,7 @@ end
 
 function M.bar(win)
   local tab = vim.api.nvim_win_get_tabpage(win)
-  if not plain(win) or require("dotfiles.git.review").is(tab) then
+  if not plain(win) or require("dotfiles.tabs").review(tab) then
     if vim.wo[win].winbar == path_bar then
       vim.wo[win].winbar = ""
     end
