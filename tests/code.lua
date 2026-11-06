@@ -6,10 +6,10 @@ vim.fn.setfperm(root .. "/.venv/bin/python", "rwxr-xr-x")
 T.case("python path", function()
   vim.cmd("edit " .. root .. "/src/a.py")
   T.stub(vim.env, "VIRTUAL_ENV", "/elsewhere")
-  T.eq("python: the project's .venv comes first", python.path(), root .. "/.venv/bin/python")
-  vim.cmd("edit " .. T.dir({ ["b.py"] = {} }) .. "/b.py")
-  T.eq("python: then $VIRTUAL_ENV", python.path(), "/elsewhere/bin/python")
+  T.eq("python: an activated $VIRTUAL_ENV comes first", python.path(), "/elsewhere/bin/python")
   vim.env.VIRTUAL_ENV = nil
+  T.eq("python: then the project's .venv", python.path(), root .. "/.venv/bin/python")
+  vim.cmd("edit " .. T.dir({ ["b.py"] = {} }) .. "/b.py")
   T.eq("python: then python3", python.path(), vim.fn.exepath("python3"))
   T.stub(vim.env, "PATH", "/nonexistent")
   T.eq(

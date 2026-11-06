@@ -34,7 +34,8 @@ others show vimtex's `<Plug>` names). Cmd+Shift+click in Skim jumps back to the 
 The build is live (`latex_live` in `settings.lua`, on by default): opening a `.tex` file
 starts latexmk's continuous mode, a `.tex` buffer is saved on `CursorHold` (`updatetime` is
 250 ms) and on `InsertLeave`, and after the first `,lv` every successful build calls
-`VimtexView` again, so Skim follows the cursor.
+`VimtexView` again, so Skim follows the cursor. A read-only file is not saved. A good build gets
+vimtex's own line in the messages; the toast says so only after a failed one.
 
 Edits from outside (another program, an AI) rebuild the PDF too, since latexmk watches the
 disk. On idle, an unmodified buffer is reloaded (`checktime`, scheduled because it does nothing
@@ -98,7 +99,7 @@ Consumes:
 | What | Where |
 |---|---|
 | `,lw`, no hard wrap | `tests/keys.lua` |
-| Live build, outside edits, view sync (stubs) | quick: `tests/autocmds.lua` |
+| Live build, outside edits, view sync, read-only files, build toasts (stubs) | quick: `tests/autocmds.lua` |
 | Skim preferences | quick: `Skim is set up for Neovim` in `tests/nvim.sh` |
 | A real live build into `build/`, save on idle, ltex, `u G` | full: `test_tex` in `tests/tex.sh` |
 | Every snippet expands, no trigger is defined twice, the common ones type what they should | quick: `tests/tex_snippets.lua` |

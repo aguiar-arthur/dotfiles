@@ -39,7 +39,8 @@ Neovim 0.12 or newer: the grammar toggle reads `vim.lsp.is_enabled()` and relies
 
 `<Space>` is the leader, `,` the local leader; which-key shows every key after a short pause.
 `<leader>` keys work everywhere, `,` keys depend on the file type (see [code](code.md)).
-`<A-j>` / `<A-k>` move lines; `C-h/j/k/l` move between windows. Splits, resizing, `]b` / `[b`,
+`<A-j>` / `<A-k>` move lines, further with a count, and do nothing at the edge of the buffer;
+`C-h/j/k/l` move between windows. Splits, resizing, `]b` / `[b`,
 `gcc` and `C-w d` (the line's diagnostics) are Neovim's own keys, not repeated under
 `<leader>`. The LSP keys are the exception: Neovim's quick `gr…` keys stay (`grr` / `gri` /
 `grt` open Snacks pickers) and `<leader>l` repeats them, with the rest, as one menu that
@@ -138,7 +139,7 @@ Consumes: nothing.
 |---|---|
 | Startup prints nothing, every module loads | quick: `nvim starts without messages`, `tests/modules.lua` |
 | Autocmds, the cursorline and winbar of `windows.lua` | `tests/autocmds.lua` |
-| `]d`, `]e` | `tests/keys.lua` |
+| `]d`, `]e`, `<A-j>` / `<A-k>` (counts, the edges of the buffer) | `tests/keys.lua` |
 | The `<leader>u` toggles, beside a review, `keep_local_opts`, `uT`, `uf` / `uF`, `uC` | `tests/toggles.lua` |
 | A Neovim without `ui2` still runs the rest of `options.lua`; `q` on a floating dashboard | `tests/core.lua` |
 | Treesitter highlight and indent per file type (Lua yes, Python highlight only, LaTeX none) | `tests/treesitter.lua` |

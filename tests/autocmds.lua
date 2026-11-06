@@ -167,6 +167,38 @@ T.case("TeX live mode", function()
   )
 end)
 
+T.case("TeX idle save of a read-only file", function()
+  local settings = require("config.settings")
+  T.stub(settings, "latex_live", false)
+  T.stub(vim.o, "confirm", false)
+  vim.fn.writefile({ "\\documentclass{article}" }, root .. "/readonly.tex")
+  vim.cmd("edit " .. root .. "/readonly.tex")
+  vim.api.nvim_buf_set_lines(0, 0, 0, false, { "text" })
+  vim.bo.readonly = true
+  settings.latex_live = true
+  vim.v.errmsg = ""
+  pcall(vim.api.nvim_exec_autocmds, "CursorHold", {})
+  T.eq("TeX: idle leaves a read-only file alone", { vim.v.errmsg, vim.bo.modified }, { "", true })
+  vim.bo.modified = false
+end)
+
+T.case("TeX build notifications", function()
+  T.stub(require("config.settings"), "latex_live", false)
+  local told = {}
+  T.stub(vim, "notify", function(message)
+    told[#told + 1] = message
+  end)
+  local function build(event)
+    told = {}
+    vim.api.nvim_exec_autocmds("User", { pattern = "VimtexEventCompile" .. event })
+    return #told
+  end
+  T.eq("TeX: a good build stays quiet", build("Success"), 0)
+  T.eq("TeX: a failed build says so", build("Failed"), 1)
+  T.eq("TeX: the build after a failure says it recovered", build("Success"), 1)
+  T.eq("TeX: the next good build is quiet again", build("Success"), 0)
+end)
+
 vim.cmd("edit " .. root .. "/b.txt")
 vim.defer_fn(function()
   T.case("focus reload", function()

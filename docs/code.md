@@ -24,7 +24,7 @@ Clojure in detail. Its relationships are in [map](map.md).
 | `config/nvim/lua/plugins/run.lua` | code_runner.nvim, `,r` and its `commands` |
 | `config/nvim/lua/plugins/test.lua` | Neotest, neotest-python, `,t` |
 | `config/nvim/lua/plugins/debug.lua` | nvim-dap, nvim-dap-view, the debugpy adapter, `,d`, the Python launch |
-| `config/nvim/lua/dotfiles/python.lua` | the interpreter: `.venv` upward from a folder (the file's by default), else `$VIRTUAL_ENV`, else `python3`; `,r`, the debugger and basedpyright ask it |
+| `config/nvim/lua/dotfiles/python.lua` | the interpreter: `$VIRTUAL_ENV`, else `.venv` upward from a folder (the file's by default), else `python3`; `,r`, the debugger and basedpyright ask it |
 | `config/nvim/after/ftplugin/lua.lua` | `,s` sources the file |
 | `config/nvim/lua/plugins/clojure.lua` | Conjure (Clojure only), nvim-paredit, `,cj` |
 | `config/nvim/lua/dotfiles/clojure.lua` | jack-in: the nREPL command (`clojure`, `lein` or `bb`), waiting for `.nrepl-port` (`poll` and `limit` are fields so the tests can shorten them; a tick queued after the timer closed returns at once), the dead-REPL check |
@@ -67,7 +67,9 @@ Clojure in detail. Its relationships are in [map](map.md).
   so a new table (as in Neovim's own example) never reaches the server. Its `root_dir` is the
   project's (lspconfig's markers) or the file's own folder, so `before_init` never guesses from
   whichever buffer is current. neotest-python keeps its own lookup, which also finds `venv/`,
-  Poetry, Pipenv and uv environments; a `python` option would replace all of that.
+  Poetry, Pipenv and uv environments; a `python` option would replace all of that. An activated
+  `$VIRTUAL_ENV` comes first in both, so `,t` agrees with the others when one is active, even
+  one left active from another project.
 - clojure-lsp's call hierarchy replies break the spec: `fromRanges` is empty, the call site is
   in `selectionRange` and the definition in `range`. Snacks then placed the call site in the
   callee's file ("index out of range" when that line is shorter) and listed no incoming calls.

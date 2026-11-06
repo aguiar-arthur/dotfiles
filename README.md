@@ -239,7 +239,7 @@ Jump anywhere in two keystrokes, edit functions and arguments as objects, copy a
 | `Space c f` | the same for the whole file |
 | `Space c p` / `Space c P` | copy the file's path from the git root / its full path |
 | `Space c l` | copy a link to the line or selection on GitHub (GitLab, …), fixed to the file's last commit |
-| `Alt-j` / `Alt-k` | move the line or selection down / up |
+| `Alt-j` / `Alt-k` | move the line or selection down / up (a count moves it further) |
 | `<` / `>` in visual mode | indent, keeping the selection |
 | `]r` / `[r` | next / previous reference of the word under the cursor |
 | `]t` / `[t` | next / previous `TODO`, `FIXME`, `NOTE` comment |
@@ -350,7 +350,7 @@ These keys exist only in the languages listed; in other files they are not mappe
 
 `,r` saves the file and runs it from its folder; running the same file again replaces its
 terminal. It also runs JavaScript, C, C++, Java, Ruby and Rust files. Python runs with
-the project's `.venv`, else `$VIRTUAL_ENV`, else `python3`.
+the activated `$VIRTUAL_ENV`, else the project's `.venv`, else `python3`.
 
 | Tests | Does |
 |---|---|

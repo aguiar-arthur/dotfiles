@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -uo pipefail
 
+unset VIRTUAL_ENV
 DOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 REAL_STATE="${XDG_STATE_HOME:-$HOME/.local/state}"
 QUICK_STATE="$(mktemp -d)"

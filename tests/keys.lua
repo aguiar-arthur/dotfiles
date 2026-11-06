@@ -406,4 +406,29 @@ T.case("the LSP keys", function()
   )
 end)
 
+T.case("moving lines", function()
+  local function move(keys, cursor)
+    vim.cmd("enew!")
+    vim.api.nvim_buf_set_lines(0, 0, -1, false, { "a", "b", "c", "d" })
+    vim.api.nvim_win_set_cursor(0, { cursor, 0 })
+    vim.cmd("messages clear")
+    vim.api.nvim_feedkeys(vim.keycode(keys), "tx", false)
+    return {
+      table.concat(vim.api.nvim_buf_get_lines(0, 0, -1, false)),
+      vim.trim(vim.fn.execute("messages")),
+    }
+  end
+  T.eq("Alt-j moves the line down", move("<A-j>", 1), { "bacd", "" })
+  T.eq("Alt-k moves the line up", move("<A-k>", 2), { "bacd", "" })
+  T.eq("a count moves the line further down", move("2<A-j>", 1), { "bcad", "" })
+  T.eq("a count moves the line further up", move("2<A-k>", 4), { "adbc", "" })
+  T.eq("Alt-j on the last line stays quiet", move("<A-j>", 4), { "abcd", "" })
+  T.eq("Alt-k on the first line stays quiet", move("<A-k>", 1), { "abcd", "" })
+  T.eq("Alt-j moves the selection", move("Vj<A-j><Esc>", 1), { "cabd", "" })
+  T.eq("Alt-k moves the selection", move("Vj<A-k><Esc>", 2), { "bcad", "" })
+  T.eq("a count moves the selection further", move("Vj2<A-j><Esc>", 1), { "cdab", "" })
+  T.eq("Alt-j on a selection at the end stays quiet", move("Vj<A-j><Esc>", 3), { "abcd", "" })
+  T.eq("Alt-k on a selection at the top stays quiet", move("Vj<A-k><Esc>", 1), { "abcd", "" })
+end)
+
 T.done()

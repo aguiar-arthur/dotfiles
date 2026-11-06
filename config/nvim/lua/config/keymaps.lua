@@ -13,10 +13,20 @@ map({ "n", "x" }, "k", "v:count == 0 ? 'gk' : 'k'", o("Up", { expr = true }))
 
 map("x", "<", "<gv", o("Indent left (keep selection)"))
 map("x", ">", ">gv", o("Indent right (keep selection)"))
-map("n", "<A-j>", "<cmd>m .+1<CR>==", o("Move line down"))
-map("n", "<A-k>", "<cmd>m .-2<CR>==", o("Move line up"))
-map("x", "<A-j>", ":m '>+1<CR>gv=gv", o("Move selection down"))
-map("x", "<A-k>", ":m '<-2<CR>gv=gv", o("Move selection up"))
+map("n", "<A-j>", "<cmd>execute 'silent! move .+' . v:count1<CR>==", o("Move line down"))
+map("n", "<A-k>", "<cmd>execute 'silent! move .-' . (v:count1 + 1)<CR>==", o("Move line up"))
+map(
+  "x",
+  "<A-j>",
+  [[:<C-u>execute "silent! '<,'>move '>+" . v:count1<CR>gv=gv]],
+  o("Move selection down")
+)
+map(
+  "x",
+  "<A-k>",
+  [[:<C-u>execute "silent! '<,'>move '<-" . (v:count1 + 1)<CR>gv=gv]],
+  o("Move selection up")
+)
 map("i", ",", ",<c-g>u", o("Undo breakpoint"))
 map("i", ".", ".<c-g>u", o("Undo breakpoint"))
 
