@@ -1,9 +1,23 @@
+local function git_call(module, name)
+  return function()
+    require("dotfiles.git." .. module)[name]()
+  end
+end
+
+local function review(command, label)
+  return function()
+    require("dotfiles.git.review").expect(label)
+    vim.cmd(command)
+  end
+end
+
 return {
 
   {
     "lewis6991/gitsigns.nvim",
     event = { "BufReadPre", "BufNewFile" },
     opts = {
+      attach_to_untracked = true,
       signs = {
         add = { text = "│" },
         change = { text = "│" },
@@ -43,10 +57,21 @@ return {
         m("n", "<leader>gS", gs.stage_buffer, "Stage buffer")
         m("n", "<leader>gR", gs.reset_buffer, "Reset buffer")
         m("n", "<leader>gp", gs.preview_hunk, "Preview hunk")
+        m("n", "<leader>gI", gs.preview_hunk_inline, "Preview hunk inline")
+        m("n", "<leader>gw", function()
+          gs.toggle_word_diff(gs.toggle_linehl())
+        end, "Toggle changed lines and words in the buffer")
         m("n", "<leader>gb", function()
           gs.blame_line({ full = true })
         end, "Blame line")
         m("n", "<leader>gB", gs.toggle_current_line_blame, "Toggle line blame")
+        m("n", "<leader>gA", gs.blame, "Blame the whole file")
+        m(
+          "n",
+          "<leader>gvs",
+          git_call("compare", "toggle_marks"),
+          "Toggle marks against the base branch"
+        )
         m({ "o", "x" }, "ih", gs.select_hunk, "Select hunk")
       end,
     },
@@ -57,29 +82,47 @@ return {
     cmd = "CodeDiff",
     build = ":CodeDiff install",
     keys = {
+      { "<leader>gV", git_call("compare", "origin"), desc = "Review branch vs origin" },
+      { "<leader>gD", review("CodeDiff", "working tree"), desc = "Review working tree" },
+      { "<leader>gC", review("CodeDiff --staged", "staged"), desc = "Review staged changes" },
       {
-        "<leader>gV",
-        function()
-          require("dotfiles.git").review_vs_origin()
-        end,
-        desc = "Review branch vs origin",
+        "<leader>gd",
+        review("CodeDiff file HEAD", "this file vs HEAD"),
+        desc = "Review this file against HEAD",
       },
-      { "<leader>gD", "<cmd>CodeDiff<CR>", desc = "Review working tree" },
-      { "<leader>gC", "<cmd>CodeDiff --staged<CR>", desc = "Review staged changes" },
-      { "<leader>gd", "<cmd>CodeDiff file HEAD<CR>", desc = "Review this file against HEAD" },
-      { "<leader>gh", "<cmd>CodeDiff history %<CR>", desc = "File history (review)" },
-      { "<leader>gL", "<cmd>.CodeDiff history<CR>", desc = "Line history (review)" },
-      { "<leader>gL", ":CodeDiff history<CR>", mode = "x", desc = "Lines history (review)" },
+      {
+        "<leader>gh",
+        review("CodeDiff history %", "file history"),
+        desc = "File history (review)",
+      },
+      {
+        "<leader>gL",
+        review(".CodeDiff history", "line history"),
+        desc = "Line history (review)",
+      },
+      {
+        "<leader>gL",
+        function()
+          require("dotfiles.git.review").expect("lines history")
+          return ":CodeDiff history<CR>"
+        end,
+        mode = "x",
+        expr = true,
+        desc = "Lines history (review)",
+      },
       { "<leader>gP", ":CodeDiff pr ", desc = "Review a pull request (number)" },
+      { "<leader>gvv", ":CodeDiff ", desc = "Compare revisions (type them)" },
       {
-        "<leader>gq",
-        function()
-          require("dotfiles.git").close_review()
-        end,
-        desc = "Close the review",
+        "<leader>gvc",
+        git_call("compare", "commits"),
+        desc = "Review the branch commit by commit",
       },
+      { "<leader>gvl", git_call("log", "line_commit"), desc = "Review the commit of this line" },
+      { "<leader>gq", git_call("review", "close"), desc = "Close the review" },
     },
     opts = {
+      diff = { cycle_hunks_across_files = true, compute_moves = true },
+      explorer = { auto_open_on_cursor = true, line_stats = { enabled = true } },
       keymaps = {
         view = {
           toggle_explorer = { "<leader>ge", "<leader>op" },
@@ -91,6 +134,7 @@ return {
           discard_hunk = false,
           toggle_layout = "<leader>gi",
           toggle_compact = "<leader>gz",
+          align_move = "<leader>gM",
         },
         conflict = {
           accept_incoming = "<leader>gmt",

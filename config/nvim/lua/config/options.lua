@@ -39,6 +39,7 @@ o.splitright = true
 o.splitbelow = true
 o.splitkeep = "screen"
 o.tabclose = "uselast"
+o.tabline = "%!v:lua.require'dotfiles.git.tabline'.render()"
 
 o.expandtab = true
 o.shiftwidth = 2

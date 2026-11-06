@@ -82,7 +82,7 @@ Clojure in detail. Its relationships are in [map](map.md).
   sources as `zipfile://<jar>::<path>`, and without it a jump there fails ("Invalid cursor line").
 - Code lenses show for every server that sends them (`vim.lsp.codelens.enable`), mostly
   clojure-lsp's reference counts; `grx` runs the one on the cursor line and `<leader>uC` hides
-  them all.
+  them all. A review keeps them off (see [git](git.md)), and the diagnostics' virtual lines too.
 - Neovim 0.12 keeps servers' `$/progress` to itself (`LspProgress`); `dotfiles/progress.lua`
   turns each task into a native progress message (`nvim_echo` with `kind = "progress"`, one id
   per client and token), so the statusline shows `vim.ui.progress_status()`, the `:` line names

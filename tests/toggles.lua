@@ -60,6 +60,31 @@ T.case("Space u w in a review", function()
   vim.cmd("tabclose")
 end)
 
+T.case("Space u C and Space u m with a review open", function()
+  vim.lsp.codelens.enable(false)
+  vim.cmd("tabnew")
+  vim.t.review = true
+  vim.cmd("tabprevious")
+  local said = {}
+  T.stub(vim, "notify", function(msg)
+    said[#said + 1] = msg
+  end)
+  press("<leader>uC")
+  T.eq("Space u C with a review open leaves lenses off", vim.lsp.codelens.is_enabled(), false)
+  local markdown = require("render-markdown")
+  local rendering = markdown.get()
+  press("<leader>um")
+  T.eq("Space u m with a review open changes nothing", markdown.get(), rendering)
+  T.eq("and they say why", said, {
+    "Code lens stays off while a review is open: it would misalign the two sides",
+    "Markdown rendering stays off while a review is open: it would misalign the two sides",
+  })
+  vim.cmd("tabnext | tabclose")
+  press("<leader>uC")
+  T.eq("Space u C works again without a review", vim.lsp.codelens.is_enabled(), true)
+  press("<leader>uC")
+end)
+
 T.case("Space u L and Space u c", function()
   local relative = vim.wo[lua_win].relativenumber
   press("<leader>uL")

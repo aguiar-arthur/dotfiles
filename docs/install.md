@@ -22,7 +22,7 @@ are in [map](map.md).
 |---|---|
 | `macos/install.sh` | runs every part: terminal, tmux, apps, nvim |
 | `macos/lib.sh` | what the parts share: `step_brew` (trusting third-party taps first), `step_link`, `run_steps`, `link` with backups, `pref` |
-| `macos/nvim/` | `Brewfile` (what Neovim needs), `install.sh` (brew, link, nvim), `link.sh` (`~/.config/nvim`, rumdl, `~/.latexmkrc`, Skim) |
+| `macos/nvim/` | `Brewfile` (what Neovim needs, `gh` for the pull request picker included), `install.sh` (brew, link, nvim), `link.sh` (`~/.config/nvim`, rumdl, `~/.latexmkrc`, Skim) |
 | `macos/terminal/` | `Brewfile` (Starship, eza, iTerm2, the font), `install.sh` (brew, link), `link.sh` (Starship, the iTerm2 profile and default, `~/.zshrc`) |
 | `macos/tmux/` | `Brewfile` (tmux, lazygit for `prefix G`), `install.sh` (brew, link, whichkey), `link.sh` (`~/.config/tmux/tmux.conf`), `whichkey.sh` (the whichkey-tmux clone in `~/.config/tmux/plugins/`) |
 | `macos/apps/` | `Brewfile` (programs that are neither), `install.sh` (brew) |

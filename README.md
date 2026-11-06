@@ -26,7 +26,7 @@ git clone https://github.com/aguiar-arthur/dotfiles.git ~/dotfiles && ~/dotfiles
 
 | | |
 |---|---|
-| **Review pull requests in the editor** | `Space g P 42`: side by side, nothing checked out, and `gd` and `K` work on the real file |
+| **Review changes in the editor** | your branch, any other, a pull request: side by side, nothing checked out, and on your own files `gd` and `K` work |
 | **Claude Code, wired in** | it sees your files, selection and diagnostics, and proposes diffs you accept with a key |
 | **Tested like software** | the checks drive a real Neovim in tmux: servers, debugger, a LaTeX build, a run on a fresh machine |
 | **Secure by default** | OpenSSF Scorecard, gitleaks, CodeQL, zizmor and ShellCheck on every push |
@@ -101,10 +101,10 @@ Neovim, terminal, tmux and apps install on their own, so a machine gets only wha
 
 | Part | Command | Installs and links |
 |---|---|---|
-| Neovim | `macos/nvim/install.sh` | Neovim, git, ripgrep, ast-grep, fd, tree-sitter, node, python, the formatters, pandoc, lazygit, Clojure and its tools, LaTeX, Skim, Claude Code; `~/.config/nvim`, `~/.config/rumdl/rumdl.toml`, `~/.latexmkrc`, Skim's preferences; then the plugins, servers and parsers |
+| Neovim | `macos/nvim/install.sh` | Neovim, git, ripgrep, ast-grep, fd, tree-sitter, node, python, the formatters, pandoc, lazygit, gh, Clojure and its tools, LaTeX, Skim, Claude Code; `~/.config/nvim`, `~/.config/rumdl/rumdl.toml`, `~/.latexmkrc`, Skim's preferences; then the plugins, servers and parsers |
 | Terminal | `macos/terminal/install.sh` | Starship, eza, iTerm2, JetBrains Mono Nerd Font; `~/.config/starship.toml`, the iTerm2 profile, the `~/.zshrc` block |
 | tmux | `macos/tmux/install.sh` | tmux, lazygit; `~/.config/tmux/tmux.conf`; the whichkey-tmux plugin in `~/.config/tmux/plugins/` |
-| Apps | `macos/apps/install.sh` | uv, ruby, mole, gh, GrandPerspective |
+| Apps | `macos/apps/install.sh` | uv, ruby, mole, GrandPerspective |
 
 On a machine whose shell and terminal are already set up and must stay as they are, run only
 `macos/nvim/install.sh`, and `macos/tmux/install.sh` if you want tmux there too. MacTeX is a
@@ -381,22 +381,25 @@ they stay open after the program ends so its output can be read.
 
 ### Git (gitsigns, Snacks, codediff, lazygit)
 
-Stage hunks inline, review the working tree, a branch or a pull request side by side, and resolve conflicts.
+Stage hunks inline, compare with any branch or pull request side by side, and resolve conflicts.
 
 <details><summary>Keys</summary>
 
-Changed lines are marked in the left column and the line's last commit shows at its end.
+Changed lines are marked in the left column, new files too; `Space g B` shows each line's last
+commit at its end.
 
 | Key | Does |
 |---|---|
 | `Space g g` | lazygit: stage, commit, push, branches, merge conflicts |
 | `]c` / `[c` | next / previous changed block (hunk) |
-| `Space g p` | preview the hunk |
+| `Space g p` / `Space g I` | preview the hunk in a float / inline |
+| `Space g w` | highlight the changed lines and words in the buffer, on or off |
 | `Space g s` / `Space g r` | stage (or unstage, if staged) / reset the hunk or the selected lines |
 | `Space g S` / `Space g R` | stage / reset the whole file |
 | `Space g b` / `Space g B` | blame the line / turn the end-of-line blame on or off (off at start) |
+| `Space g A` | blame the whole file, beside it (`q` closes it) |
 | `Space g c` / `Space g t` | jump to a changed hunk / a changed file of the working tree (`Tab` stages) |
-| `Space g l` | search the log; `Enter` reviews that commit against its parent (it never checks it out) |
+| `Space g l` | search the log; `Enter` reviews that commit against its parent, or compares two picked with `Tab`; `C-e` compares it with the working tree, `C-g` searches what commits changed instead of their messages (nothing is checked out) |
 | `Space g O` | open the file in the browser (GitHub, GitLab, …) |
 | `ih` | the hunk as a text object (`dih` deletes it) |
 
@@ -412,17 +415,40 @@ the left when there are several:
 | `Space g P` | a pull request: type its number (fetched, nothing is checked out) |
 | `Space g h` / `Space g L` | the history of the file / of the line or selected lines, commit by commit |
 
-The right side is the real file, so `gd`, `K` and edits work there. A file you open from the
-review (`gf`, or a picker: `gd`, `grr`, `Space f f`, …) opens in the tab just before it, so
-the review stays as it was; `gt` / `gT` switch between the two. `Space g q` closes the review from
-either tab, even when the review is the last tab. The two sides never wrap lines: codediff keeps
-them aligned that way.
+To compare with something else:
+
+| Key | Compares |
+|---|---|
+| `Space g v b` / `Space g v f` | the working tree / this file with another branch you pick (`Enter` never checks it out) |
+| `Space g v v` | any revisions you type, with completion: `main HEAD~3`, `v1.0...` |
+| `Space g v c` | this branch, commit by commit |
+| `Space g v h` | every hunk of this branch, in a picker |
+| `Space g v l` | the commit that last changed this line, against its parent |
+| `Space g v z` | a stash you pick (`Enter` reviews it, `C-e` applies it) |
+| `Space g v s` | the marks and `]c` of every file against where this branch forked; again goes back |
+| `Space g v p` | a pull request you pick (GitHub, through `gh`): `Enter` reviews it, `C-e` shows its actions (comment, start a review, check out), `C-o` its hunks with comments (`a` in the preview adds one); `Space g P` takes a number and also works on GitLab and Azure DevOps |
+| `Space g v o` | the hunks and comments of this branch's pull request |
+| `Space g v k` | watch the checks of this branch's pull request |
+
+The tab line names what a review compares, and a new review replaces the open one. When the right
+side is your working file (`Space g D`, `d`, `V`, `Space g v b`, `f`), `gd`, `K` and edits work
+there. A review of commits (a pull request, the log, the history, two revisions) and of staged
+changes shows copies, with no language server: to navigate a pull request, check its branch out and
+use `Space g V`. A file you open from the review (`gf`, or a picker: `gd`, `grr`, `Space f f`, …)
+opens in the tab just before it, so the review stays as it was, and a jump inside the file it shows
+stays in the review; `gt` / `gT` switch between the two. `Space g q` closes the review from either
+tab, even when the review is the last tab.
+
+The two sides stay line by line: they never wrap, and while a review is open the code lens, the
+diagnostics' virtual lines, the Markdown rendering and the code context stay off everywhere, and
+come back when it closes.
 
 | Key (in the review) | Does |
 |---|---|
-| `Enter` | show the file under the cursor (in the file list) |
+| `j` / `k` | show the next / previous file (in the file list, which also shows `+` and `-` counts) |
 | `]f` / `[f` | next / previous file |
-| `]c` / `[c` | next / previous change |
+| `]c` / `[c` | next / previous change, on to the next file at the last one |
+| `Space g M` | line up the other side with the code moved here |
 | `Space g a` | stage / unstage the file |
 | `Space g s` / `Space g r` | stage or unstage / reset the change under the cursor (on the real file) |
 | `Space g u` | unstage the change under the cursor (in a review of staged changes) |
@@ -490,11 +516,11 @@ state.
 | `Space u c` | conceal (hidden Markdown and LaTeX markup) |
 | `Space u d` | diagnostics |
 | `Space u h` | inlay hints (types and parameter names inside the code) |
-| `Space u C` | code lens (the grey text a server shows above some lines) |
+| `Space u C` | code lens (the grey text a server shows above some lines; off while a review is open) |
 | `Space u g` | indent guides |
 | `Space u S` | smooth scrolling (animated `C-d`, `C-u`, `zz`) |
 | `Space u x` | code context (the current function pinned on top) |
-| `Space u m` | Markdown rendering |
+| `Space u m` | Markdown rendering (off while a review is open) |
 | `Space u G` | grammar checking (LaTeX) |
 | `Space u T` | treesitter highlight |
 | `Space u f` | format on save |
@@ -674,7 +700,7 @@ A rendered view in the editor, a browser preview that follows your saves, lint a
 | Key | Does |
 |---|---|
 | `,p` | build an HTML preview with pandoc and open it in the browser; every save rebuilds it |
-| `Space u m` | rendered view (headings, tables, checkboxes) on or off |
+| `Space u m` | rendered view (headings, tables, checkboxes) on or off (off while a review is open) |
 | `gd` | follow a link to another file |
 
 rumdl underlines problems as you type (rules in `config/rumdl/rumdl.toml`). It reformats on

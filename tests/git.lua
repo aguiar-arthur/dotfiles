@@ -1,9 +1,20 @@
 local T = dofile(vim.env.DOT .. "/tests/lib.lua")
 
-local git = require("dotfiles.git")
-git.setup()
+local buffers = require("dotfiles.git.buffers")
+local compare = require("dotfiles.git.compare")
+local jump = require("dotfiles.git.jump")
+local log_actions = require("dotfiles.git.log")
+local pr = require("dotfiles.git.pr")
+local review = require("dotfiles.git.review")
+local tabline = require("dotfiles.git.tabline")
+require("dotfiles.git").setup()
 
-local root = T.dir({ ["src/a.py"] = {} })
+local root = T.dir({
+  ["src/a.py"] = {},
+  ["src/b.py"] = {},
+  ["src/c.py"] = {},
+  ["src/d.py"] = {},
+})
 
 local function event(pattern, tab)
   vim.api.nvim_exec_autocmds("User", { pattern = pattern, data = { tabpage = tab } })
@@ -16,7 +27,14 @@ local function new_review()
   return tab
 end
 
+local function settle()
+  vim.wait(10, function()
+    return false
+  end)
+end
+
 local function reset()
+  settle()
   vim.cmd("silent! tabonly")
   vim.cmd("silent! only")
   vim.cmd("enew")
@@ -35,12 +53,12 @@ end
 
 T.case("git: the review variable", function()
   local first = reset()
-  T.eq("git: a tab is not a review", git.review(), false)
+  T.eq("git: a tab is not a review", review.is(), false)
   local review_tab = new_review()
-  T.eq("git: CodeDiffOpen marks its tab a review", git.review(review_tab), true)
-  T.eq("git: other tabs are not", git.review(first), false)
+  T.eq("git: CodeDiffOpen marks its tab a review", review.is(review_tab), true)
+  T.eq("git: other tabs are not", review.is(first), false)
   event("CodeDiffClose", review_tab)
-  T.eq("git: CodeDiffClose unmarks it", git.review(review_tab), false)
+  T.eq("git: CodeDiffClose unmarks it", review.is(review_tab), false)
   vim.cmd("silent! tabonly")
 end)
 
@@ -52,18 +70,18 @@ T.case("git: the editing tab", function()
   vim.bo.buftype = "nofile"
   local review_tab = new_review()
   local picker = vim.api.nvim_get_current_win()
-  T.eq("git: a file from a review opens in the tab before it", git.edit_win(review_tab), editing)
+  T.eq("git: a file from a review opens in the tab before it", jump.edit_win(review_tab), editing)
   T.eq("git: and focus stays in the review", vim.api.nvim_get_current_win(), picker)
   vim.cmd.tabmove(0)
-  local made = git.edit_win(review_tab)
+  local made = jump.edit_win(review_tab)
   T.eq(
     "git: a review in the first tab gets a tab before it",
     vim.api.nvim_tabpage_get_number(vim.api.nvim_win_get_tabpage(made)),
     1
   )
   local second = new_review()
-  made = git.edit_win(second)
-  T.eq("git: never a review's window", git.review(vim.api.nvim_win_get_tabpage(made)), false)
+  made = jump.edit_win(second)
+  T.eq("git: never a review's window", review.is(vim.api.nvim_win_get_tabpage(made)), false)
   T.eq(
     "git: but a new tab just before it",
     vim.api.nvim_tabpage_get_number(vim.api.nvim_win_get_tabpage(made)) + 1,
@@ -74,7 +92,7 @@ T.case("git: the editing tab", function()
   vim.cmd("tabonly | only | enew")
   vim.bo.buftype = "nofile"
   review_tab = new_review()
-  made = git.edit_win(review_tab)
+  made = jump.edit_win(review_tab)
   T.eq("git: a tab with no file window gets a new tab after it", {
     vim.api.nvim_tabpage_get_number(vim.api.nvim_win_get_tabpage(made)),
     #vim.api.nvim_list_tabpages(),
@@ -82,30 +100,197 @@ T.case("git: the editing tab", function()
   vim.cmd("silent! tabonly")
 end)
 
+T.case("git: the focused window of the editing tab", function()
+  reset()
+  vim.cmd("edit " .. root .. "/src/a.py")
+  vim.cmd("vsplit " .. root .. "/src/b.py")
+  local focused = vim.api.nvim_get_current_win()
+  local review_tab = new_review()
+  T.eq(
+    "git: a file from a review goes to the window that had the focus",
+    jump.edit_win(review_tab),
+    focused
+  )
+  vim.cmd("silent! tabonly")
+end)
+
+T.case("git: where a picked item goes", function()
+  reset()
+  vim.cmd("edit " .. root .. "/src/a.py")
+  local editing = vim.api.nvim_get_current_win()
+  T.eq("git: outside a review a pick stays put", jump.pick_win({ main = editing }, {}), nil)
+  local review_tab = new_review()
+  vim.cmd("edit " .. root .. "/src/c.py")
+  local side = vim.api.nvim_get_current_win()
+  local other = { file = root .. "/src/d.py" }
+
+  local same = { main = side }
+  T.eq(
+    "git: the file the review shows stays in the review",
+    { jump.pick_win(same, { file = root .. "/src/c.py" }), same.main },
+    { nil, side }
+  )
+  T.eq(
+    "git: so does an item of that buffer",
+    jump.pick_win({ main = side }, { buf = vim.api.nvim_get_current_buf() }),
+    nil
+  )
+
+  local open = { main = side, shown = true }
+  T.eq("git: a listed pick goes to the editing tab", jump.pick_win(open, other), editing)
+  T.eq(
+    "git: its picker keeps the focus until it closes",
+    { open.main, vim.api.nvim_get_current_win() },
+    { editing, side }
+  )
+
+  local single = { main = side, shown = false }
+  T.eq("git: a pick with one result goes there too", jump.pick_win(single, other), editing)
+  T.eq(
+    "git: and moves the focus, since no picker window will",
+    vim.api.nvim_get_current_win(),
+    editing
+  )
+  vim.api.nvim_set_current_tabpage(review_tab)
+  vim.cmd("silent! tabonly")
+end)
+
+T.case("git: one review at a time", function()
+  reset()
+  local older = new_review()
+  settle()
+  T.eq("git: a review alone stays", review.is(older), true)
+  local newer = new_review()
+  settle()
+  T.eq("git: a new review closes the one before", vim.api.nvim_tabpage_is_valid(older), false)
+  T.eq("git: and stays", review.is(newer), true)
+  vim.cmd("silent! tabonly")
+end)
+
+T.case("git: nothing misaligns the two sides of a review", function()
+  local first = reset()
+  event("CodeDiffClose", first)
+  local markdown, context = require("render-markdown"), require("treesitter-context")
+  vim.lsp.codelens.enable(true)
+  vim.diagnostic.config({ virtual_lines = { current_line = true } })
+  markdown.enable()
+  context.enable()
+  local function state()
+    return {
+      vim.lsp.codelens.is_enabled(),
+      vim.diagnostic.config().virtual_lines,
+      markdown.get(),
+      context.enabled(),
+    }
+  end
+  local before = state()
+  local review_tab = new_review()
+  T.eq("git: lenses, virtual lines, Markdown and context go off", state(), {
+    false,
+    false,
+    false,
+    false,
+  })
+  event("CodeDiffClose", review_tab)
+  T.eq("git: the last review to close brings them back", state(), before)
+  vim.lsp.codelens.enable(false)
+  local off = new_review()
+  event("CodeDiffClose", off)
+  T.eq("git: what was off stays off", vim.lsp.codelens.is_enabled(), false)
+  local loaded
+  T.stub(require("lazy"), "load", function(opts)
+    loaded = opts.plugins
+  end)
+  event("CodeDiffClose", new_review())
+  T.eq(
+    "git: a review loads the servers first, so their setup cannot turn lenses back on",
+    loaded,
+    { "nvim-lspconfig" }
+  )
+  vim.lsp.codelens.enable(true)
+  vim.cmd("silent! tabonly")
+end)
+
+T.case("git: a review has no path bar", function()
+  reset()
+  local windows = require("dotfiles.windows")
+  vim.cmd("edit " .. root .. "/src/a.py")
+  windows.enter(vim.api.nvim_get_current_win())
+  T.eq("git: a file window outside a review has it", vim.wo.winbar, " %f%m")
+  vim.cmd("$tabnew " .. root .. "/src/b.py")
+  local side = vim.api.nvim_get_current_win()
+  windows.enter(side)
+  T.eq("git: a window that becomes a side has it at first", vim.wo[side].winbar, " %f%m")
+  event("CodeDiffOpen", vim.api.nvim_get_current_tabpage())
+  T.eq("git: CodeDiffOpen takes it away, it would push that side down", vim.wo[side].winbar, "")
+  windows.enter(side)
+  T.eq("git: and entering the side does not bring it back", vim.wo[side].winbar, "")
+  T.eq("git: the side still gets the cursor line", vim.wo[side].cursorline, true)
+  vim.cmd("silent! tabonly")
+end)
+
+T.case("git: the tab line", function()
+  reset()
+  vim.cmd("edit " .. root .. "/src/a.py")
+  local line = function()
+    return vim.api.nvim_eval_statusline(tabline.render(), { use_tabline = true }).str
+  end
+  T.eq("git: a tab shows its file", line(), " a.py ")
+  review.expect("origin/main...")
+  local review_tab = new_review()
+  T.eq("git: a review shows what it compares", line(), " a.py  review: origin/main... ")
+  event("CodeDiffClose", review_tab)
+  vim.cmd("tabclose")
+  vim.fn.histadd("cmd", "CodeDiff main HEAD~2")
+  new_review()
+  T.eq("git: or what was typed", line(), " a.py  review: main HEAD~2 ")
+  vim.cmd("silent! tabonly")
+  vim.fn.histadd("cmd", "echo")
+  vim.t.review = nil
+  vim.cmd("enew")
+  T.eq("git: an empty tab has no file", line(), " [No Name] ")
+  vim.cmd("edit " .. root .. "/src/a.py")
+  local tab_float = vim.api.nvim_open_win(vim.api.nvim_create_buf(false, true), true, {
+    relative = "editor",
+    row = 1,
+    col = 1,
+    width = 5,
+    height = 1,
+  })
+  T.eq("git: a float in the tab does not rename it", line(), " a.py ")
+  vim.api.nvim_win_close(tab_float, true)
+  local plain_review = vim.api.nvim_get_current_tabpage()
+  review.mark(plain_review, "explorer")
+  T.eq("git: a plain :CodeDiff is the working tree", review.label(plain_review), "working tree")
+  review.unmark(plain_review)
+end)
+
 T.case("git: Space g q", function()
   local first = reset()
   new_review()
   vim.api.nvim_set_current_tabpage(first)
-  git.close_review()
+  review.close()
   T.eq("git: Space g q before a review closes it", #vim.api.nvim_list_tabpages(), 1)
   new_review()
-  git.close_review()
+  review.close()
   T.eq("git: Space g q in a review closes it", #vim.api.nvim_list_tabpages(), 1)
-  capture(git.close_review)
+  capture(review.close)
   T.eq("git: Space g q without a review says so", warned, "No review is open")
   event("CodeDiffOpen", vim.api.nvim_get_current_tabpage())
-  git.close_review()
+  review.close()
   T.eq(
     "git: Space g q on a review alone leaves a new tab",
-    { #vim.api.nvim_list_tabpages(), git.review() },
+    { #vim.api.nvim_list_tabpages(), review.is() },
     { 1, false }
   )
 end)
 
 T.case("git: a session is saved without its reviews", function()
   local kept = reset()
-  new_review()
-  new_review()
+  for _ = 1, 2 do
+    vim.cmd("$tabnew")
+    vim.t.review = true
+  end
   require("lazy").load({ plugins = { "persistence.nvim" } })
   vim.api.nvim_exec_autocmds("User", { pattern = "PersistenceSavePre" })
   T.eq("git: saving a session closes every review first", vim.api.nvim_list_tabpages(), { kept })
@@ -118,13 +303,13 @@ T.case("git: Space b d, Space b o and Space b D", function()
 
   new_review()
   vim.api.nvim_set_current_buf(file)
-  git.close_buffer()
+  buffers.close_buffer()
   T.eq("git: Space b d in a review closes it", #vim.api.nvim_list_tabpages(), 1)
   local review_tab = new_review()
   vim.api.nvim_set_current_buf(file)
   vim.api.nvim_set_current_tabpage(first)
   vim.api.nvim_set_current_win(editing)
-  capture(git.close_buffer)
+  capture(buffers.close_buffer)
   T.eq(
     "git: Space b d on a file a review shows keeps it",
     { warned, vim.api.nvim_win_get_buf(editing) },
@@ -136,7 +321,7 @@ T.case("git: Space b d, Space b o and Space b D", function()
   T.stub(Snacks, "bufdelete", function()
     deleted = vim.api.nvim_get_current_buf()
   end)
-  git.close_buffer()
+  buffers.close_buffer()
   T.eq("git: Space b d on another file deletes it", deleted, other)
   local closed = {}
   T.stub(Snacks, "bufdelete", {
@@ -148,7 +333,7 @@ T.case("git: Space b d, Space b o and Space b D", function()
     end,
   })
   capture(function()
-    git.close_buffers("other")
+    buffers.close_buffers("other")
   end)
   T.eq(
     "git: Space b o with a review open keeps every buffer",
@@ -156,9 +341,9 @@ T.case("git: Space b d, Space b o and Space b D", function()
     { "A review is open: close it first (Space g q)", 0 }
   )
   vim.api.nvim_set_current_tabpage(review_tab)
-  git.close_review()
-  git.close_buffers("other")
-  git.close_buffers("all")
+  review.close()
+  buffers.close_buffers("other")
+  buffers.close_buffers("all")
   T.eq("git: Space b o / Space b D close the other / all buffers", closed, { "other", "all" })
   vim.cmd("silent! tabonly")
 end)
@@ -177,23 +362,33 @@ T.case("git: Enter in the log pickers", function()
   T.stub(vim.cmd, "CodeDiff", function(...)
     reviewed = { ... }
   end)
+  local chosen = {}
   local log_picker = {
     close = function()
       closed = true
     end,
+    selected = function()
+      return chosen
+    end,
   }
-  git.review_commit(log_picker, { commit = head, cwd = log })
+  log_actions.commit(log_picker, { commit = head, cwd = log })
   T.eq(
     "git: Enter in a log picker reviews the commit against its parent",
     { closed, reviewed },
     { true, { root_commit, head } }
   )
-  git.review_commit(log_picker, { commit = root_commit, cwd = log })
+  log_actions.commit(log_picker, { commit = root_commit, cwd = log })
   T.eq(
     "git: the first commit against the empty tree",
     reviewed,
     { "4b825dc642cb6eb9a060e54bf8d69288fbee4904", root_commit }
   )
+  chosen = { { commit = head, idx = 1 }, { commit = root_commit, idx = 2 } }
+  log_actions.commit(log_picker, { commit = head, cwd = log })
+  T.eq("git: two selected commits compare, the older first", reviewed, { root_commit, head })
+  chosen = {}
+  log_actions.worktree(log_picker, { commit = head })
+  T.eq("git: C-e in a log picker compares it with the working tree", reviewed, { head })
   for _, source in ipairs({ "git_log", "git_log_file", "git_log_line" }) do
     T.eq(
       "git: " .. source .. " never checks a commit out",
@@ -201,6 +396,202 @@ T.case("git: Enter in the log pickers", function()
       "function"
     )
   end
+end)
+
+T.case("git: comparing with a branch or a pull request", function()
+  local ran, closed
+  T.stub(vim.cmd, "CodeDiff", function(...)
+    ran = { ... }
+  end)
+  local picker = {
+    close = function()
+      closed = true
+    end,
+  }
+  compare.branch(picker, { branch = "main" })
+  T.eq("git: Enter compares with the branch's fork point", { closed, ran }, { true, { "main..." } })
+  compare.branch(picker, { commit = "abc" })
+  T.eq("git: a detached item by its commit", ran, { "abc..." })
+  compare.file(picker, { branch = "main" })
+  T.eq("git: this file against a branch", ran, { "file", "main" })
+  pr.review(picker, { number = 42 })
+  T.eq("git: a picked pull request", ran, { "pr", "42" })
+  ran = nil
+  compare.branch(picker, nil)
+  compare.file(picker, nil)
+  pr.review(picker, nil)
+  T.eq("git: no item compares nothing", ran, nil)
+  review.expect(nil)
+end)
+
+T.case("git: the pull request picker keys", function()
+  local closed = 0
+  local picker = {
+    close = function()
+      closed = closed + 1
+    end,
+  }
+  local opened = {}
+  T.stub(Snacks.picker, "gh_diff", function(opts)
+    opened.diff = opts
+  end)
+  T.stub(Snacks.picker, "gh_actions", function(opts)
+    opened.menu = opts
+  end)
+  pr.hunks(picker, nil)
+  pr.menu(picker, nil)
+  T.eq("git: an empty list does nothing", { closed, opened.diff, opened.menu }, { 0, nil, nil })
+  local item = { number = 7, repo = "o/r" }
+  pr.hunks(picker, item)
+  T.eq("git: C-o opens its hunks and comments", opened.diff, { pr = 7, repo = "o/r" })
+  pr.menu(picker, item)
+  T.eq("git: C-e opens its actions", opened.menu, { item = item })
+  T.eq("git: and each closes the list", closed, 2)
+end)
+
+T.case("git: this branch's pull request", function()
+  local said
+  T.stub(vim, "notify", function(msg)
+    said = msg
+  end)
+  T.stub(vim.fn, "executable", function()
+    return 0
+  end)
+  pr.comments()
+  T.eq("git: no gh says so", said, "gh is not installed")
+  T.stub(vim.fn, "executable", function()
+    return 1
+  end)
+  local answer
+  T.stub(vim, "system", function(_, _, done)
+    done(answer)
+  end)
+  local opened
+  T.stub(Snacks.picker, "gh_diff", function(opts)
+    opened = opts
+  end)
+  answer = { code = 1, stdout = "" }
+  pr.comments()
+  vim.wait(200, function()
+    return said == "This branch has no pull request"
+  end)
+  T.eq("git: no pull request says so", said, "This branch has no pull request")
+  answer = { code = 0, stdout = '{"number":9}' }
+  pr.comments()
+  vim.wait(200, function()
+    return opened ~= nil
+  end)
+  T.eq("git: its number opens the hunks and comments", opened and opened.pr, 9)
+end)
+
+T.case("git: the commit of a line and a stash", function()
+  vim.cmd("enew")
+  local dir = T.dir({ ["f.txt"] = { "one", "two" } })
+  local function sh(...)
+    return vim.trim(vim.system({ "git", "-C", dir, ... }, { text = true }):wait().stdout)
+  end
+  sh("init", "-q")
+  sh("add", ".")
+  sh("-c", "user.name=t", "-c", "user.email=t@t", "commit", "-qm", "one")
+  local first = sh("rev-parse", "HEAD")
+  vim.fn.writefile({ "one", "changed" }, dir .. "/f.txt")
+  sh("-c", "user.name=t", "-c", "user.email=t@t", "commit", "-qam", "two")
+  local second = sh("rev-parse", "HEAD")
+  local said, ran
+  T.stub(vim, "notify", function(msg)
+    said = msg
+  end)
+  T.stub(vim.cmd, "CodeDiff", function(...)
+    ran = { ... }
+  end)
+  vim.cmd("edit " .. dir .. "/f.txt")
+  vim.fn.cursor(2, 1)
+  log_actions.line_commit()
+  T.eq("git: Space g v l reviews the commit that changed the line", ran, { first, second })
+  vim.fn.cursor(1, 1)
+  ran = nil
+  log_actions.line_commit()
+  T.eq(
+    "git: the first commit against the empty tree",
+    ran,
+    { "4b825dc642cb6eb9a060e54bf8d69288fbee4904", first }
+  )
+  vim.api.nvim_buf_set_lines(0, 1, 2, false, { "not saved" })
+  vim.fn.cursor(2, 1)
+  said = nil
+  log_actions.line_commit()
+  T.eq("git: a line edited in the buffer has no commit yet", said, "This line is not committed yet")
+  vim.cmd("edit! | enew")
+  said = nil
+  log_actions.line_commit()
+  T.eq("git: a window without a file says so", said, "This window shows no file")
+  vim.cmd("edit " .. T.dir({ ["u.txt"] = { "x" } }) .. "/u.txt")
+  said = nil
+  log_actions.line_commit()
+  T.eq("git: outside git says so", said, "Git does not track this file")
+  review.expect(nil)
+
+  local closed
+  local picker = {
+    close = function()
+      closed = true
+    end,
+  }
+  log_actions.stash(picker, { stash = "stash@{1}" })
+  T.eq(
+    "git: Enter in Space g v z reviews the stash against its parent",
+    { closed, ran },
+    { true, { "stash@{1}^", "stash@{1}" } }
+  )
+  T.eq(
+    "git: and never applies it",
+    type(require("snacks.picker.config").get({ source = "git_stash" }).confirm),
+    "function"
+  )
+  review.expect(nil)
+end)
+
+T.case("git: a branch picker leaves the current branch out", function()
+  T.eq("git: the current branch goes", compare.not_current({ current = true }), false)
+  T.eq("git: the others stay", compare.not_current({ branch = "x" }), nil)
+end)
+
+T.case("git: the base branch for the compare keys", function()
+  vim.cmd("enew")
+  local dir = T.dir()
+  vim.fn.system(
+    ("cd %s && git init -q -b main origin && cd origin && git -c user.name=t -c user.email=t@t "):format(
+      dir
+    ) .. "commit -q --allow-empty -m x && cd .. && git clone -q origin work 2>/dev/null"
+  )
+  vim.fn.chdir(dir .. "/work")
+  local ran
+  T.stub(vim.cmd, "CodeDiff", function(...)
+    ran = { ... }
+  end)
+  compare.commits()
+  T.eq("git: the branch commit by commit", ran, { "history", "origin/main..HEAD" })
+  local hunks
+  T.stub(Snacks.picker, "git_diff", function(opts)
+    hunks = opts
+  end)
+  compare.hunks()
+  T.eq("git: the hunks of the whole branch", hunks.base, "origin/main")
+  local gitsigns = require("gitsigns")
+  local base, reset_base
+  T.stub(gitsigns, "change_base", function(rev, global)
+    base = { rev, global }
+  end)
+  T.stub(gitsigns, "reset_base", function(global)
+    reset_base = global
+  end)
+  T.stub(vim, "notify", function() end)
+  compare.toggle_marks()
+  local fork = vim.trim(vim.fn.system({ "git", "merge-base", "origin/main", "HEAD" }))
+  T.eq("git: the marks against the fork point", base, { fork, true })
+  compare.toggle_marks()
+  T.eq("git: and back", reset_base, true)
+  review.expect(nil)
 end)
 
 T.case("git: the review base branch", function()
@@ -221,7 +612,7 @@ T.case("git: the review base branch", function()
     end
     vim.fn.chdir(dir .. "/work")
     base = nil
-    git.review_vs_origin()
+    compare.origin()
   end
   repo("trunk", true)
   T.eq("git: origin/HEAD comes first", base, "origin/trunk...")
@@ -233,7 +624,7 @@ T.case("git: the review base branch", function()
   vim.cmd("edit " .. vim.fn.getcwd() .. "/f.txt")
   vim.fn.chdir(T.dir())
   base = nil
-  git.review_vs_origin()
+  compare.origin()
   T.eq("git: the base comes from the file's repository", base, "origin/main...")
   vim.cmd("enew")
   local said

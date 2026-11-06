@@ -101,6 +101,7 @@ return {
         { "<leader>f", group = "file/find" },
         { "<leader>g", group = "git" },
         { "<leader>gm", group = "merge conflict (review)" },
+        { "<leader>gv", group = "compare" },
         { "<leader>l", group = "lsp" },
         { "<leader>n", group = "notes" },
         { "<leader>o", group = "open/toggle" },

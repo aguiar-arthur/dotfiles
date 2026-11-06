@@ -96,7 +96,7 @@ Offers:
 - To [latex](latex.md): completion; LaTeX keeps its own snippets in place of friendly-snippets.
 - To [markdown](markdown.md): mini.pairs leaves the backtick alone everywhere.
 - To [git](git.md): a session is saved without its reviews: persistence's `PersistenceSavePre`
-  calls `dotfiles.git.close_reviews()`, since a restored review comes back as plain buffers
+  calls `dotfiles.git.review.close_all()`, since a restored review comes back as plain buffers
   named `codediff://…` and `CodeDiff Explorer`.
 
 Consumes: [core](core.md) keys and toggles.

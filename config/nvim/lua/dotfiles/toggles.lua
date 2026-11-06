@@ -29,7 +29,8 @@ function M.apply(win)
   end
   vim.b[buf].toggles_generation = M.generation
   if
-    not vim.wo[win].diff and not require("dotfiles.git").review(vim.api.nvim_win_get_tabpage(win))
+    not vim.wo[win].diff
+    and not require("dotfiles.git.review").is(vim.api.nvim_win_get_tabpage(win))
   then
     set_local(win, "wrap", M.values.wrap)
   end
@@ -45,11 +46,7 @@ function M.apply_all()
   end
 end
 
-local function global(name, get, set)
-  return Snacks.toggle({ name = name, get = get, set = set })
-end
-
-function M.option(name, option, on, off, blocked)
+local function global(name, get, set, blocked)
   local notify
   if blocked then
     notify = function(state)
@@ -67,23 +64,37 @@ function M.option(name, option, on, off, blocked)
   return Snacks.toggle({
     name = name,
     notify = notify,
-    get = function()
-      return M.values[option] == on
-    end,
+    get = get,
     set = function(state)
       if blocked and blocked() then
         return
       end
-      M.values[option] = state and on or off
-      vim.go[option] = M.values[option]
-      M.apply_all()
+      set(state)
     end,
   })
 end
 
+function M.option(name, option, on, off, blocked)
+  return global(name, function()
+    return M.values[option] == on
+  end, function(state)
+    M.values[option] = state and on or off
+    vim.go[option] = M.values[option]
+    M.apply_all()
+  end, blocked)
+end
+
 local function review_blocks_wrap()
-  if require("dotfiles.git").review() then
+  if require("dotfiles.git.review").is() then
     return "Wrap stays off in a review: it would misalign the two sides"
+  end
+end
+
+local function review_blocks(what)
+  return function()
+    if require("dotfiles.git.review").any() then
+      return what .. " stays off while a review is open: it would misalign the two sides"
+    end
   end
 end
 
@@ -106,7 +117,7 @@ function M.map()
     return vim.lsp.codelens.is_enabled()
   end, function(state)
     vim.lsp.codelens.enable(state)
-  end):map("<leader>uC")
+  end, review_blocks("Code lens")):map("<leader>uC")
   global("Grammar (LTeX)", function()
     return vim.lsp.is_enabled("ltex_plus")
   end, function(state)
@@ -116,7 +127,7 @@ function M.map()
     return require("render-markdown").get()
   end, function(state)
     require("render-markdown")[state and "enable" or "disable"]()
-  end):map("<leader>um")
+  end, review_blocks("Markdown rendering")):map("<leader>um")
   global("Code context", function()
     return require("treesitter-context").enabled()
   end, function(state)

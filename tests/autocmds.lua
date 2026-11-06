@@ -26,6 +26,14 @@ T.case("last line", function()
   T.eq("reopening a file goes back to the last line", vim.api.nvim_win_get_cursor(0)[1], 4)
 end)
 
+T.case("q closes the whole-file blame", function()
+  vim.cmd("enew | vsplit | enew")
+  local blame = vim.api.nvim_get_current_win()
+  vim.bo.filetype = "gitsigns-blame"
+  vim.fn.maparg("q", "n", false, true).callback()
+  T.eq("q closes the blame window, it would start a macro", vim.api.nvim_win_is_valid(blame), false)
+end)
+
 T.case("q closes help", function()
   vim.cmd("help")
   local help = vim.api.nvim_get_current_win()

@@ -191,7 +191,7 @@ return {
         group = vim.api.nvim_create_augroup("user_persistence", { clear = true }),
         pattern = "PersistenceSavePre",
         callback = function()
-          require("dotfiles.git").close_reviews()
+          require("dotfiles.git.review").close_all()
         end,
       })
     end,

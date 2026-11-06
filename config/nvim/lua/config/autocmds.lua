@@ -54,7 +54,7 @@ au("VimResized", {
 
 au("FileType", {
   group = augroup("close_with_q"),
-  pattern = { "help", "qf", "man", "checkhealth", "vimtex-toc" },
+  pattern = { "help", "qf", "man", "checkhealth", "vimtex-toc", "gitsigns-blame" },
   callback = function(ev)
     vim.bo[ev.buf].buflisted = false
     vim.keymap.set("n", "q", function()

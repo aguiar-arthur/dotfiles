@@ -72,15 +72,17 @@ diagnostics, running progress (`vim.ui.progress_status()`: the average percentag
 tasks, such as a server indexing, see [code](code.md)), language servers and a running latexmk (the
 path is in each window's winbar, not repeated there). Inactive windows are a shade darker
 (`NormalNC`), the cursorline shows only in the active one, and each file window has its path in a
-winbar (a window whose winbar is already set, as in a review, keeps it; floats and terminals have
+winbar (a window whose winbar is already set keeps it; a review's tab, floats and terminals have
 none, and a file window that turns into a terminal drops it, because a split inherits the winbar of
 the window it came from). Closing the last file (`<leader>bd`, `:bd`) shows the Snacks dashboard
 again, as at startup (`q` quits there; on the floating one from `<leader>od` it only closes it); its
 logo is `dashboard/clock.sh` in a Snacks `terminal` section with `ttl = 0` (a cached section would
 be static), so any script that redraws from the top-left corner can replace it. The clock draws two
 frames a second (each frame runs `date`), which is enough for the blinking colon; ten cost about 15%
-of a core while the dashboard was visible. Smooth scrolling is Snacks' (`<leader>uS`). Diff colors
-are tinted backgrounds over Dracula, so the code stays readable.
+of a core while the dashboard was visible. Smooth scrolling is Snacks' (`<leader>uS`), at 100 ms
+instead of its 200, since a review's `]c` and `C-d` wait for it. The tab line (`tabline`, from two
+tabs on) is `dotfiles/git/tabline.lua`: each tab's file, and what a review compares, see [git](git.md).
+Diff colors are tinted backgrounds over Dracula, so the code stays readable.
 
 Spell checking (`en_us`, `pt_br`) is on for prose filetypes. Words added with `zg` (in either
 language) go to the versioned `spell/en.utf-8.add`; Neovim compiles it at startup when it is

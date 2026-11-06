@@ -108,7 +108,8 @@ windows/            collect-diagnostics.ps1, a standalone Windows health report,
   feature; when it would need one, replace it with a proven plugin instead. Two did:
   Neotest (`,t`: runs tests, one adapter per language, pytest here) replaced our test runner,
   and code_runner.nvim (`,r`: runs the current file, any file type) replaced our own `,r`.
-  They do different jobs and both stay.
+  They do different jobs and both stay. The one exception is the git module,
+  `lua/dotfiles/git/`: it may grow, one file per subject, and every file is tested like the rest.
 - **Docs.** The README is the user's guide: a header (tagline, badges, "Why this one"), install,
   then one section per module with a one-line pitch and, folded in `<details>`, what it is for
   and a table of its keys. `docs/<context>.md` says how that context works, why, its

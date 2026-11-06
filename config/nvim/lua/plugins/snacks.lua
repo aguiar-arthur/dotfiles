@@ -20,8 +20,10 @@ local function words_jump(direction)
   end
 end
 
-local function review_commit(...)
-  require("dotfiles.git").review_commit(...)
+local function git_action(module, name)
+  return function(...)
+    return require("dotfiles.git." .. module)[name](...)
+  end
 end
 
 local hide_keys = {
@@ -42,6 +44,19 @@ local git_layout = {
     { win = "preview", title = "{preview}", border = "top" },
   },
 }
+local git_log = {
+  confirm = git_action("log", "commit"),
+  layout = git_layout,
+  actions = { review_worktree = git_action("log", "worktree") },
+  win = { input = { keys = { ["<c-e>"] = { "review_worktree", mode = { "n", "i" } } } } },
+}
+local function compare_branches(name)
+  return {
+    all = true,
+    confirm = git_action("compare", name),
+    transform = git_action("compare", "not_current"),
+  }
+end
 local float_terminal = {
   count = 1,
   win = vim.tbl_extend("force", require("dotfiles.float").win("Terminal"), { keys = hide_keys }),
@@ -89,17 +104,29 @@ return {
         lsp_references = { auto_confirm = false },
         git_diff = { layout = git_layout },
         git_status = { layout = git_layout },
-        git_log = { confirm = review_commit, layout = git_layout },
-        git_log_file = { confirm = review_commit, layout = git_layout },
-        git_log_line = { confirm = review_commit, layout = git_layout },
+        git_log = git_log,
+        git_log_file = git_log,
+        git_log_line = git_log,
+        git_stash = {
+          confirm = git_action("log", "stash"),
+          win = { input = { keys = { ["<c-e>"] = { "git_stash_apply", mode = { "n", "i" } } } } },
+        },
+        gh_pr = {
+          confirm = git_action("pr", "review"),
+          actions = { pr_menu = git_action("pr", "menu"), pr_hunks = git_action("pr", "hunks") },
+          win = {
+            input = {
+              keys = {
+                ["<c-e>"] = { "pr_menu", mode = { "n", "i" } },
+                ["<c-o>"] = { "pr_hunks", mode = { "n", "i" } },
+              },
+            },
+          },
+        },
       },
       actions = {
         confirm = function(picker, item, action)
-          local git = require("dotfiles.git")
-          local win = git.review() and git.edit_win(vim.api.nvim_get_current_tabpage())
-          if win then
-            picker.main = win
-          end
+          local win = require("dotfiles.git.jump").pick_win(picker, item)
           require("snacks.picker.actions").jump(picker, item, action)
           if win then
             vim.schedule(function()
@@ -114,7 +141,7 @@ return {
       },
     },
     quickfile = { enabled = true },
-    scroll = { enabled = true },
+    scroll = { enabled = true, animate = { duration = { step = 10, total = 100 } } },
     scope = { enabled = true },
     statuscolumn = { enabled = true },
     terminal = { enabled = true },
@@ -164,6 +191,18 @@ return {
     key("<leader>gO", function()
       Snacks.gitbrowse()
     end, "Open in browser", { "n", "v" }),
+    key("<leader>gvb", picker("git_branches", compare_branches("branch")), "Compare with a branch"),
+    key(
+      "<leader>gvf",
+      picker("git_branches", compare_branches("file")),
+      "Compare this file with a branch"
+    ),
+    key("<leader>gvh", git_action("compare", "hunks"), "Hunks of the whole branch"),
+    key("<leader>gvp", picker("gh_pr"), "Pick a pull request"),
+
+    key("<leader>gvo", git_action("pr", "comments"), "Comments on this branch's pull request"),
+    key("<leader>gvk", git_action("pr", "checks"), "Checks of this branch's pull request"),
+    key("<leader>gvz", picker("git_stash"), "Review a stash"),
 
     key("<leader>tf", terminal(float_terminal), "Float terminal"),
     key("<leader>th", terminal(bottom_terminal), "Horizontal terminal"),

@@ -23,8 +23,9 @@ the notes folder with obsidian.nvim. Its relationships are in [map](map.md).
 ## How it works
 
 render-markdown.nvim draws headings, tables, code blocks and checkboxes in the buffer; the line
-under the cursor and insert mode show the raw text. `<leader>um` turns it off. Cursor's `.mdc`
-rule files are Markdown too. LaTeX math is not rendered there: `,p` builds an HTML page with
+under the cursor and insert mode show the raw text. `<leader>um` turns it off, and a review does
+while it is open (see [git](git.md)). Cursor's `.mdc` rule files are Markdown too.
+LaTeX math is not rendered there: `,p` builds an HTML page with
 pandoc (math as MathML, images embedded), opens it in the browser and rebuilds it on every
 save. HTML in the Markdown is rendered too.
 

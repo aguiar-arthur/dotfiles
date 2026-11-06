@@ -74,4 +74,20 @@ function P.picker_count()
   return picker and picker:count() or 0
 end
 
+function P.floats_shown()
+  local shown = 0
+  for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+    local config = vim.api.nvim_win_get_config(win)
+    local filetype = vim.bo[vim.api.nvim_win_get_buf(win)].filetype
+    local own = filetype == "cmd"
+      or filetype == "msg"
+      or filetype == "pager"
+      or filetype == "dialog"
+    if config.relative ~= "" and not config.hide and not own then
+      shown = shown + 1
+    end
+  end
+  return shown
+end
+
 _G.P = P

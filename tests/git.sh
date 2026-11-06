@@ -1,6 +1,7 @@
 test_review() {
   review_repo review
   local repo="$PROJ/review"
+  printf 'side\n' >"$repo/side.txt"
   start_nvim "$repo" other.txt
   keys Space g V
   wait_for 'vim.fn.tabpagenr("$")' 2 20
@@ -27,11 +28,11 @@ test_review() {
   probe "Space o p hides the file list in a review" 'vim.fn.winnr("$")' 2 5
   keys Space o p
   probe "Space o p shows the file list again" 'vim.fn.winnr("$")' 3 5
-  probe "the review's tab is marked a review" 'require("dotfiles.git").review() and 1 or 0' 1 5
+  probe "the review's tab is marked a review" 'require("dotfiles.git.review").is() and 1 or 0' 1 5
   keys Space g i
   sleep 1
   keys Space g i
-  probe "Space g i twice keeps it a review" 'require("dotfiles.git").review() and 1 or 0' 1 10
+  probe "Space g i twice keeps it a review" 'require("dotfiles.git.review").is() and 1 or 0' 1 10
   probe "gc stays the comment operator in a review" 'vim.fn.maparg("gc", "n", false, true).buffer or 0' 0 5
   keys C-l C-l
   keys g f
@@ -41,12 +42,21 @@ test_review() {
   keys g t
   keys Space f f
   wait_for 'vim.bo.filetype' snacks_picker_input 10
-  keys r.lua Enter
+  keys side.txt
+  wait_for 'P.picker_count() == 1 and 1 or 0' 1 10
+  keys Enter
   probe "a picked file opens in the tab before the review too" 'vim.fn.tabpagenr("$") * 10 + vim.fn.tabpagenr()' 21 10
-  probe "and shows it there" 'vim.fn.expand("%:t")' r.lua 5
+  probe "and shows it there" 'vim.fn.expand("%:t")' side.txt 5
   probe "that tab wraps" 'vim.wo.wrap and 1 or 0' 1 5
   probe "the review keeps its diff" '#vim.fn.tabpagebuflist(2)' 3 5
   keys g t
+  send ':lua Snacks.picker.pick({ items = { { file = vim.fn.getcwd() .. "/other.txt", text = "other" } }, format = "text", auto_confirm = true })<CR>'
+  probe "a pick with one result opens in the tab before the review" 'vim.fn.expand("%:t") .. vim.fn.tabpagenr()' other.txt1 10
+  probe "and leaves the real side alone" 'vim.fn.fnamemodify(vim.fn.bufname(vim.fn.tabpagebuflist(2)[3]), ":t")' r.lua 5
+  keys g t
+  send ':lua Snacks.picker.pick({ items = { { file = vim.fn.getcwd() .. "/r.lua", text = "r", pos = { 3, 0 } } }, format = "text", auto_confirm = true })<CR>'
+  probe "a pick in the file the review shows stays in the review" 'vim.fn.line(".") .. vim.fn.expand("%:t") .. vim.fn.tabpagenr()' 3r.lua2 10
+  probe "the tab line names what the review compares" 'vim.api.nvim_eval_statusline(vim.o.tabline, { use_tabline = true }).str:find("review: origin/", 1, true) and 1 or 0' 1 5
   keys C-h C-h
   probe "gt goes back to the review's file list" 'vim.bo.filetype' codediff-explorer 5
   keys g T
@@ -64,11 +74,11 @@ test_review() {
   keys Space g q
   probe "Space g q in a review closes it" 'vim.fn.tabpagenr("$")' 1 10
   keys Space g h
-  probe "Space g h opens the file's history as a review" 'require("dotfiles.git").review(vim.api.nvim_list_tabpages()[2]) and 1 or 0' 1 20
+  probe "Space g h opens the file's history as a review" 'require("dotfiles.git.review").is(vim.api.nvim_list_tabpages()[2]) and 1 or 0' 1 20
   keys Space g q
   probe "Space g q closes the history" 'vim.fn.tabpagenr("$")' 1 10
   keys 3G Space g L
-  probe "Space g L opens the line's history as a review" 'require("dotfiles.git").review(vim.api.nvim_list_tabpages()[2]) and 1 or 0' 1 20
+  probe "Space g L opens the line's history as a review" 'require("dotfiles.git.review").is(vim.api.nvim_list_tabpages()[2]) and 1 or 0' 1 20
   keys Space g q
   wait_for 'vim.fn.tabpagenr("$")' 1 10
   keys Space g l
@@ -79,6 +89,35 @@ test_review() {
   probe "and leaves the edit alone" 'vim.fn.readfile(vim.fn.getcwd() .. "/r.lua")[1]' "x = 0" 5
   keys Space g q
   wait_for 'vim.fn.tabpagenr("$")' 1 10
+  keys Space g v b
+  wait_for 'P.picker_count() > 0 and 1 or 0' 1 15
+  keys Enter
+  probe "Enter in Space g v b compares with the branch" 'require("dotfiles.git.review").is(vim.api.nvim_list_tabpages()[2]) and 1 or 0' 1 20
+  probe "and checks nothing out" 'vim.fn.system("git -C " .. vim.fn.getcwd() .. " symbolic-ref -q HEAD") ~= "" and 1 or 0' 1 5
+  keys Space g V
+  probe "a second review replaces the first" 'vim.api.nvim_eval_statusline(vim.o.tabline, { use_tabline = true }).str:find("review: origin/", 1, true) and vim.fn.tabpagenr("$") or 0' 2 20
+  keys Space g q
+  wait_for 'vim.fn.tabpagenr("$")' 1 10
+  send ':edit r.lua<CR>'
+  keys 3G Space g p
+  wait_for 'P.floats_shown() > 0 and 1 or 0' 1 10
+  keys k
+  wait_for 'P.floats_shown()' 0 10
+  keys Space g V
+  wait_for 'vim.fn.tabpagenr("$")' 2 20
+  keys C-l C-l Space g z
+  sleep 1
+  probe "Space g z after a hunk preview raises nothing" 'select(2, vim.fn.execute("messages"):gsub("Invalid buffer id", "")) ' 0 5
+  keys Space g q
+  wait_for 'vim.fn.tabpagenr("$")' 1 10
+  send ':edit r.lua<CR>'
+  keys 3G Space g v l
+  probe "Space g v l reviews the commit of the line" 'vim.fn.tabpagenr("$")' 2 20
+  keys Space g q
+  wait_for 'vim.fn.tabpagenr("$")' 1 10
+  keys Space g v z
+  wait_for 'vim.bo.filetype' snacks_picker_input 10
+  keys Escape Escape
   send ':silent !git add r.lua<CR>'
   keys Space g C
   probe "Space g C reviews what is staged" 'vim.fn.tabpagenr("$")' 2 20
