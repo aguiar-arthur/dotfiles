@@ -65,7 +65,7 @@ o.updatetime = 250
 o.timeoutlen = 400
 
 o.foldmethod = "expr"
-o.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+o.foldexpr = "&buftype ==# '' ? v:lua.vim.treesitter.foldexpr() : 0"
 o.foldlevel = 99
 o.foldtext = ""
 

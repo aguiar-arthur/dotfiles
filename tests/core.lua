@@ -51,4 +51,17 @@ T.case("ui2", function()
   )
 end)
 
+T.case("folds are for file windows", function()
+  local dir = T.dir({ ["f.lua"] = { "local function f()", "  return 1", "end" } })
+  vim.cmd("edit " .. dir .. "/f.lua")
+  vim.treesitter.get_parser(0):parse()
+  T.eq("a file folds by its syntax", vim.fn.foldlevel(2) > 0, true)
+  local scratch = vim.api.nvim_create_buf(false, true)
+  vim.bo[scratch].filetype = "lua"
+  vim.api.nvim_buf_set_lines(scratch, 0, -1, false, { "local function f()", "  return 1", "end" })
+  vim.api.nvim_set_current_buf(scratch)
+  T.eq("a scratch window does not, it would leave a stale entry behind", vim.fn.foldlevel(2), 0)
+  vim.cmd("enew")
+end)
+
 T.done()

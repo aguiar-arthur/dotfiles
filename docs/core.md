@@ -119,6 +119,10 @@ Consumes: nothing.
 
 ## Pitfalls
 
+- `foldexpr` runs treesitter only where `buftype` is empty. Neovim's folds keep an entry per buffer
+  and, when `foldminlines` changes globally (`<leader>gz` in a review), refresh them all; a float
+  closed inside an autocmd, as a hunk preview closes on a cursor move, is wiped without the
+  `BufUnload` that clears its entry, and that refresh then failed with `Invalid buffer id`.
 - Neovim's own ftplugins for Lua, Markdown, help and query call `vim.treesitter.start()` after
   the `FileType` autocmds; anything that turns treesitter off must stop it again later (the
   treesitter autocmd does it in `vim.schedule`).
