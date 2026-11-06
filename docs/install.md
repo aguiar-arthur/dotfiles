@@ -24,7 +24,7 @@ are in [map](map.md).
 | `macos/lib.sh` | what the parts share: `step_brew` (trusting third-party taps first), `step_link`, `run_steps`, `link` with backups, `pref` |
 | `macos/nvim/` | `Brewfile` (what Neovim needs, `gh` for the pull request picker included), `install.sh` (brew, link, nvim), `link.sh` (`~/.config/nvim`, rumdl, `~/.latexmkrc`, Skim) |
 | `macos/terminal/` | `Brewfile` (Starship, eza, iTerm2, the font), `install.sh` (brew, link), `link.sh` (Starship, the iTerm2 profile and default, `~/.zshrc`) |
-| `macos/tmux/` | `Brewfile` (tmux, lazygit for `prefix G`), `install.sh` (brew, link, whichkey), `link.sh` (`~/.config/tmux/tmux.conf`), `whichkey.sh` (the whichkey-tmux clone in `~/.config/tmux/plugins/`) |
+| `macos/tmux/` | `Brewfile` (tmux, lazygit for `prefix G`), `install.sh` (brew, link, whichkey), `link.sh` (`~/.config/tmux/tmux.conf`, lazygit's `config.yml`), `whichkey.sh` (the whichkey-tmux clone in `~/.config/tmux/plugins/`) |
 | `macos/apps/` | `Brewfile` (programs that are neither), `install.sh` (brew) |
 | `config/nvim/lua/dotfiles/install.lua` | headless install of Mason packages, parsers and spell files, with time limits |
 | `config/nvim/lua/dotfiles/mason.lua` | which Mason packages the settings want and which are missing or broken |
@@ -33,6 +33,7 @@ are in [map](map.md).
 | `config/zsh/dotfiles.zsh` | Homebrew on `PATH` (Apple Silicon or Intel), a valid `LANG`, `JAVA_HOME`, `EDITOR` / `VISUAL`, history, emacs keys, the eza aliases (`ls`, `ll`, `lt`), `path_report`, `command_origin`, Starship, `prompt_gap` and `clear` (the blank line between prompts) |
 | `config/starship/starship.toml` | the prompt: rounded pills on rows with a left bracket and fading lines, Dracula colors |
 | `config/tmux/tmux.conf` | tmux: Dracula status bar with pills for the session, the current window and the clock, true color and focus events for Neovim, `C-h/j/k/l` across panes (not into Neovim), splits in the pane's folder, lazygit and scratch popups, vi copy mode to `pbcopy`, no `GIT_EDITOR`, menus in the terminal's colors, whichkey-tmux in auto mode (when it is there) |
+| `config/lazygit/config.yml` | lazygit's Dracula theme, linked to its default place (`~/Library/Application Support/lazygit/`) |
 | `config/iterm2/dracula.json` | the "Dotfiles (Dracula)" Dynamic Profile, with iTerm2's own Powerline glyphs and opaque cell backgrounds for the pills |
 
 ## How it works
@@ -118,6 +119,8 @@ Consumes: [core](core.md) `settings` (which servers, tools, parsers and spell la
   pane running Neovim (found with `ps` on the pane's tty), where the key goes to Neovim and
   `prefix` with an arrow leaves it. Making Neovim hand the key back needs a plugin on its side
   (vim-tmux-navigator), which was left out on purpose.
+- lazygit's theme is linked to its default path and not pointed at with `LG_CONFIG_FILE`: that
+  variable naming a missing file makes lazygit exit, so `prefix G` would break until `link.sh` ran.
 - tmux 3.8 uses `prefix g` for its floating panes, so lazygit is on `prefix G`. The scratch
   popup is a session named `scratch` attached inside `display-popup`.
 - `detach-on-destroy` is `on`: with `off`, closing a session's last pane moved you into any other

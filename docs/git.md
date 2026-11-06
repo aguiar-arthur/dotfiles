@@ -38,6 +38,7 @@ branch, a pull request, two revisions, a file's or a line's history. Its relatio
 | `config/nvim/lua/config/keymaps.lua` | `<leader>bd`, `<leader>bo`, `<leader>bD`, through `buffers.close_buffer` / `close_buffers` |
 | `config/nvim/lua/plugins/snacks.lua` | lazygit, the git pickers (`gl`, `gt`, `gc`, `gvb`, `gvf`, `gvh`, `gvp`) and their Enter, `gO`, the `confirm` that sends a file from a review to the editing tab |
 | `config/nvim/lua/plugins/ui.lua` | the which-key groups `<leader>g`, `<leader>gm` and `<leader>gv` |
+| `config/lazygit/config.yml` | lazygit's Dracula theme, for `prefix G` in tmux (inside Neovim Snacks adds its own on top) |
 
 ## How it works
 

@@ -45,6 +45,7 @@ config/starship/    starship.toml
 config/tmux/        tmux.conf
 config/rumdl/       rumdl.toml (Markdown lint rules; the root .rumdl.toml links to it)
 config/iterm2/      dracula.json (Dynamic Profile)
+config/lazygit/     config.yml (Dracula theme, linked by macos/tmux/link.sh)
 config/latex/       latexmkrc (linked to ~/.latexmkrc)
 docs/               one doc per context (the map above); img/ holds the README screenshot
 macos/              the macOS install, see docs/install.md:
@@ -52,7 +53,7 @@ macos/              the macOS install, see docs/install.md:
   lib.sh            what the parts share: Homebrew, links with backups, preferences, steps
   nvim/             Brewfile, install.sh (brew, link, plugins and Mason), link.sh (incl. Skim)
   terminal/         Brewfile, install.sh (brew, link), link.sh (Starship, iTerm2, ~/.zshrc)
-  tmux/             Brewfile, install.sh (brew, link, whichkey), link.sh (tmux.conf),
+  tmux/             Brewfile, install.sh (brew, link, whichkey), link.sh (tmux.conf, lazygit),
                     whichkey.sh (clones whichkey-tmux into ~/.config/tmux/plugins/)
   apps/             Brewfile, install.sh (brew): programs that are neither of the others
 SECURITY.md         how to report a problem
