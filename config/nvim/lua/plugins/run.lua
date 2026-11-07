@@ -1,9 +1,14 @@
 local commands = {
   python = function()
-    return { "cd $dir &&", vim.fn.shellescape(require("dotfiles.python").path()), "-u $fileName" }
+    return {
+      "cd $dir &&",
+      vim.fn.shellescape(require("dotfiles.lang.python").path()),
+      "-u $fileName",
+    }
   end,
   lua = "cd $dir && nvim -l $fileName",
   sh = "cd $dir && bash $fileName",
+  zsh = "cd $dir && zsh $fileName",
 }
 
 return {

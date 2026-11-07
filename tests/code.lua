@@ -1,6 +1,6 @@
 local T = dofile(vim.env.DOT .. "/tests/lib.lua")
 
-local python = require("dotfiles.python")
+local python = require("dotfiles.lang.python")
 local root = T.dir({ ["src/a.py"] = {}, [".venv/bin/python"] = { "#!/bin/sh" } })
 vim.fn.setfperm(root .. "/.venv/bin/python", "rwxr-xr-x")
 T.case("python path", function()
@@ -9,6 +9,15 @@ T.case("python path", function()
   T.eq("python: an activated $VIRTUAL_ENV comes first", python.path(), "/elsewhere/bin/python")
   vim.env.VIRTUAL_ENV = nil
   T.eq("python: then the project's .venv", python.path(), root .. "/.venv/bin/python")
+  local plain = T.dir({ ["src/a.py"] = {}, ["venv/bin/python"] = { "#!/bin/sh" } })
+  vim.fn.setfperm(plain .. "/venv/bin/python", "rwxr-xr-x")
+  T.eq("python: or its venv", python.path(plain .. "/src"), plain .. "/venv/bin/python")
+  local empty = T.dir({ ["src/a.py"] = {}, ["venv/README"] = {} })
+  T.eq(
+    "python: a venv folder with no interpreter is not one",
+    python.path(empty .. "/src"),
+    vim.fn.exepath("python3")
+  )
   vim.cmd("edit " .. T.dir({ ["b.py"] = {} }) .. "/b.py")
   T.eq("python: then python3", python.path(), vim.fn.exepath("python3"))
   T.stub(vim.env, "PATH", "/nonexistent")
@@ -17,6 +26,30 @@ T.case("python path", function()
     python.path(),
     "python3"
   )
+end)
+
+T.case("marksman stays out of notes", function()
+  local marksman = dofile(vim.fn.stdpath("config") .. "/after/lsp/marksman.lua")
+  local settings = require("config.settings")
+  local real_notes = T.dir({ ["a.md"] = { "# A" } })
+  local link = vim.fn.tempname()
+  vim.uv.fs_symlink(real_notes, link)
+  T.stub(settings.notes, "dir", link)
+  local function started(file)
+    local root = "not started"
+    vim.cmd("edit " .. file)
+    marksman.root_dir(vim.api.nvim_get_current_buf(), function(dir)
+      root = dir
+    end)
+    vim.cmd("enew!")
+    return root ~= "not started"
+  end
+  T.eq("marksman: a note, through a notes folder that is a link", started(link .. "/a.md"), false)
+  T.eq("marksman: a note opened by its real path", started(real_notes .. "/a.md"), false)
+  T.eq("marksman: a new note there", started(link .. "/new.md"), false)
+  T.eq("marksman: any other Markdown file", started(T.dir({ ["b.md"] = {} }) .. "/b.md"), true)
+  T.stub(settings.notes, "dir", "/nonexistent/notes")
+  T.eq("marksman: without a notes folder", started(T.dir({ ["c.md"] = {} }) .. "/c.md"), true)
 end)
 
 T.case("clojure-lsp", function()
@@ -90,7 +123,7 @@ T.case("clojure-lsp", function()
 end)
 
 T.case("Clojure jack-in", function()
-  local jack_in = require("dotfiles.clojure")
+  local jack_in = require("dotfiles.lang.clojure")
   local function repl(files)
     local cmd = jack_in.repl_command(T.dir(files))
     return cmd and cmd[1]
@@ -223,7 +256,7 @@ T.case("python in every tool", function()
 end)
 
 T.case("Clojure: waiting for the REPL", function()
-  local clojure = require("dotfiles.clojure")
+  local clojure = require("dotfiles.lang.clojure")
   T.stub(clojure, "poll", 10)
   T.stub(clojure, "limit", 200)
   local connected, told, jobs = 0, {}, {}
@@ -278,7 +311,7 @@ T.case("Clojure: waiting for the REPL", function()
 end)
 
 T.case("Clojure: two ticks queued at once", function()
-  local clojure = require("dotfiles.clojure")
+  local clojure = require("dotfiles.lang.clojure")
   T.stub(clojure, "poll", 10)
   local connected, errors = 0, {}
   T.stub(package.loaded, "conjure.client.clojure.nrepl.action", {

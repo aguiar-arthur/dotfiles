@@ -31,6 +31,7 @@ local M = {
   system_servers = { rumdl = "rumdl", clojure_lsp = "clojure-lsp" },
   parsers = {
     "bash",
+    "bibtex",
     "clojure",
     "css",
     "diff",

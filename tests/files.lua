@@ -31,6 +31,16 @@ T.case("prettier's parser", function()
 end)
 
 T.case("style markers", function()
+  T.eq(
+    "zsh with an .editorconfig [*.zsh] formats",
+    formats({ [".editorconfig"] = { "[*.zsh]" } }, "a.zsh"),
+    true
+  )
+  T.eq(
+    "zsh with only [*.sh] is left alone",
+    formats({ [".editorconfig"] = { "[*.sh]" } }, "a.zsh"),
+    false
+  )
   T.eq("Lua without stylua.toml is left alone", formats({}, "a.lua"), false)
   T.eq("Lua with stylua.toml formats on save", formats({ ["stylua.toml"] = {} }, "src/a.lua"), true)
   T.eq(

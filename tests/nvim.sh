@@ -162,6 +162,7 @@ full() {
   test_lua
   test_run
   test_debug
+  test_servers_per_language
   test_language_actions
   test_test_keys
   test_clojure

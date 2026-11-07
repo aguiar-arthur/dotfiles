@@ -6,7 +6,7 @@ return {
   before_init = function(_, config)
     local settings = config.settings
     settings.python = vim.tbl_extend("keep", settings.python or {}, {
-      pythonPath = require("dotfiles.python").path(config.root_dir),
+      pythonPath = require("dotfiles.lang.python").path(config.root_dir),
     })
   end,
   settings = {

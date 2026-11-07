@@ -163,7 +163,7 @@ The keys to start with.
 | `gd` / `grr` / `K` | go to definition / references / documentation |
 | `gra` / `grn` | code action / rename |
 | `Space g g` | lazygit |
-| `,r` | run the file (Python, Lua, shell, JavaScript, C, C++, Java, Ruby, Rust) |
+| `,r` | run the file (Python, Lua, shell, zsh, JavaScript, C, C++, Java, Ruby, Rust) |
 
 </details>
 
@@ -342,7 +342,7 @@ These keys exist only in the languages listed; in other files they are not mappe
 
 | Key | Python | Lua | Shell |
 |---|---|---|---|
-| `,r` run the file in a bottom terminal | yes | `nvim -l` | `bash` |
+| `,r` run the file in a bottom terminal | yes | `nvim -l` | `bash`, `zsh` |
 | `,t…` tests (Neotest) | pytest | | |
 | `,d…` debugger (nvim-dap) | debugpy | | |
 | `,o` organize imports | ruff | | |

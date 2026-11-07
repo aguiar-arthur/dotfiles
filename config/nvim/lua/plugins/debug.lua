@@ -1,4 +1,4 @@
-local python_path = require("dotfiles.python").path
+local python_path = require("dotfiles.lang.python").path
 
 local debuggable = { "python" }
 

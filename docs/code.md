@@ -25,10 +25,10 @@ Clojure in detail. Its relationships are in [map](map.md).
 | `config/nvim/lua/plugins/run.lua` | code_runner.nvim, `,r` and its `commands` |
 | `config/nvim/lua/plugins/test.lua` | Neotest, neotest-python, `,t` |
 | `config/nvim/lua/plugins/debug.lua` | nvim-dap, nvim-dap-view, the debugpy adapter, `,d`, the Python launch |
-| `config/nvim/lua/dotfiles/python.lua` | the interpreter: `$VIRTUAL_ENV`, else `.venv` upward from a folder (the file's by default), else `python3`; `,r`, the debugger and basedpyright ask it |
+| `config/nvim/lua/dotfiles/lang/python.lua` | the interpreter: `$VIRTUAL_ENV`, else `.venv` or `venv` upward from a folder (the file's by default), else `python3`; `,r`, the debugger and basedpyright ask it |
 | `config/nvim/after/ftplugin/lua.lua` | `,s` sources the file |
 | `config/nvim/lua/plugins/clojure.lua` | Conjure (Clojure only), nvim-paredit, `,cj` |
-| `config/nvim/lua/dotfiles/clojure.lua` | jack-in: the nREPL command (`clojure`, `lein` or `bb`), waiting for `.nrepl-port` (`poll` and `limit` are fields so the tests can shorten them; a tick queued after the timer closed returns at once), the dead-REPL check |
+| `config/nvim/lua/dotfiles/lang/clojure.lua` | jack-in: the nREPL command (`clojure`, `lein` or `bb`), waiting for `.nrepl-port` (`poll` and `limit` are fields so the tests can shorten them; a tick queued after the timer closed returns at once), the dead-REPL check |
 | `config/nvim/after/ftplugin/clojure.lua` | which-key names of Conjure's groups |
 
 ## How it works
@@ -61,16 +61,16 @@ Clojure in detail. Its relationships are in [map](map.md).
   only when the server offers it and the file type has no `,o` of its own (in Clojure it stays
   paredit's raise); `tests/keys.lua` checks both ways, since the order of ftplugin and `LspAttach`
   is what decides it.
-- One Python: `dotfiles.python` is what `,r`, the debugger and basedpyright (`python.pythonPath`,
-  set in `before_init` from the root, unless the project or machine set one) run, so a project
-  with a `.venv` that is not activated behaves the same in each. `before_init` changes
-  `config.settings` in place: the client keeps the table it was given before `before_init` runs,
-  so a new table (as in Neovim's own example) never reaches the server. Its `root_dir` is the
+- One Python: `dotfiles.lang.python` is what `,r`, the debugger and basedpyright
+  (`python.pythonPath`, set in `before_init` from the root, unless the project or machine set one)
+  run, so a project with a `.venv` that is not activated behaves the same in each. `before_init`
+  changes `config.settings` in place: the client keeps the table it was given before `before_init`
+  runs, so a new table (as in Neovim's own example) never reaches the server. Its `root_dir` is the
   project's (lspconfig's markers) or the file's own folder, so `before_init` never guesses from
   whichever buffer is current. neotest-python keeps its own lookup, which also finds `venv/`,
   Poetry, Pipenv and uv environments; a `python` option would replace all of that. An activated
-  `$VIRTUAL_ENV` comes first in both, so `,t` agrees with the others when one is active, even
-  one left active from another project.
+  `$VIRTUAL_ENV` comes first in both, so `,t` agrees with the others when one is active, even one
+  left active from another project.
 - clojure-lsp's call hierarchy replies break the spec: `fromRanges` is empty, the call site is
   in `selectionRange` and the definition in `range`. Snacks then placed the call site in the
   callee's file ("index out of range" when that line is shorter) and listed no incoming calls.
@@ -101,7 +101,7 @@ Clojure in detail. Its relationships are in [map](map.md).
 
 ### Formatting
 
-conform formats on save (Lua with stylua, Python with ruff, shell with shfmt, web/JSON/YAML
+conform formats on save (Lua with stylua, Python with ruff, shell and zsh with shfmt, web/JSON/YAML
 with prettier, Markdown with rumdl; TOML and Clojure through taplo and clojure-lsp as the LSP
 fallback), but only in projects that declare that tool's style:
 
@@ -109,31 +109,32 @@ fallback), but only in projects that declare that tool's style:
 |---|---|
 | Lua | `stylua.toml` or `.stylua.toml` |
 | Shell | an `.editorconfig` section for `.sh` or `.bash` files |
+| Zsh | an `.editorconfig` section for `.zsh` files |
 | Python | `ruff.toml`, `.ruff.toml` or `[tool.ruff]` in `pyproject.toml` |
 | CSS, HTML, JSON, YAML | a prettier config with a trusted `.nvim.lua` beside it |
 | Markdown | `.rumdl.toml`, `rumdl.toml` or `.markdownlint.*` |
 | TOML | `taplo.toml` or `.taplo.toml` |
 | Clojure | `cljfmt.edn` (or `.clj`) or `:cljfmt` in `.lsp/config.edn` |
 
-A filetype with no row here (SCSS, Less, LaTeX) never formats on save, even when its server
-could. Without one each formatter falls back to its own defaults and a `:w` would restyle someone
-else's code; a bare `.editorconfig` or `pyproject.toml` is too common to count. `<leader>lf`
-formats anywhere. LaTeX formats only with `<leader>lf`. `<leader>uf` turns saving off
-everywhere, `<leader>uF` in this buffer only (both in `dotfiles/toggles.lua`). prettier runs a
-project's JavaScript (`.prettierrc.js`, plugins), so it runs, on save or with `<leader>lf`,
-only where a `.nvim.lua` approved with `:trust` sits next to the prettier config and has not
-changed since; elsewhere `<leader>lf` falls back to the language server. It is always the
-prettier on `PATH` (Homebrew's), never a repository's `node_modules/.bin/prettier`. Neovim has
-no call that asks whether a file is trusted without prompting, so `trusted()` in
-`formatting.lua` reads Neovim's own `trust` file (`stdpath("state")`, lines of `<sha256> <path>`,
-the format `vim.secure` writes in 0.12); if a Neovim update changes that format, prettier stops
-running and the `tests/files.lua` trust cases fail.
+A filetype with no row here (SCSS, Less, LaTeX) never formats on save, even when its server could.
+Without one each formatter falls back to its own defaults and a `:w` would restyle someone else's
+code; a bare `.editorconfig` or `pyproject.toml` is too common to count. `<leader>lf` formats
+anywhere. LaTeX formats only with `<leader>lf`. `<leader>uf` turns saving off everywhere,
+`<leader>uF` in this buffer only (both in `dotfiles/toggles.lua`). prettier runs a project's
+JavaScript (`.prettierrc.js`, plugins), so it runs, on save or with `<leader>lf`, only where a
+`.nvim.lua` approved with `:trust` sits next to the prettier config and has not changed since;
+elsewhere `<leader>lf` falls back to the language server. It is always the prettier on `PATH`
+(Homebrew's), never a repository's `node_modules/.bin/prettier`. Neovim has no call that asks
+whether a file is trusted without prompting, so `trusted()` in `dotfiles/format.lua` reads Neovim's
+own `trust` file (`stdpath("state")`, lines of `<sha256> <path>`, the format `vim.secure` writes in
+0.12); if a Neovim update changes that format, prettier stops running and the `tests/files.lua`
+trust cases fail.
 
 ### Run, test, debug
 
 | Keys | Python | Lua | Shell |
 |---|---|---|---|
-| `,r` run the file | yes | `nvim -l` | `bash` |
+| `,r` run the file | yes | `nvim -l` | `bash`, `zsh` |
 | `,t…` tests (Neotest) | pytest | | |
 | `,d…` debugger | debugpy | | |
 | `,o` organize imports | ruff | | |
@@ -196,6 +197,11 @@ Consumes:
 
 ## Pitfalls
 
+- Zsh has `,r` and shfmt (which reads its dialect from the `.zsh` extension or the shebang), but no
+  server and no tree-sitter: bash-language-server and shellcheck do not read zsh, and Neovim's own
+  syntax file highlights it better than the bash parser would.
+- `after/lsp/marksman.lua` compares real paths: `~/notes` may be a link, and Neovim's buffer names
+  resolve some links but not all, so a plain comparison let marksman into notes.
 - taplo 0.10.0 (the newest in Mason) cannot read SchemaStore's current catalog (`failed to
   fetch catalog` in `lsp.log`), so TOML files get no schema completion or validation; formatting
   and syntax checks still work. Nothing to change here until taplo updates.
@@ -223,11 +229,11 @@ Consumes:
 |---|---|
 | Format on save per style marker (none without one), prettier trust, `*.json.*` parser | `tests/files.lua` |
 | `gq` keeps wrapping (`formatexpr` cleared) | `tests/keys.lua` |
-| Python interpreter (given a folder, in basedpyright's live settings; neotest-python left to its own), clojure-lsp skips Conjure's log, the jack-in command per project file, waiting for the REPL (port file, REPL gone, timeout) | `tests/code.lua` |
+| Python interpreter (`.venv`, `venv`, given a folder, in basedpyright's live settings; neotest-python left to its own), marksman out of notes through a link, clojure-lsp skips Conjure's log, the jack-in command per project file, waiting for the REPL (port file, REPL gone, timeout) | `tests/code.lua` |
 | Mason lists | `tests/install.lua` |
 | Every `<Cmd>` key names a command that exists (`Space l R` once ran a removed `:LspRestart`), also without rumdl | `tests/keys.lua` |
 | `,o` set when the server offers it, left alone when the file type has its own | `tests/keys.lua` |
-| Servers attach (Lua, Python, …), `Space l R` restarts one, `,o`, `,s` | full: `test_lua`, `test_language_actions` |
+| A server attaches per language, `Space l R` restarts one, `,o`, `,s` | full: `test_lua`, `test_servers_per_language`, `test_language_actions` |
 | `,r` per language | full: `test_run` in `tests/code.sh` |
 | `,dp` log point, `]T` / `[T` | `tests/keys.lua` |
 | The debugpy adapter found when a session starts, or a message without it | `tests/code.lua` |
@@ -242,12 +248,14 @@ Consumes:
 
 - **A language server**: its lspconfig name in `settings.mason_servers` (or
   `system_servers` with its binary), settings in `after/lsp/<name>.lua` if any, run
-  `macos/nvim/install.sh`, list the language in the README's "Code" section, and a
-  `clients("<name>")` check in a full test.
+  `macos/nvim/install.sh`, list the language in the README's "Code" section, and an entry in
+  `test_servers_per_language`.
 - **A formatter**: a line in `formatters_by_ft`, a `style_markers` entry (`dotfiles/format.lua`),
   its program in `macos/nvim/Brewfile` (or Mason tools), a case in `tests/files.lua`, the table
   above.
 - **A language for `,r`**: one line in `commands` in `run.lua` (or its name in the key's `ft`
   when the plugin knows it), a row in the README table, a `run_case` in `tests/code.sh`.
+- **Logic of one language**: a file in `dotfiles/lang/`; there is no registry of languages, since
+  each tool already keeps its own list (`formatters_by_ft`, `commands`, `settings`).
 - **A test adapter or debugger**: its plugin in `test.lua` / `debug.lua` with the new `ft`;
   check the plugin rule first.

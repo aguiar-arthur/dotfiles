@@ -18,6 +18,7 @@ return {
       python = { "ruff_organize_imports", "ruff_format" },
       sh = { "shfmt" },
       bash = { "shfmt" },
+      zsh = { "shfmt" },
       css = { "prettier" },
       html = { "prettier" },
       json = { "prettier" },

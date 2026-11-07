@@ -58,6 +58,7 @@ local style_markers = {
   lua = any_file({ "stylua.toml", ".stylua.toml" }),
   sh = shfmt_editorconfig,
   bash = shfmt_editorconfig,
+  zsh = file_matching(".editorconfig", "^%s*%[[^%]]*%f[%w]zsh%f[%W]"),
   python = either(
     any_file({ "ruff.toml", ".ruff.toml" }),
     file_matching("pyproject.toml", "^%s*%[tool%.ruff")

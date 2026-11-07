@@ -6,7 +6,7 @@ return {
       {
         "<localleader>cj",
         function()
-          require("dotfiles.clojure").jack_in()
+          require("dotfiles.lang.clojure").jack_in()
         end,
         ft = "clojure",
         desc = "Start the REPL and connect (jack-in)",

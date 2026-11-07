@@ -38,9 +38,11 @@ test_run() {
   printf 'print("RUN_OK_python")\n' >"$PROJ/run/hello.py"
   printf 'print("RUN_OK_lua")\n' >"$PROJ/run/hello.lua"
   printf 'echo RUN_OK_sh\n' >"$PROJ/run/hello.sh"
+  printf 'echo RUN_OK_zsh\n' >"$PROJ/run/hello.zsh"
   run_case Python python3 hello.py RUN_OK_python
   run_case Lua nvim hello.lua RUN_OK_lua
   run_case Shell bash hello.sh RUN_OK_sh
+  run_case Zsh zsh hello.zsh RUN_OK_zsh
   start_nvim "$PROJ/run" hello.py
   keys ,r
   probe "Python: first run opens one terminal window" "$(terminal_windows)" 1 20
@@ -90,6 +92,35 @@ test_debug() {
   keys ,du
   probe "Python: ,du closes the panels" 'P.dap_panels()' 0 10
   stop_nvim
+}
+
+test_servers_per_language() {
+  mkdir -p "$PROJ/servers"
+  printf 'x = 1\n' >"$PROJ/servers/a.py"
+  printf 'x=1\n' >"$PROJ/servers/a.sh"
+  printf '<p>x</p>\n' >"$PROJ/servers/a.html"
+  printf 'a { color: red; }\n' >"$PROJ/servers/a.css"
+  printf '{}\n' >"$PROJ/servers/a.json"
+  printf 'a: 1\n' >"$PROJ/servers/a.yaml"
+  printf 'a = 1\n' >"$PROJ/servers/a.toml"
+  printf '\\documentclass{article}\n' >"$PROJ/servers/a.tex"
+  printf '@article{a, title={x}}\n' >"$PROJ/servers/a.bib"
+  printf '# A\n' >"$PROJ/servers/a.md"
+  local item file server
+  for item in a.py:basedpyright:basedpyright a.py:ruff:ruff a.sh:bashls:bash-language-server \
+    a.html:html:vscode-html-language-server a.css:cssls:vscode-css-language-server \
+    a.json:jsonls:vscode-json-language-server a.yaml:yamlls:yaml-language-server \
+    a.toml:taplo:taplo a.tex:texlab:texlab a.bib:texlab:texlab a.md:marksman:marksman; do
+    file="${item%%:*}"
+    server="${item#*:}"
+    if ! mason "${server#*:}"; then
+      skip "${server%%:*} attaches to $file" "not installed by Mason"
+      continue
+    fi
+    start_nvim "$PROJ/servers" "$file"
+    probe "${server%%:*} attaches to $file" "$(clients "${server%%:*}")" 1 60
+    stop_nvim
+  done
 }
 
 test_language_actions() {
