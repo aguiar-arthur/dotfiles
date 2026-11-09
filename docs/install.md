@@ -7,41 +7,20 @@ are in [map](map.md).
 
 ## Language
 
-- **part**: one folder in `macos/` (`nvim`, `terminal`, `tmux`, `apps`) with its own `Brewfile`,
-  `install.sh` and (all but apps) `link.sh`; it installs alone, so a machine whose shell and
-  terminal must stay as they are runs only `macos/nvim/install.sh` (and `macos/tmux/install.sh`
-  for tmux, which is a part of its own for that reason).
-- **step**: one of `brew`, `link`, `whichkey`, `nvim` in a part's `install.sh`; a failed step
+- **part**: one folder in `macos/` (`nvim`, `terminal`, `tmux`, `apps`) with its own
+  `Brewfile`, `install.sh` and (all but apps) `link.sh`; it installs alone, so a machine whose
+  shell and terminal must stay as they are runs only `macos/nvim/install.sh` (and
+  `macos/tmux/install.sh` for tmux, which is a part of its own for that reason).
+- **step**: one of `brew`, `link`, `whichkey`, `tex`, `nvim` in a part's `install.sh`; a failed step
   does not stop the others, and a failed part does not stop `macos/install.sh`.
 - **lockfile**: `config/nvim/lazy-lock.json`, the plugin commits; the way back after a bad
   update.
 
-## Files
-
-| Path | Holds |
-|---|---|
-| `macos/install.sh` | runs every part: terminal, tmux, apps, nvim |
-| `macos/lib.sh` | what the parts share: `step_brew` (trusting third-party taps first), `step_link`, `run_steps`, `link` with backups, `pref` |
-| `macos/nvim/` | `Brewfile` (what Neovim needs, `gh` for the pull request picker included), `install.sh` (brew, link, nvim), `link.sh` (`~/.config/nvim`, rumdl, `~/.latexmkrc`, Skim) |
-| `macos/terminal/` | `Brewfile` (Starship, eza, iTerm2, the font), `install.sh` (brew, link), `link.sh` (Starship, the iTerm2 profile and default, `~/.config/git/`, `~/.zshrc`) |
-| `macos/tmux/` | `Brewfile` (tmux, lazygit for `prefix G`), `install.sh` (brew, link, whichkey), `link.sh` (`~/.config/tmux/tmux.conf`, lazygit's `config.yml`), `whichkey.sh` (the whichkey-tmux clone in `~/.config/tmux/plugins/`) |
-| `macos/apps/` | `Brewfile` (programs that are neither), `install.sh` (brew) |
-| `config/nvim/lua/dotfiles/install/init.lua` | headless install of Mason packages, parsers and spell files, with time limits |
-| `config/nvim/lua/dotfiles/install/mason.lua` | which Mason packages the settings want and which are missing or broken |
-| `config/nvim/lua/config/lazy.lua` | lazy.nvim cloned at the lockfile's commit |
-| `config/nvim/lazy-lock.json` | plugin versions (committed) |
-| `config/zsh/dotfiles.zsh` | Homebrew on `PATH` (Apple Silicon or Intel), a valid `LANG`, `JAVA_HOME`, `EDITOR` / `VISUAL`, history, emacs keys, the eza aliases (`ls`, `ll`, `lt`), `path_report`, `command_origin`, Starship, `prompt_gap` and `clear` (the blank line between prompts) |
-| `config/starship/starship.toml` | the prompt: rounded pills on rows with a left bracket and fading lines, Dracula colors |
-| `config/tmux/tmux.conf` | tmux: Dracula status bar with pills for the session, the current window and the clock, true color and focus events for Neovim, `C-h/j/k/l` across panes (not into Neovim), splits in the pane's folder, lazygit and scratch popups, vi copy mode to `pbcopy`, no `GIT_EDITOR`, menus in the terminal's colors, whichkey-tmux in auto mode (when it is there) |
-| `config/git/config`, `config/git/ignore` | how git behaves on any repository and what it ignores everywhere; identity stays in `~/.gitconfig` |
-| `config/lazygit/config.yml` | lazygit's Dracula theme, linked to its default place (`~/Library/Application Support/lazygit/`) |
-| `config/iterm2/dracula.json` | the "Dotfiles (Dracula)" Dynamic Profile, with iTerm2's own Powerline glyphs and opaque cell backgrounds for the pills |
-
 ## How it works
 
-`macos/install.sh` runs the parts' `install.sh` (terminal, tmux, apps, nvim) and ends with `Done.`
-or `Failed: <parts>`; each part runs its steps in order (`brew`, `link`, then `nvim` for
-Neovim) and ends with `Done: <part>.` or `Failed: <steps>`. The nvim step needs
+`macos/install.sh` runs the parts' `install.sh` (terminal, tmux, apps, nvim) and ends with
+`Done.` or `Failed: <parts>`; each part runs its steps in order (`brew`, `link`, then `tex` and
+`nvim` for Neovim) and ends with `Done: <part>.` or `Failed: <steps>`. The nvim step needs
 `~/.config/nvim` to link to this repository, so Neovim uses the same config as every day:
 `Lazy! restore` puts plugins at the lockfile's commits (and runs their `build` steps, such as
 codediff's library), then `dotfiles.install` installs the Mason packages, the parsers (with
@@ -53,19 +32,21 @@ The tmux part's `whichkey` step runs `whichkey.sh`: it clones whichkey-tmux into
 holds a clone of it, and stops with an error, touching nothing, when it holds anything else.
 It never pulls: an update is on purpose (see [Updating](#updating)).
 
+TeX is BasicTeX (TeX Live's small scheme, about 400 MB) rather than MacTeX (about 10 GB): Homebrew
+installs it, and the nvim part's `tex` step runs `tex.sh`, which adds with `tlmgr` the packages
+of `PACKAGES` that are missing: `latexmk` and `chktex` for vimtex and texlab, `texcount` for
+`,lw`, `abntex2` and what it needs (`enumitem`, `relsize`, `fontname`), `cm-super` for T1 text
+without `lmodern`, and `sansmathaccent` for beamer. They are the programs the config calls and
+what the snippets' documents read (`latexmk -recorder`), less what BasicTeX has. TeX Live
+belongs to root, so `tlmgr` runs with `sudo`, and only when something is missing; it first
+updates itself (`update --self`). latexindent comes from Homebrew, with its Perl modules: TeX
+Live's needs `File::HomeDir`, which macOS lacks.
+
 Each `link.sh` links its files, moving whatever was there to `<name>.bak.<timestamp>` (the three
 newest are kept; each older one is named with `prune` as it is deleted), and writes its app's
 preferences with `defaults` (Skim, iTerm2); the terminal one also
 adds one marked block (`# >>> dotfiles >>>`) to `~/.zshrc` that sources `dotfiles.zsh`. Every
 line they print starts with `ok` when nothing had to change.
-
-## Contract
-
-Offers: every program, link, Mason package, parser and spell file the other contexts assume is
-there ([code](code.md) servers, [git](git.md) codediff library, [latex](latex.md) Skim and
-`~/.latexmkrc`).
-
-Consumes: [core](core.md) `settings` (which servers, tools, parsers and spell languages).
 
 ## Pitfalls
 
@@ -91,9 +72,17 @@ Consumes: [core](core.md) `settings` (which servers, tools, parsers and spell la
   `EDITOR=nvim` the first shell had emacs keys and a shell that inherited it (nested, or a tmux
   pane) had vi keys, with `Ctrl-r` and `Ctrl-a` doing nothing useful; `bindkey -e` keeps them all
   the same. The block runs last in `~/.zshrc`, so a `bindkey -v` above it loses: change that line.
+- macOS's own zsh files never run `compinit`, so without it Tab only completed file names, not
+  git branches or `brew` and `gh` commands. It runs only in an interactive shell, after
+  Homebrew's `shellenv` (which adds its completions to `fpath`), with `-i` so a group-writable
+  Homebrew folder never stops a new shell with a question. `share_history` already appends
+  every command as it runs, so `inc_append_history` stays off, as zsh's manual says.
 - eza is not a drop-in `ls`: its `-t` takes a field, so `ls -lt` and `ls -ltr` fail with an error.
   `lt` is the same listing and `command ls` the system's. The aliases exist only in an interactive
   shell, so a script that sources `~/.zshrc` keeps the real `ls`.
+- fzf's keys come from `fzf --zsh` after `bindkey -e`, since `bindkey -e` would reset them.
+  `Alt-c` reaches zsh because the iTerm2 profile sends Option as `Esc+`. They exist only in an
+  interactive shell, like the eza aliases.
 - Starship's `add_newline` also puts a blank line above the first prompt of a window, so it is
   off and the `prompt_gap` precmd hook prints the line from the second prompt on; `clear` is a
   function so that the prompt after it stays at the top. The hook is added after Starship's,
@@ -116,10 +105,10 @@ Consumes: [core](core.md) `settings` (which servers, tools, parsers and spell la
 - A tmux server keeps the environment of the shell that started it, and Claude Code's shells
   set `GIT_EDITOR=true`; one tmux started from there made `git commit` and `git merge` skip
   the editor in every pane, so `tmux.conf` unsets it.
-- tmux stays independent of the Neovim config: `C-h/j/k/l` move between panes except in a
-  pane running Neovim (found with `ps` on the pane's tty), where the key goes to Neovim and
-  `prefix` with an arrow leaves it. Making Neovim hand the key back needs a plugin on its side
-  (vim-tmux-navigator), which was left out on purpose.
+- `C-h/j/k/l` move between panes, except in a pane running Neovim (found with `ps` on the
+  pane's tty), where tmux hands the key to Neovim. vim-tmux-navigator, on Neovim's side, moves
+  between its windows and, at the edge, runs `tmux select-pane`, so one key crosses both. Without
+  it the key could enter Neovim but never leave, and `prefix` with an arrow was needed.
 - Git reads `~/.config/git/config` and `~/.config/git/ignore` on its own, so linking them needs no
   `include` and leaves `~/.gitconfig` alone; that file wins over them, so a machine's name, email,
   credentials and exceptions stay there and out of the repository. They belong to the terminal
@@ -150,31 +139,23 @@ Consumes: [core](core.md) `settings` (which servers, tools, parsers and spell la
 
 ## Checks
 
-| What | Where |
-|---|---|
-| Mason wanted, missing and broken lists, spell files to fetch, the parsers still missing | `tests/install.lua` |
-| Mason's Python tools on this machine can start | quick: `Mason's Python tools still have their Python` |
-| Starting Neovim leaves the lockfile alone | quick: `starting nvim leaves lazy-lock.json alone` |
-| Shell syntax and format of the scripts | quick: `shell syntax`, `shfmt` |
-| `tmux.conf` loads and keeps `GIT_EDITOR` out of the panes | quick: `tmux: the config loads and git commit opens Neovim` (`tests/tmux.sh`) |
-| `C-h/j/k/l` across a shell and a Neovim pane, the scratch popup | quick: `tmux: C-h/j/k/l cross panes but not Neovim, prefix t toggles the scratch popup`, through a client attached with `script` |
-| `tmux.conf` loads, with the prefix on `Ctrl-b`, where whichkey-tmux is not installed | quick: `tmux: the config loads without whichkey-tmux` |
-| `whichkey.sh` keeps a clone of whichkey-tmux and refuses any other folder, without network | quick: `tmux: the whichkey step keeps its clone and refuses anything else` |
-| `dotfiles.zsh` makes Neovim the editor, without comments | quick: `zsh: Neovim is the editor`, `no comments in Lua, shell and PowerShell` |
-| Emacs keys with `EDITOR` inherited; `ls`, `ll`, `lt` run eza, and a script keeps `ls` | quick: `zsh: emacs keys, even with EDITOR=nvim inherited from a parent shell`, `zsh: ls, ll and lt run eza in a shell, a script keeps ls` |
-| A blank line between prompts, none above the first or after `clear`, and the hook after Starship's | quick: `zsh: a blank line between prompts, none above the first or after clear` |
-| `macos/nvim/install.sh` in an empty home | full: `install` in `tests/lib.sh`; `fresh` in a throwaway folder |
+`tests/install.lua`; quick: the zsh, tmux (`tests/tmux.sh`), shell and lockfile checks in
+`tests/nvim.sh`; full: `install` in `tests/lib.sh`, and `fresh` in a throwaway folder.
+`tests/nvim.sh` prints what each check covers.
 
 ## Updating
 
-Nothing updates itself, so do it on purpose, on a branch, and run the tests before you keep it:
+Nothing updates itself, so do it on purpose, about once a month (Dependabot only bumps the
+workflows' actions), on a branch, and run the tests before you keep it:
 
 1. Plugins: `nvim --headless "+Lazy! update" +qa` (the one time `:Lazy update` is right), then read
    `git diff config/nvim/lazy-lock.json`. `:Lazy restore` or `git checkout` of the lockfile is
    the way back.
 2. Parsers: `:TSUpdate`. Mason packages: `:Mason`, then `U`.
 3. Programs: `brew upgrade` (the install scripts never do), then `macos/nvim/install.sh` so
-   Mason's Python tools get a venv for the new Python.
+   Mason's Python tools get a venv for the new Python. A new year's BasicTeX installs into a
+   new `/usr/local/texlive/<year>basic` without the packages of `tex.sh`; that same run puts
+   them back. Within a year, `sudo tlmgr update --self --all` updates the TeX packages.
 4. Clojure: the newest `nrepl/nrepl` and `cider/cider-nrepl` on Clojars go in the `versions`
    table of `dotfiles/clojure.lua`.
 5. whichkey-tmux: `git -C ~/.config/tmux/plugins/whichkey-tmux pull`, then `prefix r`.
@@ -189,8 +170,8 @@ Nothing updates itself, so do it on purpose, on a branch, and run the tests befo
   trusts it. Then the README's part table.
 - **A Mason tool, parser or spell language**: the list in `settings.lua` (see [core](core.md));
   `install.lua` picks it up.
-- **A new link**: one `link <src> <dst>` line in the part's `link.sh`; then the README's "What
-  the `link.sh` files do".
+- **A new link**: one `link <src> <dst>` line in the part's `link.sh`; then the README's part
+  table and "What the `link.sh` files do".
 - **A new part**: a folder in `macos/` with a `Brewfile` and an `install.sh` that sets `HERE`,
   sources `../lib.sh` and calls `run_steps`; add it to the loop in `macos/install.sh` and to
   the README's part table.

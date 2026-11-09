@@ -14,6 +14,5 @@ rather than a public issue.
 
 ## Current state
 
-The repository is checked on every push and every Monday; the public score is at
-[OpenSSF Scorecard](https://scorecard.dev/viewer/?uri=github.com/aguiar-arthur/dotfiles).
-The checks are described in the [security workflow section](docs/tests.md#security-workflow).
+The repository is checked on every push and every Monday. The checks are described in the
+[security workflow section](docs/tests.md#security-workflow).

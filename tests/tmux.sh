@@ -20,14 +20,17 @@ tmux_until() {
 
 tmux_keys() {
   local -a t=(tmux -L "dotfiles-tmux-keys-$$")
-  local left right client scratch out=""
+  local left right client scratch file out=""
   active() { [ "$("${t[@]}" display -p -t main '#{pane_id}')" = "$1" ]; }
   runs_nvim() { [ "$("${t[@]}" display -p -t "$right" '#{pane_current_command}')" = nvim ]; }
+  screen_shows() { "${t[@]}" capture-pane -p -t "$right" | grep -q "$1"; }
   clients() { [ "$("${t[@]}" list-clients | wc -l | tr -d ' ')" = "$1" ]; }
   press() { perl -e 'alarm 3; exec @ARGV' "${t[@]}" send-keys -K -c "$@"; }
   "${t[@]}" -f "$DOT/config/tmux/tmux.conf" new-session -d -x 120 -y 30 -s main sh
   left="$("${t[@]}" display -p -t main '#{pane_id}')"
-  right="$("${t[@]}" split-window -h -P -F '#{pane_id}' -t main "nvim --clean -n -i NONE")"
+  file="$QUICK_STATE/nav.txt"
+  printf 'navigation\n' >"$file"
+  right="$("${t[@]}" split-window -h -P -F '#{pane_id}' -t main "env XDG_STATE_HOME='$QUICK_STATE' nvim -n -i NONE '$file'")"
   script -q /dev/null env TERM=xterm-256color "${t[@]}" attach -t main >/dev/null 2>&1 < <(sleep 20) &
   tmux_until clients 1 || out="$out
 no client attached"
@@ -38,10 +41,17 @@ Neovim did not start in the right pane"
   press "$client" C-l
   tmux_until active "$right" || out="$out
 C-l in a shell does not move to the pane on the right"
+  tmux_until screen_shows navigation || out="$out
+Neovim did not show the file"
+  press "$client" : v s p l i t Enter
+  sleep 0.5
   press "$client" C-h
   sleep 0.5
   active "$right" || out="$out
-C-h in Neovim left its pane instead of reaching Neovim"
+C-h in Neovim's right window left the pane instead of moving to its left window"
+  press "$client" C-h
+  tmux_until active "$left" || out="$out
+C-h in Neovim's leftmost window did not move to the tmux pane on the left"
   press "$client" C-b t &
   tmux_until clients 2 || out="$out
 prefix t opens no scratch popup"

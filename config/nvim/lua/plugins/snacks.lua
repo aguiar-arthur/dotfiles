@@ -1,8 +1,4 @@
-local function picker(name, opts)
-  return function()
-    Snacks.picker[name](opts)
-  end
-end
+local picker = require("dotfiles.picker").open
 
 local function terminal(opts)
   return function()

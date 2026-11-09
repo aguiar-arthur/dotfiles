@@ -9,31 +9,8 @@ look. Every other context builds on this one (see [map](map.md)).
 - **trusted `.nvim.lua`**: a project file Neovim runs (`exrc`) once approved with `:trust`.
 - **global toggle**: a `<leader>u` key that changes every window and buffer, also later ones.
 - **generation**: the counter each global toggle bumps, so a buffer gets the values once.
-- **prose filetypes**: `tex`, `markdown`, `text`, `gitcommit`, `plaintex`; spelling is on there.
-
-## Files
-
-| Path | Holds |
-|---|---|
-| `config/nvim/init.lua` | the 0.12 check, then options, keymaps, autocmds, lazy.nvim, in that order |
-| `config/nvim/lua/config/settings.lua` | colorscheme, wrap, format on save, spell languages, notes folder, servers, Mason tools, parsers |
-| `config/nvim/lua/config/local.lua` | per-machine overrides (untracked, merged over the settings) |
-| `config/nvim/lua/config/options.lua` | options, leader keys, `ui2`, `.mdc` and `*.json.*` filetypes, the spell file |
-| `config/nvim/lua/config/keymaps.lua` | save, quit, `C-h/j/k/l`, `<leader>bd` / `bo` / `bD`, `]d` / `]e`, `<leader>cs` |
-| `config/nvim/lua/config/autocmds.lua` | yank highlight, reload on focus, last position, `q` closes, missing folders, resize |
-| `config/nvim/lua/config/lazy.lua` | lazy.nvim bootstrap at the commit in `lazy-lock.json` |
-| `config/nvim/lua/dotfiles/tabs.lua` | the tab variable `review` that marks a tab whose two sides must stay aligned, and closing a tab even when it is the last |
-| `config/nvim/lua/dotfiles/tabline.lua` | the tab line: each tab's file, or what `set_labeler` returns for it |
-| `config/nvim/lua/dotfiles/buffers.lua` | `<leader>bd`, `<leader>bo`, `<leader>bD`, which respect a tab marked `review` |
-| `config/nvim/lua/dotfiles/windows.lua` | the cursorline only in the active window, the path in the winbar of file windows, the welcome screen when the last file closes, `q` closing a floating dashboard (`<leader>od`) instead of quitting |
-| `config/nvim/dashboard/clock.sh` | the welcome screen's logo: a seven-segment clock (HH:MM:SS, blinking colon, English date) drawn by awk; `clock.sh N` stops after N frames |
-| `config/nvim/lua/dotfiles/toggles.lua` | the global `<leader>u` toggles |
-| `config/nvim/lua/plugins/snacks.lua` (`init`) | where the toggles are mapped, on `VeryLazy` |
-| `config/nvim/lua/dotfiles/treesitter.lua` | highlight and indent per buffer, the switch behind `<leader>uT` |
-| `config/nvim/lua/plugins/treesitter.lua` | nvim-treesitter (`main`), installing missing parsers on `UIEnter` |
-| `config/nvim/lua/plugins/colorscheme.lua` | Dracula with tinted diff backgrounds |
-| `config/nvim/lua/plugins/ui.lua` | mini.icons, mini.statusline, treesitter-context, which-key groups |
-| `config/nvim/spell/en.utf-8.add` | words accepted with `zg` (the compiled `.spl` is ignored) |
+- **prose filetypes**: `tex`, `markdown`, `text`, `gitcommit`, `plaintex`; spelling and conceal
+  are on there only.
 
 ## How it works
 
@@ -43,7 +20,8 @@ Neovim 0.12 or newer: the grammar toggle reads `vim.lsp.is_enabled()` and relies
 `<Space>` is the leader, `,` the local leader; which-key shows every key after a short pause.
 `<leader>` keys work everywhere, `,` keys depend on the file type (see [code](code.md)).
 `<A-j>` / `<A-k>` move lines, further with a count, and do nothing at the edge of the buffer;
-`C-h/j/k/l` move between windows. Splits, resizing, `]b` / `[b`,
+`C-h/j/k/l` move between windows, and on to tmux panes (vim-tmux-navigator, see
+[workspace](workspace.md)). Splits, resizing, `]b` / `[b`,
 `gcc` and `C-w d` (the line's diagnostics) are Neovim's own keys, not repeated under
 `<leader>`. The LSP keys are the exception: Neovim's quick `gr…` keys stay (`grr` / `gri` /
 `grt` open Snacks pickers) and `<leader>l` repeats them, with the rest, as one menu that
@@ -58,7 +36,9 @@ own values. Each toggle bumps the generation, so `BufWinEnter` re-applies the va
 buffers that have not seen the latest one, and a `:setlocal` survives switching buffers. The
 toggles take their values once at startup, right after `options.lua`, and keep them in
 `toggles.lua` rather than reading `vim.go`, which is the current window's. In a review `<leader>uw`
-changes nothing and says why (wrap would misalign the two sides).
+changes nothing and says why (wrap would misalign the two sides). Conceal follows spelling: it
+applies only to the prose file types (`toggles.prose`), and every other file gets 0, since the
+JSON parser hides every quote at 2 and a missing one went unseen.
 
 Treesitter highlights every language with a parser except LaTeX, where vimtex's syntax is
 richer, and indents only the ones in `settings.treesitter_indent`: its indentation is still
@@ -107,23 +87,6 @@ Neovim runs it only after you trust it: the first time it asks, `v` shows the fi
 approves it; after any edit it asks again. A trusted `.nvim.lua` also lets prettier run (see
 [code](code.md)). Projects' `.editorconfig` files are followed (built in).
 
-## Contract
-
-Offers:
-
-- `settings.lua` keys (servers, Mason tools, parsers, notes, spell languages) to code, install,
-  Markdown and LaTeX.
-- The `<leader>` / `,` split and the global `<leader>u` toggles.
-- To [git](git.md): the tab variable `review` (`dotfiles/tabs.lua`), which git sets and Core only
-  reads, so Core requires nothing of git: in such a tab `<leader>uw` leaves wrap alone (codediff
-  sets it with `vim.wo`, so global toggles keep their own values instead of reading `vim.go`),
-  `<leader>uC` and `<leader>um` warn, `<leader>bd` closes the tab and `windows.lua` shows no path
-  bar. `tabline.set_labeler` names such a tab.
-- To [markdown](markdown.md): the conceal toggle is re-applied to render-markdown (it sets
-  `conceallevel` on every redraw).
-
-Consumes: nothing.
-
 ## Pitfalls
 
 - `foldexpr` runs treesitter only where `buftype` is empty. Neovim's folds keep an entry per buffer
@@ -138,7 +101,8 @@ Consumes: nothing.
 - `:checkhealth snacks` reports errors under `Snacks.image` (kitty graphics, `magick`, `mmdc`)
   although the module is off and iTerm2 has no kitty protocol: not real.
 - `ui2` is still marked experimental in 0.12 and turns itself on only when a UI is attached, so
-  the headless quick tests never see it; `test_look` checks it, and a probe in a real terminal
+  the headless quick tests never see it draw; they only check that its modules are still there
+  (`tests/core.lua`, which CI runs), `test_look` checks it draws, and a probe in a real terminal
   (see [tests](tests.md)) is how to check the `:` line and blink's menu after a Neovim update.
   Turning it off is deleting its line in `options.lua`. The call is in a `pcall`, because
   `vim._core.ui2` is a private module: a Neovim that renames it only warns, instead of stopping
@@ -146,18 +110,9 @@ Consumes: nothing.
 
 ## Checks
 
-| What | Where |
-|---|---|
-| Startup prints nothing, every module loads | quick: `nvim starts without messages`, `tests/modules.lua` |
-| Autocmds, the cursorline and winbar of `windows.lua` | `tests/autocmds.lua` |
-| `]d`, `]e`, `<A-j>` / `<A-k>` (counts, the edges of the buffer) | `tests/keys.lua` |
-| The `<leader>u` toggles, beside a review, `keep_local_opts`, `uT`, `uf` / `uF`, `uC` | `tests/toggles.lua` |
-| A Neovim without `ui2` still runs the rest of `options.lua`; `q` on a floating dashboard | `tests/core.lua` |
-| Treesitter highlight and indent per file type (Lua yes, Python highlight only, LaTeX none) | `tests/treesitter.lua` |
-| Filetypes (`.mdc`, `*.json.*`) | `tests/files.lua` |
-| `zg` writes to the versioned list | quick: `zg writes to the versioned word list` |
-| The look, `ui2`, progress in the statusline, code context, `C-w` splits | full: `test_look` in `tests/core.sh` |
-| Windows (`C-w` split, move, resize, close), buffers (`]b`, `Space b d`), `Space u w`, `:help` | full: `test_windows` in `tests/core.sh` |
+`tests/core.lua`, `toggles.lua`, `keys.lua`, `autocmds.lua`, `treesitter.lua`, `files.lua`;
+full: `test_look` and `test_windows` in `tests/core.sh`. `tests/nvim.sh` prints what each check
+covers.
 
 ## Changing it
 
@@ -165,6 +120,6 @@ Consumes: nothing.
   `require("config.settings")`, and show it in the README's per-machine example if users
   would change it.
 - **A new global toggle**: a `M.option` or `global(...)` line in `toggles.lua` `M.map()`, a check
-  in `tests/toggles.lua`, a row in the README's toggles table.
+  in `tests/toggles.lua`.
 - **A new global key**: `keymaps.lua` (or its plugin's `keys`), a `desc`, a which-key group in
-  `ui.lua` if it opens a new `<leader>` prefix, and the README table of its module.
+  `ui.lua` if it opens a new `<leader>` prefix.

@@ -6,6 +6,7 @@ local MODE_LABELS = { explorer = "working tree", standalone = "file", history = 
 
 local expected
 local expected_diff
+local expected_history
 
 M.is = tabs.review
 M.all = tabs.reviews
@@ -13,6 +14,7 @@ M.any = tabs.any_review
 
 function M.expect(label, diff)
   expected = label
+  expected_history = vim.fn.histnr("cmd")
   expected_diff = diff
     and vim.tbl_map(function(arg)
       return arg == "%" and vim.fn.expand("%:p") or arg
@@ -20,6 +22,9 @@ function M.expect(label, diff)
 end
 
 function M.mark(tab, mode)
+  if vim.fn.histnr("cmd") ~= expected_history then
+    M.expect(nil)
+  end
   local typed = vim.fn.histget("cmd", -1):match("CodeDiff%s+(.+)$")
   vim.api.nvim_tabpage_set_var(tab, "review", true)
   vim.api.nvim_tabpage_set_var(tab, "review_label", expected or typed or MODE_LABELS[mode] or "")

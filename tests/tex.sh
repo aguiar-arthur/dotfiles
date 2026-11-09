@@ -66,3 +66,55 @@ test_snippets() {
   probe "LaTeX snippets expand as typed" 'vim.g.test_snippets or ""' ok 90
   stop_nvim
 }
+
+tex_programs() {
+  local program missing=()
+  for program in latexmk bibtex chktex texcount; do
+    have "$program" || missing+=("$program")
+  done
+  [ "${#missing[@]}" -eq 0 ] || {
+    echo "missing ${missing[*]}: run macos/nvim/tex.sh"
+    return 1
+  }
+}
+
+tex_packages_step() {
+  local dir out="" log
+  dir="$(mktemp -d)"
+  log="$dir/log"
+  cat >"$dir/tlmgr" <<'STUB'
+#!/usr/bin/env bash
+[ "$1" = info ] && exec cat "$TEX_INSTALLED"
+echo "tlmgr $*" >>"$TEX_LOG"
+[ "$1" != "${TEX_FAIL:-}" ]
+STUB
+  cat >"$dir/sudo" <<'STUB'
+#!/usr/bin/env bash
+echo "sudo $1" >>"$TEX_LOG"
+[ "$1" = -v ] || exec "$@"
+STUB
+  chmod +x "$dir/tlmgr" "$dir/sudo"
+  printf '%s\n' latexmk latexmk.universal-darwin chktex texcount abntex2 cm-super enumitem fontname relsize sansmathaccent >"$dir/all"
+  grep -vxE 'chktex|relsize' "$dir/all" >"$dir/some"
+  local -a env=(PATH="$dir:$PATH" TEX_LOG="$log")
+  env "${env[@]}" TEX_INSTALLED="$dir/all" "$DOT/macos/nvim/tex.sh" >/dev/null 2>&1 || out="$out
+with every package installed the step failed"
+  [ -s "$log" ] && out="$out
+with every package installed the step still ran: $(tr '\n' ';' <"$log")"
+  env "${env[@]}" TEX_INSTALLED="$dir/some" "$DOT/macos/nvim/tex.sh" >/dev/null 2>&1 || out="$out
+installing the missing packages failed"
+  [ "$(grep "^tlmgr " "$log" | tr '\n' ';')" = "tlmgr update --self;tlmgr install chktex relsize;" ] || out="$out
+the missing packages were not installed alone, after tlmgr updated itself: $(tr '\n' ';' <"$log")"
+  env "${env[@]}" TEX_INSTALLED="$dir/some" TEX_FAIL=install "$DOT/macos/nvim/tex.sh" >/dev/null 2>&1 && out="$out
+a failed tlmgr install was reported as done"
+  : >"$log"
+  env "${env[@]}" TEX_INSTALLED="$dir/some" TEX_FAIL=update "$DOT/macos/nvim/tex.sh" >/dev/null 2>&1 && out="$out
+a tlmgr that could not update itself was reported as done"
+  grep -q "^tlmgr install" "$log" && out="$out
+tlmgr installed after it could not update itself"
+  rm -rf "$dir"
+  [ -z "$out" ] || {
+    echo "${out#$'\n'}"
+    return 1
+  }
+}

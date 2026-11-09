@@ -40,34 +40,4 @@ function M.worktree(picker, item)
   end
 end
 
-function M.line_commit()
-  local file = vim.bo.buftype == "" and vim.api.nvim_buf_get_name(0) or ""
-  if file == "" then
-    vim.notify("This window shows no file", vim.log.levels.WARN)
-    return
-  end
-  local line = vim.fn.line(".")
-  local dir = vim.fs.dirname(file)
-  local args = { "git", "-C", dir, "blame", "-L", line .. "," .. line, "--porcelain" }
-  vim.list_extend(args, { "--contents", "-", "--", file })
-  local stdin = vim.api.nvim_buf_get_lines(0, 0, -1, false)
-  local result = vim.system(args, { text = true, stdin = stdin }):wait()
-  local commit = result.code == 0 and result.stdout:match("^(%x+)")
-  if not commit then
-    vim.notify("Git does not track this file", vim.log.levels.WARN)
-  elseif commit:match("^0+$") then
-    vim.notify("This line is not committed yet", vim.log.levels.WARN)
-  else
-    against_parent(commit, dir)
-  end
-end
-
-function M.stash(picker, item)
-  picker:close()
-  if item and item.stash then
-    review.expect(item.stash, { "git", "diff", item.stash .. "^", item.stash })
-    vim.cmd.CodeDiff(item.stash .. "^", item.stash)
-  end
-end
-
 return M

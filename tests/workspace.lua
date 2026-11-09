@@ -10,6 +10,19 @@ T.case("the float style", function()
   }, { "float", "rounded", " Claude ", 60 })
 end)
 
+T.case("picker keys open their source with its options", function()
+  local opened
+  T.stub(Snacks, "picker", {
+    files = function(opts)
+      opened = { "files", opts }
+    end,
+  })
+  local open = require("dotfiles.picker").open("files", { hidden = true })
+  T.eq("picker: nothing opens until the key", opened, nil)
+  open()
+  T.eq("picker: the key opens its source", opened, { "files", { hidden = true } })
+end)
+
 T.case("Claude: the plugin still offers what we call", function()
   require("lazy").load({ plugins = { "claudecode.nvim" } })
   local terminal = require("claudecode.terminal")

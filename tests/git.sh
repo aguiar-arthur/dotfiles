@@ -20,10 +20,6 @@ test_review() {
   keys "x = 0" Escape
   keys Space s
   probe "an edit on the real side reaches the disk" 'vim.fn.readfile(vim.fn.expand("%:p"))[1]' "x = 0" 10
-  keys Space g e
-  probe "Space g e hides the file list" 'vim.fn.winnr("$")' 2 5
-  keys Space g e
-  probe "Space g e shows it again" 'vim.fn.winnr("$")' 3 5
   keys Space o p
   probe "Space o p hides the file list in a review" 'vim.fn.winnr("$")' 2 5
   keys Space o p
@@ -111,13 +107,6 @@ test_review() {
   keys Space g q
   wait_for 'vim.fn.tabpagenr("$")' 1 10
   send ':edit r.lua<CR>'
-  keys 3G Space g v l
-  probe "Space g v l reviews the commit of the line" 'vim.fn.tabpagenr("$")' 2 20
-  keys Space g q
-  wait_for 'vim.fn.tabpagenr("$")' 1 10
-  keys Space g v z
-  wait_for 'vim.bo.filetype' snacks_picker_input 10
-  keys Escape Escape
   send ':silent !git add r.lua<CR>'
   keys Space g C
   probe "Space g C reviews what is staged" 'vim.fn.tabpagenr("$")' 2 20

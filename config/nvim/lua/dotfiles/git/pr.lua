@@ -55,11 +55,4 @@ function M.comments()
   end)
 end
 
-function M.checks()
-  with_gh(function()
-    local command = { "gh", "pr", "checks", "--watch" }
-    Snacks.terminal(command, { cwd = repo.dir(), interactive = false })
-  end)
-end
-
 return M

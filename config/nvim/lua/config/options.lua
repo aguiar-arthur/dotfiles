@@ -79,6 +79,7 @@ if words_stat and (not compiled_stat or compiled_stat.mtime.sec < words_stat.mti
   pcall(vim.cmd, "silent mkspell! " .. vim.fn.fnameescape(spell_words))
 end
 
+-- why: setting the clipboard looks for a provider (pbcopy), which would slow startup.
 vim.schedule(function()
   o.clipboard = "unnamedplus"
 end)

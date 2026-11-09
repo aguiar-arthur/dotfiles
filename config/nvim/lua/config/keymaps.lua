@@ -47,11 +47,6 @@ map({ "n", "x" }, "<leader>cl", function()
   require("dotfiles.share").link()
 end, o("Copy permalink (line or selection)"))
 
-map("n", "<C-h>", "<C-w>h", o("Window left"))
-map("n", "<C-j>", "<C-w>j", o("Window below"))
-map("n", "<C-k>", "<C-w>k", o("Window above"))
-map("n", "<C-l>", "<C-w>l", o("Window right"))
-
 map("n", "<leader>bd", function()
   require("dotfiles.buffers").close_buffer()
 end, o("Close buffer"))

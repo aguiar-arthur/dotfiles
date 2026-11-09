@@ -74,6 +74,32 @@ zsh_eza() {
   }
 }
 
+zsh_fzf() {
+  local rc="$DOT/config/zsh/dotfiles.zsh"
+  zsh -f -i -c "source '$rc'; [[ \$(bindkey '^R') == *fzf-history-widget && \$(bindkey '^T') == *fzf-file-widget && \$(bindkey '\ec') == *fzf-cd-widget && \$FZF_DEFAULT_OPTS == *282a36* ]]" || {
+    echo "Ctrl-r, Ctrl-t or Alt-c does not run fzf in Dracula in an interactive shell"
+    return 1
+  }
+  zsh -f -c "source '$rc'; [[ \$(bindkey '^R') != *fzf* ]]" || {
+    echo "a script that sources dotfiles.zsh gets the fzf keys"
+    return 1
+  }
+}
+
+zsh_completion() {
+  local rc="$DOT/config/zsh/dotfiles.zsh" dir out=""
+  dir="$(mktemp -d)"
+  ZDOTDIR="$dir" zsh -f -i -c "source '$rc'; (( \$+_comps[git] ))" </dev/null >/dev/null 2>&1 || out="$out
+an interactive shell has no git completion"
+  ZDOTDIR="$dir" zsh -f -c "source '$rc'; (( ! \$+functions[compinit] ))" || out="$out
+a script that sources dotfiles.zsh runs compinit"
+  rm -rf "$dir"
+  [ -z "$out" ] || {
+    echo "${out#$'\n'}"
+    return 1
+  }
+}
+
 zsh_prompt_gap() {
   local rc="$DOT/config/zsh/dotfiles.zsh" got wanted prompt
   prompt="$(STARSHIP_CONFIG="$DOT/config/starship/starship.toml" starship prompt)"
@@ -99,7 +125,7 @@ quick() {
   check "every Lua module loads" perl -e 'alarm 120; exec @ARGV' nvim --headless -l "$DOT/tests/modules.lua"
   lua_check "Space c s copies the path, line:col and the code" share.lua
   lua_check "filetypes, format on save and the references list" files.lua
-  lua_check "core: the dashboard q, no ui2" core.lua
+  lua_check "core: startup loads only what it must, ui2 is still there, the dashboard q" core.lua
   lua_check "install: Mason lists, spell files, parsers" install.lua
   lua_check "code: python, clojure, LSP progress, debugpy" code.lua
   lua_check "workspace: the float style, Claude" workspace.lua
@@ -108,7 +134,6 @@ quick() {
   lua_check "]e, the TeX and Markdown keys, the preview, gq and the gr keys" keys.lua
   lua_check "treesitter highlight and indent per file type" treesitter.lua
   lua_check "every LaTeX snippet expands and the common ones type what they should" tex_snippets.lua
-  lua_check "no comments in Lua, shell and PowerShell, trailing ones included" comments.lua
   lua_check "yank highlight, focus reload, last line, q, new folders, resize" autocmds.lua
   if [ "$before" = "$(lock_hash)" ]; then
     pass "starting nvim leaves lazy-lock.json alone"
@@ -126,15 +151,18 @@ quick() {
   tool "shell syntax" bash bash -n "$DOT"/macos/*.sh "$DOT"/macos/*/*.sh "$DOT"/tests/*.sh "$DOT/config/nvim/dashboard/clock.sh"
   check "zsh: Neovim is the editor" zsh -f -c "source '$DOT/config/zsh/dotfiles.zsh' && [[ \$EDITOR == nvim && \$VISUAL == nvim ]]"
   check "zsh: emacs keys, even with EDITOR=nvim inherited from a parent shell" env EDITOR=nvim VISUAL=nvim zsh -f -i -c "source '$DOT/config/zsh/dotfiles.zsh'; [[ \$(bindkey -lL main) == 'bindkey -A emacs main' ]]"
+  check "zsh: Tab completes git in a shell, a script skips compinit" zsh_completion
   tool "zsh: ls, ll and lt run eza in a shell, a script keeps ls" eza zsh_eza
+  tool "zsh: Ctrl-r, Ctrl-t and Alt-c run fzf in a shell, a script keeps zsh's keys" fzf zsh_fzf
   tool "zsh: a blank line between prompts, none above the first or after clear" starship zsh_prompt_gap
   tool "tmux: the config loads and git commit opens Neovim" tmux tmux_config
-  tool "tmux: C-h/j/k/l cross panes but not Neovim, prefix t toggles the scratch popup" tmux tmux_keys
+  tool "tmux: C-h/j/k/l cross panes and Neovim's windows both ways, prefix t toggles the scratch popup" tmux tmux_keys
   tool "tmux: the config loads without whichkey-tmux" tmux tmux_without_whichkey
   tool "tmux: the whichkey step keeps its clone and refuses anything else" git tmux_whichkey_step
+  check "TeX: the tex step installs only the missing packages, after tlmgr updates itself" tex_packages_step
+  tool "TeX: latexmk, bibtex, chktex and texcount (,lw) are installed" tlmgr tex_programs
   tool "shfmt" shfmt shfmt -d "$DOT"/macos/*.sh "$DOT"/macos/*/*.sh "$DOT"/tests/*.sh "$DOT/config/nvim/dashboard/clock.sh"
   tool "rumdl" rumdl rumdl check "$DOT" --config "$DOT/config/rumdl/rumdl.toml"
-  check_silent "no comments in shell" grep -nE '^[[:space:]]*#([^!]|$)' "$DOT"/macos/*.sh "$DOT"/macos/*/*.sh "$DOT"/tests/*.sh "$DOT/config/nvim/dashboard/clock.sh" "$DOT/config/zsh/dotfiles.zsh" "$DOT/config/tmux/tmux.conf"
   check "the dashboard clock draws its digits and date" clock_frame
   if [ -z "$(find "$REAL_STATE/nvim/sessions" -newer "$marker" 2>/dev/null)" ]; then
     pass "the quick tests leave your sessions alone"

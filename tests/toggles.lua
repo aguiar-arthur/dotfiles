@@ -90,10 +90,18 @@ T.case("Space u L and Space u c", function()
   press("<leader>uL")
   T.eq("Space u L changes relative numbers", all("relativenumber"), { not relative, not relative })
   press("<leader>uL")
-  local conceal = vim.wo[lua_win].conceallevel
+  T.eq("conceal is on in prose only", all("conceallevel"), { 0, 2 })
   press("<leader>uc")
-  T.eq("Space u c changes conceal", all("conceallevel"), conceal == 0 and { 2, 2 } or { 0, 0 })
+  T.eq("Space u c changes conceal in prose and leaves code alone", all("conceallevel"), { 0, 0 })
   press("<leader>uc")
+  local json = vim.api.nvim_create_buf(true, false)
+  vim.api.nvim_win_set_buf(lua_win, json)
+  vim.bo[json].filetype = "json"
+  T.eq("a JSON file shows its quotes", vim.wo[lua_win].conceallevel, 0)
+  vim.bo[json].filetype = "markdown"
+  T.eq("and a buffer that becomes prose hides its markup", vim.wo[lua_win].conceallevel, 2)
+  vim.api.nvim_win_set_buf(lua_win, buf)
+  vim.api.nvim_buf_delete(json, { force = true })
 end)
 
 T.case("Space u s", function()
@@ -152,12 +160,12 @@ T.case("the values come from setup", function()
   local fresh = require("dotfiles.toggles")
   fresh.setup()
   local seeded = vim.go.conceallevel
-  vim.api.nvim_set_current_win(md_win)
-  vim.wo[md_win].conceallevel = seeded == 0 and 2 or 0
-  fresh.apply(lua_win)
+  vim.api.nvim_set_current_win(lua_win)
+  vim.wo[lua_win].conceallevel = seeded == 0 and 2 or 0
+  fresh.apply(md_win)
   T.eq(
     "the values come from setup, not from the window current at the first apply",
-    vim.wo[lua_win].conceallevel,
+    vim.wo[md_win].conceallevel,
     seeded
   )
 end)

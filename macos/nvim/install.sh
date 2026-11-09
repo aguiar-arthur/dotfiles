@@ -4,6 +4,11 @@ set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 . "$HERE/../lib.sh"
 
+step_tex() {
+  title "TeX packages that BasicTeX lacks"
+  "$HERE/tex.sh"
+}
+
 step_nvim() {
   title "Neovim: plugins, Mason servers and tools, treesitter parsers"
   have nvim || {
@@ -18,5 +23,5 @@ step_nvim() {
   nvim --headless "+lua require('dotfiles.install').run()"
 }
 
-echo "Installing Neovim: its programs (with MacTeX, a large download), ~/.config/nvim and its plugins. Homebrew and MacTeX may ask for your password; the shell and terminal are left alone."
-run_steps brew link nvim
+echo "Installing Neovim: its programs (with BasicTeX and the TeX packages we use), ~/.config/nvim and its plugins. Homebrew and tlmgr may ask for your password; the shell and terminal are left alone."
+run_steps brew link tex nvim

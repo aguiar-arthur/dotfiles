@@ -4,12 +4,6 @@ A standalone PowerShell script to debug the health of a Windows 11 PC (sudden sh
 screens, crashes). It is the one thing here that is not for macOS: nothing installs, links or
 tests it, and no other context depends on it.
 
-## Files
-
-| Path | Holds |
-|---|---|
-| `windows/collect-diagnostics.ps1` | the collector, monitor and optional repair |
-
 ## How it works
 
 Run it in PowerShell as Administrator (without it, minidumps, WER reports and DISM may be

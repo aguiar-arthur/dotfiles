@@ -14,12 +14,10 @@ local function managed(buf)
   return vim.bo[buf].buftype == "" and not vim.b[buf].keep_local_opts
 end
 
-local function set_spell(win, buf)
-  set_local(
-    win,
-    "spell",
-    vim.g.prose_spell ~= false and vim.tbl_contains(M.prose, vim.bo[buf].filetype)
-  )
+local function set_prose(win, buf)
+  local prose = vim.tbl_contains(M.prose, vim.bo[buf].filetype)
+  set_local(win, "spell", vim.g.prose_spell ~= false and prose)
+  set_local(win, "conceallevel", prose and M.values.conceallevel or 0)
 end
 
 function M.apply(win)
@@ -35,8 +33,7 @@ function M.apply(win)
     set_local(win, "wrap", M.values.wrap)
   end
   set_local(win, "relativenumber", M.values.relativenumber)
-  set_local(win, "conceallevel", M.values.conceallevel)
-  set_spell(win, buf)
+  set_prose(win, buf)
 end
 
 function M.apply_all()
@@ -107,7 +104,7 @@ function M.map()
   end):map("<leader>us")
   M.option("Wrap (all windows)", "wrap", true, false, review_blocks_wrap):map("<leader>uw")
   M.option("Relative number (all windows)", "relativenumber", true, false):map("<leader>uL")
-  M.option("Conceal (all windows)", "conceallevel", 2, 0):map("<leader>uc")
+  M.option("Conceal (prose windows)", "conceallevel", 2, 0):map("<leader>uc")
   global("Inlay hints (all buffers)", function()
     return vim.lsp.inlay_hint.is_enabled()
   end, function(state)
@@ -170,7 +167,7 @@ function M.setup()
     callback = function(ev)
       if managed(ev.buf) then
         for _, win in ipairs(vim.fn.win_findbuf(ev.buf)) do
-          set_spell(win, ev.buf)
+          set_prose(win, ev.buf)
         end
       end
     end,

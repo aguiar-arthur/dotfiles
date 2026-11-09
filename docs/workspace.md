@@ -4,24 +4,6 @@ Finding, moving and editing: pickers, the file tree, terminals, sessions, motion
 objects, completion and snippets, sharing code, and Claude Code. Its relationships are in
 [map](map.md).
 
-## Language
-
-- **picker**: any Snacks list (files, grep, symbols, references, git); one set of keys for all.
-- **share**: the `<leader>c` keys: `cs` / `cf` copy `path:line:col-line:col` and a fenced code
-  block (the line or selection / the whole file), `cp` / `cP` the path, `cl` a permalink.
-
-## Files
-
-| Path | Holds |
-|---|---|
-| `config/nvim/lua/plugins/snacks.lua` | pickers `<leader>f` and `<leader>d` (diagnostics, todos, quickfix), file tree `<leader>o`, terminals `<leader>t`, lazygit, `]r`, the picker `confirm` |
-| `config/nvim/lua/plugins/editor.lua` | flash, mini.ai, the `]f` / `]a` moves, mini.surround, mini.pairs, grug-far, todo-comments, persistence (gitsigns and codediff are in `git.lua`: see [git](git.md)) |
-| `config/nvim/lua/plugins/completion.lua` | blink.cmp, LuaSnip, friendly-snippets, the `:` line |
-| `config/nvim/lua/dotfiles/share.lua` | what the `<leader>c` keys copy; the keys are in `lua/config/keymaps.lua` |
-| `config/nvim/lua/plugins/claude.lua` | claudecode.nvim, `<leader>a` |
-| `config/nvim/lua/dotfiles/claude.lua` | `<leader>aS` (visual) and `<leader>aB`: open the last session if none runs, then send the selection / add the file; notifications from a hidden Claude |
-| `config/nvim/lua/dotfiles/float.lua` | the one float style: Claude, the float terminal and lazygit |
-
 ## How it works
 
 `gd` / `grr` / `K` work as usual (implementation is `gri`; `gi` keeps Vim's meaning);
@@ -84,20 +66,6 @@ Claude, the float terminal and lazygit share `dotfiles/float.lua`: a rounded Sna
 title, 92% by 90% of the editor, over a backdrop dimmed to 60 (the pickers get the same
 backdrop). Hiding a float keeps its session, and Snacks refits it when the terminal is resized.
 
-## Contract
-
-Offers:
-
-- To [git](git.md): the pickers' `confirm`, which it replaces to open a file from a review in the
-  tab before it.
-- To [code](code.md): blink.cmp, whose LSP capabilities servers need when they start.
-- To [latex](latex.md): completion; LaTeX keeps its own snippets in place of friendly-snippets.
-- To [markdown](markdown.md): mini.pairs leaves the backtick alone everywhere.
-- To [git](git.md): persistence's `PersistenceSavePre`, on which git closes its reviews, since a
-  restored review comes back as plain buffers named `codediff://…` and `CodeDiff Explorer`.
-
-Consumes: [core](core.md) keys and toggles.
-
 ## Pitfalls
 
 - A picker another plugin adds (todo-comments' `todo_comments`) exists only once that plugin
@@ -117,24 +85,12 @@ Consumes: [core](core.md) keys and toggles.
 
 ## Checks
 
-| What | Where |
-|---|---|
-| `<leader>cs` in each mode, fences, block columns; `<leader>cf`, `cp`, `cP` | `tests/share.lua`, `tests/keys.lua` |
-| `<leader>cl` copies a permalink, `<leader>R` uses ast-grep, `]f` / `]a` | `tests/keys.lua` |
-| References always open the list | `tests/files.lua` |
-| Completion and snippets typed for real | full: `test_snippets` in `tests/tex.sh` |
-| Claude helpers, the plugin still offering the two functions we call, notifications, the file tree keys | `tests/workspace.lua`, `tests/keys.lua` |
-| `Space t f` / `t h` / `t v`: modes, same terminal back, sizes, resize, `C-/` hides | full: `test_terminals` in `tests/workspace.sh` |
-| The tree, pickers (`Esc`, `C-v`), `Space d x`, the floating dashboard | full: `test_tree_and_pickers` |
-| Claude: `Space a s` / `a b` / `a B`, focus back to the window it came from, resize | full: `test_claude` |
-| A hidden Claude notifies (OSC 9, exit) | full: `test_claude_notices` |
-| Sessions: `Space S r` restores, `Space S d` keeps the old one | full: `test_sessions` |
-| A session is saved without its reviews | `tests/git.lua` |
-| Everything else here | plugin defaults, no check of our own |
+`tests/workspace.lua`, `share.lua`, `keys.lua`; full: `tests/workspace.sh` (terminals, the tree
+and pickers, Claude, sessions); completion typed for real: `test_snippets` in `tests/tex.sh`.
+Everything else here is plugin defaults.
 
 ## Changing it
 
-- **A picker key**: one `key(...)` line in `snacks.lua` with `picker("<source>")`, and a row in
-  the README's "Finding things" table.
+- **A picker key**: one `key(...)` line in `snacks.lua` with `picker("<source>")`.
 - **A plugin for editing**: first check the plugin rule in `AGENTS.md`; add its spec to
-  `editor.lua`, its keys with `desc`, and its row in the README.
+  `editor.lua` and its keys with `desc`.

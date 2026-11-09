@@ -49,13 +49,6 @@ function M.commits()
   end
 end
 
-function M.hunks()
-  local base, dir = repo.base()
-  if base then
-    Snacks.picker.git_diff({ base = base, cwd = dir })
-  end
-end
-
 function M.toggle_marks()
   local gitsigns = require("gitsigns")
   if marks_base then

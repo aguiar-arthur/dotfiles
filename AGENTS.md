@@ -6,10 +6,10 @@ product.
 
 ## Context map
 
-The repository is split into contexts, each with one doc in `docs/` that holds its terms,
-files, how it works and why, pitfalls that already cost time, checks, and recipes for common
-changes. Read the doc of the context a task touches before the code; most tasks need one or
-two. The README is the user's guide (keys); it is not needed to change code.
+The repository is split into contexts, each with one doc in `docs/` that holds how it works
+and why, pitfalls that already cost time, which tests check it, and recipes for common changes.
+Read the doc of the context a task touches before the code; most tasks need one or two. The
+README is the user's guide; it is not needed to change code.
 
 | Context | Doc | Owns | Depends on |
 |---|---|---|---|
@@ -23,15 +23,16 @@ two. The README is the user's guide (keys); it is not needed to change code.
 | Tests | [docs/tests.md](docs/tests.md) | `tests/`, where a new check goes, checking by hand | all |
 | Windows | [docs/windows.md](docs/windows.md) | `windows/collect-diagnostics.ps1`: a Windows 11 health report (events, dumps, drivers, disks, temperatures) and an optional DISM / SFC repair | none |
 
-How the contexts relate (upstream / downstream, the contract, the shared words) is in
+How the contexts relate (upstream / downstream, what each relies on, the decisions) is in
 [docs/map.md](docs/map.md). A change inside one context needs only its doc; a change to
-something a doc lists under **Contract** (Offers) also needs the map and the downstream docs.
+something in the map's table also needs the downstream docs.
 
 ## Working on a task
 
 1. Find the context above and read its doc; its "Changing it" section has the steps for the
    usual changes (a server, a formatter, a key, a toggle, a snippet, a program, a link).
-2. Change the code, its check in `tests/` and its docs (README keys, context doc) together.
+2. Change the code and its check in `tests/` together; the context doc only when a reason, a
+   pitfall or a step of "Changing it" changes.
 3. Run `tests/nvim.sh` (quick); run `full` when the doc's checks name a `full:` test you
    touched. Say plainly what you could not check (GUI, real language servers, LaTeX).
 
@@ -52,7 +53,8 @@ docs/               one doc per context (the map above); img/ holds the README s
 macos/              the macOS install, see docs/install.md:
   install.sh        runs every part: terminal, tmux, apps, nvim
   lib.sh            what the parts share: Homebrew, links with backups, preferences, steps
-  nvim/             Brewfile, install.sh (brew, link, plugins and Mason), link.sh (incl. Skim)
+  nvim/             Brewfile, install.sh (brew, link, TeX packages, plugins and Mason), link.sh
+                    (incl. ~/.latexmkrc and Skim), tex.sh (the TeX packages BasicTeX lacks)
   terminal/         Brewfile, install.sh (brew, link), link.sh (Starship, iTerm2, git, ~/.zshrc)
   tmux/             Brewfile, install.sh (brew, link, whichkey), link.sh (tmux.conf, lazygit),
                     whichkey.sh (clones whichkey-tmux into ~/.config/tmux/plugins/)
@@ -68,16 +70,19 @@ windows/            collect-diagnostics.ps1, a standalone Windows health report,
 
 - **Simple first.** No health checks, no doctor, no flags, no tests beyond `tests/nvim.sh`
   ([docs/tests.md](docs/tests.md)), and no CI beyond the security workflows and the quick tests
-  (`.github/workflows/`: ShellCheck, gitleaks, zizmor, CodeQL, Scorecard, `tests.yml`).
+  (`.github/workflows/`: ShellCheck, gitleaks, zizmor, `tests.yml`).
   `macos/install.sh` runs every part (`macos/<part>/install.sh`: terminal, tmux, apps, nvim); a
   part runs on its own on a machine where the rest must stay untouched, so no script takes an
   argument. Each part installs its own `Brewfile`, runs its `link.sh`, (tmux) clones
-  whichkey-tmux when it is missing, and (nvim) sets up Neovim through the linked
-  `~/.config/nvim`, as every day. Every script stays idempotent and
+  whichkey-tmux when it is missing, and (nvim) adds the TeX packages BasicTeX lacks and sets up
+  Neovim through the linked `~/.config/nvim`, as every day. Every script stays idempotent and
   only does what is missing. Every network step has a timeout or a failure path.
-- **No comments in code**, in any file. Names and `desc` / `:wk` labels say what; a reason
-  worth keeping goes in one sentence in its context's doc in `docs/`. Exceptions: `#!` lines
-  and text the code writes or matches (the `# >>> dotfiles >>>` markers).
+- **No comments that say what**, in any file. Names and `desc` / `:wk` labels say what; a
+  reason worth keeping goes in one sentence in its context's doc in `docs/`. In Lua, shell and
+  `tmux.conf`, a line that would look wrong without its reason may get one whole-line `-- why:
+  …` (`# why: …`) comment above it; never trailing, never more than one line, never a repeat of
+  what its context's doc already says. Exceptions: `#!` lines and text the code writes or
+  matches (the `# >>> dotfiles >>>` markers).
 - **macOS only**, no branches for other systems. The one exception is `windows/`: standalone
   PowerShell for debugging a Windows PC, never installed, linked or tested by the rest.
 - **English** in code, docs and commit messages; reply to the user in their language.
@@ -116,13 +121,14 @@ windows/            collect-diagnostics.ps1, a standalone Windows health report,
   folder's `init.lua` only wires, and loading any module runs nothing. Code depends along
   [docs/map.md](docs/map.md): downstream may require upstream, never the reverse. Paths Neovim
   looks for (`after/lsp/`, `after/ftplugin/`) stay where they are.
-- **Docs.** The README is the user's guide: a header (tagline, badges, "Why this one"), install,
-  then one section per module with a one-line pitch and, folded in `<details>`, what it is for
-  and a table of its keys. `docs/<context>.md` says how that context works, why, its
-  pitfalls, its checks and how to change it. A key added, moved or removed changes its README
-  table in the same change; a file, setting, pitfall or check added changes its context doc.
-  Take the keys from the code, not from memory (the `desc` of each mapping, or
-  `nvim_get_keymap` after loading the plugins). A new context (a language that grows its own
+- **Docs.** The README is the user's guide and the showcase: a header (tagline, badges, "Why this
+  one"), install, then one section per module with a one-line pitch and, folded in `<details>`,
+  what it is for; then troubleshooting, update, check and test. Its only key table is "First
+  day"; every other key is found in Neovim (which-key, `Space ?`, `Space f k`), so each mapping
+  has a `desc`. `docs/<context>.md` holds only what the code and tests cannot say: how that
+  context works, why, its pitfalls, which test files check it, and how to change it. No lists of
+  files, keys or checks: the code and `tests/nvim.sh` already print them. A fact two contexts
+  share is a row in `docs/map.md`, nowhere else. A new context (a language that grows its own
   files, say) gets its own doc and a row in the map, only when it would not fit an existing one.
 
 ## Git

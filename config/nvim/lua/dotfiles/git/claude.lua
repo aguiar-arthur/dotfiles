@@ -74,7 +74,11 @@ function M.ask_review()
 end
 
 function M.ask_message()
-  if repo.run("-C", repo.dir(), "diff", "--cached", "--name-only") == "" then
+  local staged = repo.run("-C", repo.dir(), "diff", "--cached", "--name-only")
+  if not staged then
+    vim.notify("This file is not in a git repository", vim.log.levels.WARN)
+    return
+  elseif staged == "" then
     vim.notify("Nothing is staged", vim.log.levels.WARN)
     return
   end

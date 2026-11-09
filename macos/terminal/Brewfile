@@ -1,4 +1,5 @@
 brew "starship"
 brew "eza"
+brew "fzf"
 cask "iterm2"
 cask "font-jetbrains-mono-nerd-font"

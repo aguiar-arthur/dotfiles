@@ -13,24 +13,6 @@ Clojure in detail. Its relationships are in [map](map.md).
   `[tool.ruff]`, …); without one, nothing formats on save.
 - **local leader keys**: `,` keys that exist only in the file types that have them.
 
-## Files
-
-| Path | Holds |
-|---|---|
-| `config/nvim/lua/plugins/lsp.lua` | Mason, mason-lspconfig, system servers, diagnostics, the `LspAttach` keys (`gd`, `grr` / `gri` / `grt`, `<leader>l`, `,o`), written as two tables: one of pickers (key, picker, method) and one of plain actions |
-| `config/nvim/lua/dotfiles/progress.lua` | servers' `$/progress` as Neovim's own progress messages (statusline, `:` line, the terminal's progress bar); its `setup()` calls `vim.ui.progress_status()` once because Neovim starts tracking progress on the first call, and without it the statusline misses what began before its first redraw |
-| `config/nvim/after/lsp/<server>.lua` | per-server settings (basedpyright, which also gets the project's interpreter in `before_init`; clojure_lsp, jsonls, ltex_plus, lua_ls, marksman, ruff, texlab, yamlls); `clojure_lsp.lua` also mends its call hierarchy replies |
-| `config/nvim/lua/plugins/formatting.lua` | conform, `formatters_by_ft`, `<leader>lf` |
-| `config/nvim/lua/dotfiles/format.lua` | `style_markers`, the prettier trust check, what format on save decides |
-| `config/nvim/lua/plugins/run.lua` | code_runner.nvim, `,r` and its `commands` |
-| `config/nvim/lua/plugins/test.lua` | Neotest, neotest-python, `,t` |
-| `config/nvim/lua/plugins/debug.lua` | nvim-dap, nvim-dap-view, the debugpy adapter, `,d`, the Python launch |
-| `config/nvim/lua/dotfiles/lang/python.lua` | the interpreter: `$VIRTUAL_ENV`, else `.venv` or `venv` upward from a folder (the file's by default), else `python3`; `,r`, the debugger and basedpyright ask it |
-| `config/nvim/after/ftplugin/lua.lua` | `,s` sources the file |
-| `config/nvim/lua/plugins/clojure.lua` | Conjure (Clojure only), nvim-paredit, `,cj` |
-| `config/nvim/lua/dotfiles/lang/clojure.lua` | jack-in: the nREPL command (`clojure`, `lein` or `bb`), waiting for `.nrepl-port` (`poll` and `limit` are fields so the tests can shorten them; a tick queued after the timer closed returns at once), the dead-REPL check |
-| `config/nvim/after/ftplugin/clojure.lua` | which-key names of Conjure's groups |
-
 ## How it works
 
 ### Servers
@@ -180,21 +162,6 @@ running REPL knows beside clojure-lsp's static items. Neovim keeps Conjure's omn
 `v:lua.vim.lsp.omnifunc` only when `omnifunc` is empty, and blink's `omni` turns itself off on
 the LSP one. The nREPL and cider-nrepl versions are at the top of `dotfiles/clojure.lua`.
 
-## Contract
-
-Offers:
-
-- To [latex](latex.md) and [markdown](markdown.md): the server lists in `settings.lua` they add
-  to (texlab, ltex_plus; rumdl, marksman), the `after/lsp/` files, `style_markers` and the
-  formatting rules.
-
-Consumes:
-
-- [core](core.md): `settings` (which servers and tools).
-- [workspace](workspace.md): blink.cmp registers its LSP capabilities when it loads, so it stays
-  a dependency of nvim-lspconfig; otherwise servers started before the first insert lack them.
-- [install](install.md): the Mason packages.
-
 ## Pitfalls
 
 - Zsh has `,r` and shfmt (which reads its dialect from the `.zsh` extension or the shebang), but no
@@ -222,39 +189,25 @@ Consumes:
 - Conjure's log buffer (`conjure-log-<pid or state>.cljc`) is a Clojure file until Conjure marks it
   `nofile`, so clojure-lsp started a second server for it, rooted wherever Neovim was opened;
   `after/lsp/clojure_lsp.lua` skips it by name and keeps lspconfig's root markers otherwise.
+- Neovim starts tracking server progress on the first `vim.ui.progress_status()` call, so
+  `progress.setup()` calls it once; without it the statusline missed what began before its first
+  redraw.
 
 ## Checks
 
-| What | Where |
-|---|---|
-| Format on save per style marker (none without one), prettier trust, `*.json.*` parser | `tests/files.lua` |
-| `gq` keeps wrapping (`formatexpr` cleared) | `tests/keys.lua` |
-| Python interpreter (`.venv`, `venv`, given a folder, in basedpyright's live settings; neotest-python left to its own), marksman out of notes through a link, clojure-lsp skips Conjure's log, the jack-in command per project file, waiting for the REPL (port file, REPL gone, timeout) | `tests/code.lua` |
-| Mason lists | `tests/install.lua` |
-| Every `<Cmd>` key names a command that exists (`Space l R` once ran a removed `:LspRestart`), also without rumdl | `tests/keys.lua` |
-| `,o` set when the server offers it, left alone when the file type has its own | `tests/keys.lua` |
-| A server attaches per language, `Space l R` restarts one, `,o`, `,s` | full: `test_lua`, `test_servers_per_language`, `test_language_actions` |
-| `,r` per language | full: `test_run` in `tests/code.sh` |
-| `,dp` log point, `]T` / `[T` | `tests/keys.lua` |
-| The debugpy adapter found when a session starts, or a message without it | `tests/code.lua` |
-| `,t` keys, `,d` debugger (the panel and terminal, `,de` on a word and a selection, `,dw`, `,dC`, `,du`) | full: `test_test_keys`, `test_debug` |
-| `gd`, `grr` / `gri` / `grt` and the `<leader>l` pickers open theirs on attach, `<leader>lc` / `lC` warn without a call hierarchy, the other `<leader>l` keys, Neovim's `grn` / `gra` / `grx` stay | `tests/keys.lua`, full: `test_lua` |
-| clojure-lsp's call hierarchy replies mended (and spec replies kept) | `tests/code.lua` |
-| `<leader>lc` / `lC` mapped on attach | full: `test_lua` |
-| A server's progress becomes one native progress message (title, status, percent) | `tests/code.lua` |
-| `,cj` jack-in (deps.edn, bb.edn), REPL completion through blink's `omni` | full: `test_clojure` |
+`tests/code.lua`, `files.lua`, `keys.lua`, `install.lua`; full: `tests/code.sh` (servers per
+language, `,r`, `,t`, `,d`, `,cj`). `tests/nvim.sh` prints what each check covers.
 
 ## Changing it
 
 - **A language server**: its lspconfig name in `settings.mason_servers` (or
   `system_servers` with its binary), settings in `after/lsp/<name>.lua` if any, run
-  `macos/nvim/install.sh`, list the language in the README's "Code" section, and an entry in
-  `test_servers_per_language`.
+  `macos/nvim/install.sh`, list the language in the README's "What you get" and "Code"
+  sections, and an entry in `test_servers_per_language`.
 - **A formatter**: a line in `formatters_by_ft`, a `style_markers` entry (`dotfiles/format.lua`),
-  its program in `macos/nvim/Brewfile` (or Mason tools), a case in `tests/files.lua`, the table
-  above.
+  its program in `macos/nvim/Brewfile` (or Mason tools), a case in `tests/files.lua`.
 - **A language for `,r`**: one line in `commands` in `run.lua` (or its name in the key's `ft`
-  when the plugin knows it), a row in the README table, a `run_case` in `tests/code.sh`.
+  when the plugin knows it), a `run_case` in `tests/code.sh`.
 - **Logic of one language**: a file in `dotfiles/lang/`; there is no registry of languages, since
   each tool already keeps its own list (`formatters_by_ft`, `commands`, `settings`).
 - **A test adapter or debugger**: its plugin in `test.lua` / `debug.lua` with the new `ft`;

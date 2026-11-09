@@ -3,26 +3,6 @@
 Writing and building LaTeX: vimtex with latexmk and Skim, texlab, grammar with ltex-ls-plus,
 and the snippets. Its relationships are in [map](map.md).
 
-## Language
-
-- **build folder**: `build/` next to the main file, where latexmk writes everything.
-- **autosnippet**: a snippet that expands as you type, without the completion menu.
-- **ABNT**: the Brazilian thesis norms, through abnTeX2.
-
-## Files
-
-| Path | Holds |
-|---|---|
-| `config/nvim/lua/plugins/tex.lua` | vimtex: Skim viewer, latexmk into `build/`, folds, quickfix filters, conceal, build notifications, the live build (start on open, save on idle, view sync) |
-| `config/nvim/lua/dotfiles/latex/live.lua` | live mode: compile on open, save when idle, reload the viewer, say when a build fails or recovers |
-| `config/nvim/lua/dotfiles/latex/compiler.lua` | `state()`: `idle`, `running` or empty for the buffer's latexmk; the live build and the statusline both ask it |
-| `config/nvim/after/ftplugin/tex.lua` | no hard wrap, `,lw`, which-key labels of the daily `,l` keys |
-| `config/nvim/snippets/tex.lua` | the LaTeX snippets (documents, text, math, ABNT) |
-| `config/nvim/after/lsp/texlab.lua` | texlab reads `build/`, chktex on open and save, latexindent |
-| `config/nvim/after/lsp/ltex_plus.lua` | grammar in `pt-BR`, spelling rules off, UTF-16, quiet log |
-| `config/latex/latexmkrc` | PDF output, BibTeX when a `.bib` exists, one-second polling, what `,lc` cleans; linked to `~/.latexmkrc` |
-| `macos/nvim/link.sh` (`skim_preferences`) | Skim's inverse search to Neovim and reload on change |
-
 ## How it works
 
 vimtex compiles with latexmk and shows the PDF in Skim with SyncTeX; texlab gives completion
@@ -63,24 +43,13 @@ these are the only ones.
 For a Brazilian thesis, `abnt` expands to a complete abnTeX2 skeleton (cover, abstract in two
 languages, contents, `abntex2cite` with `abntex2-alf`), and `capa`, `resumo`, `abstract`,
 `citacao`, `citeonline` and `apud` insert the pieces. Only `abntex2` and `abntex2cite` ship
-with MacTeX; `biblatex-abnt` does not, so citations go through BibTeX.
+with TeX Live (`tex.sh` installs them); `biblatex-abnt` is not installed, so citations go
+through BibTeX.
 
 ltex-ls-plus checks grammar in Portuguese (`pt-BR`) by default. A comment such as
 `% LTeX: language=en-US` switches the language from that line on. Its spelling rules are off:
 vim spell already underlines typos, and one word list (`zg`) is simpler than two that disagree.
 `<leader>uG` turns grammar off and on.
-
-## Contract
-
-Offers: nothing other contexts rely on.
-
-Consumes:
-
-- [code](code.md): texlab and ltex-ls-plus as servers. They share `.tex` buffers, so ltex is
-  pinned to UTF-16 in its `after/lsp` file (the position encoding rule).
-- [workspace](workspace.md): completion; LaTeX has its own snippets, not friendly-snippets.
-- [install](install.md): Skim and `~/.latexmkrc` (`macos/nvim/link.sh`), and the Mason packages.
-- [core](core.md): `settings` (spell languages, servers).
 
 ## Pitfalls
 
@@ -92,22 +61,24 @@ Consumes:
   raised `E716`.
 - ltex-ls-plus logs at `warning` (`ltex-ls.logLevel`): its default, `fine`, wrote the text of
   every check into `~/.local/state/nvim/lsp.log`.
+- TeX is BasicTeX, not MacTeX: a document that loads a package outside its small scheme and
+  `PACKAGES` stops at ``File `x.sty' not found``; `sudo tlmgr install x`, and add it to `PACKAGES`
+  in `macos/nvim/tex.sh` when it is for good. A program can be missing the same way: `,lw` runs
+  `texcount`, which MacTeX had and BasicTeX does not, and said only `texcount: command not
+  found` until it joined `PACKAGES`.
 - Full tests start Neovim with `view_automatic` off and the build and view events recorded in
   `start_nvim`, so a test build never opens Skim.
 
 ## Checks
 
-| What | Where |
-|---|---|
-| `,lw`, no hard wrap | `tests/keys.lua` |
-| Live build, outside edits, view sync, read-only files, build toasts (stubs) | quick: `tests/autocmds.lua` |
-| Skim preferences | quick: `Skim is set up for Neovim` in `tests/nvim.sh` |
-| A real live build into `build/`, save on idle, ltex, `u G` | full: `test_tex` in `tests/tex.sh` |
-| Every snippet expands, no trigger is defined twice, the common ones type what they should | quick: `tests/tex_snippets.lua` |
-| Snippets typed for real | full: `test_snippets`, driven by `tests/snippets.lua` |
+`tests/tex_snippets.lua`, `keys.lua`, `autocmds.lua`; `tests/tex.sh`: quick `tex_packages_step`
+and `tex_programs`, full `test_tex` and `test_snippets` (typed from `tests/snippets.lua`);
+Skim's preferences: quick, in `tests/nvim.sh`.
 
 ## Changing it
 
 - **A snippet**: add it to `snippets/tex.lua` beside its kind, a typed case in
-  `tests/snippets.lua`, a row in the README's snippet tables.
+  `tests/snippets.lua`.
 - **A vimtex option**: `init` in `tex.lua` (vimtex reads `g:` variables before it loads).
+- **A TeX package**: add it to `PACKAGES` in `macos/nvim/tex.sh` (a snippet that loads one
+  outside BasicTeX needs it there too) and run `macos/nvim/install.sh`.

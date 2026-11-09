@@ -1,5 +1,32 @@
 local T = dofile(vim.env.DOT .. "/tests/lib.lua")
 
+T.case("startup loads only what must be there at once", function()
+  local loaded = {}
+  for _, plugin in ipairs(require("lazy").plugins()) do
+    if plugin._.loaded then
+      loaded[#loaded + 1] = plugin.name
+    end
+  end
+  table.sort(loaded)
+  T.eq(
+    "startup: a new plugin waits for its event, key, command or file type",
+    loaded,
+    { "dracula.nvim", "lazy.nvim", "nvim-treesitter", "snacks.nvim", "vimtex" }
+  )
+end)
+
+T.case("ui2 is still in this Neovim", function()
+  local found = {}
+  for _, module in ipairs({ "vim._core.ui2", "vim._core.ui2.cmdline", "vim._core.ui2.messages" }) do
+    found[#found + 1] = pcall(require, module)
+  end
+  T.eq(
+    "ui2: the modules options.lua turns on are there (else delete its line, see docs/core.md)",
+    { found, type(require("vim._core.ui2").enable) },
+    { { true, true, true }, "function" }
+  )
+end)
+
 T.case("the dashboard's q", function()
   local function qmap(buf)
     return vim.api.nvim_buf_call(buf, function()

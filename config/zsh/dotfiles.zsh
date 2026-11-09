@@ -5,7 +5,7 @@ if (( ! $+commands[brew] )); then
   unset brew_bin
 fi
 [[ -n $LANG && $LANG != (C|POSIX) && ! -d /usr/share/locale/$LANG ]] && export LANG=en_US.UTF-8
-typeset -U path PATH
+typeset -U path PATH fpath
 
 if [[ -z ${JAVA_HOME:-} && -x ${HOMEBREW_PREFIX:-/opt/homebrew}/opt/openjdk/bin/java ]]; then
   export JAVA_HOME="${HOMEBREW_PREFIX:-/opt/homebrew}/opt/openjdk/libexec/openjdk.jdk/Contents/Home"
@@ -19,6 +19,18 @@ SAVEHIST=50000
 setopt share_history hist_ignore_all_dups hist_ignore_space
 
 bindkey -e
+
+if [[ -o interactive ]] && (( $+commands[fzf] )); then
+  export FZF_DEFAULT_OPTS="--color=fg:#f8f8f2,bg:#282a36,hl:#bd93f9,fg+:#f8f8f2,bg+:#44475a,hl+:#bd93f9,info:#ffb86c,prompt:#50fa7b,pointer:#ff79c6,marker:#ff79c6,spinner:#ffb86c,header:#6272a4"
+  source <(fzf --zsh)
+fi
+
+if [[ -o interactive ]]; then
+  autoload -Uz compinit
+  compinit -i
+  zstyle ':completion:*' menu select
+  zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
+fi
 
 if [[ -o interactive ]] && (( $+commands[eza] )); then
   alias ls='eza --icons=auto --group-directories-first'

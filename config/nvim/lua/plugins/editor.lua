@@ -7,6 +7,20 @@ end
 return {
 
   {
+    "christoomey/vim-tmux-navigator",
+    cmd = { "TmuxNavigateLeft", "TmuxNavigateDown", "TmuxNavigateUp", "TmuxNavigateRight" },
+    init = function()
+      vim.g.tmux_navigator_no_mappings = 1
+    end,
+    keys = {
+      { "<C-h>", "<cmd>TmuxNavigateLeft<CR>", desc = "Window or tmux pane left" },
+      { "<C-j>", "<cmd>TmuxNavigateDown<CR>", desc = "Window or tmux pane below" },
+      { "<C-k>", "<cmd>TmuxNavigateUp<CR>", desc = "Window or tmux pane above" },
+      { "<C-l>", "<cmd>TmuxNavigateRight<CR>", desc = "Window or tmux pane right" },
+    },
+  },
+
+  {
     "folke/flash.nvim",
     event = "VeryLazy",
     opts = {},
@@ -171,13 +185,7 @@ return {
         end,
         desc = "Previous todo",
       },
-      {
-        "<leader>dt",
-        function()
-          Snacks.picker.todo_comments()
-        end,
-        desc = "Todos (project)",
-      },
+      { "<leader>dt", require("dotfiles.picker").open("todo_comments"), desc = "Todos (project)" },
     },
   },
 

@@ -1,7 +1,7 @@
 # Tests
 
 How a change is checked: `tests/nvim.sh` and its files, where a new check goes, and how to
-check by hand what the suite cannot. Every other context lists its own checks; this one says
+check by hand what the suite cannot. Every other context names its own checks; this one says
 how they are built. Its relationships are in [map](map.md).
 
 ## Language
@@ -23,7 +23,6 @@ how they are built. Its relationships are in [map](map.md).
 | `tests/lib.lua` | `T.case` (a named group of checks), `T.stub` (a fake undone after its case), `T.eq`, `T.dir` (a temporary project), `T.config` (load a config file), `T.skip` (say a check could not run), `T.done` |
 | `tests/lib_check.lua` | the check of `lib.lua` itself: a crash fails only its case, every stub is undone |
 | `tests/core.lua`, `install.lua`, `code.lua`, `workspace.lua`, `git.lua`, `files.lua`, `toggles.lua`, `keys.lua`, `autocmds.lua`, `share.lua`, `treesitter.lua`, `tex_snippets.lua` | headless checks with the real config, run through `lua_check`; named after the context they check (the `.sh` names) where one file fits |
-| `tests/comments.lua` | no comments in Lua, shell and PowerShell, found by parsing (trailing ones too) |
 | `tests/modules.lua` | every module loads on its own, without the config (`nvim -l`) |
 | `tests/probes.lua` | `P.*`, the multi-statement Lua the full checks call in the running Neovim (loaded by `start_nvim`) |
 | `tests/snippets.lua` | the LaTeX probe the full run types into a real Neovim |
@@ -76,18 +75,11 @@ Where a new check goes:
   counts windows by an option (wrap, cursorline) keeps only `relative == ""` ones, as `tiles`
   does.
 
-## Contract
-
-Offers: `tests/nvim.sh` (quick, full, fresh) and `tests/lib.sh` / `lib.lua` to every context.
-
-Consumes: every context's code. A link in [map](map.md) gets a check in the downstream
-context's file; the map's last column says which.
-
 ## Quick tests in CI
 
 `.github/workflows/tests.yml` runs `tests/nvim.sh` (quick) on a macOS runner on push and pull
 request: it installs the programs the checks use (pandoc among them: without it the preview
-check skips) and BasicTeX with `latexmk`, runs
+check skips) and BasicTeX with its packages (`macos/nvim/tex.sh`), runs
 `macos/nvim/link.sh`, restores the plugins from `lazy-lock.json`, runs `dotfiles.install`
 (servers, parsers, spell files, as `macos/nvim/install.sh` does) and then the suite. Checks for
 programs or apps the runner lacks (Skim, tmux) skip. `full` and `fresh` stay manual: they need
@@ -97,16 +89,13 @@ real language servers and tmux and would fail for reasons that are not in a chan
 
 `.github/workflows/security.yml` runs on push, pull request and every Monday: ShellCheck on the
 shell scripts, gitleaks on the full history, and zizmor on the workflows. Actions are pinned to
-a commit SHA and the token is read-only; Dependabot (`.github/dependabot.yml`) bumps the pins,
-all `github/codeql-action` steps in one pull request, since CodeQL fails when they differ.
+a commit SHA and the token is read-only; Dependabot (`.github/dependabot.yml`) bumps the pins.
 ShellCheck does not read zsh, so `config/zsh/` is left out. Run `gitleaks detect` locally for the
 same secret scan.
 
-`.github/workflows/scorecard.yml` runs OSSF Scorecard weekly and on push and uploads the result
-to the repository's code scanning alerts (Security tab). It scores repository hygiene (branch
-protection, pinned actions, token permissions), not code. `.github/workflows/codeql.yml` runs
-CodeQL on the workflow files (the `actions` language; there is no other code it supports).
-OSV-Scanner is not used: it does not read `lazy-lock.json`.
+CodeQL and OSSF Scorecard are not used: CodeQL reads none of the Lua or shell here, only the
+workflows, which zizmor already checks, and Scorecard scores repository settings, not the
+config. OSV-Scanner is not used either: it does not read `lazy-lock.json`.
 
 ## Checking by hand
 

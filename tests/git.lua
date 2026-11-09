@@ -534,6 +534,15 @@ T.case("git: what the review remembers to send", function()
   local typed = new_review()
   T.eq("git: a review of unknown revisions has none", review.diff(typed), nil)
   vim.cmd("silent! tabonly")
+  review.expect("working tree", { "git", "diff", "HEAD" })
+  vim.fn.histadd("cmd", "CodeDiff main...")
+  local after_failed = new_review()
+  T.eq(
+    "git: a key whose review never opened leaves no label or diff to the next one",
+    { review.label(after_failed), review.diff(after_failed) },
+    { "main...", nil }
+  )
+  vim.cmd("silent! tabonly")
 end)
 
 T.case("git: sending changes to Claude", function()
@@ -614,6 +623,15 @@ T.case("git: sending changes to Claude", function()
   said = nil
   claude.ask_message()
   T.eq("git: nothing staged says so", said, "Nothing is staged")
+  local outside = T.dir({ ["g.txt"] = { "one" } })
+  vim.cmd.edit(outside .. "/g.txt")
+  said, typed = nil, {}
+  claude.ask_message()
+  T.eq("git: outside a repository it says so and asks nothing", { said, #typed }, {
+    "This file is not in a git repository",
+    0,
+  })
+  vim.cmd.edit(dir .. "/f.txt")
   sh("add", ".")
   typed = {}
   claude.ask_message()
@@ -635,71 +653,25 @@ T.case("git: sending changes to Claude", function()
   vim.cmd("enew!")
 end)
 
-T.case("git: the commit of a line and a stash", function()
-  vim.cmd("enew")
-  local dir = T.dir({ ["f.txt"] = { "one", "two" } })
-  local function sh(...)
-    return vim.trim(vim.system({ "git", "-C", dir, ... }, { text = true }):wait().stdout)
+T.case("git: the picker keys reach Snacks", function()
+  local function key(source, lhs)
+    return require("snacks.picker.config").get({ source = source }).win.input.keys[lhs]
   end
-  sh("init", "-q")
-  sh("add", ".")
-  sh("-c", "user.name=t", "-c", "user.email=t@t", "commit", "-qm", "one")
-  local first = sh("rev-parse", "HEAD")
-  vim.fn.writefile({ "one", "changed" }, dir .. "/f.txt")
-  sh("-c", "user.name=t", "-c", "user.email=t@t", "commit", "-qam", "two")
-  local second = sh("rev-parse", "HEAD")
-  local said, ran
-  T.stub(vim, "notify", function(msg)
-    said = msg
-  end)
-  T.stub(vim.cmd, "CodeDiff", function(...)
-    ran = { ... }
-  end)
-  vim.cmd("edit " .. dir .. "/f.txt")
-  vim.fn.cursor(2, 1)
-  log_actions.line_commit()
-  T.eq("git: Space g v l reviews the commit that changed the line", ran, { first, second })
-  vim.fn.cursor(1, 1)
-  ran = nil
-  log_actions.line_commit()
+  local both = { "n", "i" }
+  T.eq("git: C-e and C-o in the pull request picker, C-e in the log pickers", {
+    key("gh_pr", "<C-E>"),
+    key("gh_pr", "<C-O>"),
+    key("git_log_file", "<C-E>"),
+  }, {
+    { "pr_menu", mode = both },
+    { "pr_hunks", mode = both },
+    { "review_worktree", mode = both },
+  })
   T.eq(
-    "git: the first commit against the empty tree",
-    ran,
-    { "4b825dc642cb6eb9a060e54bf8d69288fbee4904", first }
+    "git: the status picker uses the tall layout",
+    require("snacks.picker.config").get({ source = "git_status" }).layout.layout.height,
+    0.9
   )
-  vim.api.nvim_buf_set_lines(0, 1, 2, false, { "not saved" })
-  vim.fn.cursor(2, 1)
-  said = nil
-  log_actions.line_commit()
-  T.eq("git: a line edited in the buffer has no commit yet", said, "This line is not committed yet")
-  vim.cmd("edit! | enew")
-  said = nil
-  log_actions.line_commit()
-  T.eq("git: a window without a file says so", said, "This window shows no file")
-  vim.cmd("edit " .. T.dir({ ["u.txt"] = { "x" } }) .. "/u.txt")
-  said = nil
-  log_actions.line_commit()
-  T.eq("git: outside git says so", said, "Git does not track this file")
-  review.expect(nil)
-
-  local closed
-  local picker = {
-    close = function()
-      closed = true
-    end,
-  }
-  log_actions.stash(picker, { stash = "stash@{1}" })
-  T.eq(
-    "git: Enter in Space g v z reviews the stash against its parent",
-    { closed, ran },
-    { true, { "stash@{1}^", "stash@{1}" } }
-  )
-  T.eq(
-    "git: and never applies it",
-    type(require("snacks.picker.config").get({ source = "git_stash" }).confirm),
-    "function"
-  )
-  review.expect(nil)
 end)
 
 T.case("git: a branch picker leaves the current branch out", function()
@@ -722,12 +694,6 @@ T.case("git: the base branch for the compare keys", function()
   end)
   compare.commits()
   T.eq("git: the branch commit by commit", ran, { "history", "origin/main..HEAD" })
-  local hunks
-  T.stub(Snacks.picker, "git_diff", function(opts)
-    hunks = opts
-  end)
-  compare.hunks()
-  T.eq("git: the hunks of the whole branch", hunks.base, "origin/main")
   local gitsigns = require("gitsigns")
   local base, reset_base
   T.stub(gitsigns, "change_base", function(rev, global)
