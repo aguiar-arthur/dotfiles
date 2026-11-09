@@ -25,8 +25,8 @@ Completion: `<Tab>` is left alone in normal mode so `<C-i>` still walks the jump
 in insert mode it jumps to the next snippet field first, then moves in the menu (`<C-n>` /
 `<C-p>` always move in it; `<C-j>` / `<C-k>` only move between windows, also in pickers). On the
 `:` line `<Tab>` completes (a single match at once) and `<CR>` runs the line as it reads.
-friendly-snippets are loaded for every language but LaTeX, which has its own (see
-[latex](latex.md)).
+Snippets are friendly-snippets through blink.cmp's own engine (`vim.snippet`); LuaSnip went
+with the LaTeX snippets that needed it.
 
 `<leader>tf` / `th` / `tv` toggle three separate terminals (float, bottom, right). Inside a
 terminal every key goes to the program; a quick double `Esc` or `C-\ C-n` returns to Neovim,
@@ -86,7 +86,7 @@ backdrop). Hiding a float keeps its session, and Snacks refits it when the termi
 ## Checks
 
 `tests/workspace.lua`, `share.lua`, `keys.lua`; full: `tests/workspace.sh` (terminals, the tree
-and pickers, Claude, sessions); completion typed for real: `test_snippets` in `tests/tex.sh`.
+and pickers, Claude, sessions).
 Everything else here is plugin defaults.
 
 ## Changing it

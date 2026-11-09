@@ -17,7 +17,7 @@ README is the user's guide; it is not needed to change code.
 | Workspace | [docs/workspace.md](docs/workspace.md) | Snacks pickers, file tree, terminals, sessions, flash, mini.*, grug-far, completion, `<leader>cs`, Claude Code | core |
 | Code | [docs/code.md](docs/code.md) | language servers, formatting and style markers, `,r` / `,t` / `,d`, Python, Clojure | core, install |
 | Git | [docs/git.md](docs/git.md) | gitsigns, codediff review, lazygit, git pickers, jumps from a review | core, workspace |
-| LaTeX | [docs/latex.md](docs/latex.md) | vimtex, texlab, ltex-ls-plus, snippets, latexmkrc, Skim | core, code, install |
+| LaTeX | [docs/latex.md](docs/latex.md) | vimtex, texlab, latexmkrc, Skim | core, code, install |
 | Markdown | [docs/markdown.md](docs/markdown.md) | render-markdown, `,p` preview, rumdl rules, notes (obsidian.nvim), marksman | core, code |
 | Install | [docs/install.md](docs/install.md) | `macos/` (one part each for nvim, terminal, tmux, apps), Mason / parser / spell installs, lockfile, zsh, Starship, tmux, iTerm2 | core (settings) |
 | Tests | [docs/tests.md](docs/tests.md) | `tests/`, where a new check goes, checking by hand | all |
@@ -53,8 +53,8 @@ docs/               one doc per context (the map above); img/ holds the README s
 macos/              the macOS install, see docs/install.md:
   install.sh        runs every part: terminal, tmux, apps, nvim
   lib.sh            what the parts share: Homebrew, links with backups, preferences, steps
-  nvim/             Brewfile, install.sh (brew, link, TeX packages, plugins and Mason), link.sh
-                    (incl. ~/.latexmkrc and Skim), tex.sh (the TeX packages BasicTeX lacks)
+  nvim/             Brewfile, install.sh (brew, link, plugins and Mason), link.sh
+                    (incl. ~/.latexmkrc and Skim)
   terminal/         Brewfile, install.sh (brew, link), link.sh (Starship, iTerm2, git, ~/.zshrc)
   tmux/             Brewfile, install.sh (brew, link, whichkey), link.sh (tmux.conf, lazygit),
                     whichkey.sh (clones whichkey-tmux into ~/.config/tmux/plugins/)
@@ -74,9 +74,9 @@ windows/            collect-diagnostics.ps1, a standalone Windows health report,
   `macos/install.sh` runs every part (`macos/<part>/install.sh`: terminal, tmux, apps, nvim); a
   part runs on its own on a machine where the rest must stay untouched, so no script takes an
   argument. Each part installs its own `Brewfile`, runs its `link.sh`, (tmux) clones
-  whichkey-tmux when it is missing, and (nvim) adds the TeX packages BasicTeX lacks and sets up
-  Neovim through the linked `~/.config/nvim`, as every day. Every script stays idempotent and
-  only does what is missing. Every network step has a timeout or a failure path.
+  whichkey-tmux when it is missing, and (nvim) sets up Neovim through the linked
+  `~/.config/nvim`, as every day. Every script stays idempotent and only does what is missing.
+  Every network step has a timeout or a failure path.
 - **No comments that say what**, in any file. Names and `desc` / `:wk` labels say what; a
   reason worth keeping goes in one sentence in its context's doc in `docs/`. In Lua, shell and
   `tmux.conf`, a line that would look wrong without its reason may get one whole-line `-- why:
@@ -107,7 +107,7 @@ windows/            collect-diagnostics.ps1, a standalone Windows health report,
   `curl -s https://api.github.com/repos/<owner>/<repo>` (`stargazers_count`, `pushed_at`,
   `archived`, `fork`) before adding one, and drop a plugin that stops meeting the rule.
   Prefer a built-in feature or one of the plugins already here over a new one.
-- **Our code is tested.** Code we write (`lua/dotfiles/`, `after/ftplugin/`, `snippets/`, and
+- **Our code is tested.** Code we write (`lua/dotfiles/`, `after/ftplugin/`, and
   logic of our own in a plugin spec, keymap or autocmd) gets a check in `tests/` in the same
   change, and a bug fixed in it gets a check that fails without the fix. Plugin defaults and
   plain settings need none.

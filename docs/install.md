@@ -11,16 +11,16 @@ are in [map](map.md).
   `Brewfile`, `install.sh` and (all but apps) `link.sh`; it installs alone, so a machine whose
   shell and terminal must stay as they are runs only `macos/nvim/install.sh` (and
   `macos/tmux/install.sh` for tmux, which is a part of its own for that reason).
-- **step**: one of `brew`, `link`, `whichkey`, `tex`, `nvim` in a part's `install.sh`; a failed step
-  does not stop the others, and a failed part does not stop `macos/install.sh`.
+- **step**: one of `brew`, `link`, `whichkey`, `nvim` in a part's `install.sh`; a failed step does
+  not stop the others, and a failed part does not stop `macos/install.sh`.
 - **lockfile**: `config/nvim/lazy-lock.json`, the plugin commits; the way back after a bad
   update.
 
 ## How it works
 
 `macos/install.sh` runs the parts' `install.sh` (terminal, tmux, apps, nvim) and ends with
-`Done.` or `Failed: <parts>`; each part runs its steps in order (`brew`, `link`, then `tex` and
-`nvim` for Neovim) and ends with `Done: <part>.` or `Failed: <steps>`. The nvim step needs
+`Done.` or `Failed: <parts>`; each part runs its steps in order (`brew`, `link`, then `nvim` for
+Neovim) and ends with `Done: <part>.` or `Failed: <steps>`. The nvim step needs
 `~/.config/nvim` to link to this repository, so Neovim uses the same config as every day:
 `Lazy! restore` puts plugins at the lockfile's commits (and runs their `build` steps, such as
 codediff's library), then `dotfiles.install` installs the Mason packages, the parsers (with
@@ -32,15 +32,10 @@ The tmux part's `whichkey` step runs `whichkey.sh`: it clones whichkey-tmux into
 holds a clone of it, and stops with an error, touching nothing, when it holds anything else.
 It never pulls: an update is on purpose (see [Updating](#updating)).
 
-TeX is BasicTeX (TeX Live's small scheme, about 400 MB) rather than MacTeX (about 10 GB): Homebrew
-installs it, and the nvim part's `tex` step runs `tex.sh`, which adds with `tlmgr` the packages
-of `PACKAGES` that are missing: `latexmk` and `chktex` for vimtex and texlab, `texcount` for
-`,lw`, `abntex2` and what it needs (`enumitem`, `relsize`, `fontname`), `cm-super` for T1 text
-without `lmodern`, and `sansmathaccent` for beamer. They are the programs the config calls and
-what the snippets' documents read (`latexmk -recorder`), less what BasicTeX has. TeX Live
-belongs to root, so `tlmgr` runs with `sudo`, and only when something is missing; it first
-updates itself (`update --self`). latexindent comes from Homebrew, with its Perl modules: TeX
-Live's needs `File::HomeDir`, which macOS lacks.
+TeX is MacTeX without its GUI apps (`mactex-no-gui`, several GB): every package and program a
+document or the config asks for (latexmk, chktex, texcount, abnTeX2) is there, so there is no
+list to keep. latexindent comes from Homebrew, with its Perl modules: TeX Live's stops at
+`YAML::Tiny`, which macOS's Perl lacks, and Homebrew's comes first on `PATH`.
 
 Each `link.sh` links its files, moving whatever was there to `<name>.bak.<timestamp>` (the three
 newest are kept; each older one is named with `prune` as it is deleted), and writes its app's
@@ -153,9 +148,8 @@ workflows' actions), on a branch, and run the tests before you keep it:
    the way back.
 2. Parsers: `:TSUpdate`. Mason packages: `:Mason`, then `U`.
 3. Programs: `brew upgrade` (the install scripts never do), then `macos/nvim/install.sh` so
-   Mason's Python tools get a venv for the new Python. A new year's BasicTeX installs into a
-   new `/usr/local/texlive/<year>basic` without the packages of `tex.sh`; that same run puts
-   them back. Within a year, `sudo tlmgr update --self --all` updates the TeX packages.
+   Mason's Python tools get a venv for the new Python. Within a year,
+   `sudo tlmgr update --self --all` updates the TeX packages.
 4. Clojure: the newest `nrepl/nrepl` and `cider/cider-nrepl` on Clojars go in the `versions`
    table of `dotfiles/clojure.lua`.
 5. whichkey-tmux: `git -C ~/.config/tmux/plugins/whichkey-tmux pull`, then `prefix r`.

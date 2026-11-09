@@ -22,10 +22,9 @@ how they are built. Its relationships are in [map](map.md).
 | `tests/tmux.sh` | the quick tmux checks: the config loads, and keys typed through a client attached with `script` (`send-keys -K`) |
 | `tests/lib.lua` | `T.case` (a named group of checks), `T.stub` (a fake undone after its case), `T.eq`, `T.dir` (a temporary project), `T.config` (load a config file), `T.skip` (say a check could not run), `T.done` |
 | `tests/lib_check.lua` | the check of `lib.lua` itself: a crash fails only its case, every stub is undone |
-| `tests/core.lua`, `install.lua`, `code.lua`, `workspace.lua`, `git.lua`, `files.lua`, `toggles.lua`, `keys.lua`, `autocmds.lua`, `share.lua`, `treesitter.lua`, `tex_snippets.lua` | headless checks with the real config, run through `lua_check`; named after the context they check (the `.sh` names) where one file fits |
+| `tests/core.lua`, `install.lua`, `code.lua`, `workspace.lua`, `git.lua`, `files.lua`, `toggles.lua`, `keys.lua`, `autocmds.lua`, `share.lua`, `treesitter.lua` | headless checks with the real config, run through `lua_check`; named after the context they check (the `.sh` names) where one file fits |
 | `tests/modules.lua` | every module loads on its own, without the config (`nvim -l`) |
 | `tests/probes.lua` | `P.*`, the multi-statement Lua the full checks call in the running Neovim (loaded by `start_nvim`) |
-| `tests/snippets.lua` | the LaTeX probe the full run types into a real Neovim |
 
 ## How it works
 
@@ -79,7 +78,7 @@ Where a new check goes:
 
 `.github/workflows/tests.yml` runs `tests/nvim.sh` (quick) on a macOS runner on push and pull
 request: it installs the programs the checks use (pandoc among them: without it the preview
-check skips) and BasicTeX with its packages (`macos/nvim/tex.sh`), runs
+check skips) and BasicTeX with `latexmk` (MacTeX is too large for a runner), runs
 `macos/nvim/link.sh`, restores the plugins from `lazy-lock.json`, runs `dotfiles.install`
 (servers, parsers, spell files, as `macos/nvim/install.sh` does) and then the suite. Checks for
 programs or apps the runner lacks (Skim, tmux) skip. `full` and `fresh` stay manual: they need

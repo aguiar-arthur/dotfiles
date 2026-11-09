@@ -19,11 +19,9 @@ Upstream offers, downstream consumes; a change upstream may break downstream.
 | Workspace | Git | `dotfiles.picker.open`, which the git picker keys call | `tests/workspace.lua` |
 | Workspace | Code | blink.cmp's LSP capabilities reach servers started before the first insert | none (plugin wiring) |
 | Workspace | Markdown | mini.pairs leaves the backtick alone; Markdown adds its own pair | `tests/keys.lua` |
-| Workspace | LaTeX | completion; LaTeX keeps its own snippets, not friendly-snippets | full: `test_snippets` |
-| Code | LaTeX, Markdown | each adds its servers (texlab, ltex_plus; rumdl, marksman) and uses the formatting rules | full: `test_tex`, `test_markdown` |
-| Code | LaTeX | ltex is pinned to the position encoding texlab uses | none (`:checkhealth vim.lsp` warns) |
+| Code | LaTeX, Markdown | each adds its servers (texlab; rumdl, marksman) and uses the formatting rules | full: `test_tex`, `test_markdown` |
 | Core settings | Install | Install installs whatever the settings list | `tests/install.lua`, `fresh` |
-| Install | Code, Git, LaTeX | Mason packages, codediff's library; BasicTeX and its packages (`macos/nvim/tex.sh`), Skim and `~/.latexmkrc` by `macos/nvim/link.sh` | `fresh`, quick: Skim, the tex step |
+| Install | Code, Git, LaTeX | Mason packages, codediff's library; MacTeX, Skim and `~/.latexmkrc` by `macos/nvim/link.sh` | `fresh`, quick: Skim |
 
 ## Decisions
 
@@ -41,7 +39,7 @@ reader (or an agent) who wants to change one starts here.
 | vim-tmux-navigator on Neovim's side | one key crosses windows and panes both ways; `tmux.conf` still loads and works without the Neovim config | [install](install.md), [workspace](workspace.md) |
 | `lazy-lock.json` committed, nothing updates itself | a bad update has a way back (`:Lazy restore`) | [install](install.md#updating) |
 | No comments that say what, one `why:` line at most, never a repeat of a doc | names and `desc` say what; reasons live in these docs | `AGENTS.md` |
-| The install split into parts; LaTeX inside nvim, on BasicTeX | a machine whose shell must stay as it is gets only Neovim; LaTeX is only used from Neovim, and BasicTeX with a few packages is about 400 MB, not MacTeX's 10 GB | [install](install.md) |
+| The install split into parts; LaTeX inside nvim, on MacTeX (no GUI) | a machine whose shell must stay as it is gets only Neovim; LaTeX is only used from Neovim, and MacTeX has every package a document asks for, with nothing to keep in a list | [install](install.md) |
 
 ## Keeping it true
 

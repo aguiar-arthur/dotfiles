@@ -133,7 +133,6 @@ quick() {
   lua_check "Space u toggles, also beside a codediff review" toggles.lua
   lua_check "]e, the TeX and Markdown keys, the preview, gq and the gr keys" keys.lua
   lua_check "treesitter highlight and indent per file type" treesitter.lua
-  lua_check "every LaTeX snippet expands and the common ones type what they should" tex_snippets.lua
   lua_check "yank highlight, focus reload, last line, q, new folders, resize" autocmds.lua
   if [ "$before" = "$(lock_hash)" ]; then
     pass "starting nvim leaves lazy-lock.json alone"
@@ -159,8 +158,6 @@ quick() {
   tool "tmux: C-h/j/k/l cross panes and Neovim's windows both ways, prefix t toggles the scratch popup" tmux tmux_keys
   tool "tmux: the config loads without whichkey-tmux" tmux tmux_without_whichkey
   tool "tmux: the whichkey step keeps its clone and refuses anything else" git tmux_whichkey_step
-  check "TeX: the tex step installs only the missing packages, after tlmgr updates itself" tex_packages_step
-  tool "TeX: latexmk, bibtex, chktex and texcount (,lw) are installed" tlmgr tex_programs
   tool "shfmt" shfmt shfmt -d "$DOT"/macos/*.sh "$DOT"/macos/*/*.sh "$DOT"/tests/*.sh "$DOT/config/nvim/dashboard/clock.sh"
   tool "rumdl" rumdl rumdl check "$DOT" --config "$DOT/config/rumdl/rumdl.toml"
   check "the dashboard clock draws its digits and date" clock_frame
@@ -200,7 +197,6 @@ full() {
   test_markdown
   test_notes
   test_tex
-  test_snippets
   if [ "$before" = "$(lock_hash)" ]; then
     pass "the whole run leaves lazy-lock.json alone"
   else

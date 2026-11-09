@@ -14,8 +14,7 @@ look. Every other context builds on this one (see [map](map.md)).
 
 ## How it works
 
-Neovim 0.12 or newer: the grammar toggle reads `vim.lsp.is_enabled()` and relies on
-`vim.lsp.enable(name, false)` stopping the running servers.
+Neovim 0.12 or newer: `ui2` and `vim.ui.progress_status()` come with it.
 
 `<Space>` is the leader, `,` the local leader; which-key shows every key after a short pause.
 `<leader>` keys work everywhere, `,` keys depend on the file type (see [code](code.md)).
@@ -52,7 +51,7 @@ notifications go to Snacks (`<leader>on`) and signature help to blink. treesitte
 enclosing function or class on top (`<leader>ux`). The status column (Snacks) shows marks and
 diagnostics on the left, git and closed folds on the right; mini.statusline shows mode, git,
 diagnostics, running progress (`vim.ui.progress_status()`: the average percentage and the number of
-tasks, such as a server indexing, see [code](code.md)), language servers and a running latexmk (the
+tasks, such as a server indexing, see [code](code.md)), and language servers (the
 path is in each window's winbar, not repeated there). Inactive windows are a shade darker
 (`NormalNC`), the cursorline shows only in the active one, and each file window has its path in a
 winbar (a window whose winbar is already set keeps it; a review's tab, floats and terminals have

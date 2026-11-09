@@ -35,13 +35,6 @@ return {
         return #names > 0 and ("LSP: " .. table.concat(names, ",")) or ""
       end
 
-      local function vimtex_status()
-        if vim.bo.filetype ~= "tex" then
-          return ""
-        end
-        return require("dotfiles.latex.compiler").state() == "running" and "⟳ latexmk" or ""
-      end
-
       return {
         content = {
           active = function()
@@ -57,7 +50,6 @@ return {
                 },
               },
               "%<",
-              { hl = "MiniStatuslineFilename", strings = { vimtex_status() } },
               "%=",
               {
                 hl = "MiniStatuslineFileinfo",

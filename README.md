@@ -30,12 +30,12 @@ git clone https://github.com/aguiar-arthur/dotfiles.git ~/dotfiles && ~/dotfiles
 | **Tested like software** | the checks drive a real Neovim in tmux: servers, debugger, a LaTeX build, a run on a fresh machine; every key is documented or a test fails |
 | **Secure by default** | gitleaks, zizmor and ShellCheck on every push, actions pinned to a commit |
 | **Never restyles other people's code** | format on save only where the project declares a style |
-| **LaTeX, live** | the PDF follows your typing in Skim, Cmd+Shift+click jumps back, math snippets expand as you type |
+| **LaTeX in Skim** | `,ll` builds into `build/`, `,lt` and texlab move through the document, Cmd+Shift+click in the PDF jumps back |
 | **Notes without an app** | plain Markdown, `[[links]]`, backlinks and daily notes, no Obsidian account |
 | **Clojure in one key** | `,cj` starts the REPL and connects; results appear next to the code |
 | **Built for AI assistants** | `AGENTS.md` and one doc per context, so an agent changes it without breaking it |
 | **Idempotent, part by part** | run it again and it only does what is missing; install only Neovim on a borrowed Mac |
-| **Small on purpose** | about 40 plugins, each well tested and maintained, pinned in a lockfile you can roll back; BasicTeX with the few packages it uses, not MacTeX's 10 GB |
+| **Small on purpose** | about 40 plugins, each well tested and maintained, pinned in a lockfile you can roll back |
 
 ## What you get
 
@@ -62,8 +62,8 @@ On a Mac with macOS and an internet connection; nothing else is needed beforehan
    git clone https://github.com/aguiar-arthur/dotfiles.git ~/dotfiles
    ```
 
-2. **Run the installer.** It takes a while the first time and asks for your password when
-   Homebrew, BasicTeX and its package manager (`tlmgr`) install.
+2. **Run the installer.** It takes a while the first time (MacTeX alone is several GB) and
+   asks for your password when Homebrew and MacTeX install.
 
    ```sh
    cd ~/dotfiles && macos/install.sh
@@ -80,8 +80,6 @@ On a Mac with macOS and an internet connection; nothing else is needed beforehan
      [whichkey-tmux](https://github.com/aguiar-arthur/whichkey-tmux) into
      `~/.config/tmux/plugins/whichkey-tmux` when it is missing; a clone already there is kept,
      and anything else in its place is left alone and reported;
-   - **tex** (Neovim part only): the TeX packages BasicTeX lacks and this setup uses (latexmk,
-     chktex, texcount, abnTeX2 and a few more), installed with `tlmgr` only when missing;
    - **nvim** (Neovim part only): the plugins at the versions in `lazy-lock.json`, the Mason
      servers and tools, the treesitter parsers and the Portuguese spell file, through the
      linked `~/.config/nvim`.
@@ -103,7 +101,7 @@ Neovim, terminal, tmux and apps install on their own, so a machine gets only wha
 
 | Part | Command | Installs and links |
 |---|---|---|
-| Neovim | `macos/nvim/install.sh` | Neovim, git, ripgrep, ast-grep, fd, tree-sitter, node, python, the formatters, pandoc, lazygit, gh, Clojure and its tools, BasicTeX with the TeX packages we use, latexindent, Skim, Claude Code; `~/.config/nvim`, `~/.config/rumdl/rumdl.toml`, `~/.latexmkrc`, Skim's preferences; then the plugins, servers and parsers |
+| Neovim | `macos/nvim/install.sh` | Neovim, git, ripgrep, ast-grep, fd, tree-sitter, node, python, the formatters, pandoc, lazygit, gh, Clojure and its tools, MacTeX (no GUI), latexindent, Skim, Claude Code; `~/.config/nvim`, `~/.config/rumdl/rumdl.toml`, `~/.latexmkrc`, Skim's preferences; then the plugins, servers and parsers |
 | Terminal | `macos/terminal/install.sh` | Starship, eza, fzf, iTerm2, JetBrains Mono Nerd Font; `~/.config/starship.toml`, the iTerm2 profile, `~/.config/git/`, the `~/.zshrc` block |
 | tmux | `macos/tmux/install.sh` | tmux, lazygit; `~/.config/tmux/tmux.conf`, lazygit's Dracula `config.yml`; the whichkey-tmux plugin in `~/.config/tmux/plugins/` |
 | Apps | `macos/apps/install.sh` | uv, ruby, mole, GrandPerspective |
@@ -143,7 +141,7 @@ The keys to start with.
 | `Space g g` | lazygit |
 | `,r` | run the file (Python, Lua, shell, zsh, JavaScript, C, C++, Java, Ruby, Rust) |
 
-### Completion and snippets (blink.cmp, LuaSnip)
+### Completion and snippets (blink.cmp)
 
 Suggestions from the server, the buffer, paths and snippets, as you type.
 
@@ -296,49 +294,32 @@ the start screen, `Space o n` the notification history.
 
 ### Write and build
 
-Continuous build, the PDF in Skim at the cursor, and a click in the PDF back to the source.
+A build on demand, the PDF in Skim at the cursor, and a click in the PDF back to the source.
 
 <details><summary>Details</summary>
 
 1. Open the main file: `nvim main.tex`.
-2. The build starts by itself when the file opens (latexmk, continuous) and the file is saved
-   when you stop typing, so the PDF follows your edits. `,ll` stops and starts it again.
-3. `,lv` opens the PDF in Skim at the line under the cursor; after that, every rebuild moves
-   Skim to the cursor. Skim stays in the background.
+2. `,ll` starts the build (latexmk, continuous): from then on each save rebuilds the PDF, until
+   `,ll` again or `,lk` stops it.
+3. `,lv` opens the PDF in Skim at the line under the cursor. Skim stays in the background.
 4. In Skim, **Cmd+Shift+click** jumps back to that line in Neovim.
 5. `,le` lists errors and warnings; `Enter` on one goes to the line.
 
 The PDF, the bibliography and the auxiliary files go to `build/` next to the main file, so the
 project folder keeps only sources. A `.bib` next to it is picked up (BibTeX). For another
-engine, put `% !TEX program = lualatex` on the first line. To build and save by hand only, set
-`latex_live = false` in `lua/config/local.lua`. A `latexmkrc` inside a project wins over the
-linked `~/.latexmkrc`. TeX is BasicTeX: a package it lacks is one `sudo tlmgr install <name>`
-away (see [Troubleshooting](#troubleshooting)).
+engine, put `% !TEX program = lualatex` on the first line. A `latexmkrc` inside a project wins
+over the linked `~/.latexmkrc`.
 
 </details>
 
-### Snippets
+### Spelling
 
-An article, a beamer deck or a complete abnTeX2 thesis in one word; fractions and Greek letters
-as you type math.
-
-<details><summary>Details</summary>
-
-`doc`, `bdoc` and `abnt` start a document; `fig`, `tab`, `ali`, `thm` and friends insert the
-common environments. Inside math, `//` makes a fraction, `;a` an alpha, `RR` a `\mathbb{R}`,
-without a key. [Every snippet](config/nvim/snippets/tex.lua).
-
-</details>
-
-### Spelling and grammar
-
-Spelling in English and Portuguese, grammar with ltex-ls-plus.
+Spelling in English and Portuguese.
 
 <details><summary>Details</summary>
 
 `]s` / `[s` move between misspelled words, `z=` suggests, `zg` accepts a word everywhere (kept in
-`config/nvim/spell/en.utf-8.add`). Grammar is checked in Portuguese (`pt-BR`); a comment
-`% LTeX: language=en-US` switches it from that line on. `Space u s` and `Space u G` turn each off.
+`config/nvim/spell/en.utf-8.add`). `Space u s` turns it off.
 
 </details>
 
@@ -406,9 +387,7 @@ and `Space n b` lists the notes that link here.
 | Symptom | Fix |
 |---|---|
 | `git clone` asks for the Command Line Tools | accept, wait for them, run the command again |
-| A LaTeX build stops at ``File `x.sty' not found`` | `sudo tlmgr install x`, or add `x` to `PACKAGES` in `macos/nvim/tex.sh` |
-| The brew step says `basictex` conflicts with `mactex-no-gui` | `brew uninstall --cask mactex-no-gui`, then run `macos/nvim/install.sh` again |
-| tlmgr says the repository is newer than this TeX Live (a new year) | `brew upgrade --cask basictex`, then run `macos/nvim/install.sh` again |
+| The brew step says `mactex-no-gui` conflicts with `basictex` | `brew uninstall --cask basictex`, then run `macos/nvim/install.sh` again |
 | basedpyright or debugpy stop starting after `brew upgrade` | `macos/nvim/install.sh` reinstalls them for the new Python (the quick tests name them) |
 | A plugin update broke something | `git restore config/nvim/lazy-lock.json`, then `:Lazy restore` |
 | A Neovim update warns `ui2 is off` | delete the `ui2` lines in `config/nvim/lua/config/options.lua` |
@@ -445,7 +424,7 @@ Nothing updates itself: about once a month, on a branch (details in
 
 | What | How |
 |---|---|
-| Programs (BasicTeX's new year included) | `brew update && brew upgrade`, then `macos/nvim/install.sh` |
+| Programs (MacTeX's new year included) | `brew update && brew upgrade`, then `macos/nvim/install.sh` |
 | TeX packages within the year | `sudo tlmgr update --self --all` |
 | Neovim plugins | `nvim --headless "+Lazy! update" +qa`, `tests/nvim.sh full`, then commit `config/nvim/lazy-lock.json` |
 | Mason servers and tools | `:Mason`, then `U` |
@@ -459,7 +438,6 @@ Read-only commands that say what is missing or wrong.
 | What | How | All good when |
 |---|---|---|
 | Programs | `brew bundle check --verbose --file ~/dotfiles/macos/<part>/Brewfile` (`nvim`, `terminal`, `tmux`, `apps`) | `The Brewfile's dependencies are satisfied.` |
-| TeX packages | `macos/nvim/tex.sh` (installs only what is missing) | every line starts with `ok` |
 | Links, `~/.zshrc`, app preferences | each part's `link.sh` (fix what differs) | every line starts with `ok` |
 | Neovim starts cleanly | `nvim --headless "+qa"` | it prints nothing |
 | Everything inside Neovim | `:checkhealth` | no `ERROR` |

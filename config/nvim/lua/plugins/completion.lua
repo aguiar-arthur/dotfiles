@@ -3,31 +3,7 @@ return {
     "saghen/blink.cmp",
     version = "1.*",
     event = { "InsertEnter", "CmdlineEnter" },
-    dependencies = {
-      "rafamadriz/friendly-snippets",
-      {
-        "L3MON4D3/LuaSnip",
-        version = "v2.*",
-        build = "make install_jsregexp",
-        config = function()
-          local ls = require("luasnip")
-          ls.setup({
-            enable_autosnippets = true,
-            update_events = { "TextChanged", "TextChangedI" },
-            region_check_events = "InsertEnter",
-            delete_check_events = "TextChanged",
-          })
-
-          require("luasnip.loaders.from_vscode").lazy_load({
-            exclude = { "latex", "tex", "plaintex" },
-          })
-
-          require("luasnip.loaders.from_lua").lazy_load({
-            paths = { vim.fn.stdpath("config") .. "/snippets" },
-          })
-        end,
-      },
-    },
+    dependencies = { "rafamadriz/friendly-snippets" },
 
     opts = {
       keymap = {
@@ -49,7 +25,6 @@ return {
         },
       },
       signature = { enabled = true },
-      snippets = { preset = "luasnip" },
       sources = {
         default = { "lsp", "path", "snippets", "buffer" },
         per_filetype = {

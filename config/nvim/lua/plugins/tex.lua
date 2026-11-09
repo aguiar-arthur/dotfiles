@@ -57,8 +57,5 @@ return {
 
       g.vimtex_complete_enabled = 0
     end,
-    config = function()
-      require("dotfiles.latex.live").setup()
-    end,
   },
 }
