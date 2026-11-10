@@ -429,6 +429,69 @@ T.case("moving lines", function()
   T.eq("a count moves the selection further", move("Vj2<A-j><Esc>", 1), { "cdab", "" })
   T.eq("Alt-j on a selection at the end stays quiet", move("Vj<A-j><Esc>", 3), { "abcd", "" })
   T.eq("Alt-k on a selection at the top stays quiet", move("Vj<A-k><Esc>", 1), { "abcd", "" })
+
+  local function untouched(keys, cursor, lines)
+    vim.cmd("enew!")
+    vim.bo.indentexpr = "0"
+    vim.api.nvim_buf_set_lines(0, 0, -1, false, lines)
+    vim.api.nvim_win_set_cursor(0, { cursor, 0 })
+    local tick = vim.b.changedtick
+    vim.api.nvim_feedkeys(vim.keycode(keys), "tx", false)
+    return vim.deep_equal(vim.api.nvim_buf_get_lines(0, 0, -1, false), lines)
+      and vim.b.changedtick == tick
+  end
+  T.eq(
+    "Alt-j on the last line leaves its indent alone",
+    untouched("<A-j>", 2, { "a", "    b" }),
+    true
+  )
+  T.eq(
+    "Alt-k on the first line leaves its indent alone",
+    untouched("<A-k>", 1, { "    a", "b" }),
+    true
+  )
+  T.eq(
+    "Alt-j on a selection at the end leaves its indent alone",
+    untouched("Vj<A-j><Esc>", 1, { "    a", "    b" }),
+    true
+  )
+  T.eq(
+    "Alt-k on a selection at the top leaves its indent alone",
+    untouched("Vj<A-k><Esc>", 1, { "    a", "    b" }),
+    true
+  )
+end)
+
+T.case("notes through a link", function()
+  local real = vim.uv.fs_realpath(T.dir())
+  local link = vim.fn.tempname()
+  vim.uv.fs_symlink(real, link)
+  T.stub(require("config.settings").notes, "dir", link)
+  local obsidian = vim.iter(T.config("plugins/markdown.lua")):find(function(spec)
+    return spec[1] == "obsidian-nvim/obsidian.nvim"
+  end)
+  local patterns = obsidian.event[1].pattern
+  patterns = type(patterns) == "table" and patterns or { patterns }
+  T.eq("notes: obsidian loads for a note opened through the link", patterns[1], link .. "/*")
+  T.eq(
+    "notes: obsidian loads for a note named by the folder's real path (cd ~/notes && nvim a.md)",
+    vim.tbl_contains(patterns, real .. "/*"),
+    true
+  )
+end)
+
+T.case("visual keys leave select mode alone", function()
+  local function modes(lhs)
+    return { vim.fn.maparg(lhs, "x") ~= "", vim.fn.maparg(lhs, "s") ~= "" }
+  end
+  vim.cmd("edit " .. root .. "/a.lua")
+  local gitsigns = vim.iter(T.config("plugins/git.lua")):find(function(spec)
+    return spec[1] == "lewis6991/gitsigns.nvim"
+  end)
+  gitsigns.opts.on_attach(vim.api.nvim_get_current_buf())
+  T.eq("Space g s stages a selection, never a snippet's placeholder", modes(" gs"), { true, false })
+  T.eq("Space g r resets a selection, never a snippet's placeholder", modes(" gr"), { true, false })
+  T.eq("Space g O opens a selection, never a snippet's placeholder", modes(" gO"), { true, false })
 end)
 
 T.done()

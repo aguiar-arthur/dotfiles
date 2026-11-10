@@ -57,7 +57,7 @@ return {
         function()
           Snacks.gitbrowse()
         end,
-        mode = { "n", "v" },
+        mode = { "n", "x" },
         desc = "Open in browser",
       },
       {
@@ -129,11 +129,11 @@ return {
         m("n", "]c", hunk("]c", "next"), "Next git hunk")
         m("n", "[c", hunk("[c", "prev"), "Previous git hunk")
         m("n", "<leader>gs", gs.stage_hunk, "Stage/unstage hunk")
-        m("v", "<leader>gs", function()
+        m("x", "<leader>gs", function()
           gs.stage_hunk({ vim.fn.line("."), vim.fn.line("v") })
         end, "Stage hunk")
         m("n", "<leader>gr", gs.reset_hunk, "Reset hunk")
-        m("v", "<leader>gr", function()
+        m("x", "<leader>gr", function()
           gs.reset_hunk({ vim.fn.line("."), vim.fn.line("v") })
         end, "Reset hunk")
         m("n", "<leader>gS", gs.stage_buffer, "Stage buffer")

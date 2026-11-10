@@ -180,13 +180,27 @@ test_clojure() {
   keys ,cj
   probe "Clojure: ,cj without deps.edn says so" 'Snacks.notifier.get_history()[#Snacks.notifier.get_history()].msg' "No deps.edn, project.clj or bb.edn above this file"
   stop_nvim
+  printf '{:paths ["."]}\n' >"$PROJ/clj/deps.edn"
+  if have clojure-lsp; then
+    trust_dir "$PROJ/clj" remove
+    printf 'start\n' >"$PROJ/clj/start.txt"
+    start_nvim "$PROJ/clj" start.txt
+    send ':edit demo.clj<CR>'
+    expect_screen "Clojure: an untrusted project asks before clojure-lsp runs its build tool" "DIRECTORY trust"
+    keys i
+    probe "Clojure: without trust clojure-lsp stays off" "$(clients clojure_lsp)" 0 5
+    stop_nvim
+  fi
+  trust_dir "$PROJ/clj" allow
   if ! have clojure; then
     skip "Clojure: ,cj starts the REPL and connects" "clojure not installed"
     return
   fi
-  printf '{:paths ["."]}\n' >"$PROJ/clj/deps.edn"
   echo 1 >"$PROJ/clj/.nrepl-port"
   start_nvim "$PROJ/clj" demo.clj
+  if have clojure-lsp; then
+    probe "Clojure: a trusted project starts clojure-lsp" "$(clients clojure_lsp)" 1 60
+  fi
   keys ,cj
   probe "Clojure: ,cj replaces a dead .nrepl-port" '(vim.fn.readfile(".nrepl-port")[1] or "1") ~= "1" and 1 or 0' 1 240
   probe "Clojure: ,cj connects Conjure" 'require("conjure.client.clojure.nrepl.state").get("conn") and 1 or 0' 1 30

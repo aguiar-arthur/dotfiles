@@ -114,6 +114,50 @@ zsh_prompt_gap() {
   }
 }
 
+link_backup() {
+  local dir out=""
+  dir="$(mktemp -d)"
+  mkdir -p "$dir/Profiles"
+  echo old >"$dir/plain"
+  echo old >"$dir/Profiles/profile.json"
+  (
+    . "$DOT/macos/lib.sh"
+    link config/git/ignore "$dir/plain"
+    link config/iterm2/dracula.json "$dir/Profiles/profile.json" "$dir/profile.json"
+  ) >/dev/null
+  [ -L "$dir/plain" ] && [ -L "$dir/Profiles/profile.json" ] || out="$out
+a file in the way was not replaced by the link"
+  compgen -G "$dir/plain.bak.*" >/dev/null || out="$out
+a backup does not sit beside its file"
+  compgen -G "$dir/profile.json.bak.*" >/dev/null && ! compgen -G "$dir/Profiles/*.bak.*" >/dev/null || out="$out
+the iTerm2 profile's backup stays in the folder iTerm2 loads every file of"
+  rm -rf "$dir"
+  [ -z "$out" ] || {
+    echo "${out#$'\n'}"
+    return 1
+  }
+}
+
+zsh_helpers() {
+  local rc="$DOT/config/zsh/dotfiles.zsh" dir got wanted
+  dir="$(mktemp -d)"
+  mkdir -p "$dir/brew/bin" "$dir/bin"
+  printf '#!/bin/sh\n' >"$dir/brew/bin/fake"
+  printf '#!/bin/sh\n' >"$dir/bin/plain"
+  chmod +x "$dir/brew/bin/fake" "$dir/bin/plain"
+  got="$(zsh -f -c "source '$rc'; HOMEBREW_PREFIX='$dir/brew'; path=('$dir/brew/bin' '$dir/bin'); command_origin fake plain nowhere; path_report")"
+  rm -rf "$dir"
+  wanted="Homebrew     fake -> $dir/brew/bin/fake
+system/user  plain -> $dir/bin/plain
+missing      nowhere (not found)
+Homebrew     $dir/brew/bin
+system/user  $dir/bin"
+  [ "$got" = "$wanted" ] || {
+    printf 'wanted:\n%s\ngot:\n%s\n' "$wanted" "$got"
+    return 1
+  }
+}
+
 quick() {
   local before marker
   before="$(lock_hash)"
@@ -151,6 +195,8 @@ quick() {
   check "zsh: Neovim is the editor" zsh -f -c "source '$DOT/config/zsh/dotfiles.zsh' && [[ \$EDITOR == nvim && \$VISUAL == nvim ]]"
   check "zsh: emacs keys, even with EDITOR=nvim inherited from a parent shell" env EDITOR=nvim VISUAL=nvim zsh -f -i -c "source '$DOT/config/zsh/dotfiles.zsh'; [[ \$(bindkey -lL main) == 'bindkey -A emacs main' ]]"
   check "zsh: Tab completes git in a shell, a script skips compinit" zsh_completion
+  check "zsh: command_origin and path_report tell Homebrew from the system" zsh_helpers
+  check "link.sh: a file in the way becomes a backup, the iTerm2 profile's outside DynamicProfiles" link_backup
   tool "zsh: ls, ll and lt run eza in a shell, a script keeps ls" eza zsh_eza
   tool "zsh: Ctrl-r, Ctrl-t and Alt-c run fzf in a shell, a script keeps zsh's keys" fzf zsh_fzf
   tool "zsh: a blank line between prompts, none above the first or after clear" starship zsh_prompt_gap

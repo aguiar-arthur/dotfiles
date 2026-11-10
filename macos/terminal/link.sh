@@ -29,7 +29,8 @@ zshrc() {
 }
 
 link config/starship/starship.toml "$HOME/.config/starship.toml"
-link config/iterm2/dracula.json "$HOME/Library/Application Support/iTerm2/DynamicProfiles/dotfiles-dracula.json"
+ITERM="$HOME/Library/Application Support/iTerm2"
+link config/iterm2/dracula.json "$ITERM/DynamicProfiles/dotfiles-dracula.json" "$ITERM/dotfiles-dracula.json"
 link config/git/config "$HOME/.config/git/config"
 link config/git/ignore "$HOME/.config/git/ignore"
 zshrc

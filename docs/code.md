@@ -26,19 +26,13 @@ Clojure in detail. Its relationships are in [map](map.md).
   exists. stylua, shfmt and prettier come from `macos/nvim/Brewfile`; Mason does not install copies.
 - blink.cmp adds its completion capabilities to every server by itself; it is a dependency of
   nvim-lspconfig so it loads, and registers them, before the first server starts.
-- JavaScript and TypeScript have no server, formatter, runner, tests or debugger: they were
-  removed as unused. Adding them back is a server in `settings.mason_servers` and a line in
-  conform. The `javascript` parser stays for `<script>` blocks in HTML, and the `ruby` one for
-  the Ruby files `,r` runs.
-- `LspAttach` maps `gd` and `grr` / `gri` / `grt` (Neovim's names for references,
-  implementation and type definition) to Snacks pickers, and `<leader>l` as the whole menu:
-  `d` / `D` / `i` / `t` / `r` (definition, declaration, implementations, type definition,
-  references), `c` / `C` (incoming / outgoing calls), `s` / `S` (symbols of the file / the
-  workspace), `a` / `A` (code action, source action), `n` rename, `l` code lens, `k` signature
-  help, `I` the servers (`lsp_config`), `R` restart; `f` (conform) and `M` (Mason) come from
-  their plugins. Neovim's own `grn` / `gra` / `grx` stay beside them. A picker key first asks
-  whether a server on the buffer offers the method and warns when none does (lua_ls has no
-  call hierarchy), since a Snacks picker would only say "No results". It also clears
+- JavaScript and TypeScript have no server, formatter, runner, tests or debugger. The
+  `javascript` parser stays for `<script>` blocks in HTML, and the `ruby` one for the Ruby files
+  `,r` runs.
+- `LspAttach` maps `gd`, `grr` / `gri` / `grt` to Snacks pickers and `<leader>l` as the whole
+  menu (which-key lists it; Neovim's own `grn` / `gra` / `grx` stay beside it). A picker key
+  first asks whether a server on the buffer offers the method and warns when none does (lua_ls
+  has no call hierarchy), since a Snacks picker would only say "No results". It also clears
   `formatexpr` so `gq` keeps wrapping prose and comments, and maps `,o` (organize imports)
   only when the server offers it and the file type has no `,o` of its own (in Clojure it stays
   paredit's raise); `tests/keys.lua` checks both ways, since the order of ftplugin and `LspAttach`
@@ -58,9 +52,8 @@ Clojure in detail. Its relationships are in [map](map.md).
   callee's file ("index out of range" when that line is shorter) and listed no incoming calls.
   `after/lsp/clojure_lsp.lua` wraps the client's `request` (`on_init`) and moves the call site
   into `fromRanges` and `range` into `selectionRange` when `fromRanges` is empty, so a fixed
-  clojure-lsp passes through untouched. No upstream issue was found to link; remove the
-  `on_init` patch (and its case in `tests/code.lua`) once `vim.lsp.buf.incoming_calls()` lists
-  call sites with `after/lsp/clojure_lsp.lua` reduced to `root_dir`.
+  clojure-lsp passes through untouched. Remove the patch (and its case in `tests/code.lua`) once
+  `vim.lsp.buf.incoming_calls()` lists call sites without it.
 - `zipPlugin` stays enabled (lazy.nvim's `disabled_plugins`): clojure-lsp points into library
   sources as `zipfile://<jar>::<path>`, and without it a jump there fails ("Invalid cursor line").
 - Code lenses show for every server that sends them (`vim.lsp.codelens.enable`), mostly
@@ -85,67 +78,43 @@ Clojure in detail. Its relationships are in [map](map.md).
 
 conform formats on save (Lua with stylua, Python with ruff, shell and zsh with shfmt, web/JSON/YAML
 with prettier, Markdown with rumdl; TOML and Clojure through taplo and clojure-lsp as the LSP
-fallback), but only in projects that declare that tool's style:
-
-| Language | Style marker |
-|---|---|
-| Lua | `stylua.toml` or `.stylua.toml` |
-| Shell | an `.editorconfig` section for `.sh` or `.bash` files |
-| Zsh | an `.editorconfig` section for `.zsh` files |
-| Python | `ruff.toml`, `.ruff.toml` or `[tool.ruff]` in `pyproject.toml` |
-| CSS, HTML, JSON, YAML | a prettier config with a trusted `.nvim.lua` beside it |
-| Markdown | `.rumdl.toml`, `rumdl.toml` or `.markdownlint.*` |
-| TOML | `taplo.toml` or `.taplo.toml` |
-| Clojure | `cljfmt.edn` (or `.clj`) or `:cljfmt` in `.lsp/config.edn` |
-
-A filetype with no row here (SCSS, Less, LaTeX) never formats on save, even when its server could.
-Without one each formatter falls back to its own defaults and a `:w` would restyle someone else's
-code; a bare `.editorconfig` or `pyproject.toml` is too common to count. `<leader>lf` formats
-anywhere. LaTeX formats only with `<leader>lf`. `<leader>uf` turns saving off everywhere,
-`<leader>uF` in this buffer only (both in `dotfiles/toggles.lua`). prettier runs a project's
-JavaScript (`.prettierrc.js`, plugins), so it runs, on save or with `<leader>lf`, only where a
-`.nvim.lua` approved with `:trust` sits next to the prettier config and has not changed since;
-elsewhere `<leader>lf` falls back to the language server. It is always the prettier on `PATH`
-(Homebrew's), never a repository's `node_modules/.bin/prettier`. Neovim has no call that asks
-whether a file is trusted without prompting, so `trusted()` in `dotfiles/format.lua` reads Neovim's
-own `trust` file (`stdpath("state")`, lines of `<sha256> <path>`, the format `vim.secure` writes in
-0.12); if a Neovim update changes that format, prettier stops running and the `tests/files.lua`
-trust cases fail.
+fallback), but only in projects that declare that tool's style (`style_markers` in
+`dotfiles/format.lua`: `stylua.toml`, `[tool.ruff]`, an `.editorconfig` section for the shell,
+`.rumdl.toml`, `cljfmt.edn`, …). A filetype with no marker (SCSS, Less, LaTeX) never formats on
+save, even when its server could: each formatter falls back to its own defaults and a `:w` would
+restyle someone else's code. A bare `.editorconfig` or `pyproject.toml` is too common to count.
+`<leader>lf` formats anywhere. LaTeX formats only with `<leader>lf`. `<leader>uf` turns saving off
+everywhere, `<leader>uF` in this buffer only (both in `dotfiles/toggles.lua`). prettier runs a
+project's JavaScript (`.prettierrc.js`, plugins), so it runs, on save or with `<leader>lf`, only
+where a `.nvim.lua` approved with `:trust` sits next to the prettier config and has not changed
+since; elsewhere `<leader>lf` falls back to the language server. It is always the prettier on
+`PATH` (Homebrew's), never a repository's `node_modules/.bin/prettier`. Neovim has no call that
+asks whether a file is trusted without prompting, so `trusted()` in `dotfiles/format.lua` reads
+Neovim's own `trust` file (`stdpath("state")`, lines of `<sha256> <path>`, the format `vim.secure`
+writes in 0.12); if a Neovim update changes that format, prettier stops running and the
+`tests/files.lua` trust cases fail.
 
 ### Run, test, debug
-
-| Keys | Python | Lua | Shell |
-|---|---|---|---|
-| `,r` run the file | yes | `nvim -l` | `bash`, `zsh` |
-| `,t…` tests (Neotest) | pytest | | |
-| `,d…` debugger | debugpy | | |
-| `,o` organize imports | ruff | | |
-| `,s` source the file | | yes | |
 
 Each `,` key sits in its plugin's spec with lazy.nvim's `ft`, so it exists only in those
 buffers and loads the plugin on first use. Where a tool is missing the key says so.
 
 `,r` (code_runner.nvim) saves the file and runs it in a bottom terminal from the file's folder;
-running the same file again replaces its terminal. It also runs JavaScript, Java, C, C++, Ruby
-and Rust with the plugin's own commands.
+running the same file again replaces its terminal. It runs any file type the plugin knows.
+`,t` (Neotest, pytest here) shows results as signs and diagnostics, and `]T` / `[T` jump between
+failed tests (replacing Vim's tag jumps in Python only). They are separate plugins because they
+do different jobs; neither is code of our own.
 
-`,t` runs Neotest: `,tt` nearest, `,tf` file, `,tp` project, `,tl` last, `,tS` stop, `,ts`
-summary, `,to` output, `,tO` output panel, `,td` debug the nearest test; `]T` / `[T` jump to the
-next / previous failed test (they replace Vim's tag jumps in Python only). Results show as signs
-and diagnostics. neotest-python runs pytest from the project's virtualenv.
-
-`,d` drives nvim-dap with nvim-dap-view in Python buffers: one panel below with views switched
-from its winbar (scopes first) and the program's terminal beside it. It opens on launch
-(`auto_toggle = "open"`) and stays open after the program ends so its output can be read (`,du`
-hides both). It replaced nvim-dap-ui, which needed a six-window layout and nvim-nio. `,de` opens
-dap-view's hover, `,dw` adds a watch (`:DapViewWatch`, which takes a range, unlike its hover),
-`,dC` runs to the cursor and `,dp` sets a log point from a prompt; in visual mode the selection
-comes from `getregion`, because `:DapViewHover` is not declared with a range and so never sees
-one. Breakpoints show as `●` (`◆` with a condition) and the stopped line is tinted green.
+`,d` drives nvim-dap with nvim-dap-view in Python buffers: one panel below with views switched from
+its winbar (scopes first) and the program's terminal beside it. It opens on launch (`auto_toggle =
+"open"`) and stays open after the program ends so its output can be read (`,du` hides both). `,de`
+opens dap-view's hover, `,dw` adds a watch (`:DapViewWatch`, which takes a range, unlike its
+hover), `,dC` runs to the cursor and `,dp` sets a log point from a prompt; in visual mode the
+selection comes from `getregion`, because `:DapViewHover` is not declared with a range and so never
+sees one. Breakpoints show as `●` (`◆` with a condition) and the stopped line is tinted green.
 debugpy runs the file with the interpreter from `python.lua`; its adapter is Mason's
-`debugpy-adapter` (mason-nvim-dap did only that and was dropped), looked up when a session
-starts rather than when nvim-dap loads, so a debugpy installed later is found and a missing one
-says how to install it.
+`debugpy-adapter`, looked up when a session starts rather than when nvim-dap loads, so a debugpy
+installed later is found and a missing one says how to install it.
 
 ### Clojure
 
@@ -162,8 +131,21 @@ running REPL knows beside clojure-lsp's static items. Neovim keeps Conjure's omn
 `v:lua.vim.lsp.omnifunc` only when `omnifunc` is empty, and blink's `omni` turns itself off on
 the LSP one. The nREPL and cider-nrepl versions are at the top of `dotfiles/clojure.lua`.
 
+clojure-lsp starts only in a project folder Neovim trusts. To find the classpath it runs the
+project's own tool (`lein classpath`, which evaluates `project.clj`; `clojure -Spath`;
+`npx shadow-cljs classpath`; `bb print-deps`) and any `:classpath-cmd` in the project's
+`.lsp/config.edn`, so opening a file of a repository you did not write would run its code, the
+reason prettier waits for a trusted `.nvim.lua`. `after/lsp/clojure_lsp.lua` asks
+`vim.secure.read` about the project root: the first Clojure file of a project shows Neovim's own
+question, `a` allows clojure-lsp there for good, `d` keeps it off, `i` asks again next time. A file
+outside any project (no root) starts it without asking, since there is no tool to run.
+
 ## Pitfalls
 
+- Neovim's trust question for a folder reads `exrc: Found untrusted code. DIRECTORY trust is
+  decided only by name, not contents`: it is the same database as `.nvim.lua`, not an exrc file.
+  `:lua vim.secure.trust({ action = "remove", path = "<root>" })` forgets an answer, as does
+  deleting its line in `stdpath("state")/trust`.
 - Zsh has `,r` and shfmt (which reads its dialect from the `.zsh` extension or the shebang), but no
   server and no tree-sitter: bash-language-server and shellcheck do not read zsh, and Neovim's own
   syntax file highlights it better than the bash parser would.
@@ -173,13 +155,13 @@ the LSP one. The nREPL and cider-nrepl versions are at the top of `dotfiles/cloj
   fetch catalog` in `lsp.log`), so TOML files get no schema completion or validation; formatting
   and syntax checks still work. Nothing to change here until taplo updates.
 - `mason-lspconfig` gets `automatic_enable = mason_servers`, never `true`: `true` enables any
-  server left installed in Mason (a stale stylua server once ran in Lua files).
+  server left installed in Mason (a stale stylua server runs in Lua files).
 - Formatters run on save only under a style marker. A formatter added to conform gets an
   entry in `style_markers`. The repository's `.rumdl.toml` links to `config/rumdl/rumdl.toml`
   so its own Markdown formats on save, and its `.editorconfig` has a `[*.{sh,bash}]` section so
   its scripts do.
 - `LspAttach` keys must not replace a `,` key the file type already has: clojure-lsp offers
-  organize imports and once took `,o` from nvim-paredit's raise.
+  organize imports and would take `,o` from nvim-paredit's raise.
 - Neovim sets `formatexpr` to the server's when it can format a range, and `gq` then stops
   wrapping prose and comments; the `LspAttach` callback clears it again.
 - Two servers on one filetype must agree on the position encoding (`:checkhealth vim.lsp`
@@ -202,8 +184,8 @@ language, `,r`, `,t`, `,d`, `,cj`). `tests/nvim.sh` prints what each check cover
 
 - **A language server**: its lspconfig name in `settings.mason_servers` (or
   `system_servers` with its binary), settings in `after/lsp/<name>.lua` if any, run
-  `macos/nvim/install.sh`, list the language in the README's "What you get" and "Code"
-  sections, and an entry in `test_servers_per_language`.
+  `macos/nvim/install.sh`, list the language in the README's "What you get" and "What is in
+  it" lists, and an entry in `test_servers_per_language`.
 - **A formatter**: a line in `formatters_by_ft`, a `style_markers` entry (`dotfiles/format.lua`),
   its program in `macos/nvim/Brewfile` (or Mason tools), a case in `tests/files.lua`.
 - **A language for `,r`**: one line in `commands` in `run.lua` (or its name in the key's `ft`

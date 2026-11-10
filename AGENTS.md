@@ -6,130 +6,86 @@ product.
 
 ## Context map
 
-The repository is split into contexts, each with one doc in `docs/` that holds how it works
-and why, pitfalls that already cost time, which tests check it, and recipes for common changes.
-Read the doc of the context a task touches before the code; most tasks need one or two. The
-README is the user's guide; it is not needed to change code.
+Each context has one doc in `docs/` with how it works and why, pitfalls that already cost time,
+its tests, and recipes for common changes. Read the doc of the context a task touches before the
+code; most tasks need one or two. The README is the user's guide, not needed to change code.
 
-| Context | Doc | Owns | Depends on |
-|---|---|---|---|
-| Core | [docs/core.md](docs/core.md) | startup, `settings.lua` / `local.lua` / `.nvim.lua`, options, global keys, autocmds, `<leader>u` toggles, treesitter, look, spell | none |
-| Workspace | [docs/workspace.md](docs/workspace.md) | Snacks pickers, file tree, terminals, sessions, flash, mini.*, grug-far, completion, `<leader>cs`, Claude Code | core |
-| Code | [docs/code.md](docs/code.md) | language servers, formatting and style markers, `,r` / `,t` / `,d`, Python, Clojure | core, install |
-| Git | [docs/git.md](docs/git.md) | gitsigns, codediff review, lazygit, git pickers, jumps from a review | core, workspace |
-| LaTeX | [docs/latex.md](docs/latex.md) | vimtex, texlab, latexmkrc, Skim | core, code, install |
-| Markdown | [docs/markdown.md](docs/markdown.md) | render-markdown, `,p` preview, rumdl rules, notes (obsidian.nvim), marksman | core, code |
-| Install | [docs/install.md](docs/install.md) | `macos/` (one part each for nvim, terminal, tmux, apps), Mason / parser / spell installs, lockfile, zsh, Starship, tmux, iTerm2 | core (settings) |
-| Tests | [docs/tests.md](docs/tests.md) | `tests/`, where a new check goes, checking by hand | all |
-| Windows | [docs/windows.md](docs/windows.md) | `windows/collect-diagnostics.ps1`: a Windows 11 health report (events, dumps, drivers, disks, temperatures) and an optional DISM / SFC repair | none |
+| Context | Doc | Owns |
+|---|---|---|
+| Core | [docs/core.md](docs/core.md) | startup, `settings.lua` / `local.lua` / `.nvim.lua`, options, global keys, autocmds, `<leader>u` toggles, treesitter, look, spell |
+| Workspace | [docs/workspace.md](docs/workspace.md) | Snacks pickers, file tree, terminals, sessions, flash, mini.*, grug-far, completion, `<leader>cs`, Claude Code |
+| Code | [docs/code.md](docs/code.md) | language servers, formatting and style markers, `,r` / `,t` / `,d`, Python, Clojure |
+| Git | [docs/git.md](docs/git.md) | gitsigns, codediff review, lazygit, git pickers, jumps from a review |
+| LaTeX | [docs/latex.md](docs/latex.md) | vimtex, texlab, latexmkrc, Skim |
+| Markdown | [docs/markdown.md](docs/markdown.md) | render-markdown, `,p` preview, rumdl rules, notes (obsidian.nvim), marksman |
+| Install | [docs/install.md](docs/install.md) | `macos/`, Mason / parser / spell installs, lockfile, zsh, Starship, tmux, iTerm2 |
+| Tests | [docs/tests.md](docs/tests.md) | `tests/`, where a new check goes, checking by hand |
+| Windows | [docs/windows.md](docs/windows.md) | `windows/collect-diagnostics.ps1` |
 
-How the contexts relate (upstream / downstream, what each relies on, the decisions) is in
-[docs/map.md](docs/map.md). A change inside one context needs only its doc; a change to
-something in the map's table also needs the downstream docs.
+How the contexts depend on each other is in [docs/map.md](docs/map.md): a change to something in
+its table also needs the downstream docs.
 
 ## Working on a task
 
-1. Find the context above and read its doc; its "Changing it" section has the steps for the
-   usual changes (a server, a formatter, a key, a toggle, a snippet, a program, a link).
-2. Change the code and its check in `tests/` together; the context doc only when a reason, a
-   pitfall or a step of "Changing it" changes.
+1. Read the context's doc; its "Changing it" section has the steps for the usual changes.
+2. Change the code and its check in `tests/` together; the doc only when a reason, a pitfall or a
+   step of "Changing it" changes.
 3. Run `tests/nvim.sh` (quick); run `full` when the doc's checks name a `full:` test you
    touched. Say plainly what you could not check (GUI, real language servers, LaTeX).
 
 ## Layout
 
 ```text
-config/nvim/        Neovim >= 0.12: lazy.nvim, one spec per concern in lua/plugins/, our own
-                    helpers in lua/dotfiles/, per-server settings in after/lsp/
-config/zsh/         dotfiles.zsh, sourced by the one ~/.zshrc block
-config/starship/    starship.toml
-config/tmux/        tmux.conf
-config/rumdl/       rumdl.toml (Markdown lint rules; the root .rumdl.toml links to it)
-config/iterm2/      dracula.json (Dynamic Profile)
-config/lazygit/     config.yml (Dracula theme, linked by macos/tmux/link.sh)
-config/git/         config and ignore (linked to ~/.config/git/ by macos/terminal/link.sh)
-config/latex/       latexmkrc (linked to ~/.latexmkrc)
-docs/               one doc per context (the map above); img/ holds the README screenshot
-macos/              the macOS install, see docs/install.md:
-  install.sh        runs every part: terminal, tmux, apps, nvim
-  lib.sh            what the parts share: Homebrew, links with backups, preferences, steps
-  nvim/             Brewfile, install.sh (brew, link, plugins and Mason), link.sh
-                    (incl. ~/.latexmkrc and Skim)
-  terminal/         Brewfile, install.sh (brew, link), link.sh (Starship, iTerm2, git, ~/.zshrc)
-  tmux/             Brewfile, install.sh (brew, link, whichkey), link.sh (tmux.conf, lazygit),
-                    whichkey.sh (clones whichkey-tmux into ~/.config/tmux/plugins/)
-  apps/             Brewfile, install.sh (brew): programs that are neither of the others
-SECURITY.md         how to report a problem
-CONTRIBUTING.md     how to change it, for people (a summary of this file)
-.github/            security workflows and Dependabot
-tests/              nvim.sh (quick, full, fresh) and its checks, see docs/tests.md
-windows/            collect-diagnostics.ps1, a standalone Windows health report, see docs/windows.md
+config/nvim/   Neovim >= 0.12: one spec per concern in lua/plugins/, our helpers in
+               lua/dotfiles/, per-server settings in after/lsp/
+config/        zsh, starship, tmux, rumdl, iterm2, lazygit, git, latex: one folder per program
+macos/         install.sh runs the parts (nvim, terminal, tmux, apps); each has a Brewfile,
+               install.sh and link.sh; lib.sh is what they share
+tests/         nvim.sh (quick, full, fresh) and its checks
+windows/       standalone, never installed or tested by the rest
 ```
 
 ## Rules
 
-- **Simple first.** No health checks, no doctor, no flags, no tests beyond `tests/nvim.sh`
-  ([docs/tests.md](docs/tests.md)), and no CI beyond the security workflows and the quick tests
-  (`.github/workflows/`: ShellCheck, gitleaks, zizmor, `tests.yml`).
-  `macos/install.sh` runs every part (`macos/<part>/install.sh`: terminal, tmux, apps, nvim); a
-  part runs on its own on a machine where the rest must stay untouched, so no script takes an
-  argument. Each part installs its own `Brewfile`, runs its `link.sh`, (tmux) clones
-  whichkey-tmux when it is missing, and (nvim) sets up Neovim through the linked
-  `~/.config/nvim`, as every day. Every script stays idempotent and only does what is missing.
-  Every network step has a timeout or a failure path.
-- **No comments that say what**, in any file. Names and `desc` / `:wk` labels say what; a
-  reason worth keeping goes in one sentence in its context's doc in `docs/`. In Lua, shell and
-  `tmux.conf`, a line that would look wrong without its reason may get one whole-line `-- why:
-  …` (`# why: …`) comment above it; never trailing, never more than one line, never a repeat of
-  what its context's doc already says. Exceptions: `#!` lines and text the code writes or
-  matches (the `# >>> dotfiles >>>` markers).
-- **macOS only**, no branches for other systems. The one exception is `windows/`: standalone
-  PowerShell for debugging a Windows PC, never installed, linked or tested by the rest.
+- **Simple first.** No health checks, no doctor, no flags, no tests beyond `tests/nvim.sh`, no
+  CI beyond the security workflows and the quick tests. A part of `macos/` runs on its own on a
+  machine where the rest must stay untouched, so no script takes an argument. Scripts are
+  idempotent, and every network step has a timeout or a failure path.
+- **No comments that say what**, in any file. Names and `desc` / `:wk` labels say what; a reason
+  worth keeping goes in its context's doc. A line that would look wrong without its reason may
+  get one whole-line `-- why: …` (`# why: …`) comment above it, never trailing, never longer
+  than a line. Exceptions: `#!` lines and text the code writes or matches.
+- **macOS only**, no branches for other systems, except `windows/`.
 - **English** in code, docs and commit messages; reply to the user in their language.
-- **Every program goes in a Brewfile**: the one of the part that needs it (`macos/nvim/`,
-  `macos/terminal/`, `macos/tmux/`), or `macos/apps/` when it is neither.
-- **Keys.** `<leader>` is for what works everywhere, `,` (the local leader) for what depends on
-  the file type. A `,` key goes in its plugin's `keys` with lazy.nvim's `ft`, in `LspAttach`
-  when it depends on the server, or in `after/ftplugin/`; never in an autocmd of our own.
-- **Settings** a user may change live in `config/nvim/lua/config/settings.lua` (including the
-  servers, Mason tools and parsers to install); per-machine overrides go in the untracked
-  `lua/config/local.lua`, per-project ones in a trusted `.nvim.lua` (`exrc`).
 - **Dracula** everywhere (editor, prompt, terminal), including diff colors.
-- **Latest versions.** `config/nvim/lazy-lock.json` is committed as the way back after a bad
-  plugin update (`:Lazy restore`); never run `:Lazy update` or `:Lazy sync` just to check
-  something, they rewrite it.
-- **Only proven plugins.** A plugin (or a dependency it pulls in) is added only when it is
-  well tested and reliable: not archived, a commit in the last two years, at least 500 GitHub
-  stars or part of a project that has them (neovim, nvim-treesitter, nvim-neotest, mason-org,
-  mini.nvim), not a fork of a living project, and no replacement for Neovim's own `:` line or
-  messages. The reference plugin of a language (vimtex, Conjure, nvim-paredit) is the one
-  exception. Check with
+- **Every program goes in a Brewfile**, the one of the part that needs it.
+- **Keys.** `<leader>` is for what works everywhere, `,` (the local leader) for what depends on
+  the file type. A `,` key goes in its plugin's `keys` with `ft`, in `LspAttach` when it depends
+  on the server, or in `after/ftplugin/`; never in an autocmd of our own. Every mapping has a
+  `desc`.
+- **Only proven plugins.** Prefer a built-in feature or a plugin already here. A new plugin
+  (and what it pulls in) must be well tested: not archived, a commit in the last two years, at
+  least 500 GitHub stars or part of a project that has them (neovim, nvim-treesitter,
+  nvim-neotest, mason-org, mini.nvim), not a fork of a living project, and no replacement for
+  Neovim's own `:` line or messages. The reference plugin of a language (vimtex, Conjure,
+  nvim-paredit) is the one exception. Check with
   `curl -s https://api.github.com/repos/<owner>/<repo>` (`stargazers_count`, `pushed_at`,
-  `archived`, `fork`) before adding one, and drop a plugin that stops meeting the rule.
-  Prefer a built-in feature or one of the plugins already here over a new one.
-- **Our code is tested.** Code we write (`lua/dotfiles/`, `after/ftplugin/`, and
-  logic of our own in a plugin spec, keymap or autocmd) gets a check in `tests/` in the same
-  change, and a bug fixed in it gets a check that fails without the fix. Plugin defaults and
-  plain settings need none.
-- **Own code has a reason.** Prefer a proven plugin to code of our own: Neotest (`,t`: runs tests,
-  one adapter per language, pytest here) replaced our test runner, and code_runner.nvim (`,r`:
-  runs the current file, any file type) replaced our own `,r`. They do different jobs and both
-  stay. What no plugin does may grow, in a module.
-- **Modules.** `lua/plugins/` only declares: repository, trigger, options, and keys that call
-  functions; lazy.nvim reads its first level only, so it has no subfolders. Logic of our own goes
-  in `lua/dotfiles/`, as one file, or as a folder of one file per subject once it needs two; a
-  folder's `init.lua` only wires, and loading any module runs nothing. Code depends along
-  [docs/map.md](docs/map.md): downstream may require upstream, never the reverse. Paths Neovim
-  looks for (`after/lsp/`, `after/ftplugin/`) stay where they are.
-- **Docs.** The README is the user's guide and the showcase: a header (tagline, badges, "Why this
-  one"), install, then one section per module with a one-line pitch and, folded in `<details>`,
-  what it is for; then troubleshooting, update, check and test. Its only key table is "First
-  day"; every other key is found in Neovim (which-key, `Space ?`, `Space f k`), so each mapping
-  has a `desc`. `docs/<context>.md` holds only what the code and tests cannot say: how that
-  context works, why, its pitfalls, which test files check it, and how to change it. No lists of
-  files, keys or checks: the code and `tests/nvim.sh` already print them. A fact two contexts
-  share is a row in `docs/map.md`, nowhere else. A new context (a language that grows its own
-  files, say) gets its own doc and a row in the map, only when it would not fit an existing one.
+  `archived`, `fork`), and drop a plugin that stops meeting the rule. Code of our own is only for
+  what no plugin does, and it gets a check in `tests/` in the same change (a bug fixed gets a
+  check that fails without the fix); plugin defaults and plain settings need none.
+- **Modules.** `lua/plugins/` only declares (repository, trigger, options, keys that call
+  functions) and has no subfolders. Logic of our own goes in `lua/dotfiles/`: one file, or a
+  folder of one file per subject once it needs two, whose `init.lua` only wires. Loading a
+  module runs nothing. Downstream may require upstream along [docs/map.md](docs/map.md), never
+  the reverse. Paths Neovim looks for (`after/lsp/`, `after/ftplugin/`) stay where they are.
+- **Settings** a user may change live in `lua/config/settings.lua`; never run `:Lazy update` or
+  `:Lazy sync` just to check something, they rewrite the committed `lazy-lock.json`.
+- **Docs.** The README is the user's guide: header, install, "First day" (its only key table),
+  one short section per module, troubleshooting. A `docs/<context>.md` holds only what the code
+  and tests cannot say: how it works, why, pitfalls, which tests check it, how to change it. No
+  lists of files, keys or checks, and no history (git has it): state the rule and its reason. A
+  fact two contexts share is a row in `docs/map.md`, nowhere else. A new context gets a doc and a
+  row in the map only when it fits no existing one.
 
 ## Git
 

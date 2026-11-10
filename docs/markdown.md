@@ -13,12 +13,9 @@ pandoc (math as MathML, images embedded), opens it in the browser and rebuilds i
 save. HTML in the Markdown is rendered too.
 
 Notes are handled by obsidian.nvim, which loads only in the notes folder or with a `<leader>n`
-key and needs no Obsidian app or account. `<leader>nf` / `ng` find and grep, `nn` asks for a
-title and creates `the-title.md`, `nd` opens today's note, `nb` lists backlinks (on a `#`
-heading, links to that heading). Links are `[[note]]`: obsidian.nvim completes them, `<CR>` or
-`gd` follows one and `grr` lists references; `<CR>` on a checkbox ticks it. No YAML frontmatter
-is written. marksman serves Markdown outside the notes folder only, so the two never answer
-the same request twice.
+key and needs no Obsidian app or account. Links are `[[note]]`: obsidian.nvim completes them,
+`<CR>` or `gd` follows one and `grr` lists references. No YAML frontmatter is written. marksman
+serves Markdown outside the notes folder only, so the two never answer the same request twice.
 
 rumdl lints as you type; it formats on save only under a `.rumdl.toml` or `.markdownlint.*`, so
 notes are never restyled.
@@ -30,7 +27,10 @@ still works.
 
 ## Pitfalls
 
-- None of its own.
+- When the working folder is reached through a link (`~/notes` linked elsewhere, then
+  `cd ~/notes && nvim a.md`), Neovim names the buffer by the real path, so a trigger on
+  `~/notes/*` alone never loaded obsidian.nvim, and marksman stays out of notes by real path:
+  the note had neither. obsidian.nvim's trigger lists the folder's path and its real path.
 
 ## Checks
 

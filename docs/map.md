@@ -23,25 +23,8 @@ Upstream offers, downstream consumes; a change upstream may break downstream.
 | Core settings | Install | Install installs whatever the settings list | `tests/install.lua`, `fresh` |
 | Install | Code, Git, LaTeX | Mason packages, codediff's library; MacTeX, Skim and `~/.latexmkrc` by `macos/nvim/link.sh` | `fresh`, quick: Skim |
 
-## Decisions
-
-The choices that shape the whole setup, each with its reason and where it is told in full. A
-reader (or an agent) who wants to change one starts here.
-
-| Decision | Why | Where |
-|---|---|---|
-| Snacks for pickers, file tree, terminals, notifications and the dashboard | one plugin already here before a new one (`AGENTS.md`, plugin rule) | [workspace](workspace.md) |
-| Native LSP (`vim.lsp.enable`, `after/lsp/`); Mason only installs, never at startup | mason-tool-installer only duplicated `dotfiles/install/` and was dropped | [code](code.md), [install](install.md) |
-| Format on save only where the project declares a style | never restyle other people's code | [code](code.md) |
-| Prettier only beside a trusted `.nvim.lua` | it runs the project's JavaScript | [code](code.md) |
-| Neotest and code_runner.nvim, not runners of our own | proven plugins before our own code | `AGENTS.md` |
-| nvim-dap-view, not nvim-dap-ui | nvim-dap-ui needed a six-window layout and nvim-nio | [code](code.md) |
-| vim-tmux-navigator on Neovim's side | one key crosses windows and panes both ways; `tmux.conf` still loads and works without the Neovim config | [install](install.md), [workspace](workspace.md) |
-| `lazy-lock.json` committed, nothing updates itself | a bad update has a way back (`:Lazy restore`) | [install](install.md#updating) |
-| No comments that say what, one `why:` line at most, never a repeat of a doc | names and `desc` say what; reasons live in these docs | `AGENTS.md` |
-| The install split into parts; LaTeX inside nvim, on MacTeX (no GUI) | a machine whose shell must stay as it is gets only Neovim; LaTeX is only used from Neovim, and MacTeX has every package a document asks for, with nothing to keep in a list | [install](install.md) |
-
 ## Keeping it true
 
-A new cross-context fact is a row here, with its check, and nowhere else. A row with "none" is a
+A new cross-context fact is a row here, with its check, and nowhere else. A choice that stays in
+one context, with its reason, is in that context's doc. A row with "none" is a
 known gap, not a promise.

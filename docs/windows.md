@@ -20,7 +20,7 @@ powershell -ExecutionPolicy Bypass -File .\windows\collect-diagnostics.ps1
 | `-Monitor -Minutes N` | only logs CPU, RAM, temperature, NVIDIA GPU and the busiest process every 5 s to `Documents\diagnostics\monitor_<stamp>.csv` for N minutes (default 30); if the PC dies, the last rows show what was happening |
 
 The collection writes numbered files (`01_system_summary.txt`, `22_unexpected_shutdowns.csv`,
-`dumps\`, ...) to `%USERPROFILE%\Documents\diagnostics\collection_<stamp>\` and zips it:
+`dumps\`, ...) to `Documents\diagnostics\collection_<stamp>\` and zips it:
 system and hardware summary, RAM sticks, video, disks and SMART counters, drivers, event logs
 (critical and error, unexpected shutdowns such as Kernel-Power 41, WHEA, thermal, Office),
 Reliability Monitor, minidumps and WER reports, power settings, installed software, updates,
@@ -36,6 +36,12 @@ needs internet), with the SFC lines of `CBS.log`.
 
 ## Pitfalls
 
+- `Documents` is the folder Windows reports (`[Environment]::GetFolderPath('MyDocuments')`), not
+  `%USERPROFILE%\Documents`: with OneDrive backing it up, the Documents a user opens is
+  `OneDrive\Documents`, and the report landed in a folder they never saw.
+- `Read-Host` returns nothing, or fails, without a console (a remote session, a management tool);
+  the repair question then counts as `n`, since the loop that asks again never ended, and
+  `70_repair_skipped.txt` says why.
 - A `try` / `catch` sees neither a native command that fails (it only sets `$LASTEXITCODE`,
   read by `Save-Exit`) nor a cmdlet error under `$ErrorActionPreference = 'Continue'`, so
   `errors.txt` is built from `$Error` and those exit codes, not from the `catch` blocks.

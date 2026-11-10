@@ -1,3 +1,5 @@
+local review = require("dotfiles.git.review")
+
 local M = {}
 
 local saved
@@ -30,6 +32,20 @@ function M.off()
   markdown[saved.markdown and "enable" or "disable"]()
   context[saved.context and "enable" or "disable"]()
   saved = nil
+end
+
+local function any_diff_window()
+  return vim.iter(vim.api.nvim_list_wins()):any(function(win)
+    return vim.wo[win].diff
+  end)
+end
+
+function M.refresh()
+  if review.any() or any_diff_window() then
+    M.on()
+  else
+    M.off()
+  end
 end
 
 return M

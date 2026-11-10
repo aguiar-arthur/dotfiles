@@ -14,17 +14,14 @@ how they are built. Its relationships are in [map](map.md).
 
 ## Files
 
-| Path | Holds |
-|---|---|
-| `tests/nvim.sh` | the one test command: `quick` (default), `full`, `fresh` |
-| `tests/lib.sh` | pass / fail / skip, the isolated home, tmux, `probe`, `menu_shows`, `install`, `review_repo` (a fresh repository with a pushed base and a local change) |
-| `tests/core.sh`, `workspace.sh`, `code.sh`, `git.sh`, `markdown.sh`, `tex.sh` | the full checks, one file per context (the same names as the docs), one `test_<name>` function per scenario |
-| `tests/tmux.sh` | the quick tmux checks: the config loads, and keys typed through a client attached with `script` (`send-keys -K`) |
-| `tests/lib.lua` | `T.case` (a named group of checks), `T.stub` (a fake undone after its case), `T.eq`, `T.dir` (a temporary project), `T.config` (load a config file), `T.skip` (say a check could not run), `T.done` |
-| `tests/lib_check.lua` | the check of `lib.lua` itself: a crash fails only its case, every stub is undone |
-| `tests/core.lua`, `install.lua`, `code.lua`, `workspace.lua`, `git.lua`, `files.lua`, `toggles.lua`, `keys.lua`, `autocmds.lua`, `share.lua`, `treesitter.lua` | headless checks with the real config, run through `lua_check`; named after the context they check (the `.sh` names) where one file fits |
-| `tests/modules.lua` | every module loads on its own, without the config (`nvim -l`) |
-| `tests/probes.lua` | `P.*`, the multi-statement Lua the full checks call in the running Neovim (loaded by `start_nvim`) |
+`tests/nvim.sh` is the one command (`quick`, `full`, `fresh`) and prints what every check covers.
+`tests/lib.sh` holds the shell helpers (the isolated home, tmux, `probe`, `review_repo`, `install`),
+and `tests/lib.lua` the Lua ones: `T.case` (a named group), `T.stub` (a fake undone after its
+case), `T.eq`, `T.dir` (a temporary project), `T.config`, `T.skip`, `T.done`. The full checks are
+one `tests/<context>.sh` per context with one `test_<name>` function per scenario; the headless
+ones are `tests/*.lua`, run with the real config through `lua_check`. `tests/modules.lua` loads
+every module alone (`nvim -l`), and `tests/probes.lua` holds the multi-statement Lua the full
+checks call in the running Neovim.
 
 ## How it works
 
@@ -32,8 +29,8 @@ Run by hand, never from an installer: `tests/nvim.sh` after any change, `full` a
 plugins, keys, servers, Markdown or LaTeX, `fresh` after changing `macos/`. It skips what is
 not installed, never touches the real home or clipboard, and fails if `lazy-lock.json` changes.
 The quick checks run headless Neovim with the real config, so `quick` points `XDG_STATE_HOME`
-at a temporary folder: persistence saves a session on exit, and it once replaced the real
-session of `~/dotfiles` with test files. `the quick tests leave your sessions alone` checks it.
+at a temporary folder: persistence saves a session on exit and would replace the real session
+of `~/dotfiles` with test files (`the quick tests leave your sessions alone` checks it).
 Each check prints `pass`, `skip` with the reason, or `FAIL` with what was wanted and what came
 back; the last line is the count. A headless check that cannot run something here (no pandoc,
 no rumdl) calls `T.skip(name, reason)` and `lua_check` prints a `skip` line below its `pass`,
@@ -43,7 +40,7 @@ so a missing program never reads as a pass of what it was meant to check.
 and the `XDG_*` folders pointed there, and drives Neovim through tmux and `nvim --server`.
 `fresh` uses a throwaway folder with its symlinks resolved: macOS keeps temporary folders under
 `/var`, a link to `/private/var`, and Neovim's paths and the checks' would not match. Run `fresh`
-now and then: a file left in the reused folder hides a test that never creates it, as one did.
+now and then: a file left in the reused folder hides a test that never creates it.
 
 Where a new check goes:
 
@@ -52,7 +49,7 @@ Where a new check goes:
   or codediff. A case runs in `xpcall`, so a crash fails only that case and the next ones still
   run; it opens the buffer it needs itself and never relies on what an earlier case left. A fake
   goes in with `T.stub(table, key, value)`, which puts the old value back when the case ends,
-  passed or crashed; a fake left by hand once replaced `vim.notify` for the rest of a file.
+  passed or crashed; a fake left by hand would replace `vim.notify` for the rest of a file.
 - A probe that needs more than one statement is a function in `tests/probes.lua`, called as
   `P.name()`, so stylua checks it; a one-line expression stays in the `.sh` file.
 - It needs a UI, a server or typing: a `probe` in the `test_<area>` function of the `.sh` file
@@ -74,27 +71,21 @@ Where a new check goes:
   counts windows by an option (wrap, cursorline) keeps only `relative == ""` ones, as `tiles`
   does.
 
-## Quick tests in CI
+## CI
 
-`.github/workflows/tests.yml` runs `tests/nvim.sh` (quick) on a macOS runner on push and pull
-request: it installs the programs the checks use (pandoc among them: without it the preview
-check skips) and BasicTeX with `latexmk` (MacTeX is too large for a runner), runs
-`macos/nvim/link.sh`, restores the plugins from `lazy-lock.json`, runs `dotfiles.install`
-(servers, parsers, spell files, as `macos/nvim/install.sh` does) and then the suite. Checks for
-programs or apps the runner lacks (Skim, tmux) skip. `full` and `fresh` stay manual: they need
-real language servers and tmux and would fail for reasons that are not in a change.
+`.github/workflows/tests.yml` runs the quick suite on a macOS runner: it installs the programs the
+checks use (without pandoc the preview check skips), links Neovim, restores the plugins from
+`lazy-lock.json` and runs `dotfiles.install`, as `macos/nvim/install.sh` does. There is no TeX on
+the runner: no quick check builds a document. Checks for programs the runner lacks (Skim, tmux)
+skip, and a newer push to the same branch cancels the run. `full` and `fresh` stay manual: they
+need real language servers and tmux and would fail for reasons that are not in a change.
 
-## Security workflow
-
-`.github/workflows/security.yml` runs on push, pull request and every Monday: ShellCheck on the
-shell scripts, gitleaks on the full history, and zizmor on the workflows. Actions are pinned to
-a commit SHA and the token is read-only; Dependabot (`.github/dependabot.yml`) bumps the pins.
-ShellCheck does not read zsh, so `config/zsh/` is left out. Run `gitleaks detect` locally for the
-same secret scan.
-
-CodeQL and OSSF Scorecard are not used: CodeQL reads none of the Lua or shell here, only the
-workflows, which zizmor already checks, and Scorecard scores repository settings, not the
-config. OSV-Scanner is not used either: it does not read `lazy-lock.json`.
+`.github/workflows/security.yml` runs on push, pull request and every Monday: ShellCheck (it reads
+`tests/*.sh` by glob, but not zsh, so `config/zsh/` is left out), gitleaks on the full history
+(`gitleaks git` runs it locally) and zizmor, pinned to a version that moves with the monthly
+update ([install](install.md#updating)). Actions are pinned to a commit SHA, the token is
+read-only, and Dependabot bumps the pins. CodeQL, OSSF Scorecard and OSV-Scanner are not used:
+none of them reads the Lua, the shell or `lazy-lock.json` here.
 
 ## Checking by hand
 

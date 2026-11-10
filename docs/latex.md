@@ -7,17 +7,15 @@ Writing and building LaTeX: vimtex with latexmk and Skim, and texlab. Its relati
 
 vimtex compiles with latexmk and shows the PDF in Skim with SyncTeX; texlab gives completion
 (`\ref`, `\cite`), go to definition, symbols and chktex diagnostics (vimtex's own completion and
-insert maps are off). Keys under `,l` are vimtex's own; which-key names the ones in daily use:
-`,ll` compile, `,lk` stop, `,lv` view / forward search, `,le` errors, `,lt` contents, `,lc` /
-`,lC` clean, `,lx` reload, `,lw` count words (the others show vimtex's `<Plug>` names).
+insert maps are off). Keys under `,l` are vimtex's own; which-key names the ones in daily use.
 Cmd+Shift+click in Skim jumps back to the line. Put `% !TEX program = lualatex` on the first
 line for another engine.
 
 There is no LaTeX code of our own, only vimtex's and texlab's settings. Nothing builds by itself:
 `,ll` starts latexmk's continuous mode, which rebuilds on each save until `,lk` (or `,ll` again)
-stops it, and Skim reloads the PDF when it changes. Errors open vimtex's quickfix list. Anything
-beyond building, reading and moving through a document (a live build, a grammar server, our own
-snippets) cost more upkeep than it gave and was dropped.
+stops it, and Skim reloads the PDF when it changes. Errors open vimtex's quickfix list. LaTeX
+stays at building, reading and moving through a document: a live build, a grammar server or
+snippets of our own cost more upkeep than they give.
 
 Skim is not activated (`vimtex_view_skim_activate = 0`), so it never takes focus from Neovim;
 `,lv` therefore does not bring it to the front. Skim opens by itself after the first successful

@@ -15,7 +15,7 @@ step_nvim() {
     return 1
   }
   perl -e 'alarm 900; exec @ARGV' nvim --headless "+Lazy! restore" +qa || return 1
-  nvim --headless "+lua require('dotfiles.install').run()"
+  perl -e 'alarm 2400; exec @ARGV' nvim --headless "+lua require('dotfiles.install').run()" "+cquit 1"
 }
 
 echo "Installing Neovim: its programs (with MacTeX, a large download), ~/.config/nvim and its plugins. Homebrew and MacTeX may ask for your password; the shell and terminal are left alone."

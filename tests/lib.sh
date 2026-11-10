@@ -114,6 +114,7 @@ review_repo() {
 }
 
 resize() { "${TMUX[@]}" resize-window -x "$1" -y "$2"; }
+trust_dir() { nvim --headless -n -i NONE -c "lua vim.secure.trust({ action = '$2', path = '$1' })" +qa >/dev/null 2>&1; }
 
 clients() { echo "#vim.lsp.get_clients({name=\"$1\"})"; }
 mason() { [ -x "$XDG_DATA_HOME/nvim/mason/bin/$1" ]; }
@@ -140,6 +141,7 @@ setup() {
 }
 
 cleanup() {
+  rm -rf "$QUICK_STATE"
   stop_nvim
   if [ "$MODE" = fresh ] && [ -n "${T:-}" ] && [ -d "$T" ]; then
     rm -rf "$T"

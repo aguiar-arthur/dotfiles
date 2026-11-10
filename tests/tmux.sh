@@ -10,8 +10,7 @@ tmux_config() {
 }
 
 tmux_until() {
-  local i
-  for i in $(seq 50); do
+  for _ in $(seq 50); do
     "$@" && return 0
     sleep 0.2
   done

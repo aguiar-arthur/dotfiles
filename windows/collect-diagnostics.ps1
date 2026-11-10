@@ -6,7 +6,9 @@ param(
 )
 
 $ErrorActionPreference = 'Continue'
-$base = Join-Path $env:USERPROFILE 'Documents\diagnostics'
+$documents = [Environment]::GetFolderPath('MyDocuments')
+if (-not $documents) { $documents = Join-Path $env:USERPROFILE 'Documents' }
+$base = Join-Path $documents 'diagnostics'
 $stamp = Get-Date -Format 'yyyyMMdd_HHmm'
 
 $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
@@ -231,14 +233,22 @@ if ($Deep) {
 }
 
 $answer = ''
+$declined = 'Repair declined by the user.'
 while ($answer -ne 'y' -and $answer -ne 'n') {
     Write-Host ''
     Write-Host 'Run the Windows repair now? (DISM /RestoreHealth + sfc /scannow)' -ForegroundColor Cyan
     Write-Host 'It can take 20 to 50 minutes and DISM needs internet.'
-    $answer = (Read-Host 'Answer y (yes) or n (no)').Trim().ToLower()
+    $reply = $null
+    $reply = Read-Host 'Answer y (yes) or n (no)'
+    if ($null -eq $reply) {
+        $declined = 'Repair skipped: no console to answer from.'
+        $answer = 'n'
+    } else {
+        $answer = $reply.Trim().ToLower()
+    }
 }
 if ($answer -eq 'n') {
-    'Repair declined by the user.' | Out-File (Join-Path $out '70_repair_skipped.txt') -Encoding UTF8
+    $declined | Out-File (Join-Path $out '70_repair_skipped.txt') -Encoding UTF8
     Write-Host '  Repair skipped.'
 } elseif (-not $isAdmin) {
     Write-Host '[10/10] Repair skipped: needs PowerShell as Administrator.' -ForegroundColor Yellow

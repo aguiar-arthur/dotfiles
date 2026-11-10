@@ -1,4 +1,5 @@
 brew "uv"
 brew "ruby"
 brew "mole"
+brew "gitleaks"
 cask "grandperspective"

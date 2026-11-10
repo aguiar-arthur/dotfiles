@@ -4,6 +4,7 @@ add_newline = false
 palette = "dracula"
 command_timeout = 1000
 
+# why: pills fill their row's whole height, so the │ rows keep two rows of pills from touching
 format = """
 [╭─ ](fg:comment)\
 $os\

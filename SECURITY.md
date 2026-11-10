@@ -15,4 +15,4 @@ rather than a public issue.
 ## Current state
 
 The repository is checked on every push and every Monday. The checks are described in the
-[security workflow section](docs/tests.md#security-workflow).
+[security workflow section](docs/tests.md#ci).

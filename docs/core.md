@@ -18,15 +18,11 @@ Neovim 0.12 or newer: `ui2` and `vim.ui.progress_status()` come with it.
 
 `<Space>` is the leader, `,` the local leader; which-key shows every key after a short pause.
 `<leader>` keys work everywhere, `,` keys depend on the file type (see [code](code.md)).
-`<A-j>` / `<A-k>` move lines, further with a count, and do nothing at the edge of the buffer;
 `C-h/j/k/l` move between windows, and on to tmux panes (vim-tmux-navigator, see
-[workspace](workspace.md)). Splits, resizing, `]b` / `[b`,
-`gcc` and `C-w d` (the line's diagnostics) are Neovim's own keys, not repeated under
-`<leader>`. The LSP keys are the exception: Neovim's quick `gr…` keys stay (`grr` / `gri` /
-`grt` open Snacks pickers) and `<leader>l` repeats them, with the rest, as one menu that
-which-key shows (see [code](code.md)). `<Esc>` clears the search
-highlight; Neovim's `nohlsearch` package is not used because it clears it after `updatetime`
-(250 ms here), before the matches can be read.
+[workspace](workspace.md)). Neovim's own keys (splits, `]b` / `[b`, `gcc`, `C-w d`) are not
+repeated under `<leader>`; the LSP keys are the exception (see [code](code.md)). `<Esc>` clears
+the search highlight; Neovim's `nohlsearch` package is not used because it clears it after
+`updatetime` (250 ms here), before the matches can be read.
 
 The `<leader>u` toggles are global. A `:setlocal` (wrap, numbers, conceal, spell) stays with
 its buffer until the next global toggle. Values an ftplugin sets are replaced when the buffer
@@ -45,26 +41,20 @@ unreliable in Python, YAML and Markdown, so the ftplugin's stays there. Folds co
 treesitter everywhere (`foldexpr`).
 
 The look: messages and the `:` line use Neovim's own `ui2` (`require("vim._core.ui2").enable()` in
-`options.lua`): no "Press ENTER" prompt, the `:` line highlighted as you type, long output folded
-behind a `[+N]` mark (`g<` shows it). blink completes the `:` line and `/` search as before,
-notifications go to Snacks (`<leader>on`) and signature help to blink. treesitter-context keeps the
-enclosing function or class on top (`<leader>ux`). The status column (Snacks) shows marks and
-diagnostics on the left, git and closed folds on the right; mini.statusline shows mode, git,
-diagnostics, running progress (`vim.ui.progress_status()`: the average percentage and the number of
-tasks, such as a server indexing, see [code](code.md)), and language servers (the
-path is in each window's winbar, not repeated there). Inactive windows are a shade darker
-(`NormalNC`), the cursorline shows only in the active one, and each file window has its path in a
-winbar (a window whose winbar is already set keeps it; a review's tab, floats and terminals have
-none, and a file window that turns into a terminal drops it, because a split inherits the winbar of
-the window it came from). Closing the last file (`<leader>bd`, `:bd`) shows the Snacks dashboard
-again, as at startup (`q` quits there; on the floating one from `<leader>od` it only closes it); its
-logo is `dashboard/clock.sh` in a Snacks `terminal` section with `ttl = 0` (a cached section would
-be static), so any script that redraws from the top-left corner can replace it. The clock draws two
-frames a second (each frame runs `date`), which is enough for the blinking colon; ten cost about 15%
-of a core while the dashboard was visible. Smooth scrolling is Snacks' (`<leader>uS`), at 100 ms
-instead of its 200, since a review's `]c` and `C-d` wait for it. The tab line (`tabline`, from two
-tabs on) is `dotfiles/tabline.lua`: each tab's file, or the label git gives a review, see [git](git.md).
-Diff colors are tinted backgrounds over Dracula, so the code stays readable.
+`options.lua`): no "Press ENTER" prompt, long output folded behind a `[+N]` mark (`g<` shows it).
+blink completes the `:` line and `/` search, notifications go to Snacks and signature help to
+blink. mini.statusline shows mode, git, diagnostics, running progress (`vim.ui.progress_status()`,
+see [code](code.md)) and language servers; the path is in each window's winbar instead. A window
+whose winbar is already set keeps it; a review's tab, floats and terminals have none, and a file
+window that turns into a terminal drops it, because a split inherits the winbar of the window it
+came from. Inactive windows are a shade darker (`NormalNC`) and the cursorline shows only in the
+active one. Closing the last file shows the Snacks dashboard again; its logo is
+`dashboard/clock.sh` in a `terminal` section with `ttl = 0` (a cached section would be static), so
+any script that redraws from the top-left corner can replace it. The clock draws two frames a
+second, enough for the blinking colon; ten cost about 15% of a core. Smooth scrolling is Snacks'
+at 100 ms instead of its 200, since a review's `]c` and `C-d` wait for it. The tab line is
+`dotfiles/tabline.lua` (see [git](git.md) for a review's label). Diff colors are tinted
+backgrounds over Dracula, so the code stays readable.
 
 Spell checking (`en_us`, `pt_br`) is on for prose filetypes. Words added with `zg` (in either
 language) go to the versioned `spell/en.utf-8.add`; Neovim compiles it at startup when it is
@@ -88,6 +78,9 @@ approves it; after any edit it asks again. A trusted `.nvim.lua` also lets prett
 
 ## Pitfalls
 
+- `<A-j>` / `<A-k>` reindent the moved lines (`==`). With `silent! move` the reindent still ran
+  when the move failed at the edge, and changed a line that never moved; the keys catch `E16`
+  (`:move` past the edge) and skip it.
 - `foldexpr` runs treesitter only where `buftype` is empty. Neovim's folds keep an entry per buffer
   and, when `foldminlines` changes globally (`<leader>gz` in a review), refresh them all; a float
   closed inside an autocmd, as a hunk preview closes on a cursor move, is wiped without the

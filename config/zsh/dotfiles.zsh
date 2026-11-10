@@ -18,6 +18,7 @@ HISTSIZE=50000
 SAVEHIST=50000
 setopt share_history hist_ignore_all_dups hist_ignore_space
 
+# why: zsh picks vi keys when EDITOR already holds vi, so a nested shell would differ from the first
 bindkey -e
 
 if [[ -o interactive ]] && (( $+commands[fzf] )); then
@@ -26,6 +27,7 @@ if [[ -o interactive ]] && (( $+commands[fzf] )); then
 fi
 
 if [[ -o interactive ]]; then
+  # why: macOS's zsh files never run compinit, and -i keeps a group-writable Homebrew folder from asking
   autoload -Uz compinit
   compinit -i
   zstyle ':completion:*' menu select
@@ -35,6 +37,7 @@ fi
 if [[ -o interactive ]] && (( $+commands[eza] )); then
   alias ls='eza --icons=auto --group-directories-first'
   alias ll='ls --long --all --git'
+  # why: eza's -t takes a field, so ls -lt fails; lt is the same listing
   alias lt='ls --long --sort=modified'
 fi
 

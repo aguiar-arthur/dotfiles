@@ -22,18 +22,13 @@ branch, a pull request, two revisions, a file's or a line's history. Its relatio
 
 ## How it works
 
-Everything git is under `<leader>g`: gitsigns for the hunks and blame of the file you edit
-(`gb` the line, `gB` the whole file), lazygit (`gg`) to commit, push, switch branches and handle
-stashes, pickers to jump (`gt` changed files, `gl` the log) and codediff for every side by side
-view. The keys stop where lazygit or a review already does the job: a hunk picker, an inline
-preview, a stash picker and a key for the commit of a line (the first entry of `gL`) were dropped.
-`<leader>gv` holds what compares with something else: another branch (`gvb`, `gvf`), typed
-revisions (`gvv`), the branch commit by commit (`gvc`) and gitsigns' marks against the branch's fork
-point (`gvs`, its `change_base`). `gP` lists pull requests through `gh`: Enter is a codediff
-review, while `C-e` (actions: comment, start a review, check out) and `C-o` (hunks with their
-comments, `a` in the preview adds one) are Snacks' own, the only way to write to a pull request
-from here. `gvo` opens those hunks for this branch's pull request. `C-g` in `gl` searches what
-commits changed (`git log -S`). codediff.nvim downloads its prebuilt diff library in
+Everything git is under `<leader>g` (which-key lists it): gitsigns for the hunks and blame of the
+file you edit, lazygit to commit, push, switch branches and handle stashes, pickers to jump, and
+codediff for every side by side view. The keys stop where lazygit or a review already does the
+job. `<leader>gv` holds what compares with something else (another branch, typed revisions, the
+branch commit by commit, gitsigns' marks against the branch's fork point). `gP` lists pull requests
+through `gh`: Enter is a codediff review, while `C-e` and `C-o` are Snacks' own actions, the only
+way to write to a pull request from here. codediff.nvim downloads its prebuilt diff library in
 its lazy.nvim `build` step, so `macos/nvim/install.sh` fetches it with the plugins.
 
 We use codediff only through what it documents: its options, its `:CodeDiff` command, its `User`
@@ -65,10 +60,8 @@ by `Tab`, compares them, older first; `C-e` compares one with the working tree. 
 file's and a line's history are codediff's own `:CodeDiff history`, so they look and behave like any
 other review. Likewise `git_branches` checks out on Enter, so `gvb` and `gvf` give it a `confirm`.
 
-Every codediff key is under `<leader>g`: `ga` stages the file, `gi` / `gz` switch the layout and
-fold, `gM` lines the other side up with moved code, `gE` focuses the file list, and the merge
-conflict keys are `gm` plus codediff's own letters (`t` theirs, `o` ours, `b` both, `x` none), one
-conflict at a time; a whole file is lazygit's. So `gc`, `t` and `-` keep their Vim meaning on the
+Every codediff key is under `<leader>g` (merge conflicts: `gm` plus codediff's own letters, one
+conflict at a time; a whole file is lazygit's). So `gc`, `t` and `-` keep their Vim meaning on the
 real side, which is the file being edited, and `gd`, `K` and edits work there. On the real file
 hunks are gitsigns' (codediff's stage and discard keys are off); its `<leader>gs` unstages a hunk
 already staged. A review of staged changes shows two codediff buffers gitsigns does not attach to,
@@ -91,8 +84,6 @@ its keys are buffer-local, so everywhere else `<leader>op` is still the file tre
   dashboard delays until the first file, in the middle of the review; `aligned.on` loads it first.
 - Snacks' `gh_actions` and `gh_diff` actions fail on an empty list, which is any repository with no
   open pull request, so `C-e` and `C-o` go through `pr.menu` and `pr.hunks`, which check the item.
-- `Snacks.picker.gh_pr` came back empty in some test runs and full in others, with the same
-  arguments and the API limits untouched; the cause is unknown, and opening it again fills it.
 - Claude's proposals are a native diff with one real side and one scratch side, misaligned by lenses
   like a review. `:diffthis` fires no `OptionSet`, so `watch_diff` (registered in codediff's `init`,
   before any review) listens to `DiffUpdated` and `WinClosed`.

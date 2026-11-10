@@ -8,6 +8,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   quick:
     runs-on: macos-latest
@@ -21,20 +25,11 @@ jobs:
           persist-credentials: false
       - name: Programs
         run: brew install neovim ripgrep fd tree-sitter-cli node stylua shfmt rumdl pandoc eza
-      - name: TeX
-        run: |
-          brew install --cask basictex
-          echo /Library/TeX/texbin >> "$GITHUB_PATH"
-          export PATH="$PATH:/Library/TeX/texbin"
-          command -v latexmk || {
-            sudo tlmgr update --self
-            sudo tlmgr install latexmk
-          }
       - name: Link Neovim
         run: macos/nvim/link.sh
       - name: Plugins
         run: nvim --headless "+Lazy! restore" +qa
       - name: Servers, parsers and spell files
-        run: nvim --headless "+lua require('dotfiles.install').run()"
+        run: nvim --headless "+lua require('dotfiles.install').run()" "+cquit 1"
       - name: Quick tests
         run: tests/nvim.sh

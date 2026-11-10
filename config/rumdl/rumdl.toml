@@ -1,6 +1,8 @@
 [global]
 line-length = 100
-exclude = ["CLAUDE.md"]
+
+[per-file-ignores]
+"CLAUDE.md" = ["MD041"]
 
 [MD013]
 code-blocks = false

@@ -66,16 +66,17 @@ prune_backups() {
 }
 
 link() {
-  local src="$DOT/$1" dst="$2"
+  local src="$DOT/$1" dst="$2" backup="${3:-$2}"
   if [ -L "$dst" ] && [ "$(readlink "$dst")" = "$src" ]; then
     say ok "$dst"
     return
   fi
   mkdir -p "$(dirname "$dst")"
   if [ -e "$dst" ] || [ -L "$dst" ]; then
-    mv "$dst" "$dst.bak.$(date +%Y%m%d%H%M%S)"
+    mkdir -p "$(dirname "$backup")"
+    mv "$dst" "$backup.bak.$(date +%Y%m%d%H%M%S)"
     say backup "$dst"
-    prune_backups "$dst"
+    prune_backups "$backup"
   fi
   ln -s "$src" "$dst"
   say link "$dst -> $src"

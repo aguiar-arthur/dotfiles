@@ -32,10 +32,29 @@ T.case("mason", function()
   )
 end)
 
+T.case("a step that crashes", function()
+  local ran, quit = {}, nil
+  for _, step in ipairs({ "mason", "parsers", "spell" }) do
+    T.stub(require("dotfiles.install." .. step), "install", function()
+      ran[#ran + 1] = step
+      if step == "parsers" then
+        error("boom")
+      end
+    end)
+  end
+  T.stub(vim, "cmd", function(command)
+    quit = command
+  end)
+  T.stub(io, "stdout", { write = function() end })
+  require("dotfiles.install").run()
+  T.eq("install: the steps after a crash still run", ran, { "mason", "parsers", "spell" })
+  T.eq("install: a crash ends Neovim with an error", quit, "cquit 1")
+end)
+
 T.case("spell files", function()
-  local install = require("dotfiles.install")
+  local spell_files = require("dotfiles.install.spell").files
   local spell = T.dir()
-  local files = install.spell_files({ "en_us", "pt_br" }, spell)
+  local files = spell_files({ "en_us", "pt_br" }, spell)
   T.eq("spell: only non-English files are fetched", #files, 1)
   T.eq(
     "spell: pt_br comes from the Vim mirror",
@@ -43,7 +62,7 @@ T.case("spell files", function()
     true
   )
   vim.fn.writefile({}, spell .. "/pt.utf-8.spl")
-  T.eq("spell: a file already there is skipped", install.spell_files({ "pt_br" }, spell), {})
+  T.eq("spell: a file already there is skipped", spell_files({ "pt_br" }, spell), {})
 end)
 
 T.case("treesitter parsers", function()

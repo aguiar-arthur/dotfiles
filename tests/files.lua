@@ -14,9 +14,14 @@ T.case("filetypes", function()
 end)
 
 local conform = T.config("plugins/formatting.lua").opts
-local function formats(files, file)
+local function formats(files, file, quiet_ft)
   local root = T.dir(files)
-  vim.cmd("edit " .. root .. "/" .. file)
+  if quiet_ft then
+    vim.cmd("noautocmd edit " .. root .. "/" .. file)
+    vim.cmd("noautocmd setlocal filetype=" .. quiet_ft)
+  else
+    vim.cmd("edit " .. root .. "/" .. file)
+  end
   return conform.format_on_save(vim.api.nvim_get_current_buf()) ~= nil
 end
 
@@ -64,6 +69,36 @@ T.case("style markers", function()
     false
   )
   T.eq("Markdown with .rumdl.toml formats on save", formats({ [".rumdl.toml"] = {} }, "a.md"), true)
+  T.eq(
+    "Markdown with a .markdownlint.yaml formats on save",
+    formats({ [".markdownlint.yaml"] = {} }, "a.md"),
+    true
+  )
+  T.eq("Python with ruff.toml formats on save", formats({ ["ruff.toml"] = {} }, "a.py"), true)
+  T.eq(
+    "bash with an .editorconfig [*.{sh,bash}] formats",
+    formats({ [".editorconfig"] = { "[*.{sh,bash}]" } }, "a.bash"),
+    true
+  )
+  T.eq("TOML with taplo.toml formats on save", formats({ ["taplo.toml"] = {} }, "a.toml"), true)
+  T.eq("TOML with .taplo.toml formats on save", formats({ [".taplo.toml"] = {} }, "a.toml"), true)
+  T.eq("TOML without a taplo config is left alone", formats({}, "a.toml"), false)
+  -- why: a Clojure buffer with its FileType autocmds would start a real clojure-lsp.
+  T.eq(
+    "Clojure with cljfmt.edn formats on save",
+    formats({ ["cljfmt.edn"] = {} }, "src/a.clj", "clojure"),
+    true
+  )
+  T.eq(
+    "Clojure with :cljfmt in .lsp/config.edn formats on save",
+    formats({ [".lsp/config.edn"] = { "{:cljfmt {:indents {}}}" } }, "src/a.clj", "clojure"),
+    true
+  )
+  T.eq(
+    "Clojure with a .lsp/config.edn but no :cljfmt is left alone",
+    formats({ [".lsp/config.edn"] = { "{:linters {}}" } }, "src/a.clj", "clojure"),
+    false
+  )
 end)
 
 T.case("prettier and a trusted .nvim.lua", function()

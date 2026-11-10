@@ -12,8 +12,12 @@ end
 return {
   root_dir = function(buf, on_dir)
     local name = vim.api.nvim_buf_get_name(buf)
-    if not vim.fs.basename(name):match("^conjure%-log%-.+%.cljc$") then
-      on_dir(vim.fs.root(buf, vim.lsp.config.clojure_lsp.root_markers))
+    if vim.fs.basename(name):match("^conjure%-log%-.+%.cljc$") then
+      return
+    end
+    local root = vim.fs.root(buf, vim.lsp.config.clojure_lsp.root_markers)
+    if not root or vim.secure.read(root) then
+      on_dir(root)
     end
   end,
   on_init = function(client)

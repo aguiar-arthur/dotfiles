@@ -13,18 +13,31 @@ map({ "n", "x" }, "k", "v:count == 0 ? 'gk' : 'k'", o("Up", { expr = true }))
 
 map("x", "<", "<gv", o("Indent left (keep selection)"))
 map("x", ">", ">gv", o("Indent right (keep selection)"))
-map("n", "<A-j>", "<cmd>execute 'silent! move .+' . v:count1<CR>==", o("Move line down"))
-map("n", "<A-k>", "<cmd>execute 'silent! move .-' . (v:count1 + 1)<CR>==", o("Move line up"))
+local at_edge = [[ | catch /^Vim\%((\a\+)\)\=:E16:/ | endtry<CR>]]
+local reselect_at_edge = [[ | catch /^Vim\%((\a\+)\)\=:E16:/ | execute 'normal! gv' | endtry<CR>]]
+map(
+  "n",
+  "<A-j>",
+  [[<cmd>try | execute 'move .+' . v:count1 | execute 'normal! ==']] .. at_edge,
+  o("Move line down")
+)
+map(
+  "n",
+  "<A-k>",
+  [[<cmd>try | execute 'move .-' . (v:count1 + 1) | execute 'normal! ==']] .. at_edge,
+  o("Move line up")
+)
 map(
   "x",
   "<A-j>",
-  [[:<C-u>execute "silent! '<,'>move '>+" . v:count1<CR>gv=gv]],
+  [[:<C-u>try | execute "'<,'>move '>+" . v:count1 | execute 'normal! gv=gv']] .. reselect_at_edge,
   o("Move selection down")
 )
 map(
   "x",
   "<A-k>",
-  [[:<C-u>execute "silent! '<,'>move '<-" . (v:count1 + 1)<CR>gv=gv]],
+  [[:<C-u>try | execute "'<,'>move '<-" . (v:count1 + 1) | execute 'normal! gv=gv']]
+    .. reselect_at_edge,
   o("Move selection up")
 )
 map("i", ",", ",<c-g>u", o("Undo breakpoint"))

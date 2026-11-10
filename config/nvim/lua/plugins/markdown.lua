@@ -1,4 +1,5 @@
 local notes = require("config.settings").notes
+local notes_dir = vim.fn.expand(notes.dir)
 
 local function render_options()
   local level = vim.go.conceallevel
@@ -35,7 +36,13 @@ return {
     "obsidian-nvim/obsidian.nvim",
     cmd = "Obsidian",
     event = {
-      { event = { "BufReadPre", "BufNewFile" }, pattern = vim.fn.expand(notes.dir) .. "/*" },
+      {
+        event = { "BufReadPre", "BufNewFile" },
+        pattern = vim.list.unique({
+          notes_dir .. "/*",
+          (vim.uv.fs_realpath(notes_dir) or notes_dir) .. "/*",
+        }),
+      },
     },
     keys = {
       { "<leader>nf", "<cmd>Obsidian quick_switch<CR>", desc = "Find note" },
