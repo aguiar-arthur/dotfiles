@@ -11,7 +11,7 @@ end
 
 local function against_parent(commit, dir)
   local parent = repo.run("-C", dir, "rev-parse", "--verify", "--quiet", commit .. "^")
-  review.expect(short(commit), { "git", "diff", parent or EMPTY_TREE, commit })
+  review.expect(short(commit))
   vim.cmd.CodeDiff(parent or EMPTY_TREE, commit)
 end
 
@@ -22,10 +22,7 @@ function M.commit(picker, item)
     table.sort(chosen, function(a, b)
       return a.idx > b.idx
     end)
-    review.expect(
-      short(chosen[1].commit) .. ".." .. short(chosen[2].commit),
-      { "git", "diff", chosen[1].commit, chosen[2].commit }
-    )
+    review.expect(short(chosen[1].commit) .. ".." .. short(chosen[2].commit))
     vim.cmd.CodeDiff(chosen[1].commit, chosen[2].commit)
   elseif item and item.commit then
     against_parent(item.commit, item.cwd or vim.fn.getcwd())
@@ -35,7 +32,7 @@ end
 function M.worktree(picker, item)
   picker:close()
   if item and item.commit then
-    review.expect(short(item.commit) .. " vs working tree", { "git", "diff", item.commit })
+    review.expect(short(item.commit) .. " vs working tree")
     vim.cmd.CodeDiff(item.commit)
   end
 end

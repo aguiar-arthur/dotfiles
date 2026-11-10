@@ -1,4 +1,5 @@
 local aligned = require("dotfiles.git.aligned")
+local explorer = require("dotfiles.git.explorer")
 local review = require("dotfiles.git.review")
 
 local M = {}
@@ -13,7 +14,11 @@ end
 
 function M.setup()
   require("dotfiles.tabline").set_labeler(function(tab)
-    return review.is(tab) and "review: " .. review.label(tab) or nil
+    if not review.is(tab) then
+      return nil
+    end
+    local progress = explorer.progress()
+    return "review: " .. review.label(tab) .. (progress and "  " .. progress or "")
   end)
   local group = vim.api.nvim_create_augroup("user_review", { clear = true })
   vim.api.nvim_create_autocmd("User", {
@@ -36,9 +41,18 @@ function M.setup()
   })
   vim.api.nvim_create_autocmd("User", {
     group = group,
+    pattern = "CodeDiffFileSelect",
+    callback = function(ev)
+      explorer.select(ev.data.path)
+      vim.cmd.redrawtabline()
+    end,
+  })
+  vim.api.nvim_create_autocmd("User", {
+    group = group,
     pattern = "CodeDiffClose",
     callback = function(ev)
       review.unmark(ev.data.tabpage)
+      explorer.clear()
       aligned.refresh()
     end,
   })

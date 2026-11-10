@@ -19,7 +19,7 @@ function M.branch(picker, item)
   picker:close()
   local rev = revision(item)
   if rev then
-    review.expect(rev .. "...", { "git", "diff", rev .. "..." })
+    review.expect(rev .. "...")
     vim.cmd.CodeDiff(rev .. "...")
   end
 end
@@ -28,7 +28,7 @@ function M.file(picker, item)
   picker:close()
   local rev = revision(item)
   if rev then
-    review.expect("this file vs " .. rev, { "git", "diff", rev, "--", "%" })
+    review.expect("this file vs " .. rev)
     vim.cmd.CodeDiff("file", rev)
   end
 end
@@ -36,7 +36,7 @@ end
 function M.origin()
   local base = repo.base()
   if base then
-    review.expect(base .. "...", { "git", "diff", base .. "..." })
+    review.expect(base .. "...")
     vim.cmd.CodeDiff(base .. "...")
   end
 end
@@ -44,7 +44,7 @@ end
 function M.commits()
   local base = repo.base()
   if base then
-    review.expect(base .. "..HEAD, by commit", { "git", "diff", base .. "..." })
+    review.expect(base .. "..HEAD, by commit")
     vim.cmd.CodeDiff("history", base .. "..HEAD")
   end
 end

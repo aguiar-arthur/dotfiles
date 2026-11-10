@@ -11,8 +11,10 @@ branch, a pull request, two revisions, a file's or a line's history. Its relatio
   `gL`, Enter in `gP`, a `<leader>gv` key, or Enter in the log picker); `review.is()` knows it
   by the tab variable `review`, the tab line shows its tab variable `review_label`.
 - **real side**: the side of a review that is the working file. Only a review against the working
-  tree has one; a review of commits or of staged changes shows two read-only copies, with no
-  filetype and no language server.
+  tree has one, which includes `<base>...` (the merge base against the working tree, so with the
+  branch checked out `<leader>gV` has `gd` and `K`); a review of commits, of staged changes or of a
+  pull request from `gP` (fetched, never checked out) shows two read-only copies, with no filetype
+  and no language server.
 - **aligned view**: what stays off while any review or native diff is open, because it adds or hides
   rows on the real side only: code lens, the diagnostics' virtual lines, render-markdown, and the
   context float, which covers a row of one side. The winbar of `windows.lua` is off in a review's
@@ -73,6 +75,19 @@ pickers (`git_layout`) put the list on top and the diff below it at full width, 
 rare. `<leader>op` inside a review toggles the file list (codediff's `toggle_explorer` is set to it;
 its keys are buffer-local, so everywhere else `<leader>op` is still the file tree).
 
+The file list is a tree (`i` flips it to a list), so a pull request reads by folder. It hides
+lockfiles, `*.min.*` and `*.snap` (`explorer.file_filter` in `plugins/git.lua`): they are noise
+in a review by hand, but a changed dependency hides there too, so a review of a pull request that
+touches a manifest also wants `<leader>gg` or `git diff` on the lockfile. The tab line adds how
+many of the listed files you have opened (`dotfiles/git/explorer.lua`); it counts opened files,
+not a position, because `]f` does not walk the list in the order codediff hands the formatter, and
+a position would lie. The tally comes from the group formatter and `CodeDiffFileSelect`, so it
+shows only in the file-list mode, and only for groups that were drawn. `+` / `-` gutter signs and
+the line numbers' colour mark the changed rows beside the background, which the Dracula greens
+and reds alone make hard to tell apart. `<leader>gw` ignores whitespace changes; codediff reads
+the option when it renders a file, so it applies from the next file you open, not to the one on
+screen.
+
 ## Pitfalls
 
 - Anything that adds or hides a row on the real side misaligns the two sides, since the old side
@@ -87,8 +102,6 @@ its keys are buffer-local, so everywhere else `<leader>op` is still the file tre
 - Claude's proposals are a native diff with one real side and one scratch side, misaligned by lenses
   like a review. `:diffthis` fires no `OptionSet`, so `watch_diff` (registered in codediff's `init`,
   before any review) listens to `DiffUpdated` and `WinClosed`.
-- `<leader>aV` and `aM` type their request into Claude and never press Enter, since Claude may act
-  on it; the diff goes as a file because a review of a branch does not fit a prompt.
 - A picker with one result and `auto_confirm` (most `gd`) never opens, so Snacks' `picker:close`
   has no picker window to leave and stays in the current window: setting `picker.main` was not
   enough and `gd` replaced the real side. `jump.pick_win` moves the focus itself when

@@ -13,7 +13,6 @@ Upstream offers, downstream consumes; a change upstream may break downstream.
 | Core | Markdown | the global conceal toggle (`<leader>uc`) is re-applied to render-markdown | full: `test_markdown` |
 | Core | Git | the tab variable `review`: `<leader>uw` leaves its wrap alone, `<leader>uC` and `<leader>um` only warn while one is open, `<leader>bd` closes it, `windows.lua` shows no path bar there; `tabline.set_labeler` names it | `tests/toggles.lua`, `tests/git.lua`, full: `test_review` |
 | Code, Markdown | Git | a review or native diff turns lenses, virtual lines and rendering off, and back when the last one closes | `tests/git.lua` |
-| Workspace | Git | Claude's terminal and `ClaudeCodeAdd`: git sends it the changes | `tests/git.lua`, by hand with a real Claude |
 | Workspace | Git | pickers' `confirm` opens a file from a review in the tab before it; the log pickers' Enter reviews a commit; `<leader>bd` beside a review keeps it whole | `tests/git.lua`, full: `test_review` |
 | Workspace | Git | persistence's `PersistenceSavePre`, on which every review closes (`review.close_all`) | `tests/git.lua` |
 | Workspace | Git | `dotfiles.picker.open`, which the git picker keys call | `tests/workspace.lua` |

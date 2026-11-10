@@ -515,142 +515,60 @@ T.case("git: this branch's pull request", function()
   T.eq("git: its number opens the hunks and comments", opened and opened.pr, 9)
 end)
 
-T.case("git: what the review remembers to send", function()
+T.case("git: a review's label", function()
   reset()
-  vim.cmd("edit " .. root .. "/src/a.py")
-  local file = vim.fn.expand("%:p")
-  review.expect("this file vs HEAD", { "git", "diff", "HEAD", "--", "%" })
-  local tab = new_review()
-  T.eq("git: a review keeps its diff, with this file's path", review.diff(tab), {
-    "git",
-    "diff",
-    "HEAD",
-    "--",
-    file,
-  })
-  event("CodeDiffClose", tab)
-  vim.cmd("silent! tabonly")
-  review.expect("typed")
-  local typed = new_review()
-  T.eq("git: a review of unknown revisions has none", review.diff(typed), nil)
-  vim.cmd("silent! tabonly")
-  review.expect("working tree", { "git", "diff", "HEAD" })
+  review.expect("working tree")
   vim.fn.histadd("cmd", "CodeDiff main...")
   local after_failed = new_review()
   T.eq(
-    "git: a key whose review never opened leaves no label or diff to the next one",
-    { review.label(after_failed), review.diff(after_failed) },
-    { "main...", nil }
+    "git: a key whose review never opened leaves no label to the next one",
+    review.label(after_failed),
+    "main..."
   )
   vim.cmd("silent! tabonly")
 end)
 
-T.case("git: sending changes to Claude", function()
+T.case("git: how much of a review was seen", function()
   reset()
-  local claude = require("dotfiles.git.claude")
-  local terminal = require("claudecode.terminal")
-  local dir = T.dir({ ["f.txt"] = { "one" } })
-  local function sh(...)
-    return vim.trim(vim.system({ "git", "-C", dir, ... }, { text = true }):wait().stdout)
-  end
-  sh("init", "-q")
-  sh("add", ".")
-  sh("-c", "user.name=t", "-c", "user.email=t@t", "commit", "-qm", "one")
-  vim.cmd("edit " .. dir .. "/f.txt")
-  local said, commands, typed = nil, {}, {}
-  T.stub(vim, "notify", function(msg)
-    said = msg
-  end)
-  T.stub(
-    vim,
-    "cmd",
-    setmetatable({}, {
-      __call = function(_, command)
-        commands[#commands + 1] = command
-      end,
-      __index = vim.cmd,
+  local explorer = require("dotfiles.git.explorer")
+  explorer.clear()
+  local tab = new_review()
+  T.eq("git: a review with no file list has no progress", explorer.progress(), nil)
+  explorer.record({ name = "Changes", files = { { path = "a" }, { path = "b" } } })
+  explorer.record({ name = "Staged Changes", files = { { path = "a" } } })
+  T.eq("git: a file in two groups counts once", explorer.progress(), "0/2 seen")
+  for _, path in ipairs({ "a", "a" }) do
+    vim.api.nvim_exec_autocmds("User", {
+      pattern = "CodeDiffFileSelect",
+      data = { tabpage = tab, path = path },
     })
-  )
-  T.stub(vim.fn, "chansend", function(_, text)
-    typed[#typed + 1] = text
-  end)
-  local function wait_for(check)
-    vim.wait(2000, check)
   end
-
-  claude.send()
-  wait_for(function()
-    return said == "No changes to send"
-  end)
-  T.eq("git: nothing changed says so", said, "No changes to send")
-
-  vim.fn.writefile({ "two" }, dir .. "/f.txt")
-  claude.send()
-  wait_for(function()
-    return #commands > 0
-  end)
+  T.eq("git: a file seen twice counts once", explorer.progress(), "1/2 seen")
   T.eq(
-    "git: changes go to Claude as a diff file",
-    commands[1]:match("^ClaudeCodeAdd .*changes%.diff$") ~= nil,
+    "git: the tab line shows it",
+    vim.api
+      .nvim_eval_statusline(tabline.render(), { use_tabline = true }).str
+      :find("1/2 seen", 1, true) ~= nil,
     true
   )
-  local written = vim.fn.readfile(vim.fn.stdpath("cache") .. "/claude/changes.diff")
-  T.eq("git: holding the change", vim.tbl_contains(written, "+two"), true)
+  event("CodeDiffClose", tab)
+  T.eq("git: closing the review forgets it", explorer.progress(), nil)
+  vim.cmd("silent! tabonly")
+end)
 
-  commands, said = {}, nil
-  T.stub(terminal, "get_active_terminal_bufnr", function()
-    return nil
+T.case("git: ignoring whitespace in reviews", function()
+  local function ignoring()
+    return require("codediff.config").options.diff.ignore_trim_whitespace
+  end
+  capture(function()
+    require("dotfiles.git.view").toggle_whitespace()
   end)
-  claude.ask_review()
-  wait_for(function()
-    return said ~= nil
-  end)
-  T.eq("git: asking without Claude running says so", { said, #commands }, {
-    "Start Claude first (Space a c)",
-    0,
+  T.eq("git: the key turns it on and says so", { ignoring(), warned ~= nil }, {
+    true,
+    true,
   })
-
-  T.stub(terminal, "get_active_terminal_bufnr", function()
-    return vim.api.nvim_get_current_buf()
-  end)
-  claude.ask_review()
-  wait_for(function()
-    return #commands >= 2
-  end)
-  T.eq("git: a review request is typed, never submitted", typed[1]:find("\n", 1, true), nil)
-  T.eq("git: and attaches the diff", commands[2]:match("^ClaudeCodeAdd") ~= nil, true)
-
-  said = nil
-  claude.ask_message()
-  T.eq("git: nothing staged says so", said, "Nothing is staged")
-  local outside = T.dir({ ["g.txt"] = { "one" } })
-  vim.cmd.edit(outside .. "/g.txt")
-  said, typed = nil, {}
-  claude.ask_message()
-  T.eq("git: outside a repository it says so and asks nothing", { said, #typed }, {
-    "This file is not in a git repository",
-    0,
-  })
-  vim.cmd.edit(dir .. "/f.txt")
-  sh("add", ".")
-  typed = {}
-  claude.ask_message()
-  T.eq(
-    "git: a message request names the staged changes",
-    typed[1]:find("staged", 1, true) ~= nil,
-    true
-  )
-
-  T.stub(require("dotfiles.git.review"), "is", function()
-    return true
-  end)
-  T.stub(require("dotfiles.git.review"), "diff", function()
-    return nil
-  end)
-  said = nil
-  claude.send()
-  T.eq("git: a review without a diff says so", said, "This review has no single diff to send")
-  vim.cmd("enew!")
+  require("dotfiles.git.view").toggle_whitespace()
+  T.eq("git: and off again", ignoring(), false)
 end)
 
 T.case("git: the picker keys reach Snacks", function()

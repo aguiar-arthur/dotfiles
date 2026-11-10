@@ -14,31 +14,14 @@ local function compare_branches(name)
   }
 end
 
-local function review(command, label, diff)
+local function review(command, label)
   return function()
-    require("dotfiles.git.review").expect(label, diff)
+    require("dotfiles.git.review").expect(label)
     vim.cmd(command)
   end
 end
 
 return {
-
-  {
-    "coder/claudecode.nvim",
-    keys = {
-      { "<leader>aD", git_action("claude", "send"), desc = "Send the changes to Claude" },
-      {
-        "<leader>aV",
-        git_action("claude", "ask_review"),
-        desc = "Ask Claude to review the changes",
-      },
-      {
-        "<leader>aM",
-        git_action("claude", "ask_message"),
-        desc = "Ask Claude for a commit message",
-      },
-    },
-  },
 
   {
     "folke/snacks.nvim",
@@ -165,17 +148,17 @@ return {
       { "<leader>gV", git_action("compare", "origin"), desc = "Review branch vs origin" },
       {
         "<leader>gD",
-        review("CodeDiff", "working tree", { "git", "diff", "HEAD" }),
+        review("CodeDiff", "working tree"),
         desc = "Review working tree",
       },
       {
         "<leader>gC",
-        review("CodeDiff --staged", "staged", { "git", "diff", "--cached" }),
+        review("CodeDiff --staged", "staged"),
         desc = "Review staged changes",
       },
       {
         "<leader>gd",
-        review("CodeDiff file HEAD", "this file vs HEAD", { "git", "diff", "HEAD", "--", "%" }),
+        review("CodeDiff file HEAD", "this file vs HEAD"),
         desc = "Review this file against HEAD",
       },
       {
@@ -205,10 +188,39 @@ return {
         desc = "Review the branch commit by commit",
       },
       { "<leader>gq", git_action("review", "close"), desc = "Close the review" },
+      {
+        "<leader>gw",
+        git_action("view", "toggle_whitespace"),
+        desc = "Toggle ignoring whitespace in reviews",
+      },
     },
     opts = {
-      diff = { cycle_hunks_across_files = true, compute_moves = true },
-      explorer = { auto_open_on_cursor = true, line_stats = { enabled = true } },
+      highlights = { char_insert = "#3e7358", char_delete = "#7a4556" },
+      diff = {
+        cycle_hunks_across_files = true,
+        compute_moves = true,
+        highlight_added_deleted_files = true,
+        gutter_signs = { insert_text = "+", delete_text = "-" },
+      },
+      explorer = {
+        auto_open_on_cursor = true,
+        line_stats = { enabled = true },
+        view_mode = "tree",
+        file_filter = {
+          ignore = {
+            ".git/**",
+            ".jj/**",
+            "*.lock",
+            "package-lock.json",
+            "pnpm-lock.yaml",
+            "*.min.js",
+            "*.min.css",
+            "*.snap",
+          },
+        },
+        formatters = { group = git_action("explorer", "group") },
+      },
+      history = { date_format = "%Y-%m-%d" },
       keymaps = {
         view = {
           toggle_explorer = "<leader>op",
