@@ -15,10 +15,7 @@ return {
     if vim.fs.basename(name):match("^conjure%-log%-.+%.cljc$") then
       return
     end
-    local root = vim.fs.root(buf, vim.lsp.config.clojure_lsp.root_markers)
-    if not root or vim.secure.read(root) then
-      on_dir(root)
-    end
+    on_dir(vim.fs.root(buf, vim.lsp.config.clojure_lsp.root_markers))
   end,
   on_init = function(client)
     local request = client.request

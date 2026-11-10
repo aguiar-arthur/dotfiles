@@ -148,14 +148,12 @@ wait: which-key lists every key that follows, so nothing has to be memorised.
   each for every window. Dracula, a status line with the servers' progress, and no "Press ENTER"
   prompts (Neovim's `ui2`).
 
-Two behaviours to know:
+One behaviour to know:
 
 - **Saving formats the file only in projects that declare that formatter's style** (a
   `stylua.toml`, `[tool.ruff]`, …), so other people's code is never restyled. Prettier runs a
   project's JavaScript, so it also needs a `.nvim.lua` approved with `:trust` next to its config.
   `Space l f` formats anywhere; `Space u f` turns format-on-save off.
-- **The first Clojure file of a project asks whether to trust its folder**: clojure-lsp runs the
-  project's build tool to read its classpath, so it starts only after `a` (allow).
 
 ### Clojure
 
@@ -237,8 +235,8 @@ terminal untouched. Then:
 - Do not put personal tokens or SSH keys there; log in with a short-lived, narrow token, or
   none, and run `gh auth logout` or delete it when you leave.
 - Do not trust a `.nvim.lua` from a repository you did not write; `exrc` asks before running
-  one, so answer no. The same goes for the folder question of a Clojure project: allowing it
-  lets clojure-lsp run that project's build tool.
+  one, so answer no. clojure-lsp runs a project's build tool to read its classpath, so open
+  Clojure files of repositories you did not write with care.
 - Before running anything on a fresh clone, read `git log` for commits you do not recognise.
 - When you leave, remove `~/.config/nvim`, `~/.local/share/nvim`, `~/.local/state/nvim` and
   `~/.cache/nvim`.

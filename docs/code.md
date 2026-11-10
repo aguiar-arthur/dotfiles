@@ -131,21 +131,15 @@ running REPL knows beside clojure-lsp's static items. Neovim keeps Conjure's omn
 `v:lua.vim.lsp.omnifunc` only when `omnifunc` is empty, and blink's `omni` turns itself off on
 the LSP one. The nREPL and cider-nrepl versions are at the top of `dotfiles/clojure.lua`.
 
-clojure-lsp starts only in a project folder Neovim trusts. To find the classpath it runs the
+clojure-lsp starts in every Clojure project without asking. To find the classpath it runs the
 project's own tool (`lein classpath`, which evaluates `project.clj`; `clojure -Spath`;
 `npx shadow-cljs classpath`; `bb print-deps`) and any `:classpath-cmd` in the project's
-`.lsp/config.edn`, so opening a file of a repository you did not write would run its code, the
-reason prettier waits for a trusted `.nvim.lua`. `after/lsp/clojure_lsp.lua` asks
-`vim.secure.read` about the project root: the first Clojure file of a project shows Neovim's own
-question, `a` allows clojure-lsp there for good, `d` keeps it off, `i` asks again next time. A file
-outside any project (no root) starts it without asking, since there is no tool to run.
+`.lsp/config.edn`, so opening a file of a repository you did not write runs its code. It used to
+wait for `vim.secure.read` on the project root; the question on every new project cost more than
+it was worth for one person's own repositories.
 
 ## Pitfalls
 
-- Neovim's trust question for a folder reads `exrc: Found untrusted code. DIRECTORY trust is
-  decided only by name, not contents`: it is the same database as `.nvim.lua`, not an exrc file.
-  `:lua vim.secure.trust({ action = "remove", path = "<root>" })` forgets an answer, as does
-  deleting its line in `stdpath("state")/trust`.
 - Zsh has `,r` and shfmt (which reads its dialect from the `.zsh` extension or the shebang), but no
   server and no tree-sitter: bash-language-server and shellcheck do not read zsh, and Neovim's own
   syntax file highlights it better than the bash parser would.

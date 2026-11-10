@@ -63,28 +63,15 @@ T.case("clojure-lsp", function()
     end)
     return root
   end
-  local trusted = { [vim.uv.fs_realpath(clojure)] = true }
-  local asked = 0
-  T.stub(vim.secure, "read", function(path)
-    asked = asked + 1
-    return trusted[vim.uv.fs_realpath(path)]
-  end)
   T.eq(
-    "clojure-lsp: a Clojure file of a trusted project gets its project root",
+    "clojure-lsp: a Clojure file gets its project root",
     vim.uv.fs_realpath(clojure_root(clojure .. "/src/a.clj")),
     vim.uv.fs_realpath(clojure)
   )
-  trusted = {}
   T.eq(
-    "clojure-lsp: an untrusted project starts no server, which would run its build tool",
-    clojure_root(clojure .. "/src/b.clj"),
-    "not started"
-  )
-  asked = 0
-  T.eq(
-    "clojure-lsp: a file outside any project starts without asking",
-    { clojure_root(T.dir({ ["c.clj"] = {} }) .. "/c.clj"), asked },
-    { nil, 0 }
+    "clojure-lsp: a file outside any project starts without a root",
+    clojure_root(T.dir({ ["c.clj"] = {} }) .. "/c.clj"),
+    nil
   )
   T.eq("clojure-lsp: Conjure's log buffers start no server", {
     clojure_root(clojure .. "/conjure-log-123.cljc"),
