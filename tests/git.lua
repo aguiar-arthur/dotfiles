@@ -531,19 +531,19 @@ end)
 T.case("git: how much of a review was seen", function()
   reset()
   local explorer = require("dotfiles.git.explorer")
-  explorer.clear()
   local tab = new_review()
-  T.eq("git: a review with no file list has no progress", explorer.progress(), nil)
+  explorer.clear(tab)
+  T.eq("git: a review with no file list has no progress", explorer.progress(tab), nil)
   explorer.record({ name = "Changes", files = { { path = "a" }, { path = "b" } } })
   explorer.record({ name = "Staged Changes", files = { { path = "a" } } })
-  T.eq("git: a file in two groups counts once", explorer.progress(), "0/2 seen")
+  T.eq("git: a file in two groups counts once", explorer.progress(tab), "0/2 seen")
   for _, path in ipairs({ "a", "a" }) do
     vim.api.nvim_exec_autocmds("User", {
       pattern = "CodeDiffFileSelect",
       data = { tabpage = tab, path = path },
     })
   end
-  T.eq("git: a file seen twice counts once", explorer.progress(), "1/2 seen")
+  T.eq("git: a file seen twice counts once", explorer.progress(tab), "1/2 seen")
   T.eq(
     "git: the tab line shows it",
     vim.api
@@ -551,8 +551,17 @@ T.case("git: how much of a review was seen", function()
       :find("1/2 seen", 1, true) ~= nil,
     true
   )
+  vim.cmd("$tabnew")
+  local next_tab = vim.api.nvim_get_current_tabpage()
+  explorer.record({ name = "Changes", files = { { path = "c" } } })
+  event("CodeDiffOpen", next_tab)
   event("CodeDiffClose", tab)
-  T.eq("git: closing the review forgets it", explorer.progress(), nil)
+  T.eq("git: closing the review forgets it", explorer.progress(tab), nil)
+  T.eq(
+    "git: the review that replaced it keeps its own count",
+    explorer.progress(next_tab),
+    "0/1 seen"
+  )
   vim.cmd("silent! tabonly")
 end)
 

@@ -17,7 +17,7 @@ function M.setup()
     if not review.is(tab) then
       return nil
     end
-    local progress = explorer.progress()
+    local progress = explorer.progress(tab)
     return "review: " .. review.label(tab) .. (progress and "  " .. progress or "")
   end)
   local group = vim.api.nvim_create_augroup("user_review", { clear = true })
@@ -43,7 +43,7 @@ function M.setup()
     group = group,
     pattern = "CodeDiffFileSelect",
     callback = function(ev)
-      explorer.select(ev.data.path)
+      explorer.select(ev.data.tabpage, ev.data.path)
       vim.cmd.redrawtabline()
     end,
   })
@@ -52,7 +52,7 @@ function M.setup()
     pattern = "CodeDiffClose",
     callback = function(ev)
       review.unmark(ev.data.tabpage)
-      explorer.clear()
+      explorer.clear(ev.data.tabpage)
       aligned.refresh()
     end,
   })

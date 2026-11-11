@@ -121,6 +121,9 @@ screen.
 - The pickers' `confirm` is replaced by this context's, which must call
   `snacks.picker.actions.jump` directly: actions such as `tab` route back through `confirm` and
   recurse.
+- A new review draws its file list and fires `CodeDiffOpen` before the review it replaces fires
+  `CodeDiffClose`, so state of one review (the tally of opened files) is kept per tab: cleared
+  globally, closing the old review wiped the new one's.
 - Every review closes before a session is saved (`PersistenceSavePre`): a restored review came
   back as plain buffers named `codediff://…` and `CodeDiff Explorer`.
 
