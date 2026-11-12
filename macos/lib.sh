@@ -103,3 +103,34 @@ pref_bool() {
     say set "$domain $key"
   fi
 }
+
+claude_deny() {
+  local rules="$DOT/$1" settings="$2" result
+  mkdir -p "$(dirname "$settings")"
+  if result="$(
+    python3 -I - "$rules" "$settings" 2>/dev/null <<'PY'
+import json, os, sys
+
+rules_path, path = sys.argv[1], sys.argv[2]
+with open(rules_path) as f:
+    rules = json.load(f)
+data = {}
+if os.path.exists(path):
+    with open(path) as f:
+        data = json.load(f)
+deny = data.setdefault("permissions", {}).setdefault("deny", [])
+added = [rule for rule in rules if rule not in deny]
+deny.extend(added)
+if added:
+    with open(path + ".tmp", "w") as f:
+        json.dump(data, f, indent=2)
+        f.write("\n")
+    os.replace(path + ".tmp", path)
+print("set" if added else "ok")
+PY
+  )"; then
+    say "$result" "$settings denies reading secrets"
+  else
+    say skip "$settings is not valid JSON; its deny rules were left alone"
+  fi
+}

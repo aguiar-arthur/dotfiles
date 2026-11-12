@@ -138,6 +138,32 @@ the iTerm2 profile's backup stays in the folder iTerm2 loads every file of"
   }
 }
 
+claude_deny_merge() {
+  local dir out="" count
+  dir="$(mktemp -d)"
+  printf '{"model":"opus","permissions":{"deny":["Read(mine)"]}}' >"$dir/settings.json"
+  echo "{broken" >"$dir/broken.json"
+  (
+    . "$DOT/macos/lib.sh"
+    claude_deny config/claude/deny.json "$dir/settings.json"
+    claude_deny config/claude/deny.json "$dir/settings.json"
+    claude_deny config/claude/deny.json "$dir/new/settings.json"
+    claude_deny config/claude/deny.json "$dir/broken.json"
+  ) >/dev/null
+  count="$(python3 -I -c 'import json, sys; print(len(json.load(open(sys.argv[1]))))' "$DOT/config/claude/deny.json")"
+  python3 -I -c 'import json, sys; d = json.load(open(sys.argv[1])); sys.exit(not (d["model"] == "opus" and d["permissions"]["deny"][0] == "Read(mine)" and len(d["permissions"]["deny"]) == int(sys.argv[2]) + 1))' "$dir/settings.json" "$count" || out="$out
+the settings lost a key or a rule, or got a rule twice"
+  [ -f "$dir/new/settings.json" ] || out="$out
+missing settings were not created"
+  [ "$(cat "$dir/broken.json")" = "{broken" ] || out="$out
+settings that are not JSON were rewritten"
+  rm -rf "$dir"
+  [ -z "$out" ] || {
+    echo "${out#$'\n'}"
+    return 1
+  }
+}
+
 zsh_helpers() {
   local rc="$DOT/config/zsh/dotfiles.zsh" dir got wanted
   dir="$(mktemp -d)"
@@ -197,6 +223,7 @@ quick() {
   check "zsh: Tab completes git in a shell, a script skips compinit" zsh_completion
   check "zsh: command_origin and path_report tell Homebrew from the system" zsh_helpers
   check "link.sh: a file in the way becomes a backup, the iTerm2 profile's outside DynamicProfiles" link_backup
+  tool "link.sh: Claude Code is denied reading secrets, the rest of its settings kept" python3 claude_deny_merge
   tool "zsh: ls, ll and lt run eza in a shell, a script keeps ls" eza zsh_eza
   tool "zsh: Ctrl-r, Ctrl-t and Alt-c run fzf in a shell, a script keeps zsh's keys" fzf zsh_fzf
   tool "zsh: a blank line between prompts, none above the first or after clear" starship zsh_prompt_gap

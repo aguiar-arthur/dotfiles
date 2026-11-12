@@ -2,7 +2,23 @@ return {
   {
     "coder/claudecode.nvim",
     dependencies = { "folke/snacks.nvim" },
-    cmd = { "ClaudeCode", "ClaudeCodeAdd", "ClaudeCodeSend", "ClaudeCodeStatus" },
+    cmd = {
+      "ClaudeCode",
+      "ClaudeCodeAdd",
+      "ClaudeCodeClose",
+      "ClaudeCodeCloseAllDiffs",
+      "ClaudeCodeDiffAccept",
+      "ClaudeCodeDiffDeny",
+      "ClaudeCodeFocus",
+      "ClaudeCodeOpen",
+      "ClaudeCodeSelectModel",
+      "ClaudeCodeSend",
+      "ClaudeCodeSendText",
+      "ClaudeCodeStart",
+      "ClaudeCodeStatus",
+      "ClaudeCodeStop",
+      "ClaudeCodeTreeAdd",
+    },
     keys = {
       { "<leader>ac", "<cmd>ClaudeCode<CR>", desc = "Toggle Claude" },
       { "<leader>af", "<cmd>ClaudeCodeFocus<CR>", desc = "Focus Claude" },
@@ -19,7 +35,7 @@ return {
       },
       {
         "<leader>as",
-        "<cmd>ClaudeCodeSend<CR>",
+        "<cmd>ClaudeCodeSend<CR><cmd>ClaudeCodeFocus<CR>",
         mode = "x",
         desc = "Send the selection to Claude",
       },
@@ -27,9 +43,18 @@ return {
         "<leader>aS",
         function()
           require("dotfiles.claude").in_last_session("ClaudeCodeSend")
+          vim.cmd("ClaudeCodeFocus")
         end,
         mode = "x",
         desc = "Send the selection to the last Claude session",
+      },
+      {
+        "<leader>ak",
+        function()
+          require("dotfiles.claude").ask()
+        end,
+        mode = { "n", "x" },
+        desc = "Ask Claude about this line or selection",
       },
       {
         "<leader>ab",
@@ -47,6 +72,7 @@ return {
       },
       { "<leader>aa", "<cmd>ClaudeCodeDiffAccept<CR>", desc = "Accept Claude's diff" },
       { "<leader>ad", "<cmd>ClaudeCodeDiffDeny<CR>", desc = "Reject Claude's diff" },
+      { "<leader>aD", "<cmd>ClaudeCodeCloseAllDiffs<CR>", desc = "Close all of Claude's diffs" },
       { "<leader>aq", "<cmd>ClaudeCodeStop<CR>", desc = "Stop the Claude connection" },
     },
     config = function(_, opts)
@@ -54,7 +80,7 @@ return {
       require("dotfiles.claude").watch()
     end,
     opts = {
-      focus_after_send = true,
+      focus_after_send = false,
       diff_opts = { open_in_new_tab = true, hide_terminal_in_new_tab = true },
       terminal = {
         snacks_win_opts = require("dotfiles.float").win("Claude"),

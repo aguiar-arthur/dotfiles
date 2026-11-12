@@ -194,6 +194,11 @@ return {
       { "]u", git_action("explorer", "next_unseen"), desc = "Next file not seen in the review" },
       { "<leader>gH", git_action("hunks", "pick"), desc = "Hunks of the review (pick one)" },
       {
+        "<leader>ah",
+        git_action("hunks", "ask"),
+        desc = "Ask Claude about the hunk of the review",
+      },
+      {
         "<leader>gx",
         git_action("explorer", "toggle_read"),
         desc = "Hide or show the files read in the review",

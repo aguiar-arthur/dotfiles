@@ -38,12 +38,17 @@ abnTeX2) is there, so there is no list to keep. latexindent comes from Homebrew,
 modules: TeX Live's stops at `YAML::Tiny`, which macOS's Perl lacks, and Homebrew's comes first on
 `PATH`.
 
-Each `link.sh` links its files, moving whatever was there to `<name>.bak.<timestamp>` beside it
-(the iTerm2 profile's goes to the `iTerm2` folder above `DynamicProfiles`; the three
-newest are kept; each older one is named with `prune` as it is deleted), and writes its app's
-preferences with `defaults` (Skim, iTerm2); the terminal one also
-adds one marked block (`# >>> dotfiles >>>`) to `~/.zshrc` that sources `dotfiles.zsh`. Every
-line they print starts with `ok` when nothing had to change.
+Each `link.sh` links its files, moving whatever was there to `<name>.bak.<timestamp>` beside it (the
+iTerm2 profile's goes to the `iTerm2` folder above `DynamicProfiles`; the three newest are kept;
+each older one is named with `prune` as it is deleted), and writes its app's preferences with
+`defaults` (Skim, iTerm2); the terminal one also adds one marked block (`# >>> dotfiles >>>`) to
+`~/.zshrc` that sources `dotfiles.zsh`. Every line they print starts with `ok` when nothing had to
+change. `macos/nvim/link.sh` also adds the rules of `config/claude/deny.json` to `permissions.deny`
+in `~/.claude/settings.json`: Claude Code reads any file of a project without asking, a `.env`
+included. It merges rather than links, because Claude Code writes that file itself (`/model`,
+`/config`) and a link would turn every such change into a change of this repository; it adds only
+the rules missing, keeps every other key and leaves a file that is not JSON alone. A rule removed
+from `deny.json` stays in the settings until removed there by hand.
 
 ## Pitfalls
 

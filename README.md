@@ -105,9 +105,10 @@ to add) and a Nerd Font in the terminal for the icons. Running another part late
 ### What the `link.sh` files do
 
 Each part's `link.sh` links its files into this repository, keeps what was there as
-`<name>.bak.<timestamp>` (the iTerm2 profile's outside the folder iTerm2 loads), and adds one
-marked block to `~/.zshrc`; the rest of `~/.zshrc` stays yours. It runs on its own after a
-`git pull`. Details: [docs/install.md](docs/install.md).
+`<name>.bak.<timestamp>` (the iTerm2 profile's outside the folder iTerm2 loads), and adds one marked
+block to `~/.zshrc`; the rest of `~/.zshrc` stays yours. The Neovim one also adds rules to
+`~/.claude/settings.json` that deny Claude Code reading secrets, keeping your other settings. It
+runs on its own after a `git pull`. Details: [docs/install.md](docs/install.md).
 
 ## Using Neovim
 
@@ -147,8 +148,10 @@ wait: which-key lists every key that follows, so nothing has to be memorised.
   them), each side says what it is, the function you are in and which hunk, unchanged code folds
   away, and `Space g H` jumps to any hunk of the review.
 - **Claude Code**: a floating window that sees your files, selection and diagnostics and shows
-  its edits as a diff to accept or reject. Log in once in the terminal first (`claude`, then
-  `/login`).
+  its edits as a diff to accept or reject. `Space a k` asks about the line or selection without
+  leaving the code, `Space a h` about the hunk of a review. It does not see what you select in a
+  file of secrets (`.env`, keys), and is denied reading them. Log in once in the terminal first
+  (`claude`, then `/login`).
 - **Toggles and look**: `Space u` toggles spelling, wrap, diagnostics, format on save and more,
   each for every window. Dracula, a status line with the servers' progress, and no "Press ENTER"
   prompts (Neovim's `ui2`).

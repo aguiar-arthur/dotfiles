@@ -136,4 +136,71 @@ function M.pick()
   end)
 end
 
+local QUESTION = "Explain this change and point out anything wrong with it."
+
+function M.prompt(tab, win, question)
+  local original, modified = session.windows(tab)
+  local which = win == original and "original" or win == modified and "modified" or nil
+  if not which then
+    return nil
+  end
+  local line = vim.api.nvim_win_get_cursor(win)[1]
+  local change = vim.iter(session.hunks(tab)):find(function(found)
+    local range = found[which]
+    return range.start_line <= line and line < math.max(range.end_line, range.start_line + 1)
+  end)
+  if not change then
+    return nil
+  end
+  local diff = {}
+  for _, side in ipairs({ { "original", "-" }, { "modified", "+" } }) do
+    local side_win = side[1] == "original" and original or modified
+    local range = change[side[1]]
+    if side_win and vim.api.nvim_win_is_valid(side_win) then
+      local buf = vim.api.nvim_win_get_buf(side_win)
+      for _, text in
+        ipairs(vim.api.nvim_buf_get_lines(buf, range.start_line - 1, range.end_line - 1, false))
+      do
+        diff[#diff + 1] = side[2] .. text
+      end
+    end
+  end
+  local side = session.side(vim.api.nvim_win_get_buf(modified), tab)
+    or session.side(vim.api.nvim_win_get_buf(original), tab)
+    or {}
+  local scope = require("dotfiles.git.bars").scope(win)
+  return table.concat({
+    ("About this change in %s%s, from the review %s:"):format(
+      side.path or "?",
+      scope and " (" .. scope .. ")" or "",
+      require("dotfiles.git.review").label(tab)
+    ),
+    "```diff",
+    table.concat(diff, "\n"),
+    "```",
+    question and vim.trim(question) ~= "" and question or QUESTION,
+  }, "\n")
+end
+
+function M.ask()
+  local tab, win = vim.api.nvim_get_current_tabpage(), vim.api.nvim_get_current_win()
+  if not M.prompt(tab, win) then
+    vim.notify("The cursor is on no hunk of a review", vim.log.levels.WARN)
+    return
+  end
+  local original, modified = session.windows(tab)
+  for _, side_win in ipairs({ original, modified }) do
+    local side = vim.api.nvim_win_is_valid(side_win)
+      and session.side(vim.api.nvim_win_get_buf(side_win), tab)
+    if side and side.path and require("dotfiles.claude").refuse(side.path) then
+      return
+    end
+  end
+  vim.ui.input({ prompt = "Ask Claude about this hunk: ", default = "" }, function(question)
+    if question then
+      require("dotfiles.claude").send(M.prompt(tab, win, question))
+    end
+  end)
+end
+
 return M

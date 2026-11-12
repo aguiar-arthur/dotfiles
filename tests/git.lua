@@ -790,6 +790,37 @@ T.case("git: folds, scope, totals, hiding and the hunk picker", function()
     }).str,
     " new working tree · parse  hunk 1/1"
   )
+  T.eq(
+    "git: the hunk under the cursor, as a question for Claude",
+    hunks.prompt(tab, modified),
+    table.concat({
+      "About this change in r.lua (parse), from the review origin/main...:",
+      "```diff",
+      "-  local v15 = 15",
+      "+  local v15 = 150",
+      "```",
+      "Explain this change and point out anything wrong with it.",
+    }, "\n")
+  )
+  local asked
+  T.stub(require("dotfiles.claude"), "send", function(prompt)
+    asked = prompt
+  end)
+  T.stub(vim.ui, "input", function(_, done)
+    done("is 150 right?")
+  end)
+  hunks.ask()
+  T.eq(
+    "git: Space a h sends it with your question",
+    vim.endswith(asked or "", "\nis 150 right?"),
+    true
+  )
+  vim.api.nvim_win_set_cursor(modified, { 1, 0 })
+  capture(function()
+    hunks.ask()
+  end)
+  T.eq("git: off a hunk it says so", warned, "The cursor is on no hunk of a review")
+  vim.api.nvim_win_set_cursor(modified, { 15, 0 })
 
   local listed
   hunks.list(tab, function(found)
@@ -860,6 +891,41 @@ T.case("git: folds, scope, totals, hiding and the hunk picker", function()
     "\\ No newline at end of file",
     "+b",
   }, "\n")), 1)
+end)
+
+T.case("git: Space a h never sends a file of secrets", function()
+  reset()
+  local hunks = require("dotfiles.git.hunks")
+  local dir = T.dir()
+  local git = git_repo(dir)
+  write(dir, { [".env"] = "TOKEN=old" })
+  git("add", ".")
+  git("commit", "-qm", "one")
+  write(dir, { [".env"] = "TOKEN=new" })
+  local tab = real_review(dir, "HEAD")
+  local _, modified = session.windows(tab)
+  vim.wait(5000, function()
+    return #session.hunks(tab) > 0
+  end)
+  vim.api.nvim_set_current_win(modified)
+  vim.api.nvim_win_set_cursor(modified, { 1, 0 })
+  local asked
+  T.stub(require("dotfiles.claude"), "send", function(prompt)
+    asked = prompt
+  end)
+  T.stub(vim.ui, "input", function(_, done)
+    done("why?")
+  end)
+  capture(function()
+    hunks.ask()
+  end)
+  T.eq(
+    "git: the hunk of a .env stays here, and it says so",
+    { asked, warned },
+    { nil, "Not sent to Claude: .env looks like a file of secrets" }
+  )
+  review.close_all()
+  settle()
 end)
 
 T.case("git: Space g V fetches its base", function()

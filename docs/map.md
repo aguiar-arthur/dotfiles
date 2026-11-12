@@ -16,6 +16,7 @@ Upstream offers, downstream consumes; a change upstream may break downstream.
 | Workspace | Git | pickers' `confirm` opens a file from a review in the tab before it; the log pickers' Enter reviews a commit; `<leader>bd` beside a review keeps it whole | `tests/git.lua`, full: `test_review` |
 | Workspace | Git | persistence's `PersistenceSavePre`, on which every review closes (`review.close_all`) | `tests/git.lua` |
 | Workspace | Git | `dotfiles.picker.open`, which the git picker keys call | `tests/workspace.lua` |
+| Workspace | Git | `dotfiles.claude.send`, which `<leader>ah` calls with the hunk of a review | `tests/git.lua` |
 | Workspace | Code | blink.cmp's LSP capabilities reach servers started before the first insert | none (plugin wiring) |
 | Workspace | Markdown | mini.pairs leaves the backtick alone; Markdown adds its own pair | `tests/keys.lua` |
 | Code | LaTeX, Markdown | each adds its servers (texlab; rumdl, marksman) and uses the formatting rules | full: `test_tex`, `test_markdown` |

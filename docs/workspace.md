@@ -44,8 +44,26 @@ and accepts the `claude` process that read the random token from `~/.claude/ide/
 0600). What Claude sees in Neovim goes to Anthropic with the rest of the conversation, as Claude
 Code does on its own.
 
-With `focus_after_send` every send opens Claude, focuses it and enters terminal mode; without it
-the cursor stayed in the code, in normal mode.
+`focus_after_send` is off, so adding files (`<leader>ab`) keeps you in the code; the keys that
+expect you to type next focus Claude themselves: `<leader>as` / `aS` (a selection, then your
+question), `<leader>ak` and `<leader>ah`. `<leader>ak` asks without leaving the code: it takes the
+line or the selection as `@path#L10-20` (relative to the working directory, which is Claude's),
+asks for the question in Neovim's own input and submits both. `<leader>ah` (Git's, inside a
+review) sends the change under the cursor as a diff, with its file, function and the review's
+label, since the old side of a review is no file Claude can read. Both go through `claude.send`:
+a running, connected Claude gets the text at once; otherwise one opens without focus and the text
+is written once it connects (and the plugin's own `connection_wait_delay`), because text typed
+before Claude's prompt is ready is lost; after 15 s it gives up and says so.
+
+The selection Claude sees is paused in a buffer whose name looks like a secret (`.env*`, `*.pem`,
+`*.key`, `id_*`, `.netrc`, a name with `credentials` or `secret`) and resumed on the next buffer
+that is not: the plugin streams every visual selection to Claude while it is connected, with no list
+of files to skip, and what Claude sees goes into the next question. `<leader>ak` and `<leader>ah`
+refuse such a file (`claude.refuse`) and say so: their text goes straight into the prompt, past both
+the pause and the denied reads, so a hunk of a `.env` would reach Claude whole. A window showing
+Claude (not its float) is hidden before a session is saved: `sessionoptions` keeps terminals, and a
+restored session would start `claude` again on its own. Reading secrets with Claude's own tools is
+denied apart from Neovim, by `macos/nvim/link.sh` (see [install](install.md)).
 
 A diff Claude proposes opens in a new tab without the Claude float (`diff_opts.open_in_new_tab`,
 `hide_terminal_in_new_tab`), as a codediff review does, instead of beside the code under the
@@ -71,11 +89,13 @@ backdrop). Hiding a float keeps its session, and Snacks refits it when the termi
   `options.lua`), so `<leader>cs` copied trailing spaces after short lines; `share.lua` turns
   `virtualedit` off around the call. `tests/share.lua` runs with the real config for this reason:
   under `nvim -l` the option is off.
-- `dotfiles/claude.lua` calls two functions claudecode.nvim does not document,
-  `claudecode.terminal.get_active_terminal_bufnr` and `toggle_open_no_focus`: its commands
-  cannot ask whether a Claude terminal runs nor open one without focus. The plugin uses both
-  itself; if an update renames them, `tests/workspace.lua` fails in quick, because it reads the
-  real plugin for both (the other cases there use fakes).
+- `dotfiles/claude.lua` calls what claudecode.nvim does not document: `claudecode.terminal`'s
+  `get_active_terminal_bufnr`, `toggle_open_no_focus` and `send_to_terminal`,
+  `claudecode.selection`'s `enable`, `disable` and `state`, and `claudecode`'s
+  `is_claude_connected` and `state`: its commands cannot ask whether a Claude terminal runs, open
+  one without focus, send text without a command line or pause the selection. The plugin uses all
+  of them itself; if an update renames one, `tests/workspace.lua` fails in quick, because it reads
+  the real plugin for them (the other cases there use fakes).
 
 ## Checks
 

@@ -1,0 +1,22 @@
+[
+  "Read(**/.env)",
+  "Read(**/.env.*)",
+  "Read(**/.envrc)",
+  "Read(**/*.pem)",
+  "Read(**/*.key)",
+  "Read(**/*.p12)",
+  "Read(**/*.pfx)",
+  "Read(**/id_rsa*)",
+  "Read(**/id_ed25519*)",
+  "Read(**/id_ecdsa*)",
+  "Read(**/.netrc)",
+  "Read(**/.npmrc)",
+  "Read(**/.pypirc)",
+  "Read(**/*credentials*)",
+  "Read(~/.ssh/**)",
+  "Read(~/.aws/**)",
+  "Read(~/.gnupg/**)",
+  "Read(~/.config/gh/hosts.yml)",
+  "Read(~/.docker/config.json)",
+  "Read(~/.kube/config)"
+]

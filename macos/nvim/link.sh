@@ -16,5 +16,6 @@ skim_preferences() {
 link config/nvim "$HOME/.config/nvim"
 link config/rumdl/rumdl.toml "$HOME/.config/rumdl/rumdl.toml"
 link config/latex/latexmkrc "$HOME/.latexmkrc"
+claude_deny config/claude/deny.json "$HOME/.claude/settings.json"
 skim_preferences
 echo "Done."

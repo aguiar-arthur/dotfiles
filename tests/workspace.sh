@@ -28,13 +28,15 @@ test_claude() {
   keys Space o p
   probe "the file tree takes the cursor" 'vim.bo.filetype' snacks_picker_list 15
   set_home
+  local running='require("claudecode.terminal").get_active_terminal_bufnr() and 1 or 0'
   keys Space a b
-  probe "Space a b in the tree opens Claude in terminal mode" 'vim.fn.mode()' t 20
-  keys C-\\ C-n q
-  probe "closing Claude returns to the tree" 'vim.bo.filetype' snacks_picker_list 5
+  probe "Space a b in the tree starts Claude" "$running" 1 20
+  probe "and keeps the cursor in the tree, in normal mode" 'vim.bo.filetype .. vim.fn.mode()' snacks_picker_listn 5
+  keys Space a c
+  probe "Space a c hides it, still in the tree" 'vim.bo.filetype' snacks_picker_list 5
   keys Space a B
-  probe "Space a B in the tree opens Claude in terminal mode" 'vim.fn.mode()' t 20
-  keys C-\\ C-n q
+  probe "Space a B in the tree keeps the cursor there too" 'vim.bo.filetype .. vim.fn.mode()' snacks_picker_listn 10
+  keys Space a c
   keys q
   keys Space a c
   probe "Claude opens before a resize" 'vim.bo.buftype' terminal 10
