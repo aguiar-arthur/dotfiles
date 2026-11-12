@@ -11,8 +11,8 @@ function M.dir()
   return vim.fn.isdirectory(dir) == 1 and dir or vim.fn.getcwd()
 end
 
-function M.base()
-  local dir = M.dir()
+function M.base(dir)
+  dir = dir or M.dir()
   local base = M.run("-C", dir, "symbolic-ref", "--quiet", "--short", "refs/remotes/origin/HEAD")
   for _, name in ipairs({ "origin/main", "origin/master" }) do
     base = base or (M.run("-C", dir, "rev-parse", "--verify", "--quiet", name) and name)

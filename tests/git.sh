@@ -13,6 +13,7 @@ test_review() {
   probe "Space g V: ]c goes to the branch's change" 'vim.fn.line(".")' 3 10
   probe "Space g V: the sides do not wrap" 'vim.wo.wrap and 1 or 0' 0 5
   probe "Space g V: the wrap toggle stays on" 'require("dotfiles.toggles").values.wrap and 1 or 0' 1 5
+  probe "Space g V: the new side's bar names the working tree and the hunk" 'vim.api.nvim_eval_statusline(vim.wo.winbar, { winid = 0, use_winbar = true, maxwidth = 200 }).str' " new working tree  hunk 1/1" 5
   keys Space u w
   probe "Space u w in a review keeps the sides unwrapped" 'vim.wo.wrap and 1 or 0' 0 5
   probe "and says why" "$(notified "Wrap stays off in a review")" 1 5
@@ -112,6 +113,38 @@ test_review() {
   probe "Space g C reviews what is staged" 'vim.fn.tabpagenr("$")' 2 20
   keys C-l C-l gg Space g u
   probe "Space g u there unstages the change" 'vim.trim(vim.fn.system("git -C " .. vim.fn.getcwd() .. " diff --cached --name-only"))' "" 15
+  stop_nvim
+}
+
+test_pr_review() {
+  review_repo pr
+  local repo="$PROJ/pr" g=(git -c user.name=t -c user.email=t@t)
+  local tab_has='vim.api.nvim_eval_statusline(vim.o.tabline, { use_tabline = true }).str:find("%s", 1, true) and 1 or 0'
+  local head='vim.trim(vim.fn.system("git -C " .. vim.fn.getcwd() .. " rev-parse %s"))'
+  printf 's = 1\n' >"$repo/s.lua"
+  "${g[@]}" -C "$repo" add s.lua && "${g[@]}" -C "$repo" commit -qm second
+  git -C "$repo" push -q origin HEAD:refs/pull/7/head
+  start_nvim "$repo" other.txt
+  send ':lua require("dotfiles.git.reviewed").target = function(_, _, dir, done) done({ baseRefName = vim.trim(vim.fn.system({ "git", "-C", dir, "branch", "--show-current" })) }) end<CR>'
+  send ':lua require("dotfiles.git.reviewed").review(7, vim.fn.getcwd())<CR>'
+  probe "a pull request opens as a review" 'vim.fn.tabpagenr("$")' 2 20
+  probe "its tab line names it, and the file it opened on is not read yet" "$(printf "$tab_has" "▱▱▱▱▱ 0/2 seen")" 1 10
+  keys ]u
+  probe "]u counts the file it leaves and opens the next" "$(printf "$tab_has" "1/2 seen")" 1 10
+  keys ]u
+  probe "]u on the last file completes the review" "$(notified "Review complete: 2/2 seen")" 1 5
+  probe "and records the head it showed" "$(printf "$head" refs/pr-review/7/reviewed)" "$(git -C "$repo" rev-parse HEAD)" 5
+  keys ]u
+  probe "]u with every file seen says so" "$(notified "Every file of this review was seen")" 1 5
+  printf 't = 1\n' >"$repo/t.lua"
+  "${g[@]}" -C "$repo" add t.lua && "${g[@]}" -C "$repo" commit -qm third
+  git -C "$repo" push -q origin HEAD:refs/pull/7/head
+  send ':lua require("dotfiles.git.reviewed").since(7, vim.fn.getcwd())<CR>'
+  probe "since the last review shows only the new push" "$(printf "$tab_has" "since")" 1 20
+  probe "one file, open but not read yet" "$(printf "$tab_has" "0/1 seen")" 1 10
+  probe "and the review replaces the first" 'vim.fn.tabpagenr("$")' 2 5
+  keys ]u
+  probe "reading it records the new head" "$(printf "$head" refs/pr-review/7/reviewed)" "$(git -C "$repo" rev-parse HEAD)" 10
   stop_nvim
 }
 

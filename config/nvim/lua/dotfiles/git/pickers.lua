@@ -43,8 +43,12 @@ M.sources = {
   git_log_line = log,
   gh_pr = {
     confirm = action("pr", "review"),
-    actions = { pr_menu = action("pr", "menu"), pr_hunks = action("pr", "hunks") },
-    win = keys({ ["<c-e>"] = "pr_menu", ["<c-o>"] = "pr_hunks" }),
+    actions = {
+      pr_menu = action("pr", "menu"),
+      pr_hunks = action("pr", "hunks"),
+      pr_since = action("pr", "since"),
+    },
+    win = keys({ ["<c-e>"] = "pr_menu", ["<c-o>"] = "pr_hunks", ["<c-l>"] = "pr_since" }),
   },
 }
 

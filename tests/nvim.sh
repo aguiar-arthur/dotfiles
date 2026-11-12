@@ -238,6 +238,7 @@ full() {
   test_test_keys
   test_clojure
   test_review
+  test_pr_review
   test_lazygit
   test_review_debug
   test_markdown

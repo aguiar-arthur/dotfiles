@@ -1,5 +1,5 @@
 local repo = require("dotfiles.git.repo")
-local review = require("dotfiles.git.review")
+local reviewed = require("dotfiles.git.reviewed")
 
 local M = {}
 
@@ -8,8 +8,14 @@ local NETWORK_TIMEOUT_MS = 15000
 function M.review(picker, item)
   picker:close()
   if item and item.number then
-    review.expect("PR #" .. item.number)
-    vim.cmd.CodeDiff("pr", tostring(item.number))
+    reviewed.review(item.number, repo.dir(), item.repo)
+  end
+end
+
+function M.since(picker, item)
+  if item and item.number then
+    picker:close()
+    reviewed.since(item.number, repo.dir(), item.repo)
   end
 end
 

@@ -140,7 +140,12 @@ wait: which-key lists every key that follows, so nothing has to be memorised.
   Clojure. `,r` runs the file, `,t` runs tests (Neotest), `,d` debugs with a watch panel.
 - **Git**: gitsigns in the margin, lazygit, and reviews in their own tab with the old and new
   versions side by side: your changes, a branch, a pull request, a commit, a file's or a line's
-  history, nothing checked out. On your own file `gd`, `K` and edits work.
+  history, nothing checked out. On your own file `gd`, `K` and edits work. `Space g n` lists the pull
+  requests waiting on your review, `]u` goes to the next file you have not read, and `Ctrl-l` in
+  `Space g P` shows only what changed since you last reviewed a pull request to the end. The file
+  list checks the files you read and remembers them until their diff changes (`Space g x` hides
+  them), each side says what it is, the function you are in and which hunk, unchanged code folds
+  away, and `Space g H` jumps to any hunk of the review.
 - **Claude Code**: a floating window that sees your files, selection and diagnostics and shows
   its edits as a diff to accept or reject. Log in once in the terminal first (`claude`, then
   `/login`).

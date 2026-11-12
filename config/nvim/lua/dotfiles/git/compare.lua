@@ -3,6 +3,8 @@ local review = require("dotfiles.git.review")
 
 local M = {}
 
+local NETWORK_TIMEOUT_MS = 15000
+
 local marks_base
 
 local function revision(item)
@@ -33,11 +35,37 @@ function M.file(picker, item)
   end
 end
 
+function M.refresh_base(base, dir)
+  local remote, branch = base:match("^([^/]+)/(.+)$")
+  local before = remote and repo.run("-C", dir, "merge-base", base, "HEAD")
+  if not before then
+    return
+  end
+  vim.system(
+    { "git", "-C", dir, "fetch", "--quiet", "--no-tags", remote, branch },
+    { text = true, timeout = NETWORK_TIMEOUT_MS },
+    vim.schedule_wrap(function(result)
+      local after = result.code == 0 and repo.run("-C", dir, "merge-base", base, "HEAD")
+      if after and after ~= before then
+        vim.notify(
+          ("%s moved: this branch now forks from %s, not %s; Space g V again reviews against it"):format(
+            base,
+            after:sub(1, 7),
+            before:sub(1, 7)
+          ),
+          vim.log.levels.WARN
+        )
+      end
+    end)
+  )
+end
+
 function M.origin()
-  local base = repo.base()
+  local base, dir = repo.base()
   if base then
     review.expect(base .. "...")
     vim.cmd.CodeDiff(base .. "...")
+    M.refresh_base(base, dir)
   end
 end
 

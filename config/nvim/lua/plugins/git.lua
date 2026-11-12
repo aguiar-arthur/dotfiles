@@ -37,9 +37,7 @@ return {
       { "<leader>gt", picker("git_status"), desc = "Changed files" },
       {
         "<leader>gO",
-        function()
-          Snacks.gitbrowse()
-        end,
+        git_action("view", "browse"),
         mode = { "n", "x" },
         desc = "Open in browser",
       },
@@ -54,6 +52,11 @@ return {
         desc = "Compare this file with a branch",
       },
       { "<leader>gP", picker("gh_pr"), desc = "Review a pull request (pick it)" },
+      {
+        "<leader>gn",
+        picker("gh_pr", { search = "review-requested:@me", title = "Waiting on my review" }),
+        desc = "Pull requests waiting on my review",
+      },
       {
         "<leader>gvo",
         git_action("pr", "comments"),
@@ -188,6 +191,13 @@ return {
         desc = "Review the branch commit by commit",
       },
       { "<leader>gq", git_action("review", "close"), desc = "Close the review" },
+      { "]u", git_action("explorer", "next_unseen"), desc = "Next file not seen in the review" },
+      { "<leader>gH", git_action("hunks", "pick"), desc = "Hunks of the review (pick one)" },
+      {
+        "<leader>gx",
+        git_action("explorer", "toggle_read"),
+        desc = "Hide or show the files read in the review",
+      },
       {
         "<leader>gw",
         git_action("view", "toggle_whitespace"),
@@ -198,6 +208,7 @@ return {
       highlights = { char_insert = "#3e7358", char_delete = "#7a4556" },
       diff = {
         cycle_hunks_across_files = true,
+        compact = true,
         compute_moves = true,
         highlight_added_deleted_files = true,
         gutter_signs = { insert_text = "+", delete_text = "-" },
@@ -205,6 +216,7 @@ return {
       explorer = {
         auto_open_on_cursor = true,
         line_stats = { enabled = true },
+        formatters = { file = git_action("explorer", "file_row") },
         view_mode = "tree",
         file_filter = {
           ignore = {
@@ -218,7 +230,6 @@ return {
             "*.snap",
           },
         },
-        formatters = { group = git_action("explorer", "group") },
       },
       history = { date_format = "%Y-%m-%d" },
       keymaps = {
