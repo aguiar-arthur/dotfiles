@@ -28,9 +28,10 @@ the `tree-sitter` CLI) and the non-English spell files. Everything is idempotent
 what is missing; already installed programs are not upgraded (`brew bundle --no-upgrade`).
 
 The tmux part's `whichkey` step runs `whichkey.sh`: it clones whichkey-tmux into
-`~/.config/tmux/plugins/whichkey-tmux` when that folder is missing, says `ok` when it already
-holds a clone of it, and stops with an error, touching nothing, when it holds anything else.
-It never pulls: an update is on purpose (see [Updating](#updating)).
+`~/.config/tmux/plugins/whichkey-tmux` when that folder is missing, pulls it (fast-forward
+only) when it already holds a clone of it, and stops with an error, touching nothing, when it
+holds anything else. It is the user's own plugin, so it follows its `main` instead of a pinned
+commit; a pull that fails (offline, local changes) keeps the clone as it is and the step passes.
 
 TeX is MacTeX without its GUI apps (`mactex-no-gui`, several GB), because LaTeX is only used from
 Neovim: every package and program a document or the config asks for (latexmk, chktex, texcount,
@@ -137,7 +138,7 @@ workflows' actions), on a branch, and run the tests before you keep it:
    `sudo tlmgr update --self --all` updates the TeX packages.
 4. Clojure: the newest `nrepl/nrepl` and `cider/cider-nrepl` on Clojars go in the `versions`
    table of `dotfiles/clojure.lua`.
-5. whichkey-tmux: `git -C ~/.config/tmux/plugins/whichkey-tmux pull`, then `prefix r`. zizmor:
+5. whichkey-tmux: `macos/tmux/install.sh`, then `prefix r`. zizmor:
    the newest version on PyPI in the `pipx run zizmor==…` line of `security.yml`.
 6. `tests/nvim.sh full`. After a Neovim update also check `ui2` in a real terminal (see
    [core](core.md)); if it breaks, deleting its line in `options.lua` is the way out.

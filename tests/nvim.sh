@@ -230,7 +230,7 @@ quick() {
   tool "tmux: the config loads and git commit opens Neovim" tmux tmux_config
   tool "tmux: C-h/j/k/l cross panes and Neovim's windows both ways, prefix t toggles the scratch popup" tmux tmux_keys
   tool "tmux: the config loads without whichkey-tmux" tmux tmux_without_whichkey
-  tool "tmux: the whichkey step keeps its clone and refuses anything else" git tmux_whichkey_step
+  tool "tmux: the whichkey step pulls its clone and refuses anything else" git tmux_whichkey_step
   tool "shfmt" shfmt shfmt -d "$DOT"/macos/*.sh "$DOT"/macos/*/*.sh "$DOT"/tests/*.sh "$DOT/config/nvim/dashboard/clock.sh"
   tool "rumdl" rumdl rumdl check "$DOT" --config "$DOT/config/rumdl/rumdl.toml"
   check "the dashboard clock draws its digits and date" clock_frame

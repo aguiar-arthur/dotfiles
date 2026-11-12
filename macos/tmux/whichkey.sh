@@ -16,9 +16,14 @@ have git || die "git not found"
 if [ -d "$DIR/.git" ]; then
   origin="$(git -C "$DIR" remote get-url origin 2>/dev/null)"
   case "${origin%.git}" in
-  */aguiar-arthur/whichkey-tmux | *:aguiar-arthur/whichkey-tmux) say ok "$DIR" ;;
+  */aguiar-arthur/whichkey-tmux | *:aguiar-arthur/whichkey-tmux) ;;
   *) die "$DIR is a clone of ${origin:-a repository without origin}, not $URL; move it away and run again" ;;
   esac
+  if GIT_TERMINAL_PROMPT=0 perl -e 'alarm 120; exec @ARGV' git -C "$DIR" pull --quiet --ff-only; then
+    say pull "$DIR"
+  else
+    say kept "$DIR (could not pull: network, local changes or a diverged branch)"
+  fi
 elif [ -e "$DIR" ] || [ -L "$DIR" ]; then
   die "$DIR exists but is not a clone of $URL; move it away and run again"
 else

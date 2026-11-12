@@ -87,7 +87,7 @@ tmux_without_whichkey() {
 }
 
 tmux_whichkey_step() {
-  local home dir out=""
+  local home dir upstream out=""
   home="$(mktemp -d)"
   dir="$home/.config/tmux/plugins/whichkey-tmux"
   mkdir -p "$dir"
@@ -102,11 +102,19 @@ a folder that is not the plugin was changed"
   git -C "$dir" remote add origin https://example.com/other.git
   HOME="$home" "$DOT/macos/tmux/whichkey.sh" >/dev/null 2>&1 && out="$out
 a clone of another repository was accepted"
-  git -C "$dir" remote set-url origin https://github.com/aguiar-arthur/whichkey-tmux.git
-  printf '#!/bin/sh\n' >"$dir/whichkey.tmux"
-  chmod +x "$dir/whichkey.tmux"
+  rm -rf "$dir"
+  upstream="$home/src/aguiar-arthur/whichkey-tmux"
+  git init -q "$upstream"
+  printf '#!/bin/sh\n' >"$upstream/whichkey.tmux"
+  chmod +x "$upstream/whichkey.tmux"
+  git -C "$upstream" add whichkey.tmux
+  git -C "$upstream" -c user.name=t -c user.email=t commit -qm one
+  git clone -q "$upstream" "$dir"
+  git -C "$upstream" -c user.name=t -c user.email=t commit -q --allow-empty -m two
   HOME="$home" "$DOT/macos/tmux/whichkey.sh" >/dev/null 2>&1 || out="$out
 an existing clone of the plugin was not accepted"
+  [ "$(git -C "$dir" rev-parse HEAD)" = "$(git -C "$upstream" rev-parse HEAD)" ] || out="$out
+an existing clone of the plugin was not pulled"
   rm -rf "$home"
   [ -z "$out" ] || {
     echo "${out#$'\n'}"
