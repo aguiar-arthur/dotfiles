@@ -78,7 +78,7 @@ function M.send(prompt)
   local claudecode = require("claudecode")
   local function deliver()
     terminal.send_to_terminal(prompt, { submit = true })
-    vim.cmd("ClaudeCodeFocus")
+    terminal.open({})
   end
   if terminal.get_active_terminal_bufnr() and claudecode.is_claude_connected() then
     return deliver()

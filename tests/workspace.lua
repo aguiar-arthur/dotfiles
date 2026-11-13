@@ -37,10 +37,11 @@ T.case("Claude: the plugin still offers what we call", function()
     type(selection.disable),
     type(selection.state.tracking_enabled),
     type(terminal.send_to_terminal),
+    type(terminal.open),
     type(claudecode.is_claude_connected),
     type(claudecode.state.config.visual_demotion_delay_ms),
     type(claudecode.state.config.connection_wait_delay),
-  }, { "function", "function", "boolean", "function", "function", "number", "number" })
+  }, { "function", "function", "boolean", "function", "function", "function", "number", "number" })
 end)
 
 T.case("Claude: no selection from a file of secrets", function()
@@ -178,6 +179,9 @@ T.case("Claude: sending a question", function()
     send_to_terminal = function(text, opts)
       sent[#sent + 1] = { text, opts.submit }
     end,
+    open = function()
+      focused = focused + 1
+    end,
   })
   T.stub(package.loaded, "claudecode", {
     is_claude_connected = function()
@@ -185,9 +189,6 @@ T.case("Claude: sending a question", function()
     end,
     state = { config = { connection_wait_delay = 0 } },
   })
-  vim.api.nvim_create_user_command("ClaudeCodeFocus", function()
-    focused = focused + 1
-  end, {})
   claude.send("first")
   T.eq("claude: no Claude opens one, without focus, and waits", { opened, sent }, { 1, {} })
   connected = true
@@ -205,7 +206,6 @@ T.case("Claude: sending a question", function()
     { opened, sent[2], focused },
     { 1, { "second", true }, 2 }
   )
-  vim.api.nvim_del_user_command("ClaudeCodeFocus")
 end)
 
 T.case("Claude: the last session", function()

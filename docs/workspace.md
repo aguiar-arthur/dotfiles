@@ -90,12 +90,15 @@ backdrop). Hiding a float keeps its session, and Snacks refits it when the termi
   `virtualedit` off around the call. `tests/share.lua` runs with the real config for this reason:
   under `nvim -l` the option is off.
 - `dotfiles/claude.lua` calls what claudecode.nvim does not document: `claudecode.terminal`'s
-  `get_active_terminal_bufnr`, `toggle_open_no_focus` and `send_to_terminal`,
+  `get_active_terminal_bufnr`, `toggle_open_no_focus`, `open` and `send_to_terminal`,
   `claudecode.selection`'s `enable`, `disable` and `state`, and `claudecode`'s
   `is_claude_connected` and `state`: its commands cannot ask whether a Claude terminal runs, open
   one without focus, send text without a command line or pause the selection. The plugin uses all
   of them itself; if an update renames one, `tests/workspace.lua` fails in quick, because it reads
   the real plugin for them (the other cases there use fakes).
+- With a float, `toggle_open_no_focus` still leaves the cursor in Claude (in normal mode), so
+  `ClaudeCodeFocus`, a toggle, then hid it: `claude.send` focuses with `terminal.open`, which
+  only shows and enters terminal mode.
 
 ## Checks
 
