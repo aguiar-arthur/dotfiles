@@ -1,7 +1,7 @@
 # AGENTS.md
 
-Personal dotfiles for macOS: Neovim, Starship, tmux and an iTerm2 profile, plus one standalone
-Windows script to debug a PC's health. Keep them small: this is one person's setup, not a
+Personal dotfiles for macOS: Neovim, Starship, tmux and an iTerm2 profile, plus two standalone
+Windows scripts to debug a PC's health. Keep them small: this is one person's setup, not a
 product.
 
 ## Context map
@@ -20,7 +20,7 @@ code; most tasks need one or two. The README is the user's guide, not needed to 
 | Markdown | [docs/markdown.md](docs/markdown.md) | render-markdown, `,p` preview, rumdl rules, notes (obsidian.nvim), marksman |
 | Install | [docs/install.md](docs/install.md) | `macos/`, Mason / parser / spell installs, lockfile, zsh, Starship, tmux, iTerm2 |
 | Tests | [docs/tests.md](docs/tests.md) | `tests/`, where a new check goes, checking by hand |
-| Windows | [docs/windows.md](docs/windows.md) | `windows/collect-diagnostics.ps1` |
+| Windows | [docs/windows.md](docs/windows.md) | `windows/check-health.ps1` (read-only verdict), `windows/collect-diagnostics.ps1` (raw data, dump analysis, optional repair) |
 
 How the contexts depend on each other is in [docs/map.md](docs/map.md): a change to something in
 its table also needs the downstream docs.
@@ -42,7 +42,7 @@ config/        zsh, starship, tmux, rumdl, iterm2, lazygit, git, latex: one fold
 macos/         install.sh runs the parts (nvim, terminal, tmux, apps); each has a Brewfile,
                install.sh and link.sh; lib.sh is what they share
 tests/         nvim.sh (quick, full, fresh) and its checks
-windows/       standalone, never installed or tested by the rest
+windows/       check-health.ps1, collect-diagnostics.ps1: standalone, never installed or tested
 ```
 
 ## Rules

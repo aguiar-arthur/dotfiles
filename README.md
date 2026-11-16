@@ -302,16 +302,37 @@ For a single project, a `.nvim.lua` at its root ([docs/core.md](docs/core.md#per
 
 ## Windows health report
 
-Not part of the macOS setup: to find why a Windows 11 PC shuts down or crashes, run in
+Not part of the macOS setup. Both scripts run on a stock Windows 11; for the complete result
+they need PowerShell as Administrator, an internet connection, and WinDbg for reading blue
+screen dumps, installed once with
+
+```powershell
+winget install Microsoft.WinDbg
+```
+
+The rest, and what each missing piece costs, is under Requirements in
+[docs/windows.md](docs/windows.md#requirements). To find what is wrong with the PC, run in
 PowerShell as Administrator
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\windows\check-health.ps1
+```
+
+It checks drivers (including third-party kernel drivers that often cause blue screens),
+hardware and Windows 11 compatibility, BIOS age, the registry, missing defaults (services,
+runtimes, system programs), security and the last 30 days of blue screens and crashes, and
+prints `OK`, `WARN` or `FAIL` for each. To gather the dumps and logs behind a problem, or to
+repair Windows (it asks first), run
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\windows\collect-diagnostics.ps1
 ```
 
-It only reads, zips a report into `Documents\diagnostics`, and asks before any repair. The ZIP
-holds computer and user names, serial numbers and crash dumps: read it before sharing. Its
-options and what it collects are in [docs/windows.md](docs/windows.md).
+It only reads, zips a report into `Documents\diagnostics`, and asks before any repair. With
+WinDbg installed (`winget install Microsoft.WinDbg`), it also reads each blue screen's dump and
+names the driver behind it. The ZIP holds computer and user names, serial numbers and crash
+dumps: read it before sharing. Both scripts save to `Documents\diagnostics`; their options and
+what they collect are in [docs/windows.md](docs/windows.md).
 
 ## Layout
 

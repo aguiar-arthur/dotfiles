@@ -131,6 +131,21 @@ Write-Host '[3/10] Drivers'
 Save-Csv (Get-CimInstance Win32_PnPSignedDriver | Where-Object { $_.DeviceName } |
     Select-Object DeviceName, DeviceClass, Manufacturer, DriverVersion, DriverDate, InfName, IsSigned | Sort-Object DeviceClass, DeviceName) '11_drivers_pnp'
 try { driverquery /v /fo csv | Out-File (Join-Path $out '12_driverquery.csv') -Encoding UTF8; Save-Exit 'driverquery' } catch {}
+Save-Csv (Get-CimInstance Win32_SystemDriver | ForEach-Object {
+    $p = $_.PathName -replace '^\\\?\?\\', '' -replace '(?i)^\\SystemRoot\\', ($env:SystemRoot + '\') -replace '(?i)^System32\\', ($env:SystemRoot + '\System32\')
+    if ($p -and (Test-Path -LiteralPath $p)) {
+        $item = Get-Item -LiteralPath $p
+        $signer = "$((Get-AuthenticodeSignature -LiteralPath $p).SignerCertificate.Subject)"
+        if ("$($item.VersionInfo.CompanyName)" -notmatch 'Microsoft' -and $signer -notmatch '^CN=Microsoft Windows,') {
+            [pscustomobject]@{ Name = $_.Name; State = $_.State; StartMode = $_.StartMode; Company = $item.VersionInfo.CompanyName
+                Version = $item.VersionInfo.FileVersion; FileDate = $item.LastWriteTime; Signer = $signer; Path = $p }
+        }
+    }
+} | Sort-Object Company, Name) '13_third_party_drivers'
+try { pnputil /enum-drivers | Out-File (Join-Path $out '14_driver_store.txt') -Encoding UTF8; Save-Exit 'pnputil /enum-drivers' } catch {}
+try { pnputil /enum-devices /problem | Out-File (Join-Path $out '15_devices_with_problems.txt') -Encoding UTF8; Save-Exit 'pnputil /enum-devices' } catch {}
+Save-Csv (Get-PnpDevice | Where-Object { -not $_.Present } | Select-Object Class, FriendlyName, InstanceId | Sort-Object Class, FriendlyName) '16_ghost_devices'
+try { Get-Content "$env:SystemRoot\INF\setupapi.dev.log" -Tail 5000 -ErrorAction Stop | Out-File (Join-Path $out '17_setupapi_dev_log_tail.txt') -Encoding UTF8 } catch {}
 
 Write-Host '[4/10] Event logs'
 Get-Ev @{ LogName = 'System'; Level = 1, 2; StartTime = $since } '20_system_critical_errors'
@@ -162,6 +177,9 @@ foreach ($p in 'Excel', 'Microsoft Office*', 'Office*', 'Outlook', 'Microsoft Of
     } catch {}
 }
 Save-Csv $office '28_office_excel_events'
+Get-Ev @{ LogName = 'System'; Id = 7000, 7026, 219; StartTime = $since } '29_service_driver_start_failures'
+Get-Ev @{ LogName = 'Microsoft-Windows-Kernel-PnP/Configuration'; Id = 411, 412; StartTime = $since } '29_kernel_pnp_device_problems'
+Get-Ev @{ LogName = 'Microsoft-Windows-CodeIntegrity/Operational'; Id = 3033, 3063, 3077; StartTime = $since } '29_code_integrity_blocks'
 
 Write-Host '[5/10] Reliability history'
 try {
@@ -191,6 +209,35 @@ try {
         }
     }
 } catch {}
+$cdb = (Get-Command cdb.exe -ErrorAction Ignore | Select-Object -First 1).Source
+if (-not $cdb) {
+    $winDbg = Get-AppxPackage -Name Microsoft.WinDbg -ErrorAction Ignore | Select-Object -First 1
+    $candidates = @("${env:ProgramFiles(x86)}\Windows Kits\10\Debuggers\x64\cdb.exe")
+    if ($winDbg) { $candidates = @(Join-Path $winDbg.InstallLocation 'amd64\cdb.exe') + $candidates }
+    $cdb = $candidates | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
+}
+$dumps = @(Get-ChildItem $dumpDir -Filter *.dmp -ErrorAction Ignore)
+if (-not $dumps.Count) {
+    'No minidumps to analyze.' | Out-File (Join-Path $out '34_dump_analysis.txt') -Encoding UTF8
+} elseif (-not $cdb) {
+    'WinDbg not found; install it with: winget install Microsoft.WinDbg' | Out-File (Join-Path $out '34_dump_analysis.txt') -Encoding UTF8
+    Write-Host '  WinDbg not found: dumps copied but not analyzed (winget install Microsoft.WinDbg)' -ForegroundColor Yellow
+} else {
+    $analysisDir = Join-Path $out 'dump_analysis'
+    New-Item -ItemType Directory -Force $analysisDir | Out-Null
+    $symbols = "srv*$env:TEMP\symbols*https://msdl.microsoft.com/download/symbols"
+    $rows = foreach ($dmp in $dumps) {
+        Write-Host "  analyzing $($dmp.Name) (downloads symbols, up to 5 min)..."
+        $txt = Join-Path $analysisDir ($dmp.BaseName + '.txt')
+        $proc = Start-Process -FilePath $cdb -ArgumentList @('-z', "`"$($dmp.FullName)`"", '-y', "`"$symbols`"", '-c', '"!analyze -v; q"') -RedirectStandardOutput $txt -NoNewWindow -PassThru
+        if (-not $proc.WaitForExit(300000)) { $proc.Kill() }
+        $text = Get-Content -LiteralPath $txt -Raw -ErrorAction Ignore
+        $field = { param($name) if ($text -match "(?m)^\s*$name\s*:\s*(.+)$") { $Matches[1].Trim() } }
+        [pscustomobject]@{ Dump = $dmp.Name; Date = $dmp.LastWriteTime; BugCheck = & $field 'BUGCHECK_CODE'; Module = & $field 'MODULE_NAME'
+            Image = & $field 'IMAGE_NAME'; Process = & $field 'PROCESS_NAME'; Bucket = & $field 'FAILURE_BUCKET_ID' }
+    }
+    Save-Csv $rows '34_dump_analysis'
+}
 try {
     Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\CrashControl' | Select-Object * -ExcludeProperty PS* |
         Out-File (Join-Path $out '33_crashcontrol_dump_settings.txt') -Encoding UTF8
