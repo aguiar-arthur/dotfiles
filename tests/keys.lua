@@ -76,6 +76,7 @@ T.case("Markdown keys", function()
   vim.api.nvim_feedkeys("i`", "tx", false)
   T.eq("Markdown: a backtick gets its pair", vim.fn.getline(2), "``")
   vim.cmd("silent undo")
+  T.eq("Markdown: scrolling is not animated, k leaves a table", vim.b.snacks_scroll, false)
 end)
 
 T.case("the Markdown preview", function()

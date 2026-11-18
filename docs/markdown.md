@@ -31,6 +31,10 @@ still works.
   `cd ~/notes && nvim a.md`), Neovim names the buffer by the real path, so a trigger on
   `~/notes/*` alone never loaded obsidian.nvim, and marksman stays out of notes by real path:
   the note had neither. obsidian.nvim's trigger lists the folder's path and its real path.
+- Snacks' scroll animation and render-markdown fight over a table: the row under the cursor
+  shows its raw text, its borders and wrapped cells vanish mid-animation, and the animation
+  lands lines below, so `k` kept falling back into the table. The ftplugin turns the animation
+  off in Markdown buffers.
 
 ## Checks
 
