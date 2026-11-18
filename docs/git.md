@@ -37,17 +37,17 @@ We use codediff through its options, its `:CodeDiff` command, its `User` events,
 cleans up on `TabClosed`) and, where that saves code, its own modules. A module is not a promised
 interface, so only three files call one: `dotfiles/git/session.lua` reads a review's state (its file
 list, the selected file, the revisions and repository it shows, the side under the cursor, its
-windows and the hunks of the file on screen), selects a file and redraws the list, `explorer.lua`
-draws a row with codediff's default one, and `reviewed.lua` calls the pull request fetch. Each has a
-case in `tests/git.lua` that opens a real review: a codediff update that moves one fails the tests,
-not a review. `setup()` sets the tab variable `review` on `CodeDiffOpen` and clears it on
-`CodeDiffClose`; that is how the wrap toggle, the pickers and `<leader>bd` know a review. The same
-events turn the aligned view on and, when the last review closes, back as it was; `<leader>uC` and
-`<leader>um` only warn meanwhile, since turning those on would misalign the sides. `CodeDiffOpen`
-also closes any other review, so the tab before a review stays the editing tab. A key names its
-review in words (`this file vs main`, `PR #7 since abc1234`) through `review.expect` before it runs
-`:CodeDiff`, which the revisions alone cannot say; a typed `:CodeDiff` is labelled from the `:`
-history, and a typed `:CodeDiff pr <N>` is a pull request review like Enter in `gP`.
+windows, the hunks of the file on screen and the line on the other side), selects a file and redraws
+the list, `explorer.lua` draws a row with codediff's default one, and `reviewed.lua` calls the pull
+request fetch. Each has a case in `tests/git.lua` that opens a real review: a codediff update that
+moves one fails the tests, not a review. `setup()` sets the tab variable `review` on `CodeDiffOpen`
+and clears it on `CodeDiffClose`; that is how the wrap toggle, the pickers and `<leader>bd` know a
+review. The same events turn the aligned view on and, when the last review closes, back as it was;
+`<leader>uC` and `<leader>um` only warn meanwhile, since turning those on would misalign the sides.
+`CodeDiffOpen` also closes any other review, so the tab before a review stays the editing tab. A key
+names its review in words (`this file vs main`, `PR #7 since abc1234`) through `review.expect`
+before it runs `:CodeDiff`, which the revisions alone cannot say; a typed `:CodeDiff` is labelled
+from the `:` history, and a typed `:CodeDiff pr <N>` is a pull request review like Enter in `gP`.
 
 A review keeps its own tab and files go to the tab before it, the way codediff's `gf` already works:
 the pickers' `confirm` (`jump.pick_win`) points `picker.main` at that tab's focused file window, or
@@ -101,14 +101,20 @@ of origin/main @ abc1234`, `working tree`, `staged`, a commit), the function or 
 cursor (treesitter, so only on a side with a filetype: the real one) and which hunk the cursor is
 in. Unchanged code is folded on both sides (codediff's `compact`, `<leader>gz` unfolds) into one
 `··· N unchanged lines ···` line, so a long file reads as its hunks, and the bar gives back the
-function a fold hides. The tab line totals the review: lines added and removed, a five-cell bar and
-the files read. `<leader>gx` hides the files read through codediff's own file filter (one glob per
-path, anchored with `/`), and hides each next file as you leave it; hidden files still count, and
-closing the review gives the filter back. `<leader>gH` lists every hunk of the review (`git diff`
-over the review's revisions, only for the files listed) with git's function line and a diff preview;
-Enter selects the file and puts the cursor on the hunk's first changed line, on the old side for a
-hunk that only removes. `+` / `-` gutter signs and the line numbers' colour mark the changed rows
-beside the background, which the Dracula greens and reds alone make hard to tell apart. `<leader>gw`
+function a fold hides. codediff opens a fold on both sides only for its `z` keys; a move that opens
+one through `'foldopen'` (`l`, a search, a mark) opened one side, which shifted it against the other
+by the whole fold, so `dotfiles/git/folds.lua` opens the other side's on `CursorMoved`, with its
+cursor on the matching line so it does not scroll away. codediff's own `z` keys put the other side's
+cursor back where it was, so opening the top fold scrolled that side away to keep it in view; when
+one side scrolls alone, `WinScrolled` puts its cursor on the matching line and `:syncbind` lines the
+sides up again. The tab line totals the review: lines added and removed, a five-cell bar and the
+files read. `<leader>gx` hides the files read through codediff's own file filter (one glob per path,
+anchored with `/`), and hides each next file as you leave it; hidden files still count, and closing
+the review gives the filter back. `<leader>gH` lists every hunk of the review (`git diff` over the
+review's revisions, only for the files listed) with git's function line and a diff preview; Enter
+selects the file and puts the cursor on the hunk's first changed line, on the old side for a hunk
+that only removes. `+` / `-` gutter signs and the line numbers' colour mark the changed rows beside
+the background, which the Dracula greens and reds alone make hard to tell apart. `<leader>gw`
 ignores whitespace changes; codediff reads the option when it renders a file, so it applies from the
 next file you open, not to the one on screen.
 

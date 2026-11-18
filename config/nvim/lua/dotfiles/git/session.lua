@@ -90,6 +90,15 @@ function M.hunks(tab)
   return result and result.changes or {}
 end
 
+function M.line(tab, from, to, lnum)
+  return require("codediff.ui.view.compact").compute_corresponding_lnum(
+    M.hunks(tab),
+    from,
+    to,
+    lnum
+  )
+end
+
 function M.redraw(tab)
   local panel = explorer(tab)
   if panel and vim.api.nvim_buf_is_valid(panel.view.bufnr or -1) then

@@ -1,6 +1,7 @@
 local aligned = require("dotfiles.git.aligned")
 local bars = require("dotfiles.git.bars")
 local explorer = require("dotfiles.git.explorer")
+local folds = require("dotfiles.git.folds")
 local review = require("dotfiles.git.review")
 local reviewed = require("dotfiles.git.reviewed")
 
@@ -74,7 +75,16 @@ function M.setup()
     group = group,
     callback = function()
       if review.is() then
+        folds.follow(vim.api.nvim_get_current_win())
         vim.cmd("redrawstatus!")
+      end
+    end,
+  })
+  vim.api.nvim_create_autocmd("WinScrolled", {
+    group = group,
+    callback = function()
+      if review.is() then
+        folds.align(vim.api.nvim_get_current_win(), vim.v.event)
       end
     end,
   })

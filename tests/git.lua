@@ -778,7 +778,35 @@ T.case("git: folds, scope, totals, hiding and the hunk picker", function()
     end),
     "  ··· 11 unchanged lines ···"
   )
+  local original = session.windows(tab)
   vim.api.nvim_set_current_win(modified)
+  vim.api.nvim_win_set_cursor(modified, { 1, 0 })
+  vim.cmd("normal! zv")
+  vim.api.nvim_exec_autocmds("CursorMoved", {})
+  T.eq(
+    "git: a fold opened on one side by moving into it opens on the other",
+    vim.api.nvim_win_call(original, function()
+      return { vim.fn.foldclosed(1), vim.fn.line(".") }
+    end),
+    { -1, 1 }
+  )
+  vim.api.nvim_win_call(original, function()
+    vim.fn.winrestview({ topline = 12, lnum = 20 })
+  end)
+  require("dotfiles.git.folds").align(modified, { [tostring(original)] = { topline = 11 } })
+  T.eq(
+    "git: a side that scrolls alone, as codediff's zo makes it, comes back beside the other",
+    vim.api.nvim_win_call(original, function()
+      return { vim.fn.line("w0"), vim.fn.line(".") }
+    end),
+    { 1, 1 }
+  )
+  vim.api.nvim_win_call(modified, function()
+    vim.cmd("normal! zx")
+  end)
+  vim.api.nvim_win_call(original, function()
+    vim.cmd("normal! zx")
+  end)
   vim.api.nvim_win_set_cursor(modified, { 15, 0 })
   settle()
   T.eq(
